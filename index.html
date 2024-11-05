@@ -39,10 +39,27 @@
             gap: 20px;
         }
         
-        .main-image {
+        .main-image-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
             flex: 1;
-            width: 300px;
+        }
+        
+        .main-image {
+            width: 100%;
+            max-width: 300px;
             height: auto;
+        }
+        
+        .main-image-container a {
+            text-decoration: none;
+            color: #007bff;
+            margin-top: 10px;
+        }
+        
+        .main-image-container a:hover {
+            text-decoration: underline;
         }
         
         .grid {
@@ -77,14 +94,16 @@
         <div class="header">
             <img src="sua-imagem-topo.png" alt="Imagem do topo">
             <h1><a href="https://sites.google.com/view/integravel">Laboratório Integrável</a> é um hub para recursos virtuais, abertos, de Ciências e Matemática, de autoria neurodivergente.
-</h1>
+            </h1>
         </div>
 
         <!-- Seção principal com imagem comprida e grid de imagens -->
         <div class="main-content">
-            <!-- Imagem comprida à esquerda -->
-            <img src="sua-imagem-comprida.png" alt="Imagem comprida" class="main-image">
-            <p><a href="http://lattes.cnpq.br/6130937835002478">Lattes</a></p>
+            <!-- Imagem comprida à esquerda com texto e link abaixo -->
+            <div class="main-image-container">
+                <img src="sua-imagem-comprida.png" alt="Imagem comprida" class="main-image">
+                <p><a href="http://lattes.cnpq.br/6130937835002478">Lattes</a></p>
+            </div>
 
             <!-- Grid de 9 imagens com links -->
             <div class="grid">
