@@ -8,7 +8,7 @@
         /* Estilos para o layout */
         body {
             font-family: Arial, sans-serif;
-            font-size: 24px; /* Define o tamanho padrão da fonte para todo o texto */
+            font-size: 24px;
             margin: 0;
             padding: 0;
             display: flex;
@@ -34,7 +34,7 @@
             height: auto;
         }
         
-        /* Tamanho do h1 ajustado para ser igual ao restante do texto */
+        /* Tamanho do h1 */
         h1 {
             font-size: 24px;
             margin: 0;
@@ -92,6 +92,29 @@
 
         .grid-item a:hover {
             text-decoration: underline;
+        }
+
+        /* Estilos para telas menores */
+        @media (max-width: 768px) {
+            /* Ajuste o cabeçalho para ficar em uma coluna */
+            .header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .header img {
+                width: 100px; /* Ajuste o tamanho da imagem do cabeçalho para telas menores */
+            }
+
+            /* Coloque a imagem comprida e o grid em uma coluna */
+            .main-content {
+                flex-direction: column;
+            }
+
+            /* Ajuste o grid para 1 coluna em telas pequenas */
+            .grid {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
