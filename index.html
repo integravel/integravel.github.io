@@ -32,6 +32,18 @@
             text-align: center;
             border: 1px solid #ddd;
             border-radius: 8px;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+            cursor: pointer;
+        }
+        .grid-item:hover {
+            transform: scale(1.02);
+        }
+        .grid-item a {
+            display: block;
+            text-decoration: none;
+            color: inherit;
+            height: 100%;
             padding: 10px;
         }
         .grid-item img {
@@ -39,12 +51,9 @@
             height: 100px;
             object-fit: contain;
         }
-        .grid-item a {
-            text-decoration: none;
-            color: #007BFF;
-            font-weight: bold;
-            display: block;
-            margin-top: 10px;
+        .grid-item p {
+            margin: 10px 0 0;
+            color: #555;
         }
         footer {
             background-color: #f4f4f4;
@@ -55,7 +64,10 @@
             border-top: 1px solid #ddd;
         }
         footer img {
-            height: 30px;
+            height: 40px;
+        }
+        footer img.large {
+            height: 50px;
         }
         footer button {
             background-color: #007BFF;
@@ -77,56 +89,65 @@
     </header>
 
     <div class="grid">
-        <div class="grid-item">
-            <img src="logo1.png" alt="Logo 1">
-            <a href="https://exemplo1.com" target="_blank">Acesse o site 1</a>
-            <p>Descrição breve sobre o site 1.</p>
+        <div class="grid-item" onclick="window.location.href='https://exemplo1.com'">
+            <a href="https://exemplo1.com">
+                <img src="logo1.png" alt="Logo 1">
+                <p>Descrição breve sobre o site 1.</p>
+            </a>
         </div>
-        <div class="grid-item">
-            <img src="logo2.png" alt="Logo 2">
-            <a href="https://exemplo2.com" target="_blank">Acesse o site 2</a>
-            <p>Descrição breve sobre o site 2.</p>
+        <div class="grid-item" onclick="window.location.href='https://exemplo2.com'">
+            <a href="https://exemplo2.com">
+                <img src="logo2.png" alt="Logo 2">
+                <p>Descrição breve sobre o site 2.</p>
+            </a>
         </div>
-        <div class="grid-item">
-            <img src="logo3.png" alt="Logo 3">
-            <a href="https://exemplo3.com" target="_blank">Acesse o site 3</a>
-            <p>Descrição breve sobre o site 3.</p>
+        <div class="grid-item" onclick="window.location.href='https://exemplo3.com'">
+            <a href="https://exemplo3.com">
+                <img src="logo3.png" alt="Logo 3">
+                <p>Descrição breve sobre o site 3.</p>
+            </a>
         </div>
-        <div class="grid-item">
-            <img src="logo4.png" alt="Logo 4">
-            <a href="https://exemplo4.com" target="_blank">Acesse o site 4</a>
-            <p>Descrição breve sobre o site 4.</p>
+        <div class="grid-item" onclick="window.location.href='https://exemplo4.com'">
+            <a href="https://exemplo4.com">
+                <img src="logo4.png" alt="Logo 4">
+                <p>Descrição breve sobre o site 4.</p>
+            </a>
         </div>
-        <div class="grid-item">
-            <img src="logo5.png" alt="Logo 5">
-            <a href="https://exemplo5.com" target="_blank">Acesse o site 5</a>
-            <p>Descrição breve sobre o site 5.</p>
+        <div class="grid-item" onclick="window.location.href='https://exemplo5.com'">
+            <a href="https://exemplo5.com">
+                <img src="logo5.png" alt="Logo 5">
+                <p>Descrição breve sobre o site 5.</p>
+            </a>
         </div>
-        <div class="grid-item">
-            <img src="logo6.png" alt="Logo 6">
-            <a href="https://exemplo6.com" target="_blank">Acesse o site 6</a>
-            <p>Descrição breve sobre o site 6.</p>
+        <div class="grid-item" onclick="window.location.href='https://exemplo6.com'">
+            <a href="https://exemplo6.com">
+                <img src="logo6.png" alt="Logo 6">
+                <p>Descrição breve sobre o site 6.</p>
+            </a>
         </div>
-        <div class="grid-item">
-            <img src="logo7.png" alt="Logo 7">
-            <a href="https://exemplo7.com" target="_blank">Acesse o site 7</a>
-            <p>Descrição breve sobre o site 7.</p>
+        <div class="grid-item" onclick="window.location.href='https://exemplo7.com'">
+            <a href="https://exemplo7.com">
+                <img src="logo7.png" alt="Logo 7">
+                <p>Descrição breve sobre o site 7.</p>
+            </a>
         </div>
-        <div class="grid-item">
-            <img src="logo8.png" alt="Logo 8">
-            <a href="https://exemplo8.com" target="_blank">Acesse o site 8</a>
-            <p>Descrição breve sobre o site 8.</p>
+        <div class="grid-item" onclick="window.location.href='https://exemplo8.com'">
+            <a href="https://exemplo8.com">
+                <img src="logo8.png" alt="Logo 8">
+                <p>Descrição breve sobre o site 8.</p>
+            </a>
         </div>
-        <div class="grid-item">
-            <img src="logo9.png" alt="Logo 9">
-            <a href="https://exemplo9.com" target="_blank">Acesse o site 9</a>
-            <p>Descrição breve sobre o site 9.</p>
+        <div class="grid-item" onclick="window.location.href='https://exemplo9.com'">
+            <a href="https://exemplo9.com">
+                <img src="logo9.png" alt="Logo 9">
+                <p>Descrição breve sobre o site 9.</p>
+            </a>
         </div>
     </div>
 
     <footer>
         <div>
-            <img src="logo-sobre.png" alt="Logo sobre">
+            <img src="logo-sobre.png" alt="Logo sobre" class="large">
             <button onclick="window.location.href='mais-informacoes.html'">Mais Informações</button>
         </div>
         <div>
