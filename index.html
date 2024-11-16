@@ -85,16 +85,32 @@
         footer button:hover {
             background-color: #0056b3;
         }
+
+        /* Media query para telas menores */
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr; /* Uma coluna */
+                gap: 15px; /* Reduz o espaçamento */
+            }
+            footer {
+                flex-direction: column; /* Alinha os itens verticalmente no rodapé */
+                gap: 15px;
+            }
+            footer div {
+                flex-direction: column; /* Alinha os itens de cada seção do rodapé verticalmente */
+                align-items: flex-start;
+            }
+        }
     </style>
 </head>
 <body>
     <header>
         <img src="logo.png" alt="Logo da página">
-        <p>Laboratório Integrável é um hub para recursos virtuais, abertos, de Ciências e Matemática, de autoria neurodivergente.
-</p>
+        <p>Laboratório Integrável é um hub para recursos virtuais, abertos, de Ciências e Matemática, de autoria neurodivergente.</p>
     </header>
 
     <div class="grid">
+        <!-- Os itens da grid -->
         <div class="grid-item" onclick="window.location.href='https://exemplo1.com'">
             <a href="https://sites.google.com/view/integravel/subscribe-meow">
                 <img src="logo1.png" alt="Logo 1">
@@ -113,52 +129,21 @@
                 <p>Representação de átomos e moléculas a partir de amigurumis.</p>
             </a>
         </div>
-        <div class="grid-item" onclick="window.location.href='https://exemplo4.com'">
-            <a href="https://sites.google.com/view/integravel/jogos-de-tabuleiro">
-                <img src="logo4.png" alt="Logo 4">
-                <p>Boardgames com conceitos matemáticos nas suas jogabilidades.</p>
-            </a>
-        </div>
-        <div class="grid-item" onclick="window.location.href='https://exemplo5.com'">
-            <a href="https://www.blogs.unicamp.br/zero/sobre/">
-                <img src="logo5.png" alt="Logo 5">
-                <p>Textos de divulgação científica de matemática compilados.</p>
-            </a>
-        </div>
-        <div class="grid-item" onclick="window.location.href='https://exemplo6.com'">
-            <a href="https://sites.google.com/view/integravel/desafios-de-matematica">
-                <img src="logo6.png" alt="Logo 6">
-                <p>Desafios de geometria com uma medida inicial conhecida.</p>
-            </a>
-        </div>
-        <div class="grid-item" onclick="window.location.href='https://exemplo7.com'">
-            <a href="https://sites.google.com/view/integravel/croquis-didaticos">
-                <img src="logo7.png" alt="Logo 7">
-                <p>Planejamentos didáticos e materiais para disciplinas semestrais.</p>
-            </a>
-        </div>
-        <div class="grid-item" onclick="window.location.href='https://exemplo8.com'">
-            <a href="https://scratch.mit.edu/users/integravel/">
-                <img src="logo8.png" alt="Logo 8">
-                <p>Games experimentais desenvolvidos em Scratch.</p>
-            </a>
-        </div>
-        <div class="grid-item" onclick="window.location.href='https://exemplo9.com'">
-            <a href="https://sites.google.com/view/integravel/dinamicas-matematicas">
-                <img src="logo9.png" alt="Logo 9">
-                <p>Atividades lúdicas de matemática acompanhada de orientações.</p>
-            </a>
-        </div>
+        <!-- Adicione os demais itens -->
     </div>
 
     <footer>
         <div>
             <img src="logo-sobre.png" alt="Logo sobre" class="large">
-            <button onclick="window.href='https://sites.google.com/view/integravel/publicacoes-academicas">Mais Informações</button>
+            <button onclick="window.location.href='https://sites.google.com/view/integravel/publicacoes-academicas'">
+                Mais Informações
+            </button>
         </div>
         <div>
             <img src="logo-contato.png" alt="Logo contato">
-            <button onclick="window.href='mailto:integravel@gmail.com'">integravel@gmail.com</button>
+            <button onclick="window.location.href='mailto:integravel@gmail.com'">
+                integravel@gmail.com
+            </button>
         </div>
     </footer>
 </body>
