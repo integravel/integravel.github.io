@@ -6,13 +6,13 @@
     <title>Laboratório Integrável</title>
     <style>
         body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    max-width: 100vw; /* Garante que o conteúdo ocupe no máximo 100% da largura da tela */
-    overflow-x: hidden; /* Impede o scroll horizontal */
-}
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            max-width: 100vw; /* Garante que o conteúdo ocupe no máximo 100% da largura da tela */
+            overflow-x: hidden; /* Impede o scroll horizontal */
+        }
         header {
             background-color: #000;
             color: #fff;
@@ -27,14 +27,20 @@
         header p {
             margin: 0;
         }
-      .grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 10px; /* Reduz o espaço entre os itens */
-    padding: 10px; /* Reduz o padding */
-    width: 100%; /* Garante que a grid ocupe a largura total da tela */
-    box-sizing: border-box; /* Inclui padding e bordas no cálculo de largura */
-}
+        header a {
+            color: inherit; /* Herda a cor do texto */
+            text-decoration: none; /* Remove o sublinhado do link */
+            display: flex; /* Garante que todo o cabeçalho seja clicável */
+            align-items: center;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px; /* Reduz o espaço entre os itens */
+            padding: 10px; /* Reduz o padding */
+            width: 100%; /* Garante que a grid ocupe a largura total da tela */
+            box-sizing: border-box; /* Inclui padding e bordas no cálculo de largura */
+        }
         .grid-item {
             text-align: center;
             border: 1px solid #ddd;
@@ -62,47 +68,39 @@
             margin: 10px 0 0;
             color: #555;
         }
-footer {
-    background-color: #f4f4f4;
-    display: flex;
-    justify-content: center; /* Centraliza o conteúdo do rodapé */
-    align-items: center;
-    padding: 20px;
-    border-top: 1px solid #ddd;
-    width: 100%;
-    box-sizing: border-box;
-}
-
-footer div {
-    display: flex;
-    align-items: center;
-    gap: 20px; /* Espaço maior entre a imagem e o botão */
-    margin: 0 15px; /* Adiciona um pequeno espaçamento entre os dois blocos */
-}
-
-footer img {
-    height: 40px;
-}
-
-footer img.large {
-    height: 50px;
-}
-
-footer button {
-    background-color: #007BFF;
-    color: #fff;
-    border: none;
-    padding: 10px 15px;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-footer button:hover {
-    background-color: #0056b3;
-}
-
-
-
+        footer {
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center; /* Centraliza o conteúdo do rodapé */
+            align-items: center;
+            padding: 20px;
+            border-top: 1px solid #ddd;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        footer div {
+            display: flex;
+            align-items: center;
+            gap: 20px; /* Espaço maior entre a imagem e o botão */
+            margin: 0 15px; /* Adiciona um pequeno espaçamento entre os dois blocos */
+        }
+        footer img {
+            height: 40px;
+        }
+        footer img.large {
+            height: 50px;
+        }
+        footer button {
+            background-color: #007BFF;
+            color: #fff;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        footer button:hover {
+            background-color: #0056b3;
+        }
         /* Estilo para dispositivos móveis */
         @media (max-width: 768px) {
             header {
@@ -138,72 +136,77 @@ footer button:hover {
     </style>
 </head>
 <body>
+    <!-- Cabeçalho com link -->
     <header>
-        <img src="imagens/logo.png" alt="Logo da página">
-        <p>Laboratório Integrável é um hub para recursos virtuais, abertos, de Ciências e Matemática, de autoria neurodivergente.</p>
+        <a href="https://integravel.github.io/">
+            <img src="imagens/logo.png" alt="Logo da página">
+            <p>Laboratório Integrável é um hub para recursos virtuais, abertos, de Ciências e Matemática, de autoria neurodivergente.</p>
+        </a>
     </header>
 
-   <div class="grid">
-    <div class="grid-item">
-        <a href="https://sites.google.com/view/integravel/subscribe-meow">
-            <img src="imagens/logo1.png" alt="Logo 1">
-            <p>Cursos online, gratuitos, assíncronos e com certificação.</p>
-        </a>
+    <!-- O restante do conteúdo -->
+    <div class="grid">
+        <div class="grid-item">
+            <a href="https://sites.google.com/view/integravel/subscribe-meow">
+                <img src="imagens/logo1.png" alt="Logo 1">
+                <p>Cursos online, gratuitos, assíncronos e com certificação.</p>
+            </a>
+        </div>
+        <div class="grid-item">
+            <a href="https://sites.google.com/view/arrasta-o-x">
+                <img src="imagens/logo2.png" alt="Logo 2">
+                <p>Demonstrações matemáticas arrastando e soltando segmentos de texto.</p>
+            </a>
+        </div>
+        <div class="grid-item">
+            <a href="https://www.instagram.com/atomigurumis/">
+                <img src="imagens/logo3.png" alt="Logo 3">
+                <p>Representação de átomos e moléculas a partir de amigurumis.</p>
+            </a>
+        </div>
+        <div class="grid-item">
+            <a href="https://sites.google.com/view/integravel/jogos-de-tabuleiro">
+                <img src="imagens/logo4.png" alt="Logo 4">
+                <p>Boardgames com conceitos matemáticos nas suas jogabilidades.</p>
+            </a>
+        </div>
+        <div class="grid-item">
+            <a href="https://www.blogs.unicamp.br/zero/sobre/">
+                <img src="imagens/logo5.png" alt="Logo 5">
+                <p>Textos de divulgação científica de matemática compilados.</p>
+            </a>
+        </div>
+        <div class="grid-item">
+            <a href="https://sites.google.com/view/integravel/desafios-de-matematica">
+                <img src="imagens/logo6.png" alt="Logo 6">
+                <p>Desafios de geometria com uma medida inicial conhecida.</p>
+            </a>
+        </div>
+        <div class="grid-item">
+            <a href="https://sites.google.com/view/integravel/croquis-didaticos">
+                <img src="imagens/logo7.png" alt="Logo 7">
+                <p>Planejamentos didáticos e materiais para disciplinas semestrais.</p>
+            </a>
+        </div>
+        <div class="grid-item">
+            <a href="https://scratch.mit.edu/users/integravel/">
+                <img src="imagens/logo8.png" alt="Logo 8">
+                <p>Games experimentais desenvolvidos em Scratch.</p>
+            </a>
+        </div>
+        <div class="grid-item">
+            <a href="https://sites.google.com/view/integravel/dinamicas-matematicas">
+                <img src="imagens/logo9.png" alt="Logo 9">
+                <p>Atividades lúdicas de matemática acompanhada de orientações.</p>
+            </a>
+        </div>
     </div>
-    <div class="grid-item">
-        <a href="https://sites.google.com/view/arrasta-o-x">
-            <img src="imagens/logo2.png" alt="Logo 2">
-            <p>Demonstrações matemáticas arrastando e soltando segmentos de texto.</p>
-        </a>
-    </div>
-    <div class="grid-item">
-        <a href="https://www.instagram.com/atomigurumis/">
-            <img src="imagens/logo3.png" alt="Logo 3">
-            <p>Representação de átomos e moléculas a partir de amigurumis.</p>
-        </a>
-    </div>
-    <div class="grid-item">
-        <a href="https://sites.google.com/view/integravel/jogos-de-tabuleiro">
-            <img src="imagens/logo4.png" alt="Logo 4">
-            <p>Boardgames com conceitos matemáticos nas suas jogabilidades.</p>
-        </a>
-    </div>
-    <div class="grid-item">
-        <a href="https://www.blogs.unicamp.br/zero/sobre/">
-            <img src="imagens/logo5.png" alt="Logo 5">
-            <p>Textos de divulgação científica de matemática compilados.</p>
-        </a>
-    </div>
-    <div class="grid-item">
-        <a href="https://sites.google.com/view/integravel/desafios-de-matematica">
-            <img src="imagens/logo6.png" alt="Logo 6">
-            <p>Desafios de geometria com uma medida inicial conhecida.</p>
-        </a>
-    </div>
-    <div class="grid-item">
-        <a href="https://sites.google.com/view/integravel/croquis-didaticos">
-            <img src="imagens/logo7.png" alt="Logo 7">
-            <p>Planejamentos didáticos e materiais para disciplinas semestrais.</p>
-        </a>
-    </div>
-    <div class="grid-item">
-        <a href="https://scratch.mit.edu/users/integravel/">
-            <img src="imagens/logo8.png" alt="Logo 8">
-            <p>Games experimentais desenvolvidos em Scratch.</p>
-        </a>
-    </div>
-    <div class="grid-item">
-        <a href="https://sites.google.com/view/integravel/dinamicas-matematicas">
-            <img src="imagens/logo9.png" alt="Logo 9">
-            <p>Atividades lúdicas de matemática acompanhada de orientações.</p>
-        </a>
-    </div>
-</div>
 
+    <!-- Rodapé -->
     <footer>
         <div>
             <img src="imagens/logo-sobre.png" alt="Logo sobre" class="large">
-	        <button onclick="window.location.href='https://sites.google.com/view/integravel/publicacoes-academicas'">Mais Informações</button>
+            <button onclick="window.location.href='https://sites.google.com/view/integravel/publicacoes-academicas'">Mais Informações</button>
         </div>
         <div>
             <img src="imagens/logo-contato.png" alt="Logo contato">
