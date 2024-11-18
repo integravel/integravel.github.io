@@ -25,12 +25,14 @@
         header p {
             margin: 0;
         }
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 20px;
-            padding: 20px;
-        }
+      .grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px; /* Reduz o espaço entre os itens */
+    padding: 10px; /* Reduz o padding */
+    width: 100%; /* Garante que a grid ocupe a largura total da tela */
+    box-sizing: border-box; /* Inclui padding e bordas no cálculo de largura */
+}
         .grid-item {
             text-align: center;
             border: 1px solid #ddd;
