@@ -65,26 +65,19 @@
  footer {
     background-color: #f4f4f4;
     display: flex;
-    justify-content: space-between; /* Alinha os itens à esquerda e à direita */
+    justify-content: center; /* Centraliza o conteúdo horizontalmente */
     align-items: center;
     padding: 20px;
     border-top: 1px solid #ddd;
     width: 100%; /* Garante que o rodapé ocupe toda a largura da tela */
+    box-sizing: border-box;
 }
 
 footer div {
     display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-footer div:first-child {
-    flex-direction: row; /* Imagem à esquerda e botão à direita */
-}
-
-footer div:last-child {
-    flex-direction: row-reverse; /* Imagem à direita e botão à esquerda */
-    margin-left: -20px; /* Move a imagem para a esquerda */
+    flex-direction: column; /* Alinha imagem e botão na vertical */
+    align-items: center; /* Centraliza a imagem e o botão */
+    gap: 10px; /* Espaço entre a imagem e o botão */
 }
 
 footer img {
