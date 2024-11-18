@@ -3,10 +3,163 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dinamicas</title>
+    <title>Laboratório Integrável</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        header {
+            background-color: #000;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            padding: 10px 20px;
+        }
+        header img {
+            height: 40px;
+            margin-right: 20px;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            padding: 20px;
+        }
+        .grid-item {
+            text-align: center;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+            cursor: pointer;
+        }
+        .grid-item:hover {
+            transform: scale(1.02);
+        }
+        .grid-item a {
+            display: block;
+            text-decoration: none;
+            color: inherit;
+            height: 100%;
+            padding: 10px;
+        }
+        .grid-item img {
+            max-width: 100%;
+            height: 100px;
+            object-fit: contain;
+        }
+        .grid-item p {
+            margin: 10px 0 0;
+            color: #555;
+        }
+        footer {
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            border-top: 1px solid #ddd;
+        }
+        footer div {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        footer img {
+            height: 40px;
+        }
+        footer img.large {
+            height: 50px;
+        }
+        footer button {
+            background-color: #007BFF;
+            color: #fff;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        footer button:hover {
+            background-color: #0056b3;
+        }
+    </style>
 </head>
 <body>
-    <h1>Bem-vindo à página Dinâmicas!</h1>
-    <p>Conteúdo da subpágina.</p>
+    <header>
+        <img src="logo.png" alt="Logo da página">
+        <p>Laboratório Integrável é um hub para recursos virtuais, abertos, de Ciências e Matemática, de autoria neurodivergente.
+</p>
+    </header>
+
+    <div class="grid">
+        <div class="grid-item" onclick="window.location.href='https://exemplo1.com'">
+            <a href="https://sites.google.com/view/integravel/subscribe-meow">
+                <img src="logo1.png" alt="Logo 1">
+                <p>Cursos online, gratuitos, assíncronos e com certificação.</p>
+            </a>
+        </div>
+        <div class="grid-item" onclick="window.location.href='https://exemplo2.com'">
+            <a href="https://sites.google.com/view/arrasta-o-x">
+                <img src="logo2.png" alt="Logo 2">
+                <p>Demonstrações matemáticas arrastando e soltando segmentos de texto.</p>
+            </a>
+        </div>
+        <div class="grid-item" onclick="window.location.href='https://exemplo3.com'">
+            <a href="https://www.instagram.com/atomigurumis/">
+                <img src="logo3.png" alt="Logo 3">
+                <p>Representação de átomos e moléculas a partir de amigurumis.</p>
+            </a>
+        </div>
+        <div class="grid-item" onclick="window.location.href='https://exemplo4.com'">
+            <a href="https://sites.google.com/view/integravel/jogos-de-tabuleiro">
+                <img src="logo4.png" alt="Logo 4">
+                <p>Boardgames com conceitos matemáticos nas suas jogabilidades.</p>
+            </a>
+        </div>
+        <div class="grid-item" onclick="window.location.href='https://exemplo5.com'">
+            <a href="https://www.blogs.unicamp.br/zero/sobre/">
+                <img src="logo5.png" alt="Logo 5">
+                <p>Textos de divulgação científica de matemática compilados.</p>
+            </a>
+        </div>
+        <div class="grid-item" onclick="window.location.href='https://exemplo6.com'">
+            <a href="https://sites.google.com/view/integravel/desafios-de-matematica">
+                <img src="logo6.png" alt="Logo 6">
+                <p>Desafios de geometria com uma medida inicial conhecida.</p>
+            </a>
+        </div>
+        <div class="grid-item" onclick="window.location.href='https://exemplo7.com'">
+            <a href="https://sites.google.com/view/integravel/croquis-didaticos">
+                <img src="logo7.png" alt="Logo 7">
+                <p>Planejamentos didáticos e materiais para disciplinas semestrais.</p>
+            </a>
+        </div>
+        <div class="grid-item" onclick="window.location.href='https://exemplo8.com'">
+            <a href="https://scratch.mit.edu/users/integravel/">
+                <img src="logo8.png" alt="Logo 8">
+                <p>Games experimentais desenvolvidos em Scratch.</p>
+            </a>
+        </div>
+        <div class="grid-item" onclick="window.location.href='https://exemplo9.com'">
+            <a href="https://sites.google.com/view/integravel/dinamicas-matematicas">
+                <img src="logo9.png" alt="Logo 9">
+                <p>Atividades lúdicas de matemática acompanhada de orientações.</p>
+            </a>
+        </div>
+    </div>
+
+    <footer>
+        <div>
+            <img src="logo-sobre.png" alt="Logo sobre" class="large">
+	    <button onclick="window.location.href='https://sites.google.com/view/integravel/publicacoes-academicas'">Mais Informações</button>
+        </div>
+        <div>
+            <img src="logo-contato.png" alt="Logo contato">
+            <button onclick="href='mailto:integravel@gmail.com'">integravel@gmail.com</button>
+        </div>
+    </footer>
 </body>
 </html>
