@@ -22,6 +22,9 @@
             height: 40px;
             margin-right: 20px;
         }
+        header p {
+            margin: 0;
+        }
         .grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -58,9 +61,10 @@
         footer {
             background-color: #f4f4f4;
             display: flex;
-            justify-content: space-between;
+            flex-direction: column;
             align-items: center;
-            padding: 10px 20px;
+            gap: 10px;
+            padding: 20px;
             border-top: 1px solid #ddd;
         }
         footer div {
@@ -85,6 +89,39 @@
         footer button:hover {
             background-color: #0056b3;
         }
+
+        /* Estilo para dispositivos móveis */
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column;
+                text-align: center;
+            }
+            header img {
+                margin-bottom: 10px;
+            }
+            .grid {
+                grid-template-columns: 1fr; /* Uma coluna */
+                gap: 15px;
+                padding: 10px;
+            }
+            .grid-item img {
+                height: 120px; /* Aumenta a visibilidade das imagens */
+            }
+            footer {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+
+        /* Estilo para dispositivos muito pequenos */
+        @media (max-width: 480px) {
+            .grid-item p {
+                font-size: 14px; /* Texto menor */
+            }
+            footer button {
+                padding: 8px 12px; /* Botões menores */
+            }
+        }
     </style>
 </head>
 <body>
@@ -94,58 +131,40 @@
     </header>
 
     <div class="grid">
-        <div class="grid-item" onclick="window.location.href='https://exemplo1.com'">
+        <div class="grid-item">
             <a href="https://sites.google.com/view/integravel/subscribe-meow">
                 <img src="imagens/logo1.png" alt="Logo 1">
                 <p>Cursos online, gratuitos, assíncronos e com certificação.</p>
             </a>
         </div>
-        <div class="grid-item" onclick="window.location.href='https://exemplo2.com'">
+        <div class="grid-item">
             <a href="https://sites.google.com/view/arrasta-o-x">
                 <img src="imagens/logo2.png" alt="Logo 2">
                 <p>Demonstrações matemáticas arrastando e soltando segmentos de texto.</p>
             </a>
         </div>
-        <div class="grid-item" onclick="window.location.href='https://exemplo3.com'">
+        <div class="grid-item">
             <a href="https://www.instagram.com/atomigurumis/">
                 <img src="imagens/logo3.png" alt="Logo 3">
                 <p>Representação de átomos e moléculas a partir de amigurumis.</p>
             </a>
         </div>
-        <div class="grid-item" onclick="window.location.href='https://exemplo4.com'">
+        <div class="grid-item">
             <a href="https://sites.google.com/view/integravel/jogos-de-tabuleiro">
                 <img src="imagens/logo4.png" alt="Logo 4">
                 <p>Boardgames com conceitos matemáticos nas suas jogabilidades.</p>
             </a>
         </div>
-        <div class="grid-item" onclick="window.location.href='https://exemplo5.com'">
+        <div class="grid-item">
             <a href="https://www.blogs.unicamp.br/zero/sobre/">
                 <img src="imagens/logo5.png" alt="Logo 5">
                 <p>Textos de divulgação científica de matemática compilados.</p>
             </a>
         </div>
-        <div class="grid-item" onclick="window.location.href='https://exemplo6.com'">
+        <div class="grid-item">
             <a href="https://sites.google.com/view/integravel/desafios-de-matematica">
                 <img src="imagens/logo6.png" alt="Logo 6">
                 <p>Desafios de geometria com uma medida inicial conhecida.</p>
-            </a>
-        </div>
-        <div class="grid-item" onclick="window.location.href='https://exemplo7.com'">
-            <a href="https://sites.google.com/view/integravel/croquis-didaticos">
-                <img src="imagens/logo7.png" alt="Logo 7">
-                <p>Planejamentos didáticos e materiais para disciplinas semestrais.</p>
-            </a>
-        </div>
-        <div class="grid-item" onclick="window.location.href='https://exemplo8.com'">
-            <a href="https://scratch.mit.edu/users/integravel/">
-                <img src="imagens/logo8.png" alt="Logo 8">
-                <p>Games experimentais desenvolvidos em Scratch.</p>
-            </a>
-        </div>
-        <div class="grid-item" onclick="window.location.href='https://exemplo9.com'">
-            <a href="https://sites.google.com/view/integravel/dinamicas-matematicas">
-                <img src="imagens/logo9.png" alt="Logo 9">
-                <p>Atividades lúdicas de matemática acompanhada de orientações.</p>
             </a>
         </div>
     </div>
@@ -157,7 +176,7 @@
         </div>
         <div>
             <img src="imagens/logo-contato.png" alt="Logo contato">
-            <button onclick="href='mailto:integravel@gmail.com'">integravel@gmail.com</button>
+            <button onclick="window.location.href='mailto:integravel@gmail.com'">integravel@gmail.com</button>
         </div>
     </footer>
 </body>
