@@ -58,7 +58,7 @@
             margin: 10px 0 0;
             color: #555;
         }
-  footer {
+ footer {
     background-color: #f4f4f4;
     display: flex;
     justify-content: space-between; /* Alinha os itens à esquerda e à direita */
@@ -70,9 +70,16 @@
 
 footer div {
     display: flex;
-    flex-direction: column; /* Alinha os itens verticais */
-    align-items: center; /* Alinha os itens horizontalmente no centro */
+    align-items: center;
     gap: 10px;
+}
+
+footer div:first-child {
+    flex-direction: row-reverse; /* Inverte a ordem dos itens (imagem e botão) */
+}
+
+footer div:last-child {
+    flex-direction: row; /* Mantém a ordem padrão para o segundo div (imagem à esquerda e botão à direita) */
 }
 
 footer img {
