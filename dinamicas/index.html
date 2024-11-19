@@ -48,10 +48,10 @@
             overflow: hidden;
             transition: transform 0.3s ease;
             cursor: pointer;
-            height: 700px; /* Ajusta a altura do grid-item para ser o dobro do original */
+            height: auto; /* Permite altura flexível */
             display: flex;
             flex-direction: column;
-            justify-content: space-between; /* Garante o espaçamento adequado interno */
+            justify-content: space-between;
             padding: 10px;
         }
         .grid-item:hover {
@@ -66,11 +66,14 @@
         .grid-item img {
             max-width: 100%;
             height: auto;
-            object-fit: contain;
+            object-fit: contain; /* Evita cortes na imagem */
+            flex-shrink: 0; /* Impede a imagem de encolher */
         }
         .grid-item p {
             margin: 10px 0 0;
             color: #555;
+            flex-grow: 1; /* Faz o parágrafo ocupar espaço adicional */
+            text-align: justify; /* Melhor legibilidade em telas menores */
         }
         footer {
             background-color: #f4f4f4;
@@ -119,7 +122,7 @@
                 gap: 15px;
             }
             .grid-item {
-                height: 300px; /* Altura aumentada para melhor visibilidade em telas menores */
+                height: auto; /* Permite altura dinâmica */
             }
             footer {
                 flex-direction: column;
@@ -148,7 +151,6 @@
 
     <!-- O restante do conteúdo -->
     <div class="grid">
-        <!-- Cada grid-item mantém a nova altura ajustada -->
         <div class="grid-item">
             <a href="https://sites.google.com/view/integravel/subscribe-meow">
                 <img src="01.jpg" alt="Logo 1">
