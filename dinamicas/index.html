@@ -41,14 +41,11 @@
             width: 100%; /* Garante que a grid ocupe a largura total da tela */
             box-sizing: border-box; /* Inclui padding e bordas no cálculo de largura */
         }
-        .grid-item {
-            text-align: center;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            overflow: hidden;
-            transition: transform 0.3s ease;
-            cursor: pointer;
-        }
+.grid-item img {
+    max-width: 100%; /* Garante que as imagens não ultrapassem a largura do contêiner */
+    height: 200px; /* Aumenta o tamanho da altura */
+    object-fit: contain; /* Mantém as proporções */
+}
         .grid-item:hover {
             transform: scale(1.02);
         }
