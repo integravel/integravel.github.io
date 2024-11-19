@@ -33,42 +33,45 @@
             display: flex; /* Garante que todo o cabeçalho seja clicável */
             align-items: center;
         }
-.grid {
-    display: grid;
-    grid-auto-rows: auto; /* Ajusta automaticamente a altura das linhas */
-    grid-auto-columns: auto; /* Ajusta automaticamente a largura das colunas */
-    grid-gap: 10px; /* Espaçamento entre os itens */
-    justify-content: center; /* Centraliza a grid horizontalmente */
-    padding: 10px; /* Espaçamento interno da grid */
-}
-
-.grid-item {
-    display: flex; /* Garante alinhamento centralizado */
-    flex-direction: column; /* Mantém o texto abaixo da imagem */
-    align-items: center; /* Centraliza o conteúdo horizontalmente */
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    overflow: hidden;
-    transition: transform 0.3s ease;
-    padding: 10px;
-}
-
-.grid-item:hover {
-    transform: scale(1.02);
-}
-
-.grid-item img {
-    display: block; /* Remove espaços extras ao redor da imagem */
-    max-width: 100%; /* Garante que a imagem não ultrapasse o contêiner */
-    height: auto; /* Mantém as proporções originais da imagem */
-    margin: 0 auto; /* Centraliza a imagem dentro do contêiner */
-}
-
-.grid-item p {
-    margin: 10px 0 0;
-    color: #555;
-    text-align: center; /* Centraliza o texto */
-}
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            padding: 10px;
+            width: 100%; /* Garante que a grid ocupe a largura total da tela */
+            box-sizing: border-box;
+        }
+        .grid-item {
+            text-align: center;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+            cursor: pointer;
+            height: 250px; /* Ajusta a altura do grid-item para ser o dobro do original */
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between; /* Garante o espaçamento adequado interno */
+            padding: 10px;
+        }
+        .grid-item:hover {
+            transform: scale(1.02);
+        }
+        .grid-item a {
+            display: block;
+            text-decoration: none;
+            color: inherit;
+            height: 100%;
+        }
+        .grid-item img {
+            max-width: 100%;
+            height: auto;
+            object-fit: contain;
+        }
+        .grid-item p {
+            margin: 10px 0 0;
+            color: #555;
+        }
         footer {
             background-color: #f4f4f4;
             display: flex;
@@ -114,17 +117,15 @@
             .grid {
                 grid-template-columns: 1fr; /* Uma coluna */
                 gap: 15px;
-                padding: 10px;
             }
-            .grid-item img {
-                height: 120px; /* Aumenta a visibilidade das imagens */
+            .grid-item {
+                height: 300px; /* Altura aumentada para melhor visibilidade em telas menores */
             }
             footer {
                 flex-direction: column;
                 text-align: center;
             }
         }
-
         /* Estilo para dispositivos muito pequenos */
         @media (max-width: 480px) {
             .grid-item p {
@@ -140,64 +141,65 @@
     <!-- Cabeçalho com link -->
     <header>
         <a href="https://integravel.github.io/">
-            <img src="../imagens/logo.png" alt="Logo da página">
+            <img src="imagens/logo.png" alt="Logo da página">
             <p>Laboratório Integrável é um hub para recursos virtuais, abertos, de Ciências e Matemática, de autoria neurodivergente.</p>
         </a>
     </header>
 
     <!-- O restante do conteúdo -->
     <div class="grid">
+        <!-- Cada grid-item mantém a nova altura ajustada -->
         <div class="grid-item">
             <a href="https://sites.google.com/view/integravel/subscribe-meow">
-                <img src="01.jpg" alt="Pixel Prints">
+                <img src="imagens/logo1.png" alt="Logo 1">
                 <p>Cursos online, gratuitos, assíncronos e com certificação.</p>
             </a>
         </div>
         <div class="grid-item">
             <a href="https://sites.google.com/view/arrasta-o-x">
-                <img src="02.jpg" alt="Coordenadas à Mão Livre">
+                <img src="imagens/logo2.png" alt="Logo 2">
                 <p>Demonstrações matemáticas arrastando e soltando segmentos de texto.</p>
             </a>
         </div>
         <div class="grid-item">
             <a href="https://www.instagram.com/atomigurumis/">
-                <img src="03.jpg" alt="Manual i.a.">
+                <img src="imagens/logo3.png" alt="Logo 3">
                 <p>Representação de átomos e moléculas a partir de amigurumis.</p>
             </a>
         </div>
         <div class="grid-item">
             <a href="https://sites.google.com/view/integravel/jogos-de-tabuleiro">
-                <img src="04.jpg" alt="Labirinto não-euclidiano">
+                <img src="imagens/logo4.png" alt="Logo 4">
                 <p>Boardgames com conceitos matemáticos nas suas jogabilidades.</p>
             </a>
         </div>
         <div class="grid-item">
             <a href="https://www.blogs.unicamp.br/zero/sobre/">
-                <img src="05.jpg" alt="Garotas mágicas e Bruxas">
+                <img src="imagens/logo5.png" alt="Logo 5">
                 <p>Textos de divulgação científica de matemática compilados.</p>
             </a>
         </div>
         <div class="grid-item">
             <a href="https://sites.google.com/view/integravel/desafios-de-matematica">
-                <img src="06.jpg" alt="Labirinto Complexo">
+                <img src="imagens/logo6.png" alt="Logo 6">
                 <p>Desafios de geometria com uma medida inicial conhecida.</p>
             </a>
         </div>
         <div class="grid-item">
             <a href="https://sites.google.com/view/integravel/croquis-didaticos">
-                <img src="07.jpg" alt="Skates de Argand-Gauss">
+                <img src="imagens/logo7.png" alt="Logo 7">
                 <p>Planejamentos didáticos e materiais para disciplinas semestrais.</p>
             </a>
         </div>
         <div class="grid-item">
             <a href="https://scratch.mit.edu/users/integravel/">
-                <img src="08.jpg" alt="Trigonometria de papel">
+                <img src="imagens/logo8.png" alt="Logo 8">
                 <p>Games experimentais desenvolvidos em Scratch.</p>
             </a>
         </div>
         <div class="grid-item">
-            <a href="https://sites.google.com/view/integravel/dinamicas-matematicas">
-                <img src="09.jpg" alt="Papel minado">
+            <a href="https://integravel.github.io/dinamicas">
+                <img src="imagens/logo9.png" alt="Logo 9">
                 <p>Atividades lúdicas de matemática acompanhada de orientações.</p>
             </a>
         </div>
@@ -206,11 +208,11 @@
     <!-- Rodapé -->
     <footer>
         <div>
-            <img src="../imagens/logo-sobre.png" alt="Logo sobre" class="large">
+            <img src="imagens/logo-sobre.png" alt="Logo sobre" class="large">
             <button onclick="window.location.href='https://sites.google.com/view/integravel/publicacoes-academicas'">Mais Informações</button>
         </div>
         <div>
-            <img src="../imagens/logo-contato.png" alt="Logo contato">
+            <img src="imagens/logo-contato.png" alt="Logo contato">
             <button onclick="window.location.href='mailto:integravel@gmail.com'">integravel@gmail.com</button>
         </div>
     </footer>
