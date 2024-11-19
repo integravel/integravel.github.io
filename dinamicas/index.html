@@ -33,40 +33,42 @@
             display: flex; /* Garante que todo o cabeçalho seja clicável */
             align-items: center;
         }
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px; /* Reduz o espaço entre os itens */
-            padding: 10px; /* Reduz o padding */
-            width: 100%; /* Garante que a grid ocupe a largura total da tela */
-            box-sizing: border-box; /* Inclui padding e bordas no cálculo de largura */
-        }
+.grid {
+    display: grid;
+    grid-auto-rows: auto; /* Ajusta automaticamente a altura das linhas */
+    grid-auto-columns: auto; /* Ajusta automaticamente a largura das colunas */
+    grid-gap: 10px; /* Espaçamento entre os itens */
+    justify-content: center; /* Centraliza a grid horizontalmente */
+    padding: 10px; /* Espaçamento interno da grid */
+}
+
+.grid-item {
+    display: flex; /* Garante alinhamento centralizado */
+    flex-direction: column; /* Mantém o texto abaixo da imagem */
+    align-items: center; /* Centraliza o conteúdo horizontalmente */
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    overflow: hidden;
+    transition: transform 0.3s ease;
+    padding: 10px;
+}
+
+.grid-item:hover {
+    transform: scale(1.02);
+}
+
 .grid-item img {
-    width: auto; /* Preserva a largura original da imagem */
-    height: auto; /* Preserva a altura original da imagem */
+    display: block; /* Remove espaços extras ao redor da imagem */
     max-width: 100%; /* Garante que a imagem não ultrapasse o contêiner */
-    display: block; /* Remove espaços adicionais ao redor da imagem */
+    height: auto; /* Mantém as proporções originais da imagem */
     margin: 0 auto; /* Centraliza a imagem dentro do contêiner */
 }
-        .grid-item:hover {
-            transform: scale(1.02);
-        }
-        .grid-item a {
-            display: block;
-            text-decoration: none;
-            color: inherit;
-            height: 100%;
-            padding: 10px;
-        }
-        .grid-item img {
-            max-width: 100%;
-            height: 100px;
-            object-fit: contain;
-        }
-        .grid-item p {
-            margin: 10px 0 0;
-            color: #555;
-        }
+
+.grid-item p {
+    margin: 10px 0 0;
+    color: #555;
+    text-align: center; /* Centraliza o texto */
+}
         footer {
             background-color: #f4f4f4;
             display: flex;
