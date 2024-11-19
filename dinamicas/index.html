@@ -42,9 +42,11 @@
             box-sizing: border-box; /* Inclui padding e bordas no cálculo de largura */
         }
 .grid-item img {
-    max-width: 100%; /* Garante que as imagens não ultrapassem a largura do contêiner */
-    height: 200px; /* Aumenta o tamanho da altura */
-    object-fit: contain; /* Mantém as proporções */
+    width: auto; /* Preserva a largura original da imagem */
+    height: auto; /* Preserva a altura original da imagem */
+    max-width: 100%; /* Garante que a imagem não ultrapasse o contêiner */
+    display: block; /* Remove espaços adicionais ao redor da imagem */
+    margin: 0 auto; /* Centraliza a imagem dentro do contêiner */
 }
         .grid-item:hover {
             transform: scale(1.02);
