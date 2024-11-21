@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laboratório Integrável</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            max-width: 100vw;
+            overflow-x: hidden;
+        }
+        header {
+            background-color: #000;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            padding: 10px 20px;
+        }
+        header img {
+            height: 40px;
+            margin-right: 20px;
+        }
+        header p {
+            margin: 0;
+        }
+        header a {
+            color: inherit;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+        }
+        .content {
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+        .content h2 {
+            color: #333;
+            margin-top: 20px;
+        }
+        .content a {
+            color: #007BFF;
+            text-decoration: none;
+        }
+        .content a:hover {
+            text-decoration: underline;
+        }
+        footer {
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            border-top: 1px solid #ddd;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        footer div {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin: 0 15px;
+        }
+        footer img {
+            height: 40px;
+        }
+        footer img.large {
+            height: 50px;
+        }
+        footer button {
+            background-color: #007BFF;
+            color: #fff;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        footer button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <!-- Cabeçalho com link -->
+    <header>
+        <a href="https://integravel.github.io/">
+            <img src="../imagens/logo.png" alt="Logo da página">
+            <p>Laboratório Integrável é um hub para recursos virtuais, abertos, de Ciências e Matemática, de autoria neurodivergente.</p>
+        </a>
+    </header>
+
+    <!-- Conteúdo principal -->
+    <div class="content">
+        <h2>Sobre o Projeto</h2>
+        <p>O Laboratório Integrável é um espaço de produção acadêmica e prática pedagógica que inclui jogos, recursos educacionais digitais e iniciativas inclusivas na área de Ciências e Matemática.</p>
+
+        <h2>Formação Acadêmica</h2>
+        <p>Doutorado em Educação Matemática - <a href="https://example.com/doutorado">Universidade Estadual de Campinas</a></p>
+        <p>Mestrado em Educação Matemática - <a href="https://example.com/mestrado">Universidade Estadual Paulista</a></p>
+        <p>Graduação em Matemática - <a href="https://example.com/graduacao">Universidade Estadual Paulista</a></p>
+
+        <h2>Produções ao Longo dos Anos</h2>
+        <ul>
+            <li><a href="https://example.com/artigo1">Artigo 1: Matemática e Inclusão</a></li>
+            <li><a href="https://example.com/artigo2">Artigo 2: Uso de Scratch na Educação</a></li>
+            <li><a href="https://example.com/artigo3">Artigo 3: Recursos Educacionais Abertos</a></li>
+        </ul>
+    </div>
+
+    <!-- Rodapé -->
+    <footer>
+        <div>
+            <img src="../imagens/logo-sobre.png" alt="Logo sobre" class="large">
+            <button onclick="window.location.href='https://sites.google.com/view/integravel/publicacoes-academicas'">Mais Informações</button>
+        </div>
+        <div>
+            <img src="../imagens/logo-contato.png" alt="Logo contato">
+            <button onclick="window.location.href='mailto:integravel@gmail.com'">integravel@gmail.com</button>
+        </div>
+    </footer>
+</body>
+</html>
