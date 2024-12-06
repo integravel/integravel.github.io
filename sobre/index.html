@@ -50,6 +50,35 @@
         .content a:hover {
             text-decoration: underline;
         }
+        .bio-section {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .bio-card {
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 15px;
+            width: calc(50% - 10px);
+            box-sizing: border-box;
+            text-align: center;
+        }
+        .bio-card img {
+            border-radius: 50%;
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            margin-bottom: 10px;
+        }
+        .bio-card h3 {
+            margin: 10px 0 5px;
+            color: #333;
+        }
+        .bio-card p {
+            font-size: 14px;
+            color: #666;
+        }
         footer {
             background-color: #f4f4f4;
             display: flex;
@@ -94,34 +123,4 @@
         </a>
     </header>
 
-    <!-- Conteúdo principal -->
-    <div class="content">
-        <h2>Origem e missão</h2>
-        <p>O Laboratório Integrável surgiu em 2022 como um endereço de e-mail para organizar discussões sobre pequenos projetos e atividades discentes. Com o crescimento dos projetos e o aumento no fluxo de materiais, consolidou-se como um espaço integrador dedicado ao acesso aberto a recursos virtuais de Ciências e Matemática, valorizando a singularidade de sua autoria neurodivergente.</p>
-
-        <h2>Formação Acadêmica (<a href="http://lattes.cnpq.br/6130937835002478">currículo Lattes</a>)</h2>
-        <p></p>
-            Licenciatura em Matemática (USP, 2009 - 2015)</p>
-            Bacharelado em Matemática, interrompido (USP, 2009 - 2017)</p>
-            Especialização em Informática Aplicada à Educação (IFRJ, 2022 - 2023)</p>
-            Mestrado em Ensino de Ciências (UNESP, 2016 - 2018)</p>
-            Doutorado em Ensino de Ciências (UNICAMP, 2019 - 2023)</p>
-            Docente de Ensino Básico, Técnico e Tecnológico (IFRJ, 2022 - atual)</p>
-            Licenciatura em Química, em andamento (IFRJ, 2023 - )</p>
-            Especialização em Gestão Escolar, em andamento (IFFar, 2024 - )</p>
-
-    </div>
-
-    <!-- Rodapé -->
-    <footer>
-        <div>
-            <img src="../imagens/logo-sobre.png" alt="Logo sobre" class="large">
-            <button onclick="window.location.href='https://integravel.github.io/sobre'">Mais Informações</button>
-        </div>
-        <div>
-            <img src="../imagens/logo-contato.png" alt="Logo contato">
-            <button onclick="window.location.href='mailto:integravel@gmail.com'">integravel@gmail.com</button>
-        </div>
-    </footer>
-</body>
-</html>
+    <!-- Conteúdo prin
