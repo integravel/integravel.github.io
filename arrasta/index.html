@@ -15,48 +15,32 @@
         }
         .grid {
             display: grid;
-            grid-template-columns: repeat(4, 100px);
-            grid-template-rows: repeat(3, 100px);
+            grid-template-columns: repeat(4, 500px); /* 4 colunas de 500px */
+            grid-template-rows: repeat(3, 300px); /* 3 linhas de 300px */
             gap: 10px;
             margin: 20px 0;
+            width: 100%;
+            height: auto;
         }
         .grid div {
-            width: 100px;
-            height: 100px;
+            width: 500px; /* Largura fixa de 500px */
+            height: 300px; /* Altura fixa de 300px */
             border: 2px dashed #ccc;
             display: flex;
             justify-content: center;
             align-items: center;
             background-color: #f9f9f9;
+            overflow: hidden;
         }
         .grid div img {
-            max-width: 100%;
-            max-height: 100%;
+            width: 100%;
+            height: auto;
+            object-fit: contain;
         }
-        @media (max-width: 768px) {
-            .grid {
-                grid-template-columns: repeat(2, 80px);
-                grid-template-rows: repeat(6, 80px);
-                gap: 5px;
-            }
-            .grid div {
-                width: 80px;
-                height: 80px;
-            }
-        }
-        @media (max-width: 480px) {
-            body {
-                padding: 10px;
-            }
-            .grid {
-                grid-template-columns: repeat(1, 100px);
-                grid-template-rows: repeat(12, 100px);
-                gap: 5px;
-            }
-            .grid div {
-                width: 100px;
-                height: 100px;
-            }
+        /* Zoom effect */
+        .grid div:hover img {
+            transform: scale(1.2);
+            transition: transform 0.3s ease;
         }
     </style>
 </head>
@@ -70,18 +54,18 @@
     </div>
     <div id="grid2" class="grid">
         <!-- Grid 2 with images in all 12 positions -->
-        <div><img src="https://via.placeholder.com/100" draggable="true"></div>
-        <div><img src="https://via.placeholder.com/100" draggable="true"></div>
-        <div><img src="https://via.placeholder.com/100" draggable="true"></div>
-        <div><img src="https://via.placeholder.com/100" draggable="true"></div>
-        <div><img src="https://via.placeholder.com/100" draggable="true"></div>
-        <div><img src="https://via.placeholder.com/100" draggable="true"></div>
-        <div><img src="https://via.placeholder.com/100" draggable="true"></div>
-        <div><img src="https://via.placeholder.com/100" draggable="true"></div>
-        <div><img src="https://via.placeholder.com/100" draggable="true"></div>
-        <div><img src="https://via.placeholder.com/100" draggable="true"></div>
-        <div><img src="https://via.placeholder.com/100" draggable="true"></div>
-        <div><img src="https://via.placeholder.com/100" draggable="true"></div>
+        <div><img src="https://via.placeholder.com/500x300" draggable="true"></div>
+        <div><img src="https://via.placeholder.com/500x300" draggable="true"></div>
+        <div><img src="https://via.placeholder.com/500x300" draggable="true"></div>
+        <div><img src="https://via.placeholder.com/500x300" draggable="true"></div>
+        <div><img src="https://via.placeholder.com/500x300" draggable="true"></div>
+        <div><img src="https://via.placeholder.com/500x300" draggable="true"></div>
+        <div><img src="https://via.placeholder.com/500x300" draggable="true"></div>
+        <div><img src="https://via.placeholder.com/500x300" draggable="true"></div>
+        <div><img src="https://via.placeholder.com/500x300" draggable="true"></div>
+        <div><img src="https://via.placeholder.com/500x300" draggable="true"></div>
+        <div><img src="https://via.placeholder.com/500x300" draggable="true"></div>
+        <div><img src="https://via.placeholder.com/500x300" draggable="true"></div>
     </div>
 
     <script>
