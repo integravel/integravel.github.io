@@ -131,10 +131,13 @@
         function setupDragAndDrop() {
             const allCells = document.querySelectorAll('.grid div');
             const grid1 = document.getElementById('grid1');
+            const grid2 = document.getElementById('grid2');
 
             allCells.forEach(cell => {
+                // Permite o arrasto entre as grids
                 cell.addEventListener('dragover', event => event.preventDefault());
 
+                // Permite soltar a imagem na grid 1 ou grid 2
                 cell.addEventListener('drop', event => {
                     event.preventDefault();
                     if (draggedImage && !isChecking) { // Permite mover apenas antes da verificação
@@ -146,17 +149,18 @@
                     }
                 });
 
+                // Para movimentar as imagens entre as grids
                 cell.addEventListener('touchend', event => {
                     if (draggedImage && !isChecking) { // Permite mover apenas antes da verificação
                         const touch = event.changedTouches[0];
                         const target = document.elementFromPoint(touch.clientX, touch.clientY);
-                        const grid1Cells = Array.from(grid1.children);
 
-                        if (grid1.contains(target)) {
+                        if (target && (target === grid1 || target === grid2)) {
+                            const gridCells = Array.from(target.children);
                             let closestCell = null;
                             let minDistance = Infinity;
 
-                            grid1Cells.forEach(cell => {
+                            gridCells.forEach(cell => {
                                 const rect = cell.getBoundingClientRect();
                                 const cellCenterX = rect.left + rect.width / 2;
                                 const cellCenterY = rect.top + rect.height / 2;
@@ -255,11 +259,6 @@
                         cell.classList.add('incorrect');
                     }
                 }
-            });
-
-            const allImages = document.querySelectorAll('img');
-            allImages.forEach(image => {
-                image.draggable = false; // Desativa o arrastar após a verificação
             });
 
             isChecking = true; // Marca que a verificação foi realizada
