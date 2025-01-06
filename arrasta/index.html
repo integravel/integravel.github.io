@@ -71,36 +71,62 @@
     </div>
 
     <script>
-        // Add drag and drop functionality
-        const grids = document.querySelectorAll('.grid div');
+        let draggedImage = null;
 
+        // Support for desktop
+        const grids = document.querySelectorAll('.grid div');
         grids.forEach(cell => {
-            cell.addEventListener('dragover', event => {
-                event.preventDefault();
-            });
+            cell.addEventListener('dragover', event => event.preventDefault());
 
             cell.addEventListener('drop', event => {
                 event.preventDefault();
-                const imageId = event.dataTransfer.getData('text');
-                const image = document.getElementById(imageId);
-                if (cell.childNodes.length === 0) {
-                    cell.appendChild(image);
+                if (draggedImage && cell.childNodes.length === 0) {
+                    cell.appendChild(draggedImage);
                 }
             });
         });
 
         const images = document.querySelectorAll('img');
-
         images.forEach(image => {
             image.addEventListener('dragstart', event => {
-                event.dataTransfer.setData('text', event.target.id);
+                draggedImage = event.target;
+            });
+
+            image.addEventListener('dragend', () => {
+                draggedImage = null;
             });
         });
 
-        // Assign unique IDs to images dynamically
-        images.forEach((img, index) => {
-            img.id = `img${index}`;
+        // Support for touch devices
+        images.forEach(image => {
+            image.addEventListener('touchstart', event => {
+                draggedImage = event.target;
+                event.target.style.opacity = '0.5';
+            });
+
+            image.addEventListener('touchend', event => {
+                event.target.style.opacity = '1';
+                draggedImage = null;
+            });
+
+            image.addEventListener('touchmove', event => {
+                event.preventDefault();
+                const touch = event.touches[0];
+                draggedImage.style.position = 'absolute';
+                draggedImage.style.left = `${touch.pageX - draggedImage.width / 2}px`;
+                draggedImage.style.top = `${touch.pageY - draggedImage.height / 2}px`;
+            });
+        });
+
+        grids.forEach(cell => {
+            cell.addEventListener('touchend', event => {
+                if (draggedImage && cell.childNodes.length === 0) {
+                    draggedImage.style.position = 'static';
+                    cell.appendChild(draggedImage);
+                }
+            });
         });
     </script>
 </body>
-</html>
+                                                                                 </html>
+                                                                                 
