@@ -19,18 +19,14 @@
         }
         .grid {
             display: grid;
-            grid-template-columns: repeat(4, 500px);
-            grid-template-rows: repeat(3, 300px);
-            gap: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 10px;
             margin: 20px 0;
             width: 100%;
             max-width: 2200px;
-            height: auto;
-            position: relative;
         }
         .grid div {
-            width: 500px;
-            height: 300px;
+            aspect-ratio: 5 / 3;
             border: 5px solid #ccc;
             display: flex;
             justify-content: center;
@@ -52,7 +48,6 @@
             width: 100%;
             height: auto;
             object-fit: contain;
-            position: relative;
             transition: transform 0.2s ease;
         }
         button {
@@ -91,8 +86,6 @@
 
     <script>
         let draggedImage = null;
-        let initialX = 0;
-        let initialY = 0;
 
         const imagesData = [
             { src: "01.png", alt: "01" },
@@ -147,45 +140,41 @@
                         cell.appendChild(draggedImage);
                     }
                 });
+
+                cell.addEventListener('touchend', event => {
+                    if (draggedImage) {
+                        const touch = event.changedTouches[0];
+                        const target = document.elementFromPoint(touch.clientX, touch.clientY);
+                        if (target && target.classList.contains('grid')) {
+                            const existingImage = target.querySelector('img');
+                            if (existingImage) {
+                                draggedImage.parentNode.appendChild(existingImage);
+                            }
+                            target.appendChild(draggedImage);
+                        }
+                    }
+                });
             });
 
             const allImages = document.querySelectorAll('img');
             allImages.forEach(image => {
                 image.addEventListener('dragstart', event => {
                     draggedImage = event.target;
-                    draggedImage.style.zIndex = '2'; // Coloca a imagem no topo
                 });
 
                 image.addEventListener('dragend', () => {
-                    draggedImage.style.zIndex = '1'; // Reseta o z-index
                     draggedImage = null;
                 });
 
                 image.addEventListener('touchstart', event => {
                     draggedImage = event.target;
-                    const touch = event.touches[0];
-                    initialX = touch.pageX - draggedImage.offsetLeft;
-                    initialY = touch.pageY - draggedImage.offsetTop;
-
-                    draggedImage.style.position = 'absolute';
-                    draggedImage.style.left = `${touch.pageX - initialX}px`;
-                    draggedImage.style.top = `${touch.pageY - initialY}px`;
-                    draggedImage.style.zIndex = '2'; // Coloca a imagem no topo
                 });
 
                 image.addEventListener('touchmove', event => {
-                    if (draggedImage) {
-                        const touch = event.touches[0];
-                        draggedImage.style.left = `${touch.pageX - initialX}px`;
-                        draggedImage.style.top = `${touch.pageY - initialY}px`;
-                    }
+                    event.preventDefault();
                 });
 
                 image.addEventListener('touchend', () => {
-                    draggedImage.style.position = '';
-                    draggedImage.style.left = '';
-                    draggedImage.style.top = '';
-                    draggedImage.style.zIndex = '1'; // Reseta o z-index
                     draggedImage = null;
                 });
             });
