@@ -154,6 +154,25 @@
                 image.addEventListener('dragend', () => {
                     draggedImage = null;
                 });
+
+                // Adicionar suporte a toques em dispositivos móveis
+                image.addEventListener('touchstart', event => {
+                    draggedImage = event.target;
+                    event.preventDefault(); // Previne o comportamento padrão do toque
+                });
+
+                image.addEventListener('touchmove', event => {
+                    if (draggedImage) {
+                        const touch = event.touches[0];
+                        draggedImage.style.position = 'absolute';
+                        draggedImage.style.left = touch.pageX + 'px';
+                        draggedImage.style.top = touch.pageY + 'px';
+                    }
+                });
+
+                image.addEventListener('touchend', () => {
+                    draggedImage = null;
+                });
             });
         }
 
@@ -181,9 +200,10 @@
             const allImages = document.querySelectorAll('img');
             allImages.forEach(image => {
                 image.draggable = false; // Remove a propriedade draggable
-                image.removeEventListener('dragstart', event => {
-                    draggedImage = event.target;
-                });
+                image.removeEventListener('dragstart', () => {});
+                image.removeEventListener('touchstart', () => {});
+                image.removeEventListener('touchmove', () => {});
+                image.removeEventListener('touchend', () => {});
             });
         });
 
