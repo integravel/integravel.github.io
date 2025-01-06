@@ -155,22 +155,32 @@
                     draggedImage = null;
                 });
 
-                // Adicionar suporte a toques em dispositivos móveis
+                // Adicionar suporte a toques em dispositivos móveis (evitar que a imagem desapareça)
                 image.addEventListener('touchstart', event => {
                     draggedImage = event.target;
                     event.preventDefault(); // Previne o comportamento padrão do toque
+                    const touch = event.touches[0];
+                    draggedImage.style.position = 'absolute';
+                    draggedImage.style.left = touch.pageX - draggedImage.width / 2 + 'px';
+                    draggedImage.style.top = touch.pageY - draggedImage.height / 2 + 'px';
+                    draggedImage.style.zIndex = 1000; // Aumenta a camada para estar sobre outras imagens
                 });
 
                 image.addEventListener('touchmove', event => {
                     if (draggedImage) {
                         const touch = event.touches[0];
-                        draggedImage.style.position = 'absolute';
-                        draggedImage.style.left = touch.pageX + 'px';
-                        draggedImage.style.top = touch.pageY + 'px';
+                        draggedImage.style.left = touch.pageX - draggedImage.width / 2 + 'px';
+                        draggedImage.style.top = touch.pageY - draggedImage.height / 2 + 'px';
                     }
                 });
 
-                image.addEventListener('touchend', () => {
+                image.addEventListener('touchend', event => {
+                    if (draggedImage) {
+                        draggedImage.style.position = '';
+                        draggedImage.style.left = '';
+                        draggedImage.style.top = '';
+                        draggedImage.style.zIndex = '';
+                    }
                     draggedImage = null;
                 });
             });
@@ -196,7 +206,7 @@
                 }
             });
 
-            // Impedir que as imagens sejam arrastadas
+            // Impedir que as imagens sejam arrastadas após a verificação
             const allImages = document.querySelectorAll('img');
             allImages.forEach(image => {
                 image.draggable = false; // Remove a propriedade draggable
