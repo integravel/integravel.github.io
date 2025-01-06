@@ -141,6 +141,9 @@
                             draggedImage.parentNode.appendChild(existingImage);
                         }
                         cell.appendChild(draggedImage);
+                        draggedImage.style.position = '';
+                        draggedImage.style.left = '';
+                        draggedImage.style.top = '';
                     }
                 });
             });
@@ -155,15 +158,15 @@
                     draggedImage = null;
                 });
 
-                // Adicionar suporte a toques em dispositivos móveis (evitar que a imagem desapareça)
+                // Adicionar suporte a toques em dispositivos móveis
                 image.addEventListener('touchstart', event => {
                     draggedImage = event.target;
                     event.preventDefault(); // Previne o comportamento padrão do toque
                     const touch = event.touches[0];
                     draggedImage.style.position = 'absolute';
+                    draggedImage.style.zIndex = 1000; // Aumenta a camada para estar sobre outras imagens
                     draggedImage.style.left = touch.pageX - draggedImage.width / 2 + 'px';
                     draggedImage.style.top = touch.pageY - draggedImage.height / 2 + 'px';
-                    draggedImage.style.zIndex = 1000; // Aumenta a camada para estar sobre outras imagens
                 });
 
                 image.addEventListener('touchmove', event => {
@@ -174,7 +177,7 @@
                     }
                 });
 
-                image.addEventListener('touchend', event => {
+                image.addEventListener('touchend', () => {
                     if (draggedImage) {
                         draggedImage.style.position = '';
                         draggedImage.style.left = '';
