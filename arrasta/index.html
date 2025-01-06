@@ -125,60 +125,80 @@
             });
         }
 
-        function setupDragAndDrop() {
-            const allCells = document.querySelectorAll('.grid div');
-            allCells.forEach(cell => {
-                cell.addEventListener('dragover', event => event.preventDefault());
+       function setupDragAndDrop() {
+    const allCells = document.querySelectorAll('.grid div');
+    let offsetX = 0;
+    let offsetY = 0;
 
-                cell.addEventListener('drop', event => {
-                    event.preventDefault();
-                    if (draggedImage) {
-                        const existingImage = cell.querySelector('img');
-                        if (existingImage) {
-                            draggedImage.parentNode.appendChild(existingImage);
-                        }
-                        cell.appendChild(draggedImage);
-                    }
-                });
+    allCells.forEach(cell => {
+        cell.addEventListener('dragover', event => event.preventDefault());
 
-                cell.addEventListener('touchend', event => {
-                    if (draggedImage) {
-                        const touch = event.changedTouches[0];
-                        const target = document.elementFromPoint(touch.clientX, touch.clientY);
-                        if (target && target.classList.contains('grid')) {
-                            const existingImage = target.querySelector('img');
-                            if (existingImage) {
-                                draggedImage.parentNode.appendChild(existingImage);
-                            }
-                            target.appendChild(draggedImage);
-                        }
-                    }
-                });
-            });
+        cell.addEventListener('drop', event => {
+            event.preventDefault();
+            if (draggedImage) {
+                const existingImage = cell.querySelector('img');
+                if (existingImage) {
+                    draggedImage.parentNode.appendChild(existingImage);
+                }
+                cell.appendChild(draggedImage);
+            }
+        });
+    });
 
-            const allImages = document.querySelectorAll('img');
-            allImages.forEach(image => {
-                image.addEventListener('dragstart', event => {
-                    draggedImage = event.target;
-                });
+    const allImages = document.querySelectorAll('img');
+    allImages.forEach(image => {
+        image.addEventListener('dragstart', event => {
+            draggedImage = event.target;
+        });
 
-                image.addEventListener('dragend', () => {
-                    draggedImage = null;
-                });
+        image.addEventListener('dragend', () => {
+            draggedImage = null;
+        });
 
-                image.addEventListener('touchstart', event => {
-                    draggedImage = event.target;
-                });
+        image.addEventListener('touchstart', event => {
+            draggedImage = event.target;
+            const touch = event.touches[0];
+            offsetX = touch.clientX - draggedImage.getBoundingClientRect().left;
+            offsetY = touch.clientY - draggedImage.getBoundingClientRect().top;
 
-                image.addEventListener('touchmove', event => {
-                    event.preventDefault();
-                });
+            draggedImage.style.position = 'absolute';
+            draggedImage.style.zIndex = '1000';
+        });
 
-                image.addEventListener('touchend', () => {
-                    draggedImage = null;
-                });
-            });
-        }
+        image.addEventListener('touchmove', event => {
+            event.preventDefault();
+            if (draggedImage) {
+                const touch = event.touches[0];
+                draggedImage.style.left = `${touch.clientX - offsetX}px`;
+                draggedImage.style.top = `${touch.clientY - offsetY}px`;
+            }
+        });
+
+        image.addEventListener('touchend', event => {
+            const touch = event.changedTouches[0];
+            const target = document.elementFromPoint(touch.clientX, touch.clientY);
+
+            if (target && target.closest('.grid div')) {
+                const cell = target.closest('.grid div');
+                const existingImage = cell.querySelector('img');
+                if (existingImage) {
+                    draggedImage.parentNode.appendChild(existingImage);
+                }
+                cell.appendChild(draggedImage);
+            }
+
+            // Reset draggedImage position
+            if (draggedImage) {
+                draggedImage.style.position = '';
+                draggedImage.style.zIndex = '';
+                draggedImage.style.left = '';
+                draggedImage.style.top = '';
+                draggedImage = null;
+            }
+        });
+    });
+}
+
 
         const checkButton = document.getElementById('checkButton');
         checkButton.addEventListener('click', () => {
