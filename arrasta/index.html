@@ -177,7 +177,7 @@
                     }
                 });
 
-                image.addEventListener('touchend', () => {
+                image.addEventListener('touchend', event => {
                     if (draggedImage) {
                         draggedImage.style.position = '';
                         draggedImage.style.left = '';
