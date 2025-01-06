@@ -89,6 +89,8 @@
 
     <script>
         let draggedImage = null;
+        let initialX = 0;
+        let initialY = 0;
 
         const imagesData = [
             { src: "01.png", alt: "01" },
@@ -162,22 +164,27 @@
                 image.addEventListener('touchstart', event => {
                     draggedImage = event.target;
                     event.preventDefault(); // Previne o comportamento padrão do toque
+
                     const touch = event.touches[0];
+                    initialX = touch.pageX - draggedImage.offsetLeft;
+                    initialY = touch.pageY - draggedImage.offsetTop;
+
+                    // Coloca a imagem no topo e permite movimentação
                     draggedImage.style.position = 'absolute';
-                    draggedImage.style.zIndex = 1000; // Aumenta a camada para estar sobre outras imagens
-                    draggedImage.style.left = touch.pageX - draggedImage.width / 2 + 'px';
-                    draggedImage.style.top = touch.pageY - draggedImage.height / 2 + 'px';
+                    draggedImage.style.zIndex = 1000;
+                    draggedImage.style.left = `${touch.pageX - initialX}px`;
+                    draggedImage.style.top = `${touch.pageY - initialY}px`;
                 });
 
                 image.addEventListener('touchmove', event => {
                     if (draggedImage) {
                         const touch = event.touches[0];
-                        draggedImage.style.left = touch.pageX - draggedImage.width / 2 + 'px';
-                        draggedImage.style.top = touch.pageY - draggedImage.height / 2 + 'px';
+                        draggedImage.style.left = `${touch.pageX - initialX}px`;
+                        draggedImage.style.top = `${touch.pageY - initialY}px`;
                     }
                 });
 
-                image.addEventListener('touchend', event => {
+                image.addEventListener('touchend', () => {
                     if (draggedImage) {
                         draggedImage.style.position = '';
                         draggedImage.style.left = '';
