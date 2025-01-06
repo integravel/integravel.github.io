@@ -146,6 +146,7 @@
                         draggedImage.style.position = '';
                         draggedImage.style.left = '';
                         draggedImage.style.top = '';
+                        draggedImage.style.zIndex = '';
                     }
                 });
             });
@@ -163,15 +164,14 @@
                 // Adicionar suporte a toques em dispositivos móveis
                 image.addEventListener('touchstart', event => {
                     draggedImage = event.target;
-                    event.preventDefault(); // Previne o comportamento padrão do toque
+                    event.preventDefault();
 
                     const touch = event.touches[0];
                     initialX = touch.pageX - draggedImage.offsetLeft;
                     initialY = touch.pageY - draggedImage.offsetTop;
 
-                    // Coloca a imagem no topo e permite movimentação
                     draggedImage.style.position = 'absolute';
-                    draggedImage.style.zIndex = 1000;
+                    draggedImage.style.zIndex = '1000'; // Move para a frente
                     draggedImage.style.left = `${touch.pageX - initialX}px`;
                     draggedImage.style.top = `${touch.pageY - initialY}px`;
                 });
@@ -184,12 +184,12 @@
                     }
                 });
 
-                image.addEventListener('touchend', () => {
+                image.addEventListener('touchend', event => {
                     if (draggedImage) {
                         draggedImage.style.position = '';
                         draggedImage.style.left = '';
                         draggedImage.style.top = '';
-                        draggedImage.style.zIndex = '';
+                        draggedImage.style.zIndex = ''; // Remove destaque
                     }
                     draggedImage = null;
                 });
@@ -216,14 +216,9 @@
                 }
             });
 
-            // Impedir que as imagens sejam arrastadas após a verificação
             const allImages = document.querySelectorAll('img');
             allImages.forEach(image => {
-                image.draggable = false; // Remove a propriedade draggable
-                image.removeEventListener('dragstart', () => {});
-                image.removeEventListener('touchstart', () => {});
-                image.removeEventListener('touchmove', () => {});
-                image.removeEventListener('touchend', () => {});
+                image.draggable = false;
             });
         });
 
