@@ -39,6 +39,7 @@
             width: 100%;
             height: auto;
             object-fit: contain;
+            transition: transform 0.2s ease;
         }
     </style>
 </head>
@@ -68,7 +69,7 @@
 
     <script>
         let draggedImage = null;
-        let initialParent = null;
+        let touchClone = null;
 
         // Support for desktop
         const grids = document.querySelectorAll('.grid div');
@@ -87,7 +88,6 @@
         images.forEach(image => {
             image.addEventListener('dragstart', event => {
                 draggedImage = event.target;
-                initialParent = draggedImage.parentElement;
             });
 
             image.addEventListener('dragend', () => {
@@ -99,34 +99,47 @@
         images.forEach(image => {
             image.addEventListener('touchstart', event => {
                 draggedImage = event.target;
-                initialParent = draggedImage.parentElement;
-                draggedImage.style.opacity = '0.5';
+                event.target.style.opacity = '0.5';
+
+                // Criar um clone da imagem para seguir o toque
+                touchClone = draggedImage.cloneNode(true);
+                touchClone.style.position = 'absolute';
+                touchClone.style.pointerEvents = 'none';
+                touchClone.style.zIndex = '1000';
+                touchClone.style.width = `${draggedImage.offsetWidth}px`;
+                touchClone.style.height = `${draggedImage.offsetHeight}px`;
+                document.body.appendChild(touchClone);
+            });
+
+            image.addEventListener('touchmove', event => {
+                event.preventDefault();
+                const touch = event.touches[0];
+
+                if (touchClone) {
+                    touchClone.style.left = `${touch.pageX - touchClone.offsetWidth / 2}px`;
+                    touchClone.style.top = `${touch.pageY - touchClone.offsetHeight / 2}px`;
+                }
             });
 
             image.addEventListener('touchend', event => {
                 event.preventDefault();
                 draggedImage.style.opacity = '1';
 
-                // Verificar se a imagem está sobre uma célula vazia
+                // Verificar onde o toque foi solto
                 const touch = event.changedTouches[0];
                 const elementUnderTouch = document.elementFromPoint(touch.clientX, touch.clientY);
 
                 if (elementUnderTouch && elementUnderTouch.parentElement.classList.contains('grid') && elementUnderTouch.childNodes.length === 0) {
                     elementUnderTouch.appendChild(draggedImage);
-                } else {
-                    // Retornar à célula original
-                    initialParent.appendChild(draggedImage);
+                }
+
+                // Remover o clone e restaurar o estado
+                if (touchClone) {
+                    touchClone.remove();
+                    touchClone = null;
                 }
 
                 draggedImage = null;
-            });
-
-            image.addEventListener('touchmove', event => {
-                event.preventDefault();
-                const touch = event.touches[0];
-                draggedImage.style.position = 'absolute';
-                draggedImage.style.left = `${touch.pageX - draggedImage.offsetWidth / 2}px`;
-                draggedImage.style.top = `${touch.pageY - draggedImage.offsetHeight / 2}px`;
             });
         });
     </script>
