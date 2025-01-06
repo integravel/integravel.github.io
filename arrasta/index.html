@@ -19,8 +19,8 @@
         }
         .grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr); /* 4 colunas fixas */
-            grid-template-rows: repeat(3, auto); /* 3 linhas fixas */
+            grid-template-columns: repeat(4, 1fr);
+            grid-template-rows: repeat(3, auto);
             gap: 10px;
             margin: 20px 0;
             width: 100%;
@@ -87,7 +87,7 @@
 
     <script>
         let draggedImage = null;
-        let touchOffset = { x: 0, y: 0 };
+        let touchClone = null;
 
         const imagesData = [
             { src: "01.png", alt: "01" },
@@ -154,6 +154,11 @@
                         }
                         target.appendChild(draggedImage);
                     }
+
+                    if (touchClone) {
+                        touchClone.remove();
+                        touchClone = null;
+                    }
                 });
             });
 
@@ -168,29 +173,40 @@
                 });
 
                 image.addEventListener('touchstart', event => {
+                    event.preventDefault();
                     draggedImage = event.target;
                     const touch = event.touches[0];
-                    touchOffset.x = touch.clientX - draggedImage.getBoundingClientRect().left;
-                    touchOffset.y = touch.clientY - draggedImage.getBoundingClientRect().top;
+
+                    touchClone = draggedImage.cloneNode(true);
+                    touchClone.style.position = 'absolute';
+                    touchClone.style.pointerEvents = 'none';
+                    touchClone.style.zIndex = 1000;
+                    document.body.appendChild(touchClone);
+
+                    moveClone(touch.pageX, touch.pageY);
                 });
 
                 image.addEventListener('touchmove', event => {
                     event.preventDefault();
                     const touch = event.touches[0];
-                    draggedImage.style.position = 'absolute';
-                    draggedImage.style.zIndex = 1000;
-                    draggedImage.style.left = `${touch.clientX - touchOffset.x}px`;
-                    draggedImage.style.top = `${touch.clientY - touchOffset.y}px`;
+                    moveClone(touch.pageX, touch.pageY);
                 });
 
                 image.addEventListener('touchend', () => {
-                    draggedImage.style.position = '';
-                    draggedImage.style.zIndex = '';
-                    draggedImage.style.left = '';
-                    draggedImage.style.top = '';
+                    if (touchClone) {
+                        touchClone.remove();
+                        touchClone = null;
+                    }
                     draggedImage = null;
                 });
             });
+        }
+
+        function moveClone(x, y) {
+            if (touchClone) {
+                touchClone.style.left = `${x - touchClone.offsetWidth / 2}px`;
+                touchClone.style.top = `${y - touchClone.offsetHeight / 2}px`;
+            }
         }
 
         const checkButton = document.getElementById('checkButton');
@@ -213,11 +229,10 @@
                 }
             });
 
-            // Tornar imagens não arrastáveis
             const allImages = document.querySelectorAll('img');
             allImages.forEach(image => {
                 image.draggable = false;
-                image.style.pointerEvents = 'none'; // Desabilitar interações
+                image.style.pointerEvents = 'none';
             });
         });
 
