@@ -88,6 +88,7 @@
     <script>
         let draggedImage = null;
         let touchClone = null;
+        let isChecking = false; // Flag para saber se a verificação foi feita
 
         const imagesData = [
             { src: "01.png", alt: "01" },
@@ -136,7 +137,7 @@
 
                 cell.addEventListener('drop', event => {
                     event.preventDefault();
-                    if (draggedImage) {
+                    if (draggedImage && !isChecking) { // Permite mover apenas antes da verificação
                         const existingImage = cell.querySelector('img');
                         if (existingImage) {
                             draggedImage.parentNode.appendChild(existingImage);
@@ -146,7 +147,7 @@
                 });
 
                 cell.addEventListener('touchend', event => {
-                    if (draggedImage) {
+                    if (draggedImage && !isChecking) { // Permite mover apenas antes da verificação
                         const touch = event.changedTouches[0];
                         const target = document.elementFromPoint(touch.clientX, touch.clientY);
                         const grid1Cells = Array.from(grid1.children);
@@ -192,30 +193,36 @@
             const allImages = document.querySelectorAll('img');
             allImages.forEach(image => {
                 image.addEventListener('dragstart', event => {
-                    draggedImage = event.target;
+                    if (!isChecking) {
+                        draggedImage = event.target;
+                    }
                 });
 
                 image.addEventListener('dragend', () => {
-                    draggedImage = null;
+                    if (!isChecking) {
+                        draggedImage = null;
+                    }
                 });
 
                 image.addEventListener('touchstart', event => {
-                    draggedImage = event.target;
-                    const touch = event.touches[0];
+                    if (!isChecking) { // Impede mover as imagens após a verificação
+                        draggedImage = event.target;
+                        const touch = event.touches[0];
 
-                    touchClone = draggedImage.cloneNode(true);
-                    touchClone.style.position = 'absolute';
-                    touchClone.style.pointerEvents = 'none';
-                    touchClone.style.width = `${draggedImage.clientWidth}px`;
-                    touchClone.style.left = `${touch.clientX - touchClone.clientWidth / 2}px`;  // set initial position here
-                    touchClone.style.top = `${touch.clientY - touchClone.clientHeight / 2}px`;  // set initial position here
-                    document.body.appendChild(touchClone);
+                        touchClone = draggedImage.cloneNode(true);
+                        touchClone.style.position = 'absolute';
+                        touchClone.style.pointerEvents = 'none';
+                        touchClone.style.width = `${draggedImage.clientWidth}px`;
+                        touchClone.style.left = `${touch.clientX - touchClone.clientWidth / 2}px`;  // set initial position here
+                        touchClone.style.top = `${touch.clientY - touchClone.clientHeight / 2}px`;  // set initial position here
+                        document.body.appendChild(touchClone);
+                    }
                 });
 
                 image.addEventListener('touchmove', event => {
                     event.preventDefault();
-                    const touch = event.touches[0];
-                    if (touchClone) {
+                    if (!isChecking && touchClone) { // Impede mover as imagens após a verificação
+                        const touch = event.touches[0];
                         touchClone.style.left = `${touch.clientX - touchClone.clientWidth / 2}px`;
                         touchClone.style.top = `${touch.clientY - touchClone.clientHeight / 2}px`;
                     }
@@ -252,8 +259,10 @@
 
             const allImages = document.querySelectorAll('img');
             allImages.forEach(image => {
-                image.draggable = false;
+                image.draggable = false; // Desativa o arrastar após a verificação
             });
+
+            isChecking = true; // Marca que a verificação foi realizada
         });
 
         renderImages();
