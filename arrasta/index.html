@@ -88,7 +88,7 @@
     <script>
         let draggedImage = null;
         let touchClone = null;
-        let isChecking = false; // Flag para saber se a verificação foi feita
+        let isChecking = false;
 
         const imagesData = [
             { src: "01.png", alt: "01" },
@@ -130,17 +130,13 @@
 
         function setupDragAndDrop() {
             const allCells = document.querySelectorAll('.grid div');
-            const grid1 = document.getElementById('grid1');
-            const grid2 = document.getElementById('grid2');
 
             allCells.forEach(cell => {
-                // Permite o arrasto entre as grids
                 cell.addEventListener('dragover', event => event.preventDefault());
 
-                // Permite soltar a imagem na grid 1 ou grid 2
                 cell.addEventListener('drop', event => {
                     event.preventDefault();
-                    if (draggedImage && !isChecking) { // Permite mover apenas antes da verificação
+                    if (draggedImage && !isChecking) {
                         const existingImage = cell.querySelector('img');
                         if (existingImage) {
                             draggedImage.parentNode.appendChild(existingImage);
@@ -149,18 +145,17 @@
                     }
                 });
 
-                // Para movimentar as imagens entre as grids
                 cell.addEventListener('touchend', event => {
-                    if (draggedImage && !isChecking) { // Permite mover apenas antes da verificação
+                    if (draggedImage && !isChecking) {
                         const touch = event.changedTouches[0];
                         const target = document.elementFromPoint(touch.clientX, touch.clientY);
-
-                        if (target && (target === grid1 || target === grid2)) {
-                            const gridCells = Array.from(target.children);
+                        if (target && target.closest('.grid')) {
+                            const grid = target.closest('.grid');
+                            const cells = Array.from(grid.children);
                             let closestCell = null;
                             let minDistance = Infinity;
 
-                            gridCells.forEach(cell => {
+                            cells.forEach(cell => {
                                 const rect = cell.getBoundingClientRect();
                                 const cellCenterX = rect.left + rect.width / 2;
                                 const cellCenterY = rect.top + rect.height / 2;
@@ -179,12 +174,7 @@
                                 }
                                 closestCell.appendChild(draggedImage);
                             }
-                        } else {
-                            draggedImage.style.position = '';
-                            draggedImage.style.left = '';
-                            draggedImage.style.top = '';
                         }
-
                         draggedImage = null;
                         if (touchClone) {
                             touchClone.remove();
@@ -203,13 +193,11 @@
                 });
 
                 image.addEventListener('dragend', () => {
-                    if (!isChecking) {
-                        draggedImage = null;
-                    }
+                    draggedImage = null;
                 });
 
                 image.addEventListener('touchstart', event => {
-                    if (!isChecking) { // Impede mover as imagens após a verificação
+                    if (!isChecking) {
                         draggedImage = event.target;
                         const touch = event.touches[0];
 
@@ -217,15 +205,13 @@
                         touchClone.style.position = 'absolute';
                         touchClone.style.pointerEvents = 'none';
                         touchClone.style.width = `${draggedImage.clientWidth}px`;
-                        touchClone.style.left = `${touch.clientX - touchClone.clientWidth / 2}px`;  // set initial position here
-                        touchClone.style.top = `${touch.clientY - touchClone.clientHeight / 2}px`;  // set initial position here
                         document.body.appendChild(touchClone);
                     }
                 });
 
                 image.addEventListener('touchmove', event => {
                     event.preventDefault();
-                    if (!isChecking && touchClone) { // Impede mover as imagens após a verificação
+                    if (touchClone) {
                         const touch = event.touches[0];
                         touchClone.style.left = `${touch.clientX - touchClone.clientWidth / 2}px`;
                         touchClone.style.top = `${touch.clientY - touchClone.clientHeight / 2}px`;
@@ -261,7 +247,7 @@
                 }
             });
 
-            isChecking = true; // Marca que a verificação foi realizada
+            isChecking = true;
         });
 
         renderImages();
