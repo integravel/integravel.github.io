@@ -27,7 +27,6 @@
             max-width: 2200px;
             height: auto;
             position: relative;
-            z-index: 0; /* Coloca a grid no plano de fundo */
         }
         .grid div {
             width: 500px;
@@ -53,11 +52,8 @@
             width: 100%;
             height: auto;
             object-fit: contain;
-            transition: transform 0.2s ease;
-        }
-        img {
             position: relative;
-            z-index: 1; /* Garante que a imagem fique na frente */
+            transition: transform 0.2s ease;
         }
         button {
             padding: 20px 40px;
@@ -157,15 +153,16 @@
             allImages.forEach(image => {
                 image.addEventListener('dragstart', event => {
                     draggedImage = event.target;
+                    draggedImage.style.zIndex = '2'; // Coloca a imagem no topo
                 });
 
                 image.addEventListener('dragend', () => {
+                    draggedImage.style.zIndex = '1'; // Reseta o z-index
                     draggedImage = null;
                 });
 
                 image.addEventListener('touchstart', event => {
                     draggedImage = event.target;
-
                     const touch = event.touches[0];
                     initialX = touch.pageX - draggedImage.offsetLeft;
                     initialY = touch.pageY - draggedImage.offsetTop;
@@ -173,7 +170,7 @@
                     draggedImage.style.position = 'absolute';
                     draggedImage.style.left = `${touch.pageX - initialX}px`;
                     draggedImage.style.top = `${touch.pageY - initialY}px`;
-                    draggedImage.style.zIndex = '1';
+                    draggedImage.style.zIndex = '2'; // Coloca a imagem no topo
                 });
 
                 image.addEventListener('touchmove', event => {
@@ -188,7 +185,7 @@
                     draggedImage.style.position = '';
                     draggedImage.style.left = '';
                     draggedImage.style.top = '';
-                    draggedImage.style.zIndex = '';
+                    draggedImage.style.zIndex = '1'; // Reseta o z-index
                     draggedImage = null;
                 });
             });
