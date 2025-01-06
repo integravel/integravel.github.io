@@ -129,6 +129,8 @@
 
         function setupDragAndDrop() {
             const allCells = document.querySelectorAll('.grid div');
+            const grid1 = document.getElementById('grid1');
+
             allCells.forEach(cell => {
                 cell.addEventListener('dragover', event => event.preventDefault());
 
@@ -144,20 +146,45 @@
                 });
 
                 cell.addEventListener('touchend', event => {
-                    const touch = event.changedTouches[0];
-                    const target = document.elementFromPoint(touch.clientX, touch.clientY);
+                    if (draggedImage) {
+                        const touch = event.changedTouches[0];
+                        const target = document.elementFromPoint(touch.clientX, touch.clientY);
+                        const grid1Cells = Array.from(grid1.children);
 
-                    if (target && target.parentNode.classList.contains('grid')) {
-                        const existingImage = target.querySelector('img');
-                        if (existingImage) {
-                            draggedImage.parentNode.appendChild(existingImage);
+                        if (grid1.contains(target)) {
+                            let closestCell = null;
+                            let minDistance = Infinity;
+
+                            grid1Cells.forEach(cell => {
+                                const rect = cell.getBoundingClientRect();
+                                const cellCenterX = rect.left + rect.width / 2;
+                                const cellCenterY = rect.top + rect.height / 2;
+                                const distance = Math.hypot(cellCenterX - touch.clientX, cellCenterY - touch.clientY);
+
+                                if (distance < minDistance) {
+                                    minDistance = distance;
+                                    closestCell = cell;
+                                }
+                            });
+
+                            if (closestCell) {
+                                const existingImage = closestCell.querySelector('img');
+                                if (existingImage) {
+                                    draggedImage.parentNode.appendChild(existingImage);
+                                }
+                                closestCell.appendChild(draggedImage);
+                            }
+                        } else {
+                            draggedImage.style.position = '';
+                            draggedImage.style.left = '';
+                            draggedImage.style.top = '';
                         }
-                        target.appendChild(draggedImage);
-                    }
 
-                    if (touchClone) {
-                        touchClone.remove();
-                        touchClone = null;
+                        draggedImage = null;
+                        if (touchClone) {
+                            touchClone.remove();
+                            touchClone = null;
+                        }
                     }
                 });
             });
@@ -173,23 +200,23 @@
                 });
 
                 image.addEventListener('touchstart', event => {
-                    event.preventDefault();
                     draggedImage = event.target;
                     const touch = event.touches[0];
 
                     touchClone = draggedImage.cloneNode(true);
                     touchClone.style.position = 'absolute';
                     touchClone.style.pointerEvents = 'none';
-                    touchClone.style.zIndex = 1000;
+                    touchClone.style.width = `${draggedImage.clientWidth}px`;
                     document.body.appendChild(touchClone);
-
-                    moveClone(touch.pageX, touch.pageY);
                 });
 
                 image.addEventListener('touchmove', event => {
                     event.preventDefault();
                     const touch = event.touches[0];
-                    moveClone(touch.pageX, touch.pageY);
+                    if (touchClone) {
+                        touchClone.style.left = `${touch.clientX - touchClone.clientWidth / 2}px`;
+                        touchClone.style.top = `${touch.clientY - touchClone.clientHeight / 2}px`;
+                    }
                 });
 
                 image.addEventListener('touchend', () => {
@@ -197,16 +224,8 @@
                         touchClone.remove();
                         touchClone = null;
                     }
-                    draggedImage = null;
                 });
             });
-        }
-
-        function moveClone(x, y) {
-            if (touchClone) {
-                touchClone.style.left = `${x - touchClone.offsetWidth / 2}px`;
-                touchClone.style.top = `${y - touchClone.offsetHeight / 2}px`;
-            }
         }
 
         const checkButton = document.getElementById('checkButton');
@@ -232,7 +251,13 @@
             const allImages = document.querySelectorAll('img');
             allImages.forEach(image => {
                 image.draggable = false;
-                image.style.pointerEvents = 'none';
+            });
+
+            const allCells = document.querySelectorAll('.grid div');
+            allCells.forEach(cell => {
+                cell.removeEventListener('dragover', event => event.preventDefault());
+                cell.removeEventListener('drop', event => {});
+                cell.removeEventListener('touchend', event => {});
             });
         });
 
