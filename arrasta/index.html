@@ -26,6 +26,8 @@
             width: 100%;
             max-width: 2200px;
             height: auto;
+            position: relative;
+            z-index: 0; /* Coloca a grid no plano de fundo */
         }
         .grid div {
             width: 500px;
@@ -52,6 +54,10 @@
             height: auto;
             object-fit: contain;
             transition: transform 0.2s ease;
+        }
+        img {
+            position: relative;
+            z-index: 1; /* Garante que a imagem fique na frente */
         }
         button {
             padding: 20px 40px;
@@ -143,7 +149,6 @@
                             draggedImage.parentNode.appendChild(existingImage);
                         }
                         cell.appendChild(draggedImage);
-                        resetImageStyles(draggedImage);
                     }
                 });
             });
@@ -152,17 +157,14 @@
             allImages.forEach(image => {
                 image.addEventListener('dragstart', event => {
                     draggedImage = event.target;
-                    elevateImage(draggedImage);
                 });
 
                 image.addEventListener('dragend', () => {
-                    resetImageStyles(draggedImage);
                     draggedImage = null;
                 });
 
                 image.addEventListener('touchstart', event => {
                     draggedImage = event.target;
-                    elevateImage(draggedImage);
 
                     const touch = event.touches[0];
                     initialX = touch.pageX - draggedImage.offsetLeft;
@@ -171,6 +173,7 @@
                     draggedImage.style.position = 'absolute';
                     draggedImage.style.left = `${touch.pageX - initialX}px`;
                     draggedImage.style.top = `${touch.pageY - initialY}px`;
+                    draggedImage.style.zIndex = '1';
                 });
 
                 image.addEventListener('touchmove', event => {
@@ -181,26 +184,14 @@
                     }
                 });
 
-                image.addEventListener('touchend', event => {
-                    resetImageStyles(draggedImage);
+                image.addEventListener('touchend', () => {
+                    draggedImage.style.position = '';
+                    draggedImage.style.left = '';
+                    draggedImage.style.top = '';
+                    draggedImage.style.zIndex = '';
                     draggedImage = null;
                 });
             });
-        }
-
-        function elevateImage(image) {
-            image.style.zIndex = '1000';
-            image.style.pointerEvents = 'none'; // Evita interferências
-        }
-
-        function resetImageStyles(image) {
-            if (image) {
-                image.style.zIndex = '';
-                image.style.position = '';
-                image.style.left = '';
-                image.style.top = '';
-                image.style.pointerEvents = '';
-            }
         }
 
         const checkButton = document.getElementById('checkButton');
