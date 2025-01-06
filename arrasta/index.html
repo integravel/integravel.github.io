@@ -143,10 +143,7 @@
                             draggedImage.parentNode.appendChild(existingImage);
                         }
                         cell.appendChild(draggedImage);
-                        draggedImage.style.position = '';
-                        draggedImage.style.left = '';
-                        draggedImage.style.top = '';
-                        draggedImage.style.zIndex = '';
+                        resetImageStyles(draggedImage);
                     }
                 });
             });
@@ -155,23 +152,23 @@
             allImages.forEach(image => {
                 image.addEventListener('dragstart', event => {
                     draggedImage = event.target;
+                    elevateImage(draggedImage);
                 });
 
                 image.addEventListener('dragend', () => {
+                    resetImageStyles(draggedImage);
                     draggedImage = null;
                 });
 
-                // Adicionar suporte a toques em dispositivos móveis
                 image.addEventListener('touchstart', event => {
                     draggedImage = event.target;
-                    event.preventDefault();
+                    elevateImage(draggedImage);
 
                     const touch = event.touches[0];
                     initialX = touch.pageX - draggedImage.offsetLeft;
                     initialY = touch.pageY - draggedImage.offsetTop;
 
                     draggedImage.style.position = 'absolute';
-                    draggedImage.style.zIndex = '1000'; // Move para a frente
                     draggedImage.style.left = `${touch.pageX - initialX}px`;
                     draggedImage.style.top = `${touch.pageY - initialY}px`;
                 });
@@ -185,15 +182,25 @@
                 });
 
                 image.addEventListener('touchend', event => {
-                    if (draggedImage) {
-                        draggedImage.style.position = '';
-                        draggedImage.style.left = '';
-                        draggedImage.style.top = '';
-                        draggedImage.style.zIndex = ''; // Remove destaque
-                    }
+                    resetImageStyles(draggedImage);
                     draggedImage = null;
                 });
             });
+        }
+
+        function elevateImage(image) {
+            image.style.zIndex = '1000';
+            image.style.pointerEvents = 'none'; // Evita interferências
+        }
+
+        function resetImageStyles(image) {
+            if (image) {
+                image.style.zIndex = '';
+                image.style.position = '';
+                image.style.left = '';
+                image.style.top = '';
+                image.style.pointerEvents = '';
+            }
         }
 
         const checkButton = document.getElementById('checkButton');
