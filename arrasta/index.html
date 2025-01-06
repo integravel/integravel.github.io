@@ -19,11 +19,12 @@
         }
         .grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr); /* Agora é sempre 3 colunas */
+            grid-template-columns: repeat(4, 1fr); /* 4 colunas fixas */
+            grid-template-rows: repeat(3, auto); /* 3 linhas fixas */
             gap: 10px;
             margin: 20px 0;
             width: 100%;
-            max-width: 600px; /* Ajustado para um tamanho mais apropriado */
+            max-width: 600px;
         }
         .grid div {
             aspect-ratio: 5 / 3;
@@ -86,6 +87,7 @@
 
     <script>
         let draggedImage = null;
+        let touchOffset = { x: 0, y: 0 };
 
         const imagesData = [
             { src: "01.png", alt: "01" },
@@ -140,6 +142,19 @@
                         cell.appendChild(draggedImage);
                     }
                 });
+
+                cell.addEventListener('touchend', event => {
+                    const touch = event.changedTouches[0];
+                    const target = document.elementFromPoint(touch.clientX, touch.clientY);
+
+                    if (target && target.parentNode.classList.contains('grid')) {
+                        const existingImage = target.querySelector('img');
+                        if (existingImage) {
+                            draggedImage.parentNode.appendChild(existingImage);
+                        }
+                        target.appendChild(draggedImage);
+                    }
+                });
             });
 
             const allImages = document.querySelectorAll('img');
@@ -154,9 +169,25 @@
 
                 image.addEventListener('touchstart', event => {
                     draggedImage = event.target;
+                    const touch = event.touches[0];
+                    touchOffset.x = touch.clientX - draggedImage.getBoundingClientRect().left;
+                    touchOffset.y = touch.clientY - draggedImage.getBoundingClientRect().top;
                 });
 
-                image.addEventListener('touchend', event => {
+                image.addEventListener('touchmove', event => {
+                    event.preventDefault();
+                    const touch = event.touches[0];
+                    draggedImage.style.position = 'absolute';
+                    draggedImage.style.zIndex = 1000;
+                    draggedImage.style.left = `${touch.clientX - touchOffset.x}px`;
+                    draggedImage.style.top = `${touch.clientY - touchOffset.y}px`;
+                });
+
+                image.addEventListener('touchend', () => {
+                    draggedImage.style.position = '';
+                    draggedImage.style.zIndex = '';
+                    draggedImage.style.left = '';
+                    draggedImage.style.top = '';
                     draggedImage = null;
                 });
             });
