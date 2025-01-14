@@ -41,12 +41,17 @@
         }
         .content .flex-container {
             display: flex;
-            align-items: center;
+            align-items: flex-start;
             gap: 20px;
         }
         .content .flex-container img {
             max-width: 100px;
             height: auto;
+            flex-shrink: 0;
+        }
+        .content .text-content {
+            display: flex;
+            flex-direction: column;
         }
         .grid {
             display: grid;
@@ -104,6 +109,10 @@
             .grid {
                 grid-template-columns: 1fr;
             }
+            .content .flex-container {
+                flex-direction: column;
+                align-items: center;
+            }
         }
     </style>
 </head>
@@ -116,10 +125,12 @@
     </header>
 
     <div class="content">
-        <h2>Arrasta o X</h2>
         <div class="flex-container">
-            <img src="../imagens/logo2.png" alt="Logo do projeto">
-            <p>Recurso virtual desenvolvido durante a pandemia de COVID-19 que possibilita demonstrar enunciados matemáticos arrastando e soltando segmentos de texto. Aqui você encontrará as várias versões deste recurso e os dados coletados (sem identificação) que fundamentaram a tese <a href="https://repositorio.unicamp.br/Acervo/Detalhe/1338944">Justapor demonstrações e seu efeito na escrita de demonstrações</a>.</p>
+            <img src="../imagens/logo-projeto.png" alt="Logo do projeto">
+            <div class="text-content">
+                <h2>Arrasta o X</h2>
+                <p>Recurso virtual desenvolvido durante a pandemia de COVID-19 que possibilita demonstrar enunciados matemáticos arrastando e soltando segmentos de texto. Aqui você encontrará as várias versões deste recurso e os dados coletados (sem identificação) que fundamentaram a tese <a href="https://repositorio.unicamp.br/Acervo/Detalhe/1338944">Justapor demonstrações e seu efeito na escrita de demonstrações</a>.</p>
+            </div>
         </div>
     </div>
 
@@ -152,7 +163,7 @@
             <a href="#"><img src="09.png" alt="Logo 9"><p>Curso 9</p></a>
         </div>
         <div class="grid-item">
-            <a href="#"><img src="10.png" alt="Logo 9"><p>Curso 9</p></a>
+            <a href="#"><img src="10.png" alt="Logo 10"><p>Curso 10</p></a>
         </div>
     </div>
 
