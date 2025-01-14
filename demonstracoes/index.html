@@ -10,8 +10,8 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            max-width: 100vw;
-            overflow-x: hidden;
+            max-width: 100vw; /* Garante que o conteúdo ocupe no máximo 100% da largura da tela */
+            overflow-x: hidden; /* Impede o scroll horizontal */
         }
         header {
             background-color: #000;
@@ -28,24 +28,17 @@
             margin: 0;
         }
         header a {
-            color: inherit;
-            text-decoration: none;
-            display: flex;
+            color: inherit; /* Herda a cor do texto */
+            text-decoration: none; /* Remove o sublinhado do link */
+            display: flex; /* Garante que todo o cabeçalho seja clicável */
             align-items: center;
-        }
-        .message {
-            padding: 20px;
-            text-align: center;
-            font-size: 18px;
-            background-color: #f9f9f9;
-            color: #333;
         }
         .grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 10px;
             padding: 10px;
-            width: 100%;
+            width: 100%; /* Garante que a grid ocupe a largura total da tela */
             box-sizing: border-box;
         }
         .grid-item {
@@ -55,7 +48,7 @@
             overflow: hidden;
             transition: transform 0.3s ease;
             cursor: pointer;
-            height: auto;
+            height: auto; /* Permite altura flexível */
             display: flex;
             flex-direction: column;
             justify-content: space-between;
@@ -73,19 +66,19 @@
         .grid-item img {
             max-width: 100%;
             height: auto;
-            object-fit: contain;
-            flex-shrink: 0;
+            object-fit: contain; /* Evita cortes na imagem */
+            flex-shrink: 0; /* Impede a imagem de encolher */
         }
         .grid-item p {
             margin: 10px 0 0;
             color: #555;
-            flex-grow: 1;
-            text-align: justify;
+            flex-grow: 1; /* Faz o parágrafo ocupar espaço adicional */
+            text-align: justify; /* Melhor legibilidade em telas menores */
         }
         footer {
             background-color: #f4f4f4;
             display: flex;
-            justify-content: center;
+            justify-content: center; /* Centraliza o conteúdo do rodapé */
             align-items: center;
             padding: 20px;
             border-top: 1px solid #ddd;
@@ -95,8 +88,8 @@
         footer div {
             display: flex;
             align-items: center;
-            gap: 20px;
-            margin: 0 15px;
+            gap: 20px; /* Espaço maior entre a imagem e o botão */
+            margin: 0 15px; /* Adiciona um pequeno espaçamento entre os dois blocos */
         }
         footer img {
             height: 40px;
@@ -115,6 +108,7 @@
         footer button:hover {
             background-color: #0056b3;
         }
+        /* Estilo para dispositivos móveis */
         @media (max-width: 768px) {
             header {
                 flex-direction: column;
@@ -124,20 +118,24 @@
                 margin-bottom: 10px;
             }
             .grid {
-                grid-template-columns: 1fr;
+                grid-template-columns: 1fr; /* Uma coluna */
                 gap: 15px;
+            }
+            .grid-item {
+                height: auto; /* Permite altura dinâmica */
             }
             footer {
                 flex-direction: column;
                 text-align: center;
             }
         }
+        /* Estilo para dispositivos muito pequenos */
         @media (max-width: 480px) {
             .grid-item p {
-                font-size: 14px;
+                font-size: 14px; /* Texto menor */
             }
             footer button {
-                padding: 8px 12px;
+                padding: 8px 12px; /* Botões menores */
             }
         }
     </style>
@@ -151,14 +149,69 @@
         </a>
     </header>
 
-    <!-- Mensagem adicional -->
-    <div class="message">
-        zigue zigue zague
-    </div>
-
-    <!-- Grid -->
+    <!-- O restante do conteúdo -->
     <div class="grid">
-        <!-- Conteúdo da grid continua igual -->
+        <div class="grid-item">
+            <a href="https://classroom.google.com/c/NzEzMTU2NTA5ODY0?cjc=deqshid">
+                <img src="01.png" alt="Logo 1">
+                <p>Introdução ao Cálculo - 60 horas.</p>
+            </a>
+        </div>
+        <div class="grid-item">
+            <a href="https://classroom.google.com/c/NzIzMjg5NDY1NDI4?cjc=beihezj">
+                <img src="02.png" alt="Logo 2">
+                <p>Introdução à linguagem de programação Scratch - 20 horas.</p>
+            </a>
+        </div>
+        <div class="grid-item">
+            <a href="https://classroom.google.com/c/NzIzMjg5NDY1NDI4?cjc=beihezj">
+                <img src="03.png" alt="Logo 2">
+                <p>Introdução à linguagem de programação Scratch - 20 horas.</p>
+            </a>
+        </div>
+        <div class="grid-item">
+            <a href="https://classroom.google.com/c/NzIzMjg5NDY1NDI4?cjc=beihezj">
+                <img src="04.png" alt="Logo 2">
+                <p>Introdução à linguagem de programação Scratch - 20 horas.</p>
+            </a>
+        </div>
+        <div class="grid-item">
+            <a href="https://classroom.google.com/c/NzIzMjg5NDY1NDI4?cjc=beihezj">
+                <img src="05.png" alt="Logo 2">
+                <p>Introdução à linguagem de programação Scratch - 20 horas.</p>
+            </a>
+        </div>
+        <div class="grid-item">
+            <a href="https://classroom.google.com/c/NzIzMjg5NDY1NDI4?cjc=beihezj">
+                <img src="06.png" alt="Logo 2">
+                <p>Introdução à linguagem de programação Scratch - 20 horas.</p>
+            </a>
+        </div>
+        <div class="grid-item">
+            <a href="https://classroom.google.com/c/NzIzMjg5NDY1NDI4?cjc=beihezj">
+                <img src="07.png" alt="Logo 2">
+                <p>Introdução à linguagem de programação Scratch - 20 horas.</p>
+            </a>
+        </div>
+        <div class="grid-item">
+            <a href="https://classroom.google.com/c/NzIzMjg5NDY1NDI4?cjc=beihezj">
+                <img src="08.png" alt="Logo 2">
+                <p>Introdução à linguagem de programação Scratch - 20 horas.</p>
+            </a>
+        </div>
+        <div class="grid-item">
+            <a href="https://classroom.google.com/c/NzIzMjg5NDY1NDI4?cjc=beihezj">
+                <img src="09.png" alt="Logo 2">
+                <p>Introdução à linguagem de programação Scratch - 20 horas.</p>
+            </a>
+        </div>
+        <div class="grid-item">
+            <a href="https://classroom.google.com/c/NzIzMjg5NDY1NDI4?cjc=beihezj">
+                <img src="10.png" alt="Logo 2">
+                <p>Introdução à linguagem de programação Scratch - 20 horas.</p>
+            </a>
+        </div>
+
     </div>
 
     <!-- Rodapé -->
