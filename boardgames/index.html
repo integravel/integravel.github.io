@@ -10,8 +10,8 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            max-width: 100vw; /* Garante que o conteúdo ocupe no máximo 100% da largura da tela */
-            overflow-x: hidden; /* Impede o scroll horizontal */
+            max-width: 100vw;
+            overflow-x: hidden;
         }
         header {
             background-color: #000;
@@ -28,74 +28,78 @@
             margin: 0;
         }
         header a {
-            color: inherit; /* Herda a cor do texto */
-            text-decoration: none; /* Remove o sublinhado do link */
-            display: flex; /* Garante que todo o cabeçalho seja clicável */
+            color: inherit;
+            text-decoration: none;
+            display: flex;
             align-items: center;
+        }
+        .content {
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .content .flex-container {
+            display: flex;
+            align-items: center; /* Centraliza o logo verticalmente */
+            gap: 20px;
+        }
+        .content .flex-container img {
+            max-width: 100px;
+            height: auto;
+            flex-shrink: 0;
+        }
+        .content .text-content {
+            display: flex;
+            flex-direction: column;
+            line-height: 1.4; /* Ajuste fino do espaçamento entre linhas */
+        }
+        .content .text-content h2 {
+            margin: 0; /* Remove margens padrão */
+            padding-bottom: 5px; /* Reduz o espaçamento abaixo do título */
+        }
+        .content .text-content p {
+            margin: 0; /* Remove margens padrão do parágrafo */
         }
         .grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 10px;
             padding: 10px;
-            width: 100%; /* Garante que a grid ocupe a largura total da tela */
-            box-sizing: border-box;
         }
         .grid-item {
-            text-align: center;
             border: 1px solid #ddd;
             border-radius: 8px;
             overflow: hidden;
             transition: transform 0.3s ease;
-            cursor: pointer;
-            height: auto; /* Permite altura flexível */
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            padding: 10px;
         }
         .grid-item:hover {
             transform: scale(1.02);
         }
         .grid-item a {
-            display: block;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
             text-decoration: none;
             color: inherit;
+            width: 100%;
             height: 100%;
         }
         .grid-item img {
             max-width: 100%;
             height: auto;
-            object-fit: contain; /* Evita cortes na imagem */
-            flex-shrink: 0; /* Impede a imagem de encolher */
-        }
-        .grid-item p {
-            margin: 10px 0 0;
-            color: #555;
-            flex-grow: 1; /* Faz o parágrafo ocupar espaço adicional */
-            text-align: justify; /* Melhor legibilidade em telas menores */
         }
         footer {
             background-color: #f4f4f4;
             display: flex;
-            justify-content: center; /* Centraliza o conteúdo do rodapé */
-            align-items: center;
+            justify-content: center;
             padding: 20px;
-            border-top: 1px solid #ddd;
-            width: 100%;
-            box-sizing: border-box;
         }
         footer div {
-            display: flex;
-            align-items: center;
-            gap: 20px; /* Espaço maior entre a imagem e o botão */
-            margin: 0 15px; /* Adiciona um pequeno espaçamento entre os dois blocos */
+            margin: 0 15px;
         }
         footer img {
             height: 40px;
-        }
-        footer img.large {
-            height: 50px;
         }
         footer button {
             background-color: #007BFF;
@@ -108,40 +112,18 @@
         footer button:hover {
             background-color: #0056b3;
         }
-        /* Estilo para dispositivos móveis */
         @media (max-width: 768px) {
-            header {
-                flex-direction: column;
-                text-align: center;
-            }
-            header img {
-                margin-bottom: 10px;
-            }
             .grid {
-                grid-template-columns: 1fr; /* Uma coluna */
-                gap: 15px;
+                grid-template-columns: 1fr;
             }
-            .grid-item {
-                height: auto; /* Permite altura dinâmica */
-            }
-            footer {
+            .content .flex-container {
                 flex-direction: column;
-                text-align: center;
-            }
-        }
-        /* Estilo para dispositivos muito pequenos */
-        @media (max-width: 480px) {
-            .grid-item p {
-                font-size: 14px; /* Texto menor */
-            }
-            footer button {
-                padding: 8px 12px; /* Botões menores */
+                align-items: center;
             }
         }
     </style>
 </head>
 <body>
-    <!-- Cabeçalho com link -->
     <header>
         <a href="https://integravel.github.io/">
             <img src="../imagens/logo.png" alt="Logo da página">
@@ -149,98 +131,52 @@
         </a>
     </header>
 
-    <!-- O restante do conteúdo -->
-    <div class="grid">
-        <div class="grid-item">
-            <a href="https://drive.google.com/drive/folders/1zIa5K95jlp72szICjylvGTrnum3hgZNR">
-                <img src="01.jpg" alt="Logo 1">
-                <p>RPG medieval baixa-fantasia com aventuras protagonizadas por aldeões.</p>
-            </a>
+    <div class="content">
+        <div class="flex-container">
+            <img src="../imagens/logo4.png" alt="Logo do projeto">
+            <div class="text-content">
+                <h2>Boardgames</h2>
+                <p>Recurso virtual desenvolvido durante a pandemia de COVID-19 que possibilita demonstrar enunciados matemáticos arrastando e soltando segmentos de texto. Aqui você encontrará as várias versões deste recurso e os dados coletados (sem identificação) que fundamentaram a tese <a href="https://repositorio.unicamp.br/Acervo/Detalhe/1338944">Justapor demonstrações e seu efeito na escrita de demonstrações</a>.</p>
+            </div>
         </div>
-        <div class="grid-item">
-            <a href="https://drive.google.com/drive/folders/1Fwt-D3iamv8HCXmiY7ns52D8ISn0wi8v">
-                <img src="02.jpg" alt="Logo 2">
-                <p>Arcanos Maiores procuram seus objetivos em uma aventura pela cabala.</p>
-            </a>
-        </div>
-        <div class="grid-item">
-            <a href="https://drive.google.com/drive/folders/1OW_I9mQfxHJ4M3n5KDBVCAr_eKfzULDf">
-                <img src="03.jpg" alt="Logo 3">
-                <p>Forme duplas/trios de dragões e coloque-os em campo para batalhar.</p>
-            </a>
-        </div>
-        <div class="grid-item">
-            <a href="https://drive.google.com/drive/folders/13b59M6sAuvy7ddcs9E9QUqYhaL4TpdU2">
-                <img src="04.jpg" alt="Logo 4">
-                <p>Xadrez com peças encobertas e posições personalizadas, blefar faz parte.</p>
-            </a>
-        </div>
-        <div class="grid-item">
-            <a href="https://drive.google.com/drive/folders/1r2QeLeKSGW-Jb63N_Rd8DGno-4P6dDWk">
-                <img src="05.jpg" alt="Logo 5">
-                <p>Combine monstros para batalha, mas cuidado para que eles não se anulem.</p>
-            </a>
-        </div>
-        <div class="grid-item">
-            <a href="https://drive.google.com/drive/folders/1395-t07GmI07rtJJHegsagYAljZVnsLC">
-                <img src="06.jpg" alt="Logo 6">
-                <p>Escolha qual peça do tabuleiro se moverá considerando o resultado do dado.</p>
-            </a>
-        </div>
-        <div class="grid-item">
-            <a href="https://drive.google.com/drive/folders/1n4fsRsHxQIof4GUJKBRtaX1jt4sCiVy4">
-                <img src="07.jpg" alt="Logo 7">
-                <p>Explorar a cidade, completar as missões e muitas chess-based battles.</p>
-            </a>
-        </div>
-        <div class="grid-item">
-            <a href="https://drive.google.com/drive/folders/19mqXNV5VVk5NggtkPDKtlya6lm-hhMEM">
-                <img src="08.jpg" alt="Logo 8">
-                <p>Um jogo de blefes e sacrifícios baseado no paradigma de Monty Hall.</p>
-            </a>
-        </div>
-        <div class="grid-item">
-            <a href="https://drive.google.com/drive/folders/1X8Ve1RI4YDwXeOcR9hSd5n1X4aqnY5fo">
-                <img src="09.jpg" alt="Logo 9">
-                <p>Observe a maldição se manifestar e encontre o objeto amaldiçoado.</p>
-            </a>
-        </div>
-
-        <div class="grid-item">
-            <a href="https://drive.google.com/drive/folders/1M4O3mOcYZTxbN2SolgGFhO3nUTmyQb55">
-                <img src="10.jpg" alt="Logo 10">
-                <p>Monstros avançam, disparar agora ou arrisque subir o poder do canhão?</p>
-            </a>
-        </div>
-
-        <div class="grid-item">
-            <a href="https://drive.google.com/drive/folders/1xLaQc3dtFYm43Lwk_5j-J2Icx9CfjPxC">
-                <img src="11.jpg" alt="Logo 11">
-                <p>Old Gods invadiram, altere as funções básicas do servidor para detê-los.</p>
-            </a>
-        </div>
-
-        <div class="grid-item">
-            <a href="https://drive.google.com/drive/folders/1USJwY5Wn9jxW8Sivnzib_EscIbHQIsTj">
-                <img src="12.jpg" alt="Logo 12">
-                <p>Xadrez com peças bomba-relógios, programe-as em segredo e aguarde a explosão.</p>
-            </a>
-        </div>
-
-        <div class="grid-item">
-            <a href="https://drive.google.com/drive/folders/1XFzsBvcukgumLqqQeta2Il5PgNfK_Zxq">
-                <img src="13.jpg" alt="Logo 13">
-                <p>RPG medieval fantasia com magias baseadas em montar/desmontar moléculas.</p>
-            </a>
-        </div>
-
-        
     </div>
 
-    <!-- Rodapé -->
+    <div class="grid">
+        <div class="grid-item">
+            <a href="#"><img src="01.png" alt="Logo 1"><p>Curso 1</p></a>
+        </div>
+        <div class="grid-item">
+            <a href="#"><img src="02.png" alt="Logo 2"><p>Curso 2</p></a>
+        </div>
+        <div class="grid-item">
+            <a href="#"><img src="03.png" alt="Logo 3"><p>Curso 3</p></a>
+        </div>
+        <div class="grid-item">
+            <a href="#"><img src="04.png" alt="Logo 4"><p>Curso 4</p></a>
+        </div>
+        <div class="grid-item">
+            <a href="#"><img src="05.png" alt="Logo 5"><p>Curso 5</p></a>
+        </div>
+        <div class="grid-item">
+            <a href="#"><img src="06.png" alt="Logo 6"><p>Curso 6</p></a>
+        </div>
+        <div class="grid-item">
+            <a href="#"><img src="07.png" alt="Logo 7"><p>Curso 7</p></a>
+        </div>
+        <div class="grid-item">
+            <a href="#"><img src="08.png" alt="Logo 8"><p>Curso 8</p></a>
+        </div>
+        <div class="grid-item">
+            <a href="#"><img src="09.png" alt="Logo 9"><p>Curso 9</p></a>
+        </div>
+        <div class="grid-item">
+            <a href="#"><img src="10.png" alt="Logo 10"><p>Curso 10</p></a>
+        </div>
+    </div>
+
     <footer>
         <div>
-            <img src="../imagens/logo-sobre.png" alt="Logo sobre" class="large">
+            <img src="../imagens/logo-sobre.png" alt="Logo sobre">
             <button onclick="window.location.href='https://integravel.github.io/sobre'">Mais Informações</button>
         </div>
         <div>
