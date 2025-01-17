@@ -10,8 +10,8 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            max-width: 100vw; /* Garante que o conteúdo ocupe no máximo 100% da largura da tela */
-            overflow-x: hidden; /* Impede o scroll horizontal */
+            max-width: 100vw;
+            overflow-x: hidden;
         }
         header {
             background-color: #000;
@@ -28,74 +28,78 @@
             margin: 0;
         }
         header a {
-            color: inherit; /* Herda a cor do texto */
-            text-decoration: none; /* Remove o sublinhado do link */
-            display: flex; /* Garante que todo o cabeçalho seja clicável */
+            color: inherit;
+            text-decoration: none;
+            display: flex;
             align-items: center;
+        }
+        .content {
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .content .flex-container {
+            display: flex;
+            align-items: center; /* Centraliza o logo verticalmente */
+            gap: 20px;
+        }
+        .content .flex-container img {
+            max-width: 100px;
+            height: auto;
+            flex-shrink: 0;
+        }
+        .content .text-content {
+            display: flex;
+            flex-direction: column;
+            line-height: 1.4; /* Ajuste fino do espaçamento entre linhas */
+        }
+        .content .text-content h2 {
+            margin: 0; /* Remove margens padrão */
+            padding-bottom: 5px; /* Reduz o espaçamento abaixo do título */
+        }
+        .content .text-content p {
+            margin: 0; /* Remove margens padrão do parágrafo */
         }
         .grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 10px;
             padding: 10px;
-            width: 100%; /* Garante que a grid ocupe a largura total da tela */
-            box-sizing: border-box;
         }
         .grid-item {
-            text-align: center;
             border: 1px solid #ddd;
             border-radius: 8px;
             overflow: hidden;
             transition: transform 0.3s ease;
-            cursor: pointer;
-            height: auto; /* Permite altura flexível */
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            padding: 10px;
         }
         .grid-item:hover {
             transform: scale(1.02);
         }
         .grid-item a {
-            display: block;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
             text-decoration: none;
             color: inherit;
+            width: 100%;
             height: 100%;
         }
         .grid-item img {
             max-width: 100%;
             height: auto;
-            object-fit: contain; /* Evita cortes na imagem */
-            flex-shrink: 0; /* Impede a imagem de encolher */
-        }
-        .grid-item p {
-            margin: 10px 0 0;
-            color: #555;
-            flex-grow: 1; /* Faz o parágrafo ocupar espaço adicional */
-            text-align: justify; /* Melhor legibilidade em telas menores */
         }
         footer {
             background-color: #f4f4f4;
             display: flex;
-            justify-content: center; /* Centraliza o conteúdo do rodapé */
-            align-items: center;
+            justify-content: center;
             padding: 20px;
-            border-top: 1px solid #ddd;
-            width: 100%;
-            box-sizing: border-box;
         }
         footer div {
-            display: flex;
-            align-items: center;
-            gap: 20px; /* Espaço maior entre a imagem e o botão */
-            margin: 0 15px; /* Adiciona um pequeno espaçamento entre os dois blocos */
+            margin: 0 15px;
         }
         footer img {
             height: 40px;
-        }
-        footer img.large {
-            height: 50px;
         }
         footer button {
             background-color: #007BFF;
@@ -108,40 +112,18 @@
         footer button:hover {
             background-color: #0056b3;
         }
-        /* Estilo para dispositivos móveis */
         @media (max-width: 768px) {
-            header {
-                flex-direction: column;
-                text-align: center;
-            }
-            header img {
-                margin-bottom: 10px;
-            }
             .grid {
-                grid-template-columns: 1fr; /* Uma coluna */
-                gap: 15px;
+                grid-template-columns: 1fr;
             }
-            .grid-item {
-                height: auto; /* Permite altura dinâmica */
-            }
-            footer {
+            .content .flex-container {
                 flex-direction: column;
-                text-align: center;
-            }
-        }
-        /* Estilo para dispositivos muito pequenos */
-        @media (max-width: 480px) {
-            .grid-item p {
-                font-size: 14px; /* Texto menor */
-            }
-            footer button {
-                padding: 8px 12px; /* Botões menores */
+                align-items: center;
             }
         }
     </style>
 </head>
 <body>
-    <!-- Cabeçalho com link -->
     <header>
         <a href="https://integravel.github.io/">
             <img src="../imagens/logo.png" alt="Logo da página">
@@ -149,111 +131,58 @@
         </a>
     </header>
 
-    <!-- O restante do conteúdo -->
-    <div class="grid">
-        <div class="grid-item">
-            <a href="https://drive.google.com/drive/folders/1XOHtm1iya1p_JtM1kcgw2_iBscRh6E2e">
-                <img src="01.jpg" alt="Logo 1">
-                <p>Desafios 001 - 030</p>
-            </a>
+    <div class="content">
+        <div class="flex-container">
+            <img src="../imagens/logo5.png" alt="Logo do projeto">
+            <div class="text-content">
+                <h2>Divulgação científica</h2>
+                <p>M30 é um projeto de promoção da Divulgação Científica de Matemática vinculado ao Laboratório Integrável, que compila textos autorais publicados semestralmente nos Blogs <a href="https://www.blogs.unicamp.br/zero">Zero</a> e <a href="https://www.blogs.unicamp.br/m3">Matemática Multimídia (M³)</a>.</p>
+            </div>
         </div>
-        <div class="grid-item">
-            <a href="https://drive.google.com/drive/folders/1dNjsSVVRFOifSC7JsPJyO3m1HaS1JXrF">
-                <img src="02.jpg" alt="Logo 2">
-                <p>Desafios 031 - 060</p>
-            </a>
-        </div>
-        <div class="grid-item">
-            <a href="https://drive.google.com/drive/folders/1N9FY7mEFayxAut2GvHEgwMJtvDeUN8ht">
-                <img src="03.jpg" alt="Logo 3">
-                <p>Desafios 061 - 090</p>
-            </a>
-        </div>
-        <div class="grid-item">
-            <a href="https://drive.google.com/drive/folders/1T-QJZcwknLSb68vg3f3AYS9sE1n1d56J">
-                <img src="04.jpg" alt="Logo 4">
-                <p>Desafios 091 - 120</p>
-            </a>
-        </div>
-        <div class="grid-item">
-            <a href="https://drive.google.com/drive/folders/1r8yebRVWa9_jOL3iPzB8R3L3h5tk1sHm">
-                <img src="05.jpg" alt="Logo 5">
-                <p>Desafios 121 - 150</p>
-            </a>
-        </div>
-        <div class="grid-item">
-            <a href="https://drive.google.com/drive/folders/12IQKS6I50TVQboAtFibfOyRDw_xafKPs">
-                <img src="06.jpg" alt="Logo 6">
-                <p>Desafios 151 - 180</p>
-            </a>
-        </div>
-        <div class="grid-item">
-            <a href="https://drive.google.com/drive/folders/1fvHVIrq_YTc9pd46SK1xYg9GTdPext9I">
-                <img src="07.jpg" alt="Logo 7">
-                <p>Desafios 181 - 210</p>
-            </a>
-        </div>
-        <div class="grid-item">
-            <a href="https://drive.google.com/drive/folders/1UzKtz0zlP7QUEoE9HJ6u3rmx57qftBot">
-                <img src="08.jpg" alt="Logo 8">
-                <p>Desafios 211 - 240</p>
-            </a>
-        </div>
-        <div class="grid-item">
-            <a href="https://drive.google.com/drive/folders/1EdmZ1GR2l55fQlBOESvDWtaCLTQtGaaV">
-                <img src="09.jpg" alt="Logo 9">
-                <p>Desafios 241 - 270</p>
-            </a>
-        </div>
-
-        <div class="grid-item">
-            <a href="https://drive.google.com/drive/folders/1tr7UHRIgtL-Y0mTyVDcutvpgwH8kFRmM">
-                <img src="10.jpg" alt="Logo 10">
-                <p>Desafios 271 - 300</p>
-            </a>
-        </div>
-
-        <div class="grid-item">
-            <a href="https://drive.google.com/drive/folders/1YVemG6AKSOyQAum_sIbchU7oTo_XUnNu">
-                <img src="11.jpg" alt="Logo 11">
-                <p>Desafios 301 - 330</p>
-            </a>
-        </div>
-
-        <div class="grid-item">
-            <a href="https://drive.google.com/drive/folders/1t-IWkveXR5-Q5hSYdhOhqfUbsp8ftsEb">
-                <img src="12.jpg" alt="Logo 12">
-                <p>Desafios 331 - 360</p>
-            </a>
-        </div>
-
-        <div class="grid-item">
-            <a href="https://drive.google.com/drive/folders/1INsTQpGJ7L_G56RbGq0y4n1KMMucM8Nv">
-                <img src="13.jpg" alt="Logo 13">
-                <p>Desafios 361 - 390</p>
-            </a>
-        </div>
-
-        <div class="grid-item">
-            <a href="https://drive.google.com/drive/folders/1WOGB0XuY_k6RkVi_ht1J1FD3mTpWbYeL">
-                <img src="14.jpg" alt="Logo 14">
-                <p>Desafios 391 - 420</p>
-            </a>
-        </div>
-
-            <div class="grid-item">
-            <a href="https://drive.google.com/drive/folders/1RIlXwtsGfdr8bnmS0LVT2XRaVEUOJ6f_">
-                <img src="15.jpg" alt="Logo 15">
-                <p>Desafios 421 - 450</p>
-            </a>
-        </div>
-        
     </div>
 
-    <!-- Rodapé -->
+    <div class="grid">
+        <div class="grid-item">
+            <a href="https://drive.google.com/drive/folders/16d44aRAPinyXfKDgeT29Tc86vc3hhxfD"><img src="01.jpg" alt="Logo 1"><p>V1 – 2019.1</p></a>
+        </div>
+        <div class="grid-item">
+            <a href="https://drive.google.com/drive/folders/1Gny-r6KY3kaHwRN9tmZn59-4D5M-W0D6"><img src="02.jpg" alt="Logo 2"><p>V2 – 2019.2</p></a>
+        </div>
+        <div class="grid-item">
+            <a href="https://drive.google.com/drive/folders/1ztVeq0wSnPVJyqudpHiaV21TFyfUm1nR"><img src="03.jpg" alt="Logo 3"><p>V3 – 2020.1</p></a>
+        </div>
+        <div class="grid-item">
+            <a href="https://drive.google.com/drive/folders/1e12lByNIFJQJHSu3OpKVJ2sEoAIVRgWp"><img src="04.jpg" alt="Logo 4"><p>V4 – 2020.2</p></a>
+        </div>
+        <div class="grid-item">
+            <a href="https://drive.google.com/drive/folders/1sSch7GtHE0quxXtQwsMfeaROWSv-Jssy"><img src="05.jpg" alt="Logo 5"><p>V5 – 2021.1</p></a>
+        </div>
+        <div class="grid-item">
+            <a href="https://drive.google.com/drive/folders/1ru-7Y1nBAt-VWi2bFN1dyIOJT4lnuxYf"><img src="06.jpg" alt="Logo 6"><p>V6 – 2021.2</p></a>
+        </div>
+        <div class="grid-item">
+            <a href="https://drive.google.com/drive/folders/1y_w3sQZxp3MZ4d_Ncp-LCHUzjSGVG8SL"><img src="07.jpg" alt="Logo 7"><p>V7 – 2022.1</p></a>
+        </div>
+        <div class="grid-item">
+            <a href="https://drive.google.com/drive/folders/1db9kyFZyn4il7QgwjePiyfNJimpGD9oP"><img src="08.jpg" alt="Logo 8"><p>V8 – 2022.2</p></a>
+        </div>
+        <div class="grid-item">
+            <a href="https://drive.google.com/drive/folders/1OlwetC0VGocxXqyHJbnXDstdRnOkp-wV"><img src="09.jpg" alt="Logo 9"><p>V9 – 2023.1</p></a>
+        </div>
+        <div class="grid-item">
+            <a href="https://drive.google.com/drive/folders/1Jn7y8pbmn6TyHx5kjX8lIt7IirR4DAJ7"><img src="10.jpg" alt="Logo 10"><p>V10 – 2023.2</p></a>
+        </div>
+        <div class="grid-item">
+            <a href="https://drive.google.com/drive/folders/1RBzCS5rXdfDRr0gm_DirdYoBxbfsLtO0"><img src="11.jpg" alt="Logo 11"><p>V11 – 2024.1</p></a>
+        </div>
+        <div class="grid-item">
+            <a href="https://drive.google.com/drive/folders/1gJoM6e5EzBJnc7gZPclWrpfWRdyK7lur"><img src="12.jpg" alt="Logo 12"><p>V12 – 2024.2</p></a>
+        </div>
+    </div>
+
     <footer>
         <div>
-            <img src="../imagens/logo-sobre.png" alt="Logo sobre" class="large">
+            <img src="../imagens/logo-sobre.png" alt="Logo sobre">
             <button onclick="window.location.href='https://integravel.github.io/sobre'">Mais Informações</button>
         </div>
         <div>
