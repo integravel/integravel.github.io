@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laboratório Integrável</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            max-width: 100vw;
+            overflow-x: hidden;
+        }
+        header {
+            background-color: #000;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            padding: 10px 20px;
+        }
+        header img {
+            height: 40px;
+            margin-right: 20px;
+        }
+        header p {
+            margin: 0;
+        }
+        header a {
+            color: inherit;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+        }
+        .content {
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .content .flex-container {
+            display: flex;
+            align-items: center; /* Centraliza o logo verticalmente */
+            gap: 20px;
+        }
+        .content .flex-container img {
+            max-width: 100px;
+            height: auto;
+            flex-shrink: 0;
+        }
+        .content .text-content {
+            display: flex;
+            flex-direction: column;
+            line-height: 1.4; /* Ajuste fino do espaçamento entre linhas */
+        }
+        .content .text-content h2 {
+            margin: 0; /* Remove margens padrão */
+            padding-bottom: 5px; /* Reduz o espaçamento abaixo do título */
+        }
+        .content .text-content p {
+            margin: 0; /* Remove margens padrão do parágrafo */
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            padding: 10px;
+        }
+        .grid-item {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+        .grid-item:hover {
+            transform: scale(1.02);
+        }
+        .grid-item a {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            color: inherit;
+            width: 100%;
+            height: 100%;
+        }
+        .grid-item img {
+            max-width: 100%;
+            height: auto;
+        }
+        footer {
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+        }
+        footer div {
+            margin: 0 15px;
+        }
+        footer img {
+            height: 40px;
+        }
+        footer button {
+            background-color: #007BFF;
+            color: #fff;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        footer button:hover {
+            background-color: #0056b3;
+        }
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+            .content .flex-container {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <a href="https://integravel.github.io/">
+            <img src="../imagens/logo.png" alt="Logo da página">
+            <p>Laboratório Integrável é um hub para recursos virtuais, abertos, de Ciências e Matemática, de autoria neurodivergente.</p>
+        </a>
+    </header>
+
+    <div class="content">
+        <div class="flex-container">
+            <img src="../imagens/logo1.png" alt="Logo do projeto">
+            <div class="text-content">
+                <h2>Subscribe Meow</h2>
+                <p>Programa de cursos livres, abertos e assíncronos. A aprendizagem é baseada em vídeos, textos de divulgação científica, recursos interativos e listas de exercícios. Participantes que obtiverem um desempenho mínimo de 70% nas avaliações automáticas recebem, diretamente por e-mail, um certificado de conclusão com registro da carga horária.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid">
+        <div class="grid-item">
+            <a href="https://classroom.google.com/c/NzEzMTU2NTA5ODY0?cjc=deqshid"><img src="01.png" alt="Logo 1"><p>Introdução ao Cálculo - 60 horas.</p></a>
+        </div>
+        <div class="grid-item">
+            <a href="https://classroom.google.com/c/NzEzMTU2NTA5ODY0?cjc=deqshid"><img src="02.png" alt="Logo 2"><p>Introdução à linguagem de programação Scratch - 20 horas.</p></a>
+        </div>
+    </div>
+
+    <footer>
+        <div>
+            <img src="../imagens/logo-sobre.png" alt="Logo sobre">
+            <button onclick="window.location.href='https://integravel.github.io/sobre'">Mais Informações</button>
+        </div>
+        <div>
+            <img src="../imagens/logo-contato.png" alt="Logo contato">
+            <button onclick="window.location.href='mailto:integravel@gmail.com'">integravel@gmail.com</button>
+        </div>
+    </footer>
+</body>
+</html>
