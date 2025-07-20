@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arrasta o X</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+        h1 {
+            font-size: 48px;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-template-rows: repeat(3, auto);
+            gap: 10px;
+            margin: 20px 0;
+            width: 100%;
+            max-width: 600px;
+        }
+        .grid div {
+            aspect-ratio: 5 / 3;
+            border: 5px solid #ccc;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #f9f9f9;
+            overflow: hidden;
+            position: relative;
+            transition: border-color 0.3s ease;
+        }
+        .grid div.correct {
+            border-color: green;
+            border-width: 8px;
+        }
+        .grid div.incorrect {
+            border-color: red;
+            border-width: 8px;
+        }
+        .grid div img {
+            width: 100%;
+            height: auto;
+            object-fit: contain;
+            transition: transform 0.2s ease;
+        }
+        button {
+            padding: 20px 40px;
+            font-size: 32px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>Demonstre que se todos os valores de um conjunto forem iguais, a variância é zero.</h1>
+    <div id="grid1" class="grid">
+        <div data-correct="01"></div>
+        <div data-correct="02"></div>
+        <div data-correct="03"></div>
+        <div data-correct="04"></div>
+        <div data-correct="05"></div>
+        <div data-correct="06"></div>
+        <div data-correct="07"></div>
+        <div data-correct="08"></div>
+        <div data-correct="09"></div>
+        <div data-correct="10"></div>
+        <div data-correct="11"></div>
+        <div data-correct="12"></div>
+    </div>
+    <div id="grid2" class="grid"></div>
+    <button id="checkButton">Verificar resposta</button>
+
+    <script>
+        let draggedImage = null;
+        let touchClone = null;
+        let isChecking = false;
+
+        const imagesData = [
+            { src: "01.png", alt: "01" },
+            { src: "02.png", alt: "02" },
+            { src: "03.png", alt: "03" },
+            { src: "04.png", alt: "04" },
+            { src: "05.png", alt: "05" },
+            { src: "06.png", alt: "06" },
+            { src: "07.png", alt: "07" },
+            { src: "08.png", alt: "08" },
+            { src: "09.png", alt: "09" },
+            { src: "10.png", alt: "10" },
+            { src: "11.png", alt: "11" },
+            { src: "12.png", alt: "12" }
+        ];
+
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function renderImages() {
+            const grid2 = document.getElementById('grid2');
+            const shuffledImages = shuffle([...imagesData]);
+
+            shuffledImages.forEach(image => {
+                const cell = document.createElement('div');
+                const img = document.createElement('img');
+                img.src = image.src;
+                img.alt = image.alt;
+                img.draggable = true;
+                cell.appendChild(img);
+                grid2.appendChild(cell);
+            });
+        }
+
+        function setupDragAndDrop() {
+            const allCells = document.querySelectorAll('.grid div');
+
+            allCells.forEach(cell => {
+                cell.addEventListener('dragover', event => event.preventDefault());
+
+                cell.addEventListener('drop', event => {
+                    event.preventDefault();
+                    if (draggedImage && !isChecking) {
+                        const existingImage = cell.querySelector('img');
+                        if (existingImage) {
+                            draggedImage.parentNode.appendChild(existingImage);
+                        }
+                        cell.appendChild(draggedImage);
+                    }
+                });
+
+                cell.addEventListener('touchend', event => {
+                    if (draggedImage && !isChecking) {
+                        const touch = event.changedTouches[0];
+                        const target = document.elementFromPoint(touch.clientX, touch.clientY);
+                        if (target && target.closest('.grid')) {
+                            const grid = target.closest('.grid');
+                            const cells = Array.from(grid.children);
+                            let closestCell = null;
+                            let minDistance = Infinity;
+
+                            cells.forEach(cell => {
+                                const rect = cell.getBoundingClientRect();
+                                const cellCenterX = rect.left + rect.width / 2;
+                                const cellCenterY = rect.top + rect.height / 2;
+                                const distance = Math.hypot(cellCenterX - touch.clientX, cellCenterY - touch.clientY);
+
+                                if (distance < minDistance) {
+                                    minDistance = distance;
+                                    closestCell = cell;
+                                }
+                            });
+
+                            if (closestCell) {
+                                const existingImage = closestCell.querySelector('img');
+                                if (existingImage) {
+                                    draggedImage.parentNode.appendChild(existingImage);
+                                }
+                                closestCell.appendChild(draggedImage);
+                            }
+                        }
+                        draggedImage = null;
+                        if (touchClone) {
+                            touchClone.remove();
+                            touchClone = null;
+                        }
+                    }
+                });
+            });
+
+            const allImages = document.querySelectorAll('img');
+            allImages.forEach(image => {
+                image.addEventListener('dragstart', event => {
+                    if (!isChecking) {
+                        draggedImage = event.target;
+                    }
+                });
+
+                image.addEventListener('dragend', () => {
+                    draggedImage = null;
+                });
+
+                image.addEventListener('touchstart', event => {
+                    if (!isChecking) {
+                        draggedImage = event.target;
+                        const touch = event.touches[0];
+
+                        touchClone = draggedImage.cloneNode(true);
+                        touchClone.style.position = 'absolute';
+                        touchClone.style.pointerEvents = 'none';
+                        touchClone.style.width = `${draggedImage.clientWidth}px`;
+                        document.body.appendChild(touchClone);
+                    }
+                });
+
+                image.addEventListener('touchmove', event => {
+                    event.preventDefault();
+                    if (touchClone) {
+                        const touch = event.touches[0];
+                        touchClone.style.left = `${touch.clientX - touchClone.clientWidth / 2}px`;
+                        touchClone.style.top = `${touch.clientY - touchClone.clientHeight / 2}px`;
+                    }
+                });
+
+                image.addEventListener('touchend', () => {
+                    if (touchClone) {
+                        touchClone.remove();
+                        touchClone = null;
+                    }
+                });
+            });
+        }
+
+        const checkButton = document.getElementById('checkButton');
+        checkButton.addEventListener('click', () => {
+            const grid1Cells = document.querySelectorAll('#grid1 > div');
+
+            grid1Cells.forEach(cell => {
+                const image = cell.querySelector('img');
+                cell.classList.remove('correct', 'incorrect');
+
+                if (image) {
+                    const correctValue = cell.getAttribute('data-correct');
+                    const imageValue = image.getAttribute('alt');
+
+                    if (correctValue === imageValue) {
+                        cell.classList.add('correct');
+                    } else {
+                        cell.classList.add('incorrect');
+                    }
+                }
+            });
+
+            isChecking = true;
+        });
+
+        renderImages();
+        setupDragAndDrop();
+    </script>
+</body>
+</html>
