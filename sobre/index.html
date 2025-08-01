@@ -83,6 +83,37 @@
         footer button:hover {
             background-color: #0056b3;
         }
+
+        .perfil {
+            display: flex;
+            align-items: flex-start;
+            margin-top: 30px;
+            gap: 20px;
+        }
+
+        .foto-perfil {
+            width: 150px;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        .descricao-perfil {
+            flex: 1;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 600px) {
+            .perfil {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+
+            .descricao-perfil {
+                text-align: left;
+            }
+        }
     </style>
 </head>
 <body>
@@ -100,16 +131,23 @@
         <p>O Laboratório Integrável surgiu em 2022 como um endereço de e-mail para organizar discussões sobre pequenos projetos e atividades discentes. Com o crescimento dos projetos e o aumento no fluxo de materiais, consolidou-se como um espaço integrador dedicado ao acesso aberto a recursos virtuais de Ciências e Matemática, valorizando a singularidade de sua autoria neurodivergente.</p>
 
         <h2>Formação Acadêmica (<a href="https://lattes.cnpq.br/6269977294035076">currículo Lattes</a>)</h2>
-        <p></p>
-            Licenciatura em Matemática (USP, 2009 - 2015)</p>
-            Bacharelado em Matemática, interrompido (USP, 2009 - 2017)</p>
-            Especialização em Informática Aplicada à Educação (IFRJ, 2022 - 2023)</p>
-            Mestrado em Ensino de Ciências (UNESP, 2016 - 2018)</p>
-            Doutorado em Ensino de Ciências (UNICAMP, 2019 - 2023)</p>
-            Docente de Ensino Básico, Técnico e Tecnológico (IFRJ, 2022 - atual)</p>
-            Licenciatura em Química, em andamento (IFRJ, 2023 - )</p>
-            Especialização em Gestão Escolar, em andamento (IFFar, 2024 - )</p>
+        <ul>
+            <li>Licenciatura em Matemática (USP, 2009 - 2015)</li>
+            <li>Bacharelado em Matemática, interrompido (USP, 2009 - 2017)</li>
+            <li>Especialização em Informática Aplicada à Educação (IFRJ, 2022 - 2023)</li>
+            <li>Mestrado em Ensino de Ciências (UNESP, 2016 - 2018)</li>
+            <li>Doutorado em Ensino de Ciências (UNICAMP, 2019 - 2023)</li>
+            <li>Docente de Ensino Básico, Técnico e Tecnológico (IFRJ, 2022 - atual)</li>
+            <li>Licenciatura em Química, em andamento (IFRJ, 2023 - )</li>
+            <li>Especialização em Gestão Escolar, em andamento (IFFar, 2024 - )</li>
+        </ul>
 
+        <div class="perfil">
+            <img src="../imagens/foto-perfil.jpg" alt="Foto de perfil" class="foto-perfil">
+            <div class="descricao-perfil">
+                <p>Educador e pesquisador com foco em ensino de Ciências e Matemática, explorando abordagens abertas, acessíveis e interseccionais. Interessado na integração de práticas pedagógicas com tecnologias digitais e na valorização da autoria neurodivergente como potência para inovação educacional.</p>
+            </div>
+        </div>
     </div>
 
     <!-- Rodapé -->
