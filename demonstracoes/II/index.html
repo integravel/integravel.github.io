@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Laboratório Integrável</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      max-width: 100vw;
+      overflow-x: hidden;
+    }
+
+    header {
+      background-color: #000;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      padding: 10px 20px;
+    }
+
+    header img {
+      height: 40px;
+      margin-right: 20px;
+    }
+
+    header p {
+      margin: 0;
+    }
+
+    header a {
+      color: inherit;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+    }
+
+    .content {
+      padding: 20px;
+      max-width: 800px;
+      margin: 0 auto;
+      line-height: 1.6;
+      text-align: justify;
+    }
+
+    .content h2 {
+      color: #333;
+      margin-top: 20px;
+    }
+
+    .content a {
+      color: #007BFF;
+      text-decoration: none;
+    }
+
+    .content a:hover {
+      text-decoration: underline;
+    }
+
+    footer {
+      background-color: #f4f4f4;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      border-top: 1px solid #ddd;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    footer div {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      margin: 0 15px;
+    }
+
+    footer img {
+      height: 40px;
+    }
+
+    footer img.large {
+      height: 50px;
+    }
+
+    footer button {
+      background-color: #007BFF;
+      color: #fff;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    footer button:hover {
+      background-color: #0056b3;
+    }
+
+    .perfil {
+      display: flex;
+      align-items: stretch;
+      margin-top: 30px;
+      gap: 20px;
+    }
+
+    .foto-perfil {
+      height: 100%;
+      object-fit: cover;
+      border-radius: 8px;
+    }
+
+    .descricao-perfil {
+      flex: 1;
+      line-height: 1.6;
+      text-align: justify;
+    }
+
+    @media (max-width: 600px) {
+      .perfil {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+      }
+
+      .descricao-perfil {
+        text-align: justify;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Cabeçalho com link -->
+  <header>
+    <a href="https://integravel.github.io/">
+      <img src="/imagens/logo.png" alt="Logo da página" />
+      <p>Laboratório Integrável é um hub para recursos virtuais, abertos, de Ciências e Matemática, de autoria neurodivergente.</p>
+    </a>
+  </header>
+
+  <!-- Conteúdo principal -->
+  <div class="content">
+    <h2>Geração II</h2>
+    <p>Como a Geração I foi implementada às pressas para atender a demanda de adaptação à pandemia, tão logo quanto começamos a utilizá-la já identificamos algumas carências, como a necessidade de espaços para informar propriedades conhecidas e a possibilidade de deixar blocos parcialmente ou totalmente editáveis, uma vez que os próprios participantes chegaram a editar alguns segmentos utilizando as funções do editor de slides. Assim, a Geração II procurou implementar aquilo que acreditávamos ter faltado na Geração anterior.</p>
+
+    <h2>Coleta de dados</h2>
+
+    <p><b>PERÍODO 1</b></p>
+    <p><b>Instruções dadas aos estudantes - 1:</b><br>
+    Olá pessoal, neste post temos um vídeo me apresentando a vocês e dando algumas diretrizes sobre como serão nossas atividades.<br>
+    Para aqueles que preferirem a leitura, disponibilizo o texto deste vídeo em .pdf.<br>
+    É importante que assistam/leiam com atenção e venham a mim tirar eventuais dúvidas.<br>
+    Vídeo 1 - apresentando o pesquisador<br>
+    Transcrição do vídeo 1</p>
+
+    <p><b>Instruções dadas aos estudantes - 2:</b><br>
+    Olá pessoal, como mencionado no vídeo de apresentação, trabalharemos demonstrações de teoremas dentro da Álgebra Matricial. Assim, neste post temos uma avaliação inicial a ser realizada por vocês.<br>
+    Gostaríamos que ela fosse realizada de forma individual, evitando fazer consultas em anotações, livros, internet ou colegas (seu resultado nesta avaliação não afetará seu desempenho nesta disciplina).<br>
+    Seu formato é um pouco diferente do habitual, nela temos vários slides, cada um referente a uma questão. Resolvam no caderno, à mão, tirem uma foto e então anexem a foto no respectivo slide. Optamos por este modelo, para que vocês possam resolver a avaliação aos poucos e organizar/rever suas respostas.<br>
+    Vocês devem carregar os slides com suas respostas até 23h55 do dia 04/06.<br>
+    Nesta data farei download de todos os slides com as respostas que vocês carregaram na forma de fotos.<br>
+    Reitero para não tentarem digitar as respostas, é bastante trabalhoso, resolvam no caderno, tirem uma foto e subam no respectivo slide.<br>
+    Caso vocês sem querer, apaguem alguma informação importante do enunciado no slide, não se preocupem. Apenas abram a versão "não-editável" da avaliação, pois lá temos a versão original preservada disponível apenas para visualização.<br>
+    Exercícios - 1<br>
+    <p><b>Instruções dadas aos estudantes - 3 (após o término do prazo de entrega dos exercícios):</b><br>
+    Olá pessoal, disponibilizo neste pdf o gabarito referente à avaliação inicial.<br>
+    Peço àqueles que já realizaram a avaliação inicial que leiam-no e verifiquem as diferenças entre as suas respostas, em caso de dúvida por favor entrem em contato para que esclareçamos juntos.<br>
+    Àqueles que ainda não realizaram a avaliação inicial, é desejável que tentem respondê-la antes de lerem o gabarito.<br>
+    Gabarito - Exercícios 1</p>
+    </p>
+
+    <p><b>PERÍODO 2 - GRUPO 1</b></p>
+    <p><b>Instruções dadas aos estudantes - 4:</b><br>
+    Olá, você foi selecionado para o Grupo 1.<br>
+    A atividade dos alunos deste grupo envolverá o uso de blocos para escrever demonstrações.<br>
+    Pedimos que assistam ao vídeo "como usar os blocos para montar demonstrações" e depois tentem resolver os 8 exercícios propostos utilizando os blocos como mostrado no vídeo.<br>
+    Em caso de dúvidas, por favor entrem em contato para que juntos possamos esclarecê-las.<br>
+    É desejável que vocês não compartilhem este vídeo ou exercícios com outros colegas da disciplina.<br>
+    Vídeo 2 - instruções iniciais ao Grupo 1<br>
+    Transcrição do vídeo 2<br>
+    Vídeo 3 - como demonstrar por justaposição<br>
+    Exercícios - 2</p>
+
+    <p><b>PERÍODO 2 - GRUPO A</b></p>
+    <p><b>Instruções dadas aos estudantes - 5:</b><br>
+    Olá, você foi selecionado para o Grupo A.<br>
+    A atividade dos alunos deste grupo envolverá assistir a trechos selecionados das videoaulas do professor Ricardo Miranda Martins (IMECC - UNICAMP) realizando três demonstrações em Álgebra Matricial no curso de Geometria Analítica e Vetores.<br>
+    Após assistirem aos vídeos, pedimos que tentem resolver os 5 exercícios propostos na lista, seguindo a mesma estrutura de respostas que utilizamos na avaliação inicial (ou seja, resolvam no caderno, tirem uma foto e colem no respectivo slide da apresentação/lista de exercícios).<br>
+    Em caso de dúvidas, por favor entrem em contato para que juntos possamos esclarecê-las.<br>
+    É desejável que vocês não compartilhem estes vídeos ou exercícios com outros colegas da disciplina.<br>
+    Vídeo 4 - Instruções iniciais ao grupo A<br>
+    Transcrição do vídeo 4<br>
+    Vídeo 5 - Exemplo de demonstração 1<br>
+    Vídeo 6 - Exemplo de demonstração 2<br>
+    Vídeo 7 - Exemplo de demonstração 3<br>
+    Exercícios - 3</p>
+
+    <p><b>PERÍODO 3 - GRUPO 1</b></p>
+    <p><b>Instruções dadas aos estudantes - 6:</b><br>
+    Olá pessoal, nesta semana teremos nossa avaliação intermediária abordando o tema demonstrações em Álgebra Matricial, ela será bem parecida com a avaliação inicial, na qual vocês tinham vários slides, cada um referente a uma questão e resolviam no caderno, à mão, tiravam uma foto e então anexavam a foto no respectivo slide. Optamos por este modelo, para que vocês possam resolver a avaliação aos poucos e organizar/rever suas respostas. Mas atenção, vocês perceberão que nesta avaliação temos duas questões em um formato um pouco diferente. Elas envolvem demonstrar rearranjando ou duplicando aqueles blocos coloridos apresentados no tópico anterior deste curso.<br>
+    Vídeo 8 - Instruções ao Grupo 1<br>
+    Transcrição do vídeo 8<br>
+    Exercícios - 4<br>
+    Instruções dadas aos estudantes - 8 (após o término do prazo de entrega dos exercícios):<br>
+    Olá pessoal, disponibilizo neste pdf o gabarito referente à avaliação intermediária.<br>
+    Peço àqueles que já realizaram a avaliação intermediária que leiam-no e verifiquem as diferenças entre as suas respostas, em caso de dúvida por favor entrem em contato para que esclareçamos juntos.<br>
+    Àqueles que ainda não realizaram a avaliação intermediária, é desejável que tentem respondê-la antes de lerem o gabarito.<br>
+    Gabarito - Exercícios - 4</p>
+
+    <p><b>Instruções dadas aos estudantes - 8 (após o término do prazo de entrega dos exercícios):</b><br>
+    Olá pessoal, nesta semana teremos nossa avaliação intermediária abordando o tema demonstrações em Álgebra Matricial, ela será bem parecida com a avaliação inicial, na qual vocês tinham vários slides, cada um referente a uma questão e resolviam no caderno, à mão, tiravam uma foto e então anexavam a foto no respectivo slide. Optamos por este modelo, para que vocês possam resolver a avaliação aos poucos e organizar/rever suas respostas. Mas atenção, vocês perceberão que nesta avaliação temos duas questões em um formato um pouco diferente. Para estas, pedimos que assistam ao vídeo "como usar os blocos para montar demonstrações" e depois tentem resolver estas questões em específico utilizando os blocos como mostrado no vídeo.<br>
+    Vídeo 9 - Instruções ao Grupo A<br>
+    Transcrição do vídeo 9<br>
+    Vídeo 3 - como demonstrar por justaposição<br>
+    Exercícios - 4<br>
+    Instruções dadas aos estudantes - 8 (após o término do prazo de entrega dos exercícios):<br>
+    Olá pessoal, disponibilizo neste pdf o gabarito referente à avaliação intermediária.<br>
+    Peço àqueles que já realizaram a avaliação intermediária que leiam-no e verifiquem as diferenças entre as suas respostas, em caso de dúvida por favor entrem em contato para que esclareçamos juntos.<br>
+    Àqueles que ainda não realizaram a avaliação intermediária, é desejável que tentem respondê-la antes de lerem o gabarito.<br>
+    Gabarito - Exercícios - 4</p>
+
+    <p><b>PERÍODO 3 - GRUPO A</b></p>
+    <p><b>Instruções dadas aos estudantes - 7:</b><br>
+    Olá pessoal, nesta semana teremos nossa avaliação intermediária abordando o tema demonstrações em Álgebra Matricial, ela será bem parecida com a avaliação inicial, na qual vocês tinham vários slides, cada um referente a uma questão e resolviam no caderno, à mão, tiravam uma foto e então anexavam a foto no respectivo slide. Optamos por este modelo, para que vocês possam resolver a avaliação aos poucos e organizar/rever suas respostas. Mas atenção, vocês perceberão que nesta avaliação temos duas questões em um formato um pouco diferente. Para estas, pedimos que assistam ao vídeo "como usar os blocos para montar demonstrações" e depois tentem resolver estas questões em específico utilizando os blocos como mostrado no vídeo.<br>
+    Vídeo 9 - Instruções ao Grupo A<br>
+    Transcrição do vídeo 9<br>
+    Vídeo 3 - como demonstrar por justaposição<br>
+    Exercícios - 4</p>
+
+    <p><b>Instruções dadas aos estudantes - 8 (após o término do prazo de entrega dos exercícios):</b><br>
+    Olá pessoal, disponibilizo neste pdf o gabarito referente à avaliação intermediária.<br>
+    Peço àqueles que já realizaram a avaliação intermediária que leiam-no e verifiquem as diferenças entre as suas respostas, em caso de dúvida por favor entrem em contato para que esclareçamos juntos.<br>
+    Àqueles que ainda não realizaram a avaliação intermediária, é desejável que tentem respondê-la antes de lerem o gabarito.<br>
+    Gabarito - Exercícios - 4</p>
+
+    <p><b>PERÍODO 4 E 5 - GRUPO 1</b></p>
+    <p><b>Instruções dadas aos estudantes - 9:</b><br>
+    Assista/leia esta apresentação para entender como prosseguiremos neste tópico.<br>
+    Vídeo 10 - Instruções ao Grupo 1<br>
+    Transcrição do vídeo 10<br>
+    Vídeo 5 - Exemplo de demonstração 1<br>
+    Vídeo 6 - Exemplo de demonstração 2<br>
+    Vídeo 7 - Exemplo de demonstração 3<br>
+    Exercícios - 3<br>
+    Exercícios - 5</p>
+
+    <p><b>Instruções dadas aos estudantes - 10 (após o término do prazo de entrega dos exercícios):</b><br>
+    Olá pessoal, disponibilizo neste pdf o gabarito referente à avaliação final e aos exercícios de demonstração (apresentados na forma de blocos para demonstrar).<br>
+    Peço àqueles que já realizaram a avaliação final e resolvido os exercícios (sejam aqueles disponíveis no tópico 10 ou 12), que leiam estes gabaritos e verifiquem as diferenças entre as suas respostas, em caso de dúvida por favor entrem em contato para que esclareçamos juntos.<br>
+    Àqueles que ainda não realizaram a avaliação final ou os exercícios, é desejável que tentem responder antes de lerem os gabaritos.<br>
+    Gabarito - Exercícios - 2<br>
+    Gabarito - Exercícios - 5</p>
+
+    <p><b>PERÍODO 4 E 5 - GRUPO A</b></p>
+    <p><b>Instruções dadas aos estudantes - 9:</b><br>
+    Instruções dadas aos estudantes - 9:<br>
+    Assista/leia esta apresentação para entender como prosseguiremos neste tópico.<br>
+    Vídeo 11 - Instruções ao Grupo A<br>
+    Transcrição do vídeo 11<br>
+    Vídeo 3 - como demonstrar por justaposição<br>
+    Exercícios - 2<br>
+    Exercícios - 5</p>
+
+    <p><b>Instruções dadas aos estudantes - 10 (após o término do prazo de entrega dos exercícios):</b><br>
+    Olá pessoal, disponibilizo neste pdf o gabarito referente à avaliação final e aos exercícios de demonstração (apresentados na forma de blocos para demonstrar).<br>
+    Peço àqueles que já realizaram a avaliação final e resolvido os exercícios (sejam aqueles disponíveis no tópico 10 ou 12), que leiam estes gabaritos e verifiquem as diferenças entre as suas respostas, em caso de dúvida por favor entrem em contato para que esclareçamos juntos.<br>
+    Àqueles que ainda não realizaram a avaliação final ou os exercícios, é desejável que tentem responder antes de lerem os gabaritos.<br>
+    Gabarito - Exercícios - 2<br>
+    Gabarito - Exercícios - 5</p>
+
+    <p><b>DADOS BRUTOS</b><br>
+    Nos dados brutos disponibilizados, as respostas dos 40 participantes que consentiram com a pesquisa encontram-se organizadas em pastas numeradas de P-01 até P-40. Em cada pasta temos as respostas dos Exercícios em .pdf, sem identificação e enumerados da seguinte forma:<br>
+    Exercícios - 1: 01 até 06<br>
+    Exercícios - 2 (Grupo 1): 07 até 14<br>
+    Exercícios - 3 (Grupo A): 15 até 19<br>
+    Exercícios - 4: 20 até 25<br>
+    Exercícios - 3 (Grupo 1): 26 até 30<br>
+    Exercícios - 2 (Grupo A): 31 até 38<br>
+    Exercícios - 5: 39 até 44</p>
+  </div>
+
+  <!-- Rodapé -->
+  <footer>
+    <div>
+      <img src="/imagens/logo-sobre.png" alt="Logo sobre" class="large" />
+      <button onclick="window.location.href='https://integravel.github.io/sobre'">Mais Informações</button>
+    </div>
+    <div>
+      <img src="/imagens/logo-contato.png" alt="Logo contato" />
+      <button onclick="window.location.href='mailto:integravel@gmail.com'">integravel@gmail.com</button>
+    </div>
+  </footer>
+</body>
+</html>
