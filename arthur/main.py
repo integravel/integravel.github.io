@@ -183,3 +183,30 @@ def executar(event=None):
         "\n\n——— Eliminados ———\n" +
         "\n".join(elim)
     )
+
+def teste_aleatorio(event=None):
+    import random
+    
+    # Valores possíveis
+    colors = ["incolor", "amarelo", "laranja"]
+    rg_values = ["+", "-"]
+    ox_values = ["+", "-"]
+    baca_values = ["nao precipita", "ppt branco", "ppt laranja", "ppt marrom"]
+    acetic_values = ["soluvel", "insolvel"]
+    ag_values = ["ppt branco", "ppt amarelo", "ppt preto"]
+    hno3_values = ["soluvel", "insolvel"]
+
+    # Preencher selects
+    js.document.getElementById("color").value = random.choice(colors)
+    js.document.getElementById("rg").value = random.choice(rg_values)
+    js.document.getElementById("ox").value = random.choice(ox_values)
+    js.document.getElementById("baca").value = random.choice(baca_values)
+    js.document.getElementById("acetic").value = random.choice(acetic_values)
+    js.document.getElementById("ag").value = random.choice(ag_values)
+    js.document.getElementById("hno3").value = random.choice(hno3_values)
+
+    # pH aleatório
+    js.document.getElementById("ph").value = str(round(random.uniform(0, 14), 1))
+
+    # Executar normalmente
+    executar()
