@@ -135,8 +135,15 @@
     </div>
 </div>
 
-<!-- Conexão com Python -->
-<py-script src="main.py"></py-script>
+<!-- CONFIGURAÇÃO DO PYSCRIPT (OBRIGATÓRIA) -->
+<py-config>
+    paths = ["main.py"]
+</py-config>
+
+<!-- CHAMADA DO PYTHON -->
+<py-script>
+from main import executar
+</py-script>
 
 </body>
 </html>
