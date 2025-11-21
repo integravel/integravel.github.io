@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Identificador de Ânions (Web)</title>
+
+    <!-- PyScript -->
+    <link rel="stylesheet" href="https://pyscript.net/latest/pyscript.css" />
+    <script defer src="https://pyscript.net/latest/pyscript.js"></script>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<h1>Identificador de Ânions – Versão Web</h1>
+
+<div class="form">
+    <label>Cor da solução:</label>
+    <input id="color">
+
+    <label>pH:</label>
+    <input id="ph">
+
+    <label>RG (+ ou -):</label>
+    <input id="rg">
+
+   <label>OX (+ ou -):</label>
+    <input id="ox">
+
+    <label>Precipitação Ba/Ca:</label>
+    <input id="baca">
+
+    <label>Ácido acético:</label>
+    <input id="acetic">
+
+    <label>Ag⁺:</label>
+    <input id="ag">
+
+    <label>HNO₃:</label>
+    <input id="hno3">
+
+    <button id="run-btn" py-onClick="executar">Identificar</button>
+</div>
+
+<div class="results">
+    <h2>Ânions possíveis:</h2>
+    <pre id="possiveis"></pre>
+
+    <h2>Explicações & Eliminações:</h2>
+    <pre id="eliminacoes"></pre>
+</div>
+
+<py-script src="main.py"></py-script>
+
+</body>
+</html>
