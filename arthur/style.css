@@ -1,45 +1,12 @@
-body {
-    font-family: Arial, sans-serif;
-    margin: 20px;
-    background: #fafafa;
-}
-
-h1 {
-    text-align: center;
-}
-
-.form {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-    max-width: 600px;
-    margin: auto;
-}
-
-.form label {
-    font-weight: bold;
-}
-
-.form input {
-    padding: 6px;
-}
-
-button {
-    grid-column: span 2;
-    padding: 10px;
-    font-size: 16px;
-}
-
-.results {
-    max-width: 650px;
-    margin: 30px auto;
-    background: white;
-    padding: 20px;
-    border-radius: 10px;
-}
-
-pre {
-    background: #efefef;
+.result-box {
+    background: #f8f9fa;
     padding: 15px;
+    border-radius: 8px;
+    min-height: 80px;
+    font-size: 1rem;
     white-space: pre-wrap;
+}
+
+body {
+    background: linear-gradient(to bottom right, #ffffff, #e9ecef);
 }
