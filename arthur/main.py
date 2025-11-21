@@ -1,6 +1,6 @@
-import js
 import unicodedata
-
+from pyscript import Element
+import random
 
 # ---------------------------------------------------------
 # DICIONÁRIO COMPLETO DOS ÂNIONS
@@ -72,7 +72,7 @@ ANION_DATA = {
 
 
 # ---------------------------------------------------------
-# FUNÇÕES DE NORMALIZAÇÃO E REGRAS
+# FUNÇÕES AUXILIARES
 # ---------------------------------------------------------
 def normalize(s):
     if not s:
@@ -83,6 +83,9 @@ def normalize(s):
     return s
 
 
+# ---------------------------------------------------------
+# APLICAÇÃO DAS REGRAS
+# ---------------------------------------------------------
 def aplicar_regras(user_input):
 
     eliminados = set()
@@ -97,7 +100,7 @@ def aplicar_regras(user_input):
     hno3 = normalize(user_input["hno3"])
     ph_str = normalize(user_input["ph"])
 
-    # --------------- pH ----------------------------------
+    # -------- pH -------------------------------------------------
     if ph_str:
         try:
             ph_user = float(ph_str)
@@ -113,42 +116,42 @@ def aplicar_regras(user_input):
         except:
             pass
 
-    # --------------- Cor ----------------------------------
+    # -------- Cor ------------------------------------------------
     if color:
         for a, p in ANION_DATA.items():
-            if p["color"] != color and p["color"] in ["amarelo", "laranja", "incolor"]:
+            if p["color"] != color:
                 eliminados.add(a)
         explicacoes.append(f"Cor: {color}")
 
-    # --------------- RG + OX ------------------------------
+    # -------- RG + OX -------------------------------------------
     if rg and ox:
         for a, p in ANION_DATA.items():
             if p["rg"] != rg or p["ox"] != ox:
                 eliminados.add(a)
         explicacoes.append(f"Redox: RG={rg} OX={ox}")
 
-    # --------------- Ba/Ca --------------------------------
+    # -------- Ba/Ca ---------------------------------------------
     if baca:
         for a, p in ANION_DATA.items():
-            if baca not in p["baca"]:
+            if baca != p["baca"]:
                 eliminados.add(a)
         explicacoes.append(f"Ba/Ca: {baca}")
 
-    # --------------- Acético ------------------------------
+    # -------- Acético -------------------------------------------
     if acetic:
         for a, p in ANION_DATA.items():
             if acetic != p["acetic"]:
                 eliminados.add(a)
         explicacoes.append(f"Acético: {acetic}")
 
-    # --------------- Ag+ ----------------------------------
+    # -------- Ag+ ------------------------------------------------
     if ag:
         for a, p in ANION_DATA.items():
-            if ag not in p["ag"]:
+            if ag != p["ag"]:
                 eliminados.add(a)
         explicacoes.append(f"Ag⁺: {ag}")
 
-    # --------------- HNO₃ ---------------------------------
+    # -------- HNO3 ----------------------------------------------
     if hno3:
         for a, p in ANION_DATA.items():
             if hno3 != p["hno3"]:
@@ -160,53 +163,44 @@ def aplicar_regras(user_input):
 
 
 # ---------------------------------------------------------
-# FUNÇÃO CHAMADA PELO BOTÃO NA PÁGINA WEB
+# FUNÇÃO PRINCIPAL (PYSCRIPT)
 # ---------------------------------------------------------
 def executar(event=None):
 
     user_input = {
-        "color": js.document.getElementById("color").value,
-        "ph": js.document.getElementById("ph").value,
-        "rg": js.document.getElementById("rg").value,
-        "ox": js.document.getElementById("ox").value,
-        "baca": js.document.getElementById("baca").value,
-        "acetic": js.document.getElementById("acetic").value,
-        "ag": js.document.getElementById("ag").value,
-        "hno3": js.document.getElementById("hno3").value,
+        "color": Element("color").value,
+        "ph": Element("ph").value,
+        "rg": Element("rg").value,
+        "ox": Element("ox").value,
+        "baca": Element("baca").value,
+        "acetic": Element("acetic").value,
+        "ag": Element("ag").value,
+        "hno3": Element("hno3").value,
     }
 
     possiveis, exp, elim = aplicar_regras(user_input)
 
-    js.document.getElementById("possiveis").innerText = "\n".join(possiveis)
-    js.document.getElementById("eliminacoes").innerText = (
+    Element("possiveis").write("\n".join(possiveis))
+
+    Element("eliminacoes").write(
         "\n".join(exp) +
         "\n\n——— Eliminados ———\n" +
         "\n".join(elim)
     )
 
+
+# ---------------------------------------------------------
+# TESTE ALEATÓRIO
+# ---------------------------------------------------------
 def teste_aleatorio(event=None):
-    import random
-    
-    # Valores possíveis
-    colors = ["incolor", "amarelo", "laranja"]
-    rg_values = ["+", "-"]
-    ox_values = ["+", "-"]
-    baca_values = ["nao precipita", "ppt branco", "ppt laranja", "ppt marrom"]
-    acetic_values = ["soluvel", "insolvel"]
-    ag_values = ["ppt branco", "ppt amarelo", "ppt preto"]
-    hno3_values = ["soluvel", "insolvel"]
 
-    # Preencher selects
-    js.document.getElementById("color").value = random.choice(colors)
-    js.document.getElementById("rg").value = random.choice(rg_values)
-    js.document.getElementById("ox").value = random.choice(ox_values)
-    js.document.getElementById("baca").value = random.choice(baca_values)
-    js.document.getElementById("acetic").value = random.choice(acetic_values)
-    js.document.getElementById("ag").value = random.choice(ag_values)
-    js.document.getElementById("hno3").value = random.choice(hno3_values)
+    Element("color").element.value = random.choice(["incolor", "amarelo", "laranja"])
+    Element("rg").element.value = random.choice(["+", "-"])
+    Element("ox").element.value = random.choice(["+", "-"])
+    Element("baca").element.value = random.choice(["nao precipita", "ppt branco", "ppt laranja", "ppt marrom"])
+    Element("acetic").element.value = random.choice(["soluvel", "insoluvel"])
+    Element("ag").element.value = random.choice(["ppt branco", "ppt amarelo", "ppt preto"])
+    Element("hno3").element.value = random.choice(["soluvel", "insoluvel"])
+    Element("ph").element.value = str(round(random.uniform(0, 14), 1))
 
-    # pH aleatório
-    js.document.getElementById("ph").value = str(round(random.uniform(0, 14), 1))
-
-    # Executar normalmente
     executar()
