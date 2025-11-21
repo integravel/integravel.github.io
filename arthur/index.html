@@ -117,13 +117,13 @@
                         </div>
 
                         <!-- BOTÕES -->
-<button py-click="executar" class="btn btn-primary w-100 mt-4 py-2 fs-5">
-    🔍 Identificar Ânions
-</button>
+                        <button py-click="executar" class="btn btn-primary w-100 mt-4 py-2 fs-5">
+                            🔍 Identificar Ânions
+                        </button>
 
-<button py-click="teste_aleatorio" class="btn btn-secondary w-100 mt-2 py-2 fs-5">
-    🎲 Testar Aleatoriamente
-</button>
+                        <button py-click="teste_aleatorio" class="btn btn-secondary w-100 mt-2 py-2 fs-5">
+                            🎲 Testar Aleatoriamente
+                        </button>
 
                     </div>
                 </div>
@@ -144,12 +144,12 @@
         </div>
     </div>
 
-    <!-- CONFIGURAÇÃO OBRIGATÓRIA DO PYSCRIPT -->
-<py-config>
-    fetch = ["main.py"]
-</py-config>
+    <!-- CONFIGURAÇÃO DO PYSCRIPT -->
+    <py-config>
+        fetch = ["main.py"]
+    </py-config>
 
-    <!-- IMPORTAÇÃO DO SEU ARQUIVO PYTHON -->
+    <!-- IMPORTAÇÃO DO ARQUIVO PYTHON -->
     <py-script>
 from main import executar, teste_aleatorio
     </py-script>
