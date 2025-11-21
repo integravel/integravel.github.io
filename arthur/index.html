@@ -1,12 +1,3 @@
-<!-- index.html e main.py combinados neste documento por limitação de um único arquivo.
-Copie e salve como arquivos separados no GitHub Pages:
-- index.html
-- main.py
--->
-
-<!-- =============================== -->
-<!--            index.html           -->
-<!-- =============================== -->
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -85,7 +76,7 @@ Copie e salve como arquivos separados no GitHub Pages:
                             <label class="form-label">Precipitação Ba/Ca</label>
                             <select id="baca" class="form-select">
                                 <option value="">(Selecione)</option>
-                                <option>não precipita</option>
+                                <option>nao precipita</option>
                                 <option>ppt branco</option>
                                 <option>ppt laranja</option>
                                 <option>ppt marrom</option>
@@ -96,8 +87,8 @@ Copie e salve como arquivos separados no GitHub Pages:
                             <label class="form-label">Ácido acético</label>
                             <select id="acetic" class="form-select">
                                 <option value="">(Selecione)</option>
-                                <option>solúvel</option>
-                                <option>insolúvel</option>
+                                <option>soluvel</option>
+                                <option>insolvel</option>
                             </select>
                         </div>
 
@@ -115,8 +106,8 @@ Copie e salve como arquivos separados no GitHub Pages:
                             <label class="form-label">Ácido nítrico</label>
                             <select id="hno3" class="form-select">
                                 <option value="">(Selecione)</option>
-                                <option>solúvel</option>
-                                <option>insolúvel</option>
+                                <option>soluvel</option>
+                                <option>insolvel</option>
                             </select>
                         </div>
 
@@ -144,35 +135,8 @@ Copie e salve como arquivos separados no GitHub Pages:
     </div>
 </div>
 
-<!-- Ligação com o arquivo Python -->
-<py-script src="arthur/main.py"></py-script>
+<!-- Conexão com Python -->
+<py-script src="main.py"></py-script>
 
 </body>
 </html>
-
-
-
-<!-- =============================== -->
-<!--             main.py             -->
-<!-- =============================== -->
-<!-- Salve este conteúdo como main.py -->
-<script type="text/plain" id="python-main">
-import js
-import unicodedata
-
-ANION_DATA = {
-    "CN⁻": {"color":"incolor","rg":"+","ox":"-","baca":"nao precipita","acetic":"soluvel","ag":"ppt branco","hno3":"insoluvel","pH":11},
-    "S²⁻": {"color":"incolor","rg":"+","ox":"-","baca":"nao precipita","acetic":"soluvel","ag":"ppt preto","hno3":"insoluvel","pH":13},
-    "SO₃²⁻": {"color":"incolor","rg":"+","ox":"-","baca":"ppt branco","acetic":"insoluvel","ag":"ppt branco","hno3":"soluvel","pH":9},
-    "S₂O₃²⁻": {"color":"incolor","rg":"+","ox":"-","baca":"nao precipita","acetic":"soluvel","ag":"ppt preto","hno3":"insoluvel","pH":9},
-    "NO₂⁻": {"color":"incolor","rg":"+","ox":"+","baca":"nao precipita","acetic":"soluvel","ag":"ppt preto","hno3":"insoluvel","pH":8},
-    "ClO⁻": {"color":"incolor","rg":"-","ox":"+","baca":"nao precipita","acetic":"soluvel","ag":"ppt preto","hno3":"insoluvel","pH":None},
-    "CO₃²⁻": {"color":"incolor","rg":"-","ox":"-","baca":"ppt branco","acetic":"soluvel","ag":"ppt branco","hno3":"soluvel","pH":12},
-    "HCO₃⁻": {"color":"incolor","rg":"-","ox":"-","baca":"ppt branco","acetic":"soluvel","ag":"ppt branco","hno3":"soluvel","pH":8},
-    "F⁻": {"color":"incolor","rg":"-","ox":"-","baca":"ppt branco","acetic":"insoluvel","ag":"ppt branco","hno3":"soluvel","pH":8.5},
-    "C₂O₄²⁻": {"color":"incolor","rg":"+","ox":"-","baca":"ppt branco","acetic":"insoluvel","ag":"ppt branco","hno3":"soluvel","pH":9},
-    "PO₄³⁻": {"color":"incolor","rg":"-","ox":"-","baca":"ppt branco","acetic":"soluvel","ag":"ppt amarelo","hno3":"soluvel","pH":12},
-    "CrO₄²⁻": {"color":"amarelo","rg":"-","ox":"+","baca":"ppt amarelo","acetic":"insoluvel","ag":"ppt marrom","hno3":"insolvel","pH":8},
-    "Cr₂O₇²⁻": {"color":"laranja","rg":"-","ox":"+","baca":"ppt amarelo","acetic":"insoluvel","ag":"ppt marrom","hno3":"insolvel","pH":4},
-    "SO₄²⁻": {"color":"incolor","rg":"-","ox":"-","baca":"ppt branco","acetic":"insolvel","ag":"nao precipita","hno3":"soluvel","pH":7},
-    "BO₂⁻": {"color":"incolor","rg":"-","ox":"-","baca":"ppt branco","acetic":"soluvel","ag":"
