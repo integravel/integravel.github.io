@@ -1,12 +1,98 @@
-.result-box {
-    background: #f8f9fa;
-    padding: 15px;
-    border-radius: 8px;
-    min-height: 80px;
-    font-size: 1rem;
-    white-space: pre-wrap;
-}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Identificador de Ânions</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>Identificador de Ânions</h1>
+    <p class="sub">Versão Web ― baseada nos scripts IDA + IDAE</p>
 
-body {
-    background: linear-gradient(to bottom right, #ffffff, #e9ecef);
-}
+    <div class="form">
+
+      <div class="field">
+        <label>Cor da solução</label>
+        <select id="color">
+          <option value="">--</option>
+          <option>incolor</option>
+          <option>amarelo</option>
+          <option>laranja</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>pH</label>
+        <input id="ph" type="text" placeholder="ex: 7, 8, 11..." />
+      </div>
+
+      <div class="field">
+        <label>Redutor (RG)</label>
+        <select id="rg">
+          <option value="">--</option>
+          <option>+</option>
+          <option>-</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Oxidante (OX)</label>
+        <select id="ox">
+          <option value="">--</option>
+          <option>+</option>
+          <option>-</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Precipitação com Ba/Ca</label>
+        <select id="baca">
+          <option value="">--</option>
+          <option>nao precipita</option>
+          <option>ppt branco</option>
+          <option>ppt laranja</option>
+          <option>ppt marrom</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Reação com ácido acético</label>
+        <select id="acetic">
+          <option value="">--</option>
+          <option>soluvel</option>
+          <option>insoluvel</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Precipitação com Ag⁺</label>
+        <select id="ag">
+          <option value="">--</option>
+          <option>ppt branco</option>
+          <option>ppt amarelo</option>
+          <option>ppt preto</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Reação com HNO₃</label>
+        <select id="hno3">
+          <option value="">--</option>
+          <option>soluvel</option>
+          <option>insoluvel</option>
+        </select>
+      </div>
+
+      <button id="btn">Identificar</button>
+      <button id="clear">Limpar</button>
+
+    </div>
+
+    <div id="results"></div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
