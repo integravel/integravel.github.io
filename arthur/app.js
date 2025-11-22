@@ -173,9 +173,22 @@ function getInput(){
 }
 
 function renderResultado({restantes, eliminados, explicacoes}){
-  document.getElementById('restantes-list').innerHTML = restantes.length?restantes.join(', '):'Nenhum';
-  document.getElementById('eliminados-list').innerHTML = eliminados.length?eliminados.join(', '):'Nenhum';
-  document.getElementById('explicacoes-list').innerHTML = explicacoes.length? ('<ul>' + explicacoes.map(e=>`<li>${e}</li>`).join('') + '</ul>') : '—';
+  const rEl = document.getElementById('restantes-list');
+  const eEl = document.getElementById('eliminados-list');
+  const xEl = document.getElementById('explicacoes-list');
+
+  rEl.innerHTML = restosToHtml(restantes, '✨');
+  eEl.innerHTML = restosToHtml(eliminados, '❌');
+  xEl.innerHTML = explicacoes.length? ('<ul>' + explicacoes.map(e=>`<li>${e}</li>`).join('') + '</ul>') : '—';
+  // subtle glow animation
+  [rEl.parentElement, eEl.parentElement, xEl.parentElement].forEach(card=>{
+    card.animate([{transform:'translateY(-4px)', boxShadow:'0 20px 40px rgba(15,15,30,0.06)'},{transform:'translateY(0)'}], {duration:300, easing:'ease-out'});
+  });
+}
+
+function restosToHtml(arr, emoji){
+  if (!arr || arr.length===0) return 'Nenhum';
+  return '<div style="display:flex;flex-wrap:wrap;gap:8px;">' + arr.map(a=>`<div style="background:linear-gradient(180deg,#fff,#fff);border-radius:10px;padding:6px 10px;border:1px solid #f3e8f2;font-weight:700">${emoji} ${a}</div>`).join('') + '</div>';
 }
 
 function limpar(){
