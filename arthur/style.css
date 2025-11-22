@@ -1,33 +1,42 @@
 body {
   margin: 0;
   background: #fff6fb;
-  font-family: Inter, Arial, sans-serif;
+  font-family: Inter, Arial;
 }
 
 .container {
   width: 100%;
-  max-width: 520px;
-  padding: 14px;
+  max-width: 900px;
   margin: auto;
+  padding: 12px;
 }
 
 .header h1 {
+  margin: 0 0 18px 0;
   text-align: center;
-  margin-bottom: 20px;
 }
 
 .card {
-  background: #fff;
+  background: white;
   border-radius: 14px;
   border: 1px solid #ffd9eb;
-  padding: 16px;
+  padding: 18px;
   margin-bottom: 16px;
 }
 
-.column {
+/* MOBILE — sempre 1 COLUNA */
+.grid {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 14px;
+}
+
+/* DESKTOP — 2 COLUNAS */
+@media (min-width: 750px) {
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
 }
 
 label {
@@ -35,28 +44,36 @@ label {
   margin-bottom: 4px;
 }
 
-input, select {
-  padding: 12px;
+input,
+select {
   width: 100%;
+  padding: 12px;
+  font-size: 16px;
   border-radius: 10px;
   border: 1px solid #e5c9df;
-  font-size: 16px;
 }
 
 .actions {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  margin-top: 18px;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+/* Desktop deixa botões lado a lado */
+@media (min-width: 750px) {
+  .actions {
+    flex-direction: row;
+  }
 }
 
 .btn {
-  padding: 14px;
+  padding: 12px;
   border-radius: 10px;
+  font-size: 16px;
+  font-weight: bold;
   background: #ffd1e8;
   border: none;
-  font-size: 17px;
-  font-weight: bold;
 }
 
 .btn.primary {
@@ -64,16 +81,14 @@ input, select {
   color: white;
 }
 
-.list {
-  background: #fff;
-  border: 1px solid #f0dcec;
-  padding: 12px;
-  border-radius: 10px;
-  min-height: 40px;
+.results .card {
+  margin-bottom: 16px;
 }
 
-.footer {
-  text-align: center;
-  color: #777;
-  margin-top: 20px;
+.list {
+  padding: 10px;
+  background: #fff;
+  border-radius: 10px;
+  min-height: 40px;
+  border: 1px solid #f0dcec;
 }
