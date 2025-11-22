@@ -1,160 +1,98 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
-    <meta charset="UTF-8" />
-    <title>Identificador de Ânions – Web</title>
-
-    <!-- Bootstrap -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
-
-    <!-- PyScript -->
-    <link rel="stylesheet" href="https://pyscript.net/latest/pyscript.css" />
-    <script defer src="https://pyscript.net/latest/pyscript.js"></script>
-
-    <style>
-        body {
-            background: linear-gradient(to bottom right, #ffffff, #e9ecef);
-        }
-        .result-box {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 8px;
-            min-height: 80px;
-            white-space: pre-wrap;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Identificador de Ânions</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
+<body>
+  <div class="container">
+    <h1>Identificador de Ânions</h1>
+    <p class="sub">Versão Web ― baseada nos scripts IDA + IDAE</p>
 
-<body class="bg-light">
-<div class="container py-5">
-    <h1 class="text-center mb-4 display-5 fw-bold">🔬 Identificador de Ânions</h1>
-    <p class="text-center text-muted mb-5">Versão Web – PyScript</p>
+    <div class="form">
 
-    <div class="row justify-content-center">
-        <div class="col-lg-8">
+      <div class="field">
+        <label>Cor da solução</label>
+        <select id="color">
+          <option value="">--</option>
+          <option>incolor</option>
+          <option>amarelo</option>
+          <option>laranja</option>
+        </select>
+      </div>
 
-            <div class="card shadow-lg border-0 mb-4">
-                <div class="card-body p-4">
-                    <h4 class="mb-3 fw-semibold">Características observadas</h4>
+      <div class="field">
+        <label>pH</label>
+        <input id="ph" type="text" placeholder="ex: 7, 8, 11..." />
+      </div>
 
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <label class="form-label">Cor da solução</label>
-                            <select id="color" class="form-select">
-                                <option value="">(Selecione)</option>
-                                <option>incolor</option>
-                                <option>amarelo</option>
-                                <option>laranja</option>
-                            </select>
-                        </div>
+      <div class="field">
+        <label>Redutor (RG)</label>
+        <select id="rg">
+          <option value="">--</option>
+          <option>+</option>
+          <option>-</option>
+        </select>
+      </div>
 
-                        <div class="col-md-6">
-                            <label class="form-label">pH</label>
-                            <input id="ph" class="form-control" placeholder="0 a 14" />
-                        </div>
+      <div class="field">
+        <label>Oxidante (OX)</label>
+        <select id="ox">
+          <option value="">--</option>
+          <option>+</option>
+          <option>-</option>
+        </select>
+      </div>
 
-                        <div class="col-md-6">
-                            <label class="form-label">RG</label>
-                            <select id="rg" class="form-select">
-                                <option value="">(Selecione)</option>
-                                <option>+</option>
-                                <option>-</option>
-                            </select>
-                        </div>
+      <div class="field">
+        <label>Precipitação com Ba/Ca</label>
+        <select id="baca">
+          <option value="">--</option>
+          <option>nao precipita</option>
+          <option>ppt branco</option>
+          <option>ppt laranja</option>
+          <option>ppt marrom</option>
+        </select>
+      </div>
 
-                        <div class="col-md-6">
-                            <label class="form-label">OX</label>
-                            <select id="ox" class="form-select">
-                                <option value="">(Selecione)</option>
-                                <option>+</option>
-                                <option>-</option>
-                            </select>
-                        </div>
+      <div class="field">
+        <label>Reação com ácido acético</label>
+        <select id="acetic">
+          <option value="">--</option>
+          <option>soluvel</option>
+          <option>insoluvel</option>
+        </select>
+      </div>
 
-                        <div class="col-md-6">
-                            <label class="form-label">Precipitação Ba/Ca</label>
-                            <select id="baca" class="form-select">
-                                <option value="">(Selecione)</option>
-                                <option>nao precipita</option>
-                                <option>ppt branco</option>
-                                <option>ppt laranja</option>
-                                <option>ppt marrom</option>
-                            </select>
-                        </div>
+      <div class="field">
+        <label>Precipitação com Ag⁺</label>
+        <select id="ag">
+          <option value="">--</option>
+          <option>ppt branco</option>
+          <option>ppt amarelo</option>
+          <option>ppt preto</option>
+        </select>
+      </div>
 
-                        <div class="col-md-6">
-                            <label class="form-label">Ácido acético</label>
-                            <select id="acetic" class="form-select">
-                                <option value="">(Selecione)</option>
-                                <option>soluvel</option>
-                                <option>insolvel</option>
-                            </select>
-                        </div>
+      <div class="field">
+        <label>Reação com HNO₃</label>
+        <select id="hno3">
+          <option value="">--</option>
+          <option>soluvel</option>
+          <option>insoluvel</option>
+        </select>
+      </div>
 
-                        <div class="col-md-6">
-                            <label class="form-label">Ag+</label>
-                            <select id="ag" class="form-select">
-                                <option value="">(Selecione)</option>
-                                <option>ppt branco</option>
-                                <option>ppt amarelo</option>
-                                <option>ppt preto</option>
-                            </select>
-                        </div>
+      <button id="btn">Identificar</button>
+      <button id="clear">Limpar</button>
 
-                        <div class="col-md-6">
-                            <label class="form-label">Ácido nítrico</label>
-                            <select id="hno3" class="form-select">
-                                <option value="">(Selecione)</option>
-                                <option>soluvel</option>
-                                <option>insolvel</option>
-                            </select>
-                        </div>
-
-                    </div>
-
-                    <!-- BOTÕES -->
-                    <button id="btnExecutar" class="btn btn-primary w-100 mt-4 py-2 fs-5">
-                        🔍 Identificar Ânions
-                    </button>
-
-                    <button id="btnTeste" class="btn btn-secondary w-100 mt-2 py-2 fs-5">
-                        🎲 Testar Aleatoriamente
-                    </button>
-
-                </div>
-            </div>
-
-            <div class="card shadow border-0 mb-5">
-                <div class="card-body p-4">
-                    <h4 class="fw-semibold">Ânions possíveis</h4>
-                    <pre id="possiveis" class="result-box"></pre>
-
-                    <hr />
-
-                    <h4 class="fw-semibold">Explicações & Eliminações</h4>
-                    <pre id="eliminacoes" class="result-box"></pre>
-                </div>
-            </div>
-
-        </div>
     </div>
-</div>
 
-<!-- CONFIGURAÇÃO DO PYSCRIPT -->
-<py-config>
-    packages = []
-    paths = ["main.py"]
-</py-config>
+    <div id="results"></div>
+  </div>
 
-<!-- REGISTRO DOS EVENTOS (PARTE CRÍTICA QUE FALTAVA!) -->
-<py-script>
-from main import executar, teste_aleatorio
-from js import document
-
-# Associar eventos manualmente
-document.getElementById("btnExecutar").addEventListener("click", executar)
-document.getElementById("btnTeste").addEventListener("click", teste_aleatorio)
-</py-script>
-
+  <script src="script.js"></script>
 </body>
 </html>
