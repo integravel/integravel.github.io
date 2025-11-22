@@ -1,64 +1,45 @@
-
-:root{
-  --bg:#fff6fb;
-  --card:#fff;
-  --muted:#7d7d8a;
-  --accent:#ff92c9;
-  --accent-2:#ffd1e8;
-  --shadow: 0 8px 28px rgba(15,15,30,0.06);
-  --radius:16px;
-  --glass: rgba(255,255,255,0.7);
-  font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+/* FORÇA VISIBILIDADE PERFEITA EM CELULARES */
+body {
+  margin: 0;
+  padding: 16px !important;     /* aumenta o respiro no topo */
+  background: linear-gradient(180deg, #fff6fb, #f9fbff);
 }
 
-*{box-sizing:border-box}
-html,body{height:100%}
-body{
-  margin:0;
-  background: linear-gradient(180deg, #fff6fb 0%, #f9fbff 100%);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-family:var(--font);
-  color:#1b1b1f;
-  padding:28px;
+.container {
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  padding-top: 10px;            /* garante que o topo nunca corte */
 }
 
-.container{
-  width:100%;max-width:1000px;
-}
+/* Melhor grid para mobile */
+@media(max-width: 600px) {
+  .form-card .grid {
+    grid-template-columns: 1fr !important;
+    gap: 14px;
+  }
 
-.header{margin-bottom:14px}
-h1{margin:0;font-size:26px;line-height:1.1}
-.subtitle{color:var(--muted);margin-top:6px}
+  .header h1 {
+    font-size: 22px;            /* evita quebra estranha */
+    text-align: center;
+    margin-bottom: 20px;
+  }
 
-.card{background:var(--card);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow);margin-bottom:14px;border:1px solid rgba(255,255,255,0.6)}
+  .card {
+    padding: 18px !important;   /* aumenta área clicável */
+  }
 
-.form-card .grid{
-  display:grid;
-  grid-template-columns:repeat(2,minmax(0,1fr));
-  gap:12px;
-}
+  input, select {
+    font-size: 16px !important; /* evita zoom automático no iPhone */
+    padding: 12px !important;
+  }
 
-.field label{display:block;font-size:13px;color:#333;margin-bottom:6px}
-input[type=number],select{
-  width:100%;padding:12px;border-radius:12px;border:1px solid #f0e9f3;background:linear-gradient(180deg,#fff,#fff);font-size:14px;
-  outline:none;transition:box-shadow .18s, transform .12s;
-}
-input[type=number]:focus, select:focus{box-shadow:0 6px 18px rgba(190,120,180,0.12);transform:translateY(-1px)}
+  .actions {
+    flex-direction: column;
+  }
 
-.actions{display:flex;gap:10px;margin-top:14px}
-.btn{padding:10px 14px;border-radius:12px;border:1px solid transparent;background:transparent;cursor:pointer;font-weight:700;background:var(--accent-2);box-shadow:0 6px 18px rgba(255,146,201,0.08)}
-.btn.primary{background:linear-gradient(90deg,var(--accent),#ff7ab3);color:#fff;box-shadow:0 10px 30px rgba(255,146,201,0.18);border:1px solid rgba(255,255,255,0.2);}
-.btn:hover{transform:translateY(-3px)}
-
-.results{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:8px}
-.result-card h3{margin:0 0 8px 0;font-size:15px}
-.list{min-height:64px;padding:12px;border-radius:12px;background:linear-gradient(180deg,#fff,#fff);border:1px solid #f4eef6;color:#333; font-size:14px;display:flex;align-items:center}
-
-.footer{text-align:center;color:var(--muted);margin-top:12px;font-size:13px}
-
-@media (max-width:880px){
-  .form-card .grid{grid-template-columns:1fr}
-  .results{grid-template-columns:1fr}
+  .btn {
+    width: 100%;
+    text-align: center;
+  }
 }
