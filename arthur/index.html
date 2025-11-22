@@ -3,21 +3,21 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Identificador de Ânions — Web</title>
+  <title>Identificador de Ânions — Kawaii</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <main class="container">
     <header class="header">
-      <h1>Identificador de Ânions</h1>
-      <p class="subtitle">Versão web — lógica unificada (IDA + IDAE). Teste com valores reais ou gere uma configuração aleatória.</p>
+      <h1>🧪✨ Identificador de Ânions</h1>
+      <p class="subtitle">Versão web — estilo kawaii: leve, clean e fofinho. Use "Gerar aleatório" para testar.</p>
     </header>
 
     <section class="card form-card">
       <div class="grid">
         <div class="field">
-          <label for="color">Cor da solução</label>
-          <select id="color">
+          <label for="color">🌈 Cor da solução</label>
+          <select id="color" aria-label="Cor da solução">
             <option value="">—</option>
             <option value="incolor">incolor</option>
             <option value="amarelo">amarelo</option>
@@ -26,13 +26,13 @@
         </div>
 
         <div class="field">
-          <label for="ph">pH (0–14 ou vazio)</label>
-          <input id="ph" type="number" step="0.1" min="0" max="14" placeholder="ex: 7.0">
+          <label for="ph">⚖️ pH (0–14)</label>
+          <input id="ph" type="number" step="0.1" min="0" max="14" placeholder="ex: 7.0" aria-label="pH">
         </div>
 
         <div class="field">
-          <label for="rg">Redutor (RG)</label>
-          <select id="rg">
+          <label for="rg">🔁 Redutor (RG)</label>
+          <select id="rg" aria-label="Redutor">
             <option value="">—</option>
             <option value="+">+</option>
             <option value="-">-</option>
@@ -40,8 +40,8 @@
         </div>
 
         <div class="field">
-          <label for="ox">Oxidante (OX)</label>
-          <select id="ox">
+          <label for="ox">⚡ Oxidante (OX)</label>
+          <select id="ox" aria-label="Oxidante">
             <option value="">—</option>
             <option value="+">+</option>
             <option value="-">-</option>
@@ -49,8 +49,8 @@
         </div>
 
         <div class="field">
-          <label for="baca">Precipitação com Ba/Ca (Ba/Ca)</label>
-          <select id="baca">
+          <label for="baca">🧂 Precipitação com Ba/Ca</label>
+          <select id="baca" aria-label="Precipitação com Ba/Ca">
             <option value="">—</option>
             <option value="nao precipita">não precipita</option>
             <option value="ppt branco">ppt branco</option>
@@ -60,8 +60,8 @@
         </div>
 
         <div class="field">
-          <label for="acetic">Adição de ácido acético</label>
-          <select id="acetic">
+          <label for="acetic">🍋 Ácido acético</label>
+          <select id="acetic" aria-label="Acido acético">
             <option value="">—</option>
             <option value="soluvel">solúvel</option>
             <option value="insoluvel">insolúvel</option>
@@ -69,8 +69,8 @@
         </div>
 
         <div class="field">
-          <label for="ag">Precipitação com Ag⁺</label>
-          <select id="ag">
+          <label for="ag">🧲 Precipitação com Ag⁺</label>
+          <select id="ag" aria-label="Precipitação com Ag+">
             <option value="">—</option>
             <option value="nao precipita">não precipita</option>
             <option value="ppt branco">ppt branco</option>
@@ -80,8 +80,8 @@
         </div>
 
         <div class="field">
-          <label for="hno3">Adição de ácido nítrico (HNO₃)</label>
-          <select id="hno3">
+          <label for="hno3">🧴 Ácido nítrico (HNO₃)</label>
+          <select id="hno3" aria-label="HNO3">
             <option value="">—</option>
             <option value="soluvel">solúvel</option>
             <option value="insoluvel">insolúvel</option>
@@ -90,31 +90,31 @@
       </div>
 
       <div class="actions">
-        <button id="btn-identify" class="btn primary">Identificar</button>
-        <button id="btn-random" class="btn">Gerar aleatório</button>
-        <button id="btn-clear" class="btn">Limpar</button>
+        <button id="btn-identify" class="btn primary">🔎 Identificar</button>
+        <button id="btn-random" class="btn">🎲 Gerar aleatório</button>
+        <button id="btn-clear" class="btn">🧹 Limpar</button>
       </div>
     </section>
 
     <section id="results" class="results">
       <div class="card result-card" id="card-restantes">
-        <h3>Ânions possíveis</h3>
+        <h3>✨ Ânions possíveis</h3>
         <div id="restantes-list" class="list">—</div>
       </div>
 
       <div class="card result-card" id="card-eliminados">
-        <h3>Ânions eliminados</h3>
+        <h3>❌ Ânions eliminados</h3>
         <div id="eliminados-list" class="list">—</div>
       </div>
 
       <div class="card result-card" id="card-explicacoes">
-        <h3>Justificativas</h3>
+        <h3>📝 Justificativas</h3>
         <div id="explicacoes-list" class="list">—</div>
       </div>
     </section>
 
     <footer class="footer">
-      <small>Gerado automaticamente — pronto para hospedar no GitHub Pages. Contém a lógica ported do projeto Python.</small>
+      <small>Feito com ❤️ — pronto para GitHub Pages</small>
     </footer>
   </main>
 
