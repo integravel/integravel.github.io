@@ -1,10 +1,10 @@
-Identificador de Ânions — Web
-===========================
+Identificador de Ânions — Kawaii (Web)
+======================================
 
 Arquivos gerados:
-- index.html : página principal
-- style.css  : estilos
-- app.js     : lógica JS (portada do IDA + IDAE em Python)
+- index.html : página principal (kawaii theme)
+- style.css  : estilos (pastel, fofo, clean)
+- app.js     : lógica JS (portada do IDA + IDAE)
 - README.md  : este arquivo
 
 Instruções:
@@ -13,6 +13,6 @@ Instruções:
 3. Use os controles para inserir parâmetros e clique em 'Identificar'.
 4. Use 'Gerar aleatório' para testar rapidamente várias configurações.
 
-Observações:
-- A lógica foi ported do código Python que você enviou. Ela tenta reproduzir o comportamento das funções de eliminação e identificação.
-- Se quiser ajustes na lógica ou no layout (paleta, fontes, textos), me diga e eu atualizo.
+Notas:
+- Visual atualizado para um estilo "kawaii": cores pastéis, bordas arredondadas, emojis e micro-animações.
+- Se quiser que eu publique direto no GitHub Pages ou ajuste ícones/cores, diga qual paleta prefere.
