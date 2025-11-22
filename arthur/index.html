@@ -1,154 +1,123 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Identificador de Ânions</title>
-
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f5f5f5;
-      display: flex;
-      justify-content: center;
-      padding: 30px;
-    }
-    .container {
-      background: white;
-      padding: 25px;
-      width: 100%;
-      max-width: 700px;
-      border-radius: 12px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-    }
-    h1 { text-align: center; margin-bottom: 20px; }
-
-    .form-group {
-      margin-bottom: 15px;
-    }
-    label { font-weight: bold; display: block; margin-bottom: 5px; }
-    input { width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #aaa; }
-
-    .buttons {
-      display: flex;
-      justify-content: space-between;
-      margin-top: 20px;
-    }
-    button {
-      padding: 10px 22px;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 1rem;
-      font-weight: bold;
-      color: white;
-      transition: 0.25s;
-    }
-    #btn-identify { background-color: #007bff; }
-    #btn-identify:hover { background-color: #0056b3; }
-
-    #btn-random { background-color: #28a745; }
-    #btn-random:hover { background-color: #1e7e34; }
-
-    .card {
-      background: #fafafa;
-      padding: 15px;
-      margin-top: 20px;
-      border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-    }
-  </style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Identificador de Ânions — Web</title>
+  <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
-  <div class="container">
-    <h1>Identificador de Ânions</h1>
+  <main class="container">
+    <header class="header">
+      <h1>Identificador de Ânions</h1>
+      <p class="subtitle">Versão web — lógica unificada (IDA + IDAE). Teste com valores reais ou gere uma configuração aleatória.</p>
+    </header>
 
-    <!-- FORM -->
-    <div id="form">
-      <div class="form-group">
-        <label>Cor da solução</label>
-        <input type="text" id="color" placeholder="ex: incolor">
-      </div>
-
-      <div class="form-group">
-        <label>pH</label>
-        <input type="text" id="ph" placeholder="ex: 7, 12, 4...">
-      </div>
-
-      <div class="form-group">
-        <label>Redutor (RG)</label>
-        <input type="text" id="rg" placeholder="+ ou -">
-      </div>
-
-      <div class="form-group">
-        <label>Oxidante (OX)</label>
-        <input type="text" id="ox" placeholder="+ ou -">
-      </div>
-
-      <div class="form-group">
-        <label>Precipitação com Ba/Ca</label>
-        <input type="text" id="baca" placeholder="ppt branco, não precipita...">
-      </div>
-
-      <div class="form-group">
-        <label>Ácido acético</label>
-        <input type="text" id="acetic" placeholder="solúvel ou insolúvel">
-      </div>
-
-      <div class="form-group">
-        <label>Ag⁺</label>
-        <input type="text" id="ag" placeholder="ppt branco, ppt amarelo...">
-      </div>
-
-      <div class="form-group">
-        <label>Ácido nítrico</label>
-        <input type="text" id="hno3" placeholder="solúvel ou insolúvel">
-      </div>
-
-      <div class="buttons">
-        <button id="btn-identify">Identificar</button>
-        <button id="btn-random">Gerar configuração aleatória</button>
-      </div>
-    </div>
-
-    <!-- RESULTADOS -->
-    <div id="results"></div>
-  </div>
-
-
-  <script>
-    // Valores possíveis para gerar dados aleatórios
-    const randomOptions = {
-      color: ["incolor", "amarelo", "laranja"],
-      rg: ["+", "-"],
-      ox: ["+", "-"],
-      baca: ["ppt branco", "ppt laranja", "ppt marrom", "não precipita"],
-      acetic: ["solúvel", "insolúvel"],
-      ag: ["ppt branco", "ppt amarelo", "ppt preto", "não precipita"],
-      hno3: ["solúvel", "insolúvel"],
-      ph: ["2", "4", "7", "8", "9", "11", "12", "13", "não foi possível medir"]
-    };
-
-    // Botão de configuração aleatória
-    document.getElementById("btn-random").addEventListener("click", () => {
-      for (const key in randomOptions) {
-        const valueList = randomOptions[key];
-        const selected = valueList[Math.floor(Math.random() * valueList.length)];
-        document.getElementById(key).value = selected;
-      }
-    });
-
-    // Botão "Identificar"
-    document.getElementById("btn-identify").addEventListener("click", () => {
-      document.getElementById("results").innerHTML = `
-        <div class="card">
-          <h3>Processando...</h3>
-          <p>A lógica completa ainda será adicionada.</p>
+    <section class="card form-card">
+      <div class="grid">
+        <div class="field">
+          <label for="color">Cor da solução</label>
+          <select id="color">
+            <option value="">—</option>
+            <option value="incolor">incolor</option>
+            <option value="amarelo">amarelo</option>
+            <option value="laranja">laranja</option>
+          </select>
         </div>
-      `;
-    });
-  </script>
 
+        <div class="field">
+          <label for="ph">pH (0–14 ou vazio)</label>
+          <input id="ph" type="number" step="0.1" min="0" max="14" placeholder="ex: 7.0">
+        </div>
+
+        <div class="field">
+          <label for="rg">Redutor (RG)</label>
+          <select id="rg">
+            <option value="">—</option>
+            <option value="+">+</option>
+            <option value="-">-</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="ox">Oxidante (OX)</label>
+          <select id="ox">
+            <option value="">—</option>
+            <option value="+">+</option>
+            <option value="-">-</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="baca">Precipitação com Ba/Ca (Ba/Ca)</label>
+          <select id="baca">
+            <option value="">—</option>
+            <option value="nao precipita">não precipita</option>
+            <option value="ppt branco">ppt branco</option>
+            <option value="ppt marrom">ppt marrom</option>
+            <option value="ppt laranja">ppt laranja</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="acetic">Adição de ácido acético</label>
+          <select id="acetic">
+            <option value="">—</option>
+            <option value="soluvel">solúvel</option>
+            <option value="insoluvel">insolúvel</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="ag">Precipitação com Ag⁺</label>
+          <select id="ag">
+            <option value="">—</option>
+            <option value="nao precipita">não precipita</option>
+            <option value="ppt branco">ppt branco</option>
+            <option value="ppt preto">ppt preto</option>
+            <option value="ppt amarelo">ppt amarelo</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="hno3">Adição de ácido nítrico (HNO₃)</label>
+          <select id="hno3">
+            <option value="">—</option>
+            <option value="soluvel">solúvel</option>
+            <option value="insoluvel">insolúvel</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button id="btn-identify" class="btn primary">Identificar</button>
+        <button id="btn-random" class="btn">Gerar aleatório</button>
+        <button id="btn-clear" class="btn">Limpar</button>
+      </div>
+    </section>
+
+    <section id="results" class="results">
+      <div class="card result-card" id="card-restantes">
+        <h3>Ânions possíveis</h3>
+        <div id="restantes-list" class="list">—</div>
+      </div>
+
+      <div class="card result-card" id="card-eliminados">
+        <h3>Ânions eliminados</h3>
+        <div id="eliminados-list" class="list">—</div>
+      </div>
+
+      <div class="card result-card" id="card-explicacoes">
+        <h3>Justificativas</h3>
+        <div id="explicacoes-list" class="list">—</div>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <small>Gerado automaticamente — pronto para hospedar no GitHub Pages. Contém a lógica ported do projeto Python.</small>
+    </footer>
+  </main>
+
+  <script src="app.js"></script>
 </body>
 </html>
