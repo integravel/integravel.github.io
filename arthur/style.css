@@ -1,42 +1,33 @@
 body {
   margin: 0;
   background: #fff6fb;
-  font-family: Inter, Arial;
+  font-family: Inter, Arial, sans-serif;
 }
 
 .container {
   width: 100%;
-  max-width: 900px;
+  max-width: 520px;
+  padding: 14px;
   margin: auto;
-  padding: 12px;
 }
 
 .header h1 {
-  margin: 0 0 18px 0;
   text-align: center;
+  margin-bottom: 20px;
 }
 
 .card {
-  background: white;
+  background: #fff;
   border-radius: 14px;
   border: 1px solid #ffd9eb;
-  padding: 18px;
+  padding: 16px;
   margin-bottom: 16px;
 }
 
-/* MOBILE — sempre 1 COLUNA */
-.grid {
+.column {
   display: flex;
   flex-direction: column;
-  gap: 14px;
-}
-
-/* DESKTOP — 2 COLUNAS */
-@media (min-width: 750px) {
-  .grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-  }
+  gap: 16px;
 }
 
 label {
@@ -44,36 +35,28 @@ label {
   margin-bottom: 4px;
 }
 
-input,
-select {
-  width: 100%;
+input, select {
   padding: 12px;
-  font-size: 16px;
+  width: 100%;
   border-radius: 10px;
   border: 1px solid #e5c9df;
+  font-size: 16px;
 }
 
 .actions {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  margin-top: 16px;
-}
-
-/* Desktop deixa botões lado a lado */
-@media (min-width: 750px) {
-  .actions {
-    flex-direction: row;
-  }
+  gap: 12px;
+  margin-top: 18px;
 }
 
 .btn {
-  padding: 12px;
+  padding: 14px;
   border-radius: 10px;
-  font-size: 16px;
-  font-weight: bold;
   background: #ffd1e8;
   border: none;
+  font-size: 17px;
+  font-weight: bold;
 }
 
 .btn.primary {
@@ -81,14 +64,16 @@ select {
   color: white;
 }
 
-.results .card {
-  margin-bottom: 16px;
-}
-
 .list {
-  padding: 10px;
   background: #fff;
+  border: 1px solid #f0dcec;
+  padding: 12px;
   border-radius: 10px;
   min-height: 40px;
-  border: 1px solid #f0dcec;
+}
+
+.footer {
+  text-align: center;
+  color: #777;
+  margin-top: 20px;
 }
