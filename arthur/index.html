@@ -3,30 +3,33 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Identificador de Ânions — One Column</title>
+  <title>Identificador de Ânions</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+
   <main class="container">
+
     <header class="header">
       <h1>🧪✨ Identificador de Ânions</h1>
     </header>
 
+    <!-- FORMULÁRIO PRINCIPAL -->
     <section class="card form-card">
-      <div class="column">
 
+      <div class="grid">
         <div class="field">
           <label for="color">🌈 Cor da solução</label>
           <select id="color">
             <option value="">—</option>
-            <option>incolor</option>
-            <option>amarelo</option>
-            <option>laranja</option>
+            <option value="incolor">incolor</option>
+            <option value="amarelo">amarelo</option>
+            <option value="laranja">laranja</option>
           </select>
         </div>
 
         <div class="field">
-          <label for="ph">⚖️ pH</label>
+          <label for="ph">⚖️ pH (0–14)</label>
           <input id="ph" type="number" step="0.1" min="0" max="14">
         </div>
 
@@ -34,8 +37,8 @@
           <label for="rg">🔁 Redutor (RG)</label>
           <select id="rg">
             <option value="">—</option>
-            <option>+</option>
-            <option>-</option>
+            <option value="+">+</option>
+            <option value="-">-</option>
           </select>
         </div>
 
@@ -43,19 +46,19 @@
           <label for="ox">⚡ Oxidante (OX)</label>
           <select id="ox">
             <option value="">—</option>
-            <option>+</option>
-            <option>-</option>
+            <option value="+">+</option>
+            <option value="-">-</option>
           </select>
         </div>
 
         <div class="field">
-          <label for="baca">🧂 Ba/Ca</label>
+          <label for="baca">🧂 Precipitação com Ba/Ca</label>
           <select id="baca">
             <option value="">—</option>
-            <option>nao precipita</option>
-            <option>ppt branco</option>
-            <option>ppt marrom</option>
-            <option>ppt laranja</option>
+            <option value="nao precipita">não precipita</option>
+            <option value="ppt branco">ppt branco</option>
+            <option value="ppt marrom">ppt marrom</option>
+            <option value="ppt laranja">ppt laranja</option>
           </select>
         </div>
 
@@ -63,8 +66,8 @@
           <label for="acetic">🍋 Ácido acético</label>
           <select id="acetic">
             <option value="">—</option>
-            <option>soluvel</option>
-            <option>insoluvel</option>
+            <option value="soluvel">solúvel</option>
+            <option value="insoluvel">insolúvel</option>
           </select>
         </div>
 
@@ -72,10 +75,10 @@
           <label for="ag">🧲 Ag⁺</label>
           <select id="ag">
             <option value="">—</option>
-            <option>nao precipita</option>
-            <option>ppt branco</option>
-            <option>ppt preto</option>
-            <option>ppt amarelo</option>
+            <option value="nao precipita">não precipita</option>
+            <option value="ppt branco">ppt branco</option>
+            <option value="ppt preto">ppt preto</option>
+            <option value="ppt amarelo">ppt amarelo</option>
           </select>
         </div>
 
@@ -83,35 +86,39 @@
           <label for="hno3">🧴 Ácido nítrico (HNO₃)</label>
           <select id="hno3">
             <option value="">—</option>
-            <option>soluvel</option>
-            <option>insoluvel</option>
+            <option value="soluvel">solúvel</option>
+            <option value="insoluvel">insolúvel</option>
           </select>
         </div>
-
       </div>
 
+      <!-- BOTÕES -->
       <div class="actions">
         <button id="btn-identify" class="btn primary">🔎 Identificar</button>
         <button id="btn-random" class="btn">🎲 Aleatório</button>
         <button id="btn-clear" class="btn">🧹 Limpar</button>
       </div>
+
     </section>
 
+    <!-- RESULTADOS -->
     <section id="results" class="results">
-      <div class="card">
+
+      <div class="card result-card">
         <h3>✨ Ânions possíveis</h3>
         <div id="restantes-list" class="list">—</div>
       </div>
 
-      <div class="card">
+      <div class="card result-card">
         <h3>❌ Eliminados</h3>
         <div id="eliminados-list" class="list">—</div>
       </div>
 
-      <div class="card">
+      <div class="card result-card">
         <h3>📝 Justificativas</h3>
         <div id="explicacoes-list" class="list">—</div>
       </div>
+
     </section>
 
     <footer class="footer">
@@ -121,5 +128,6 @@
   </main>
 
   <script src="app.js"></script>
+
 </body>
 </html>
