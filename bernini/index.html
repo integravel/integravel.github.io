@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gerador de Horários - IF</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <h1>Gerador de Horários</h1>
+
+  <div class="container">
+    <h2>Docentes</h2>
+    <input id="profName" placeholder="Nome do docente" />
+    <button onclick="addProf()">Adicionar</button>
+    <ul id="profList"></ul>
+
+    <h2>Laboratórios</h2>
+    <input id="labName" placeholder="Nome do laboratório" />
+    <button onclick="addLab()">Adicionar</button>
+    <ul id="labList"></ul>
+
+    <h2>Disciplinas</h2>
+    <input id="discName" placeholder="Disciplina" />
+    <input id="discProf" placeholder="Docente responsável" />
+    <input id="discLab" placeholder="Laboratório exigido" />
+    <button onclick="addDisc()">Adicionar</button>
+    <ul id="discList"></ul>
+
+    <h2>Gerar soluções</h2>
+    <button onclick="generateSolutions()">Gerar</button>
+    <pre id="solutions"></pre>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
