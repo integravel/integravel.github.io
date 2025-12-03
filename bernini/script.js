@@ -1,176 +1,133 @@
 /* =======================  BANCO DE DADOS LOCAL  ======================= */
 
 let bd = JSON.parse(localStorage.getItem("horarios_bd")) || {
-    blocos: [], // Parte 0 - intervalos de horários
+    blocos: [],
     cursos: [],
     disciplinas: [],
     laboratorios: [],
     docentes: [],
-    solutions: [] // soluções encontradas
+    solutions: []
 };
 
-function salvarBD() { localStorage.setItem("horarios_bd", JSON.stringify(bd)); }
-function resetarBD() { 
-    if(confirm("Tem certeza que deseja apagar tudo?")) {
-        localStorage.removeItem("horarios_bd"); 
-        location.reload();
-    }
-}
+function salvarBD(){ localStorage.setItem("horarios_bd", JSON.stringify(bd)); }
+function resetarBD(){ if(confirm("APAGAR TUDO?")){localStorage.removeItem("horarios_bd"); location.reload();}}
 
-/* =======================   PARTE 0 – BLOCOS HORÁRIOS   ======================= */
+/* ============================ BLOCOS ============================= */
 
 function addBloco(){
-    const inicio = document.getElementById("bloco_ini").value;
-    const fim = document.getElementById("bloco_fim").value;
-    if(inicio && fim){
-        bd.blocos.push({inicio,fim});
-        salvarBD();
-        listarBlocos();
-    }
+    let i=document.getElementById("bloco_ini").value;
+    let f=document.getElementById("bloco_fim").value;
+    if(i&&f){ bd.blocos.push({inicio:i,fim:f}); salvarBD(); listarBlocos(); }
 }
 function listarBlocos(){
-    let box=document.getElementById("lista_blocos");
-    box.innerHTML="";
-    bd.blocos.forEach((b,i)=> box.innerHTML+=`<div>${b.inicio} - ${b.fim}</div>`);
+    let box=document.getElementById("lista_blocos"); box.innerHTML="";
+    bd.blocos.forEach(b=> box.innerHTML+=`<div>${b.inicio} - ${b.fim}</div>`);
 }
 
-/* ==================    PARTE 1 – CADASTRO DE CURSOS   ================== */
+/* ============================ CURSOS ============================= */
 
 function addCurso(){
-    const nome=document.getElementById("curso_nome").value;
-    const periodo=document.getElementById("curso_periodo").value;
-    const sabado=document.getElementById("curso_sab").checked;
-    const sem=document.getElementById("curso_sem").value;
+    let nome=document.getElementById("curso_nome").value;
+    let periodo=document.getElementById("curso_periodo").value;
+    let sab=document.getElementById("curso_sab").checked;
+    let sem=document.getElementById("curso_sem").value;
 
-    if(nome !="" && sem>0){
-        bd.cursos.push({id:Date.now(),nome,periodo,sabado,semestres:sem});
-        salvarBD();
-        listarCursos();
+    if(nome && sem>0){
+        bd.cursos.push({id:Date.now(), nome, periodo, sabado:sab, semestres:sem});
+        salvarBD(); listarCursos();
     }
 }
-
 function listarCursos(){
-    let area=document.getElementById("lista_cursos");
-    area.innerHTML="";
-    bd.cursos.forEach(c=>{
-        area.innerHTML+=`<div><b>${c.nome}</b> | ${c.periodo} | ${c.semestres} semestres</div>`;
-    });
+    let area=document.getElementById("lista_cursos"); area.innerHTML="";
+    bd.cursos.forEach(c=> area.innerHTML+=`<div><b>${c.nome}</b> | ${c.periodo} (${c.semestres} sem)</div>`);
 }
 
-/* =========== PARTE 2 – DISCIPLINAS POR CURSO E SEMESTRE ================= */
+/* ============================ DISCIPLINAS ============================= */
 
 function gerarDisciplinasForm(){
-    let select=document.getElementById("selCursoDis");
-    select.innerHTML="<option value=''>Selecione</option>";
-    bd.cursos.forEach(c=> select.innerHTML+=`<option value=${c.id}>${c.nome}</option>`);
+    let sel=document.getElementById("selCursoDis");
+    sel.innerHTML="<option value=''>-- selecione --</option>";
+    bd.cursos.forEach(c=> sel.innerHTML+=`<option value="${c.id}">${c.nome}</option>`);
 }
 
 function cursoSelecionado(){
-    const id=document.getElementById("selCursoDis").value;
+    let id=document.getElementById("selCursoDis").value;
     let c=bd.cursos.find(x=>x.id==id);
-
     let area=document.getElementById("areaDisciplinas");
     area.innerHTML="";
 
     if(!c) return;
+
     for(let s=1;s<=c.semestres;s++){
         area.innerHTML+=`
         <h3>Semestre ${s}</h3>
         <input id="dis_${s}" placeholder="Nome da disciplina"><br>
-        Carga horário (em blocos de 2h): <input id="ch_${s}" type="number" min="1"><br>
-        Necessita laboratório? 
+        CH (blocos de 2h): <input id="ch_${s}" type="number" min="1"><br>
+        Laboratório: 
         <select id="lab_${s}">
             <option value="">Não</option>
-            ${bd.laboratorios.map(l=>`<option>${l.nome}</option>`).join("")}
+            ${bd.laboratorios.map(l=> `<option>${l.nome}</option>`).join("")}
         </select>
-        <button onclick="addDisciplina(${id},${s})">Adicionar disciplina</button><br><br>`;
+        <button onclick="addDisciplina(${c.id},${s})">Adicionar</button><br><br>`;
     }
-
     listarDisciplinas();
 }
 
-function addDisciplina(idCurso,sem){
+function addDisciplina(id,sem){
     let nome=document.getElementById("dis_"+sem).value;
     let ch=document.getElementById("ch_"+sem).value;
     let lab=document.getElementById("lab_"+sem).value;
 
-    if(nome!="" && ch>0){
-        bd.disciplinas.push({id:Date.now(),curso:idCurso,semestre:sem,nome,ch:ch,lab:lab});
-        salvarBD();
-        listarDisciplinas();
+    if(nome && ch>0){
+        bd.disciplinas.push({id:Date.now(),curso:id,semestre:sem,nome,ch,lab});
+        salvarBD(); listarDisciplinas();
     }
 }
-
 function listarDisciplinas(){
-    let box=document.getElementById("listaDis");
-    box.innerHTML="";
+    let box=document.getElementById("listaDis"); box.innerHTML="";
     bd.disciplinas.forEach(d=>{
         let c=bd.cursos.find(x=>x.id==d.curso);
-        box.innerHTML+=`<div>${c.nome} - ${d.nome} (${d.ch} blocos) Lab: ${d.lab||"N/A"}</div>`;
+        box.innerHTML+=`<div>${c.nome} - ${d.nome} (${d.ch} blocos) Lab:${d.lab||"Não"}</div>`;
     });
 }
 
-/* ======================  PARTE 3 – LABORATÓRIOS ======================== */
+/* ============================ LABS ============================= */
 
 function addLab(){
-    const nome=document.getElementById("lab_nome").value;
-    const qtd=document.getElementById("lab_qtd").value;
-    if(nome && qtd>0){
-        let ja=bd.laboratorios.find(l=>l.nome==nome);
-        if(ja) ja.qtd=parseInt(ja.qtd)+parseInt(qtd);
-        else bd.laboratorios.push({nome,qtd:parseInt(qtd)});
-        
-        salvarBD();
-        listarLab();
+    let n=document.getElementById("lab_nome").value;
+    let q=document.getElementById("lab_qtd").value;
+    if(n && q>0){
+        let ja=bd.laboratorios.find(l=>l.nome==n);
+        if(ja) ja.qtd+=parseInt(q);
+        else bd.laboratorios.push({nome:n,qtd:parseInt(q)});
+        salvarBD(); listarLab();
     }
 }
 function listarLab(){
-    let box=document.getElementById("listaLab");
-    box.innerHTML="";
-    bd.laboratorios.forEach(l=> box.innerHTML+=`<div>${l.nome} – ${l.qtd} unidades</div>`);
+    let b=document.getElementById("listaLab"); b.innerHTML="";
+    bd.laboratorios.forEach(l=> b.innerHTML+=`<div>${l.nome} — ${l.qtd} unidades</div>`);
 }
 
-/* ========================  PARTE 4 – DOCENTES  =========================*/
-
-function addProf(){
-    const nome=document.getElementById("prof_nome").value;
-    const maxCH=document.getElementById("prof_ch").value;
-
-    let disciplinas=[...document.querySelectorAll(".chkDis:checked")].map(e=>e.value);
-    let disp=[];
-
-    document.querySelectorAll(".linha_disp").forEach(l=>{
-        let dia=l.querySelector(".dia").value;
-        let periodo=l.querySelector(".periodo").value;
-        if(dia && periodo) disp.push({dia,periodo});
-    });
-
-    bd.docentes.push({id:Date.now(),nome,maxCH,disciplinas,disp});
-    salvarBD();
-    listarProf();
-}
-
-function listarProf(){
-    let box=document.getElementById("listaProf");
-    box.innerHTML="";
-    bd.docentes.forEach(p=>{
-        box.innerHTML+=`<div><b>${p.nome}</b> – CH Max: ${p.maxCH}h</div>`;
-    });
-}
+/* ============================ DOCENTES ============================= */
 
 function carregarDisciplinasParaProf(){
     let box=document.getElementById("areaDisProf");
     box.innerHTML="";
     bd.disciplinas.forEach(d=>{
         let c=bd.cursos.find(x=>x.id==d.curso);
-        box.innerHTML+=`<label><input type="checkbox" class="chkDis" value="${d.id}">${c.nome} - ${d.nome}</label><br>`;
+        box.innerHTML+=`<label><input type="checkbox" class="chkDis" value="${d.id}">
+            ${c.nome} - ${d.nome}</label><br>`;
     });
 }
 
-/* 🟢 GERA CAMPOS DE DISPONIBILIDADE */
+/* 🔥 Exibir área de disponibilidade devidamente */
+function mostrarDisponibilidade(){
+    document.getElementById("area_disp").innerHTML="";
+    addDisponibilidade(); // cria pelo menos 1 linha inicial
+}
+
 function addDisponibilidade(){
-    let area=document.getElementById("area_disp");
-    area.innerHTML+=`
+    document.getElementById("area_disp").innerHTML+=`
     <div class="linha_disp">
         <select class="dia">
             <option>Segunda</option><option>Terça</option><option>Quarta</option>
@@ -182,49 +139,70 @@ function addDisponibilidade(){
     </div>`;
 }
 
-/* ======================  GERAR HORÁRIOS – ALGORITMO  ===================*/
+function addProf(){
+    let nome=document.getElementById("prof_nome").value;
+    let max=document.getElementById("prof_ch").value;
+
+    let disciplinas=[...document.querySelectorAll(".chkDis:checked")].map(e=>e.value);
+    let disp=[];
+
+    document.querySelectorAll(".linha_disp").forEach(l=>{
+        disp.push({
+            dia:l.querySelector(".dia").value,
+            periodo:l.querySelector(".periodo").value
+        });
+    });
+
+    bd.docentes.push({id:Date.now(),nome,max,disciplinas,disp});
+    salvarBD(); listarProf();
+}
+
+/* ❗ Agora com botão REMOVER */
+function removerProf(id){
+    if(confirm("Excluir docente?")){
+        bd.docentes = bd.docentes.filter(p=>p.id!=id);
+        salvarBD(); listarProf();
+    }
+}
+
+function listarProf(){
+    let box=document.getElementById("listaProf");
+    box.innerHTML="";
+    bd.docentes.forEach(p=>{
+        box.innerHTML+=`
+        <div>
+            <b>${p.nome}</b> — CH Máx: ${p.max}<br>
+            <button onclick="removerProf(${p.id})">🗑 Remover</button>
+        </div><br>`;
+    });
+}
+
+/* ======================== GERAÇÃO DE HORÁRIOS ======================== */
 
 function gerarSolucao(){
-    alert("🔄 Iniciando busca – isso pode demorar...");
+    alert("Gerando soluções...");
+    let ocup={};
 
-    let ocupação = {}; // bloco → { curso, disciplina, professor }
-
-    function valido(disciplina, blocoIdx, professor){
-
-        // ❗Evita duas disciplinas para o mesmo curso no mesmo bloco
-        if(ocupação[blocoIdx] && ocupação[blocoIdx].curso == disciplina.curso) return false;
-
-        // HORÁRIO DO DOCENTE
-        let disp=bd.docentes.find(x=>x.id==professor.id).disp;
-        let blocoPeriodo = bd.blocos[blocoIdx].periodo;
-        if(!disp.some(d=>d.periodo==blocoPeriodo)) return false;
-
+    function valido(d,b,p){
+        if(ocup[b] && ocup[b].curso==d.curso) return false; // evita 2 matérias simultâneas da mesma turma
         return true;
     }
 
-    // busca simples recursiva
-    function backtrack(i){
-        if(i>=bd.disciplinas.length){
-            bd.solutions.push(JSON.parse(JSON.stringify(ocupação)));
-            salvarBD();
-            return;
-        }
-
+    function back(i){
+        if(i>=bd.disciplinas.length){ bd.solutions.push(JSON.parse(JSON.stringify(ocup))); salvarBD(); return; }
         let d=bd.disciplinas[i];
         for(let p of bd.docentes){
-            if(!p.disciplinas.includes(d.id)) continue;
-
-            let blocosLivres = [...bd.blocos.keys()];
-            for(let b of blocosLivres){
+            if(!p.disciplinas.includes(String(d.id))) continue;
+            for(let b in bd.blocos){
                 if(valido(d,b,p)){
-                    ocupação[b]={curso:d.curso,disciplina:d.nome,prof:p.nome};
-                    backtrack(i+1);
-                    delete ocupação[b];
+                    ocup[b]={curso:d.curso,disciplina:d.nome,prof:p.nome};
+                    back(i+1);
+                    delete ocup[b];
                 }
             }
         }
     }
 
-    backtrack(0);
-    alert("Busca finalizada. Soluções encontradas: "+bd.solutions.length);
+    back(0);
+    alert("Concluído — soluções encontradas: "+bd.solutions.length);
 }
