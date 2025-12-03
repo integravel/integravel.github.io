@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Organizador de Horários - Campus</title>
+  <style>
+    :root{font-family:Inter,system-ui,Segoe UI,Roboto,Arial;color:#111}
+    body{margin:0;padding:20px;background:#f6f7fb}
+    .container{max-width:1100px;margin:0 auto;background:#fff;padding:20px;border-radius:10px;box-shadow:0 6px 20px rgba(14,21,47,0.08)}
+    h1{margin:0 0 12px;font-size:20px}
+    .steps{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+    .step{padding:8px 12px;border-radius:8px;background:#eef2ff;color:#2b3a67;font-weight:600}
+    .panel{border:1px solid #e6e9f2;padding:12px;border-radius:8px;margin-bottom:12px;background:#fff}
+    label{display:block;margin-top:8px;font-weight:600}
+    input[type=text], select, input[type=number], textarea{width:100%;padding:8px;margin-top:6px;border-radius:6px;border:1px solid #dce1f0}
+    .row{display:flex;gap:12px}
+    .col{flex:1}
+    button{background:#374bea;color:#fff;padding:8px 12px;border-radius:8px;border:0;cursor:pointer;margin-top:8px}
+    button.ghost{background:#eef2ff;color:#374bea}
+    .small{font-size:13px;color:#556}
+    .list{max-height:220px;overflow:auto;border:1px dashed #e6e9f2;padding:8px;border-radius:6px}
+    table{width:100%;border-collapse:collapse}
+    table th, table td{padding:6px;border-bottom:1px solid #f0f2fa;text-align:left}
+    .flex-between{display:flex;justify-content:space-between;align-items:center}
+    .controls{display:flex;gap:8px;flex-wrap:wrap}
+    .progress{margin-top:8px}
+    .solution-item{padding:8px;border-radius:6px;border:1px solid #eef2ff;margin-bottom:8px}
+    .kbd{background:#f1f5ff;padding:2px 6px;border-radius:4px;font-weight:700;color:#2b3a67}
+    .danger{background:#ff4d4f}
+    .muted{color:#7b7f91}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Organizador de Horários - Campus</h1>
+    <div class="steps">
+      <div class="step">0 - Blocos</div>
+      <div class="step">1 - Cursos</div>
+      <div class="step">2 - Disciplinas</div>
+      <div class="step">3 - Laboratórios</div>
+      <div class="step">4 - Docentes</div>
+      <div class="step">5 - Resolver</div>
+    </div>
+
+    <!-- Etapa 0: Blocos -->
+    <div class="panel" id="panel-blocks">
+      <h2>Etapa 0 — Definir blocos de horário (semana)</h2>
+      <p class="small">Crie os blocos e associe a dias da semana. Ex.: 07:00 - 08:30 (2h). O sistema trabalha em blocos (unidade mínima 2h).</p>
+      <div class="row">
+        <div class="col">
+          <label>Horário (ex.: 07:00 - 08:30)</label>
+          <input id="block-label" placeholder="07:00 - 08:30" />
+        </div>
+        <div class="col">
+          <label>Dias aplicáveis</label>
+          <div style="display:flex;gap:6px;margin-top:6
