@@ -1,0 +1,113 @@
+/* ==================== LAYOUT BASE ==================== */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    background: #f3f5f7;
+    color: #222;
+}
+
+header {
+    text-align: center;
+    padding: 20px;
+    background: #0366d6;
+    color: white;
+    font-size: 20px;
+}
+
+nav {
+    display: flex;
+    gap: 10px;
+    padding: 10px;
+    background: #e7eff7;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+nav button {
+    padding: 10px 15px;
+    border: none;
+    cursor: pointer;
+    background: #0366d6;
+    color: white;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+nav button:hover {
+    background: #024e9f;
+}
+
+/* ==================== ÁREAS DE CONTEÚDO ==================== */
+.tab {
+    display: none;
+    padding: 20px;
+    animation: fade 0.4s ease-in-out;
+}
+
+@keyframes fade {
+    from {opacity:0;}
+    to {opacity:1;}
+}
+
+/* Inputs gerais */
+input, select {
+    padding: 6px;
+    margin: 5px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+}
+
+button {
+    padding: 7px 12px;
+    margin-top: 10px;
+    border: none;
+    background: #2ea043;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #237532;
+}
+
+/* Listas */
+ul {
+    background: white;
+    padding: 10px;
+    border-radius: 5px;
+    list-style: none;
+}
+
+ul li {
+    background: #e7edf3;
+    padding: 8px;
+    margin: 5px 0;
+    border-radius: 5px;
+}
+
+/* Disponibilidade dos professores */
+#dispContainer {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(120px,1fr));
+    gap: 10px;
+    padding: 10px;
+    background: #fff;
+    border-radius: 5px;
+}
+
+/* Aba atual ativa */
+.active {
+    display: block !important;
+    border-left: 6px solid #0366d6;
+}
+
+/* Botões especiais */
+#t5 button:nth-child(1){ background:#0366d6; }
+#t5 button:nth-child(1):hover{ background:#024e9f; }
+
+#t5 button:nth-child(2){ background:#c91d1d; }
+#t5 button:nth-child(2):hover{ background:#891313; }
+
+#t5 button:nth-child(3){ background:#555; }
+#t5 button:nth-child(3):hover{ background:#333; }
