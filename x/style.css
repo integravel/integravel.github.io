@@ -5,6 +5,10 @@
   --preto: #2C2C2C;
 }
 
+* {
+  box-sizing: border-box;
+}
+
 body {
   margin: 0;
   font-family: "Nunito", "Inter", sans-serif;
@@ -16,6 +20,7 @@ body {
 
 main {
   max-width: 820px;
+  width: 100%;
   padding: 1.5rem;
 }
 
@@ -23,6 +28,7 @@ h1 {
   text-align: center;
   color: var(--roxo);
   font-size: 1.4rem;
+  margin-bottom: 1rem;
 }
 
 .card {
@@ -31,32 +37,47 @@ h1 {
   padding: 1.5rem;
 }
 
+/* ===== TEXTO ===== */
+
+p {
+  line-height: 1.5;
+  font-size: 1rem;
+}
+
 h2 {
   margin-top: 1.5rem;
   font-size: 1.1rem;
 }
 
+/* ===== GRID ===== */
+
 .grid-area {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
   gap: 0.6rem;
-  justify-content: center;
   margin: 1rem 0;
 }
 
 .dropzone {
-  width: 120px;
-  height: 52px;
+  min-height: 64px;
+  padding: 6px;
+
   border: 2px dashed var(--roxo);
   border-radius: 12px;
+
   display: flex;
   align-items: center;
   justify-content: center;
+
+  text-align: center;
+  overflow: hidden;
 }
 
 .dropzone.hover {
   background: var(--amarelo);
 }
+
+/* ===== BLOCOS ===== */
 
 .options {
   display: flex;
@@ -71,7 +92,23 @@ h2 {
   padding: 0.5rem 0.7rem;
   cursor: grab;
   font-size: 0.9rem;
+  max-width: 220px;
+  text-align: center;
 }
+
+/* 🔑 ADAPTAÇÃO DO BLOCO DENTRO DO GRID */
+.dropzone .draggable {
+  width: 100%;
+  max-width: 100%;
+
+  white-space: normal;
+  word-break: break-word;
+
+  font-size: 0.85rem;
+  line-height: 1.25;
+}
+
+/* ===== BOTÃO ===== */
 
 button {
   margin: 1.2rem auto 0;
@@ -82,13 +119,18 @@ button {
   border-radius: 16px;
   padding: 0.5rem 1.2rem;
   font-size: 1rem;
+  cursor: pointer;
 }
+
+/* ===== FEEDBACK ===== */
 
 #feedback {
   text-align: center;
   margin-top: 0.8rem;
   font-weight: 600;
 }
+
+/* ===== FOOTER ===== */
 
 footer {
   margin-top: 1.5rem;
