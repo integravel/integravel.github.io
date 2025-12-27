@@ -33,11 +33,16 @@ h1 {
 .card {
   border: 2px solid var(--roxo);
   border-radius: 18px;
-  padding: 1.5rem;
+  padding: 1.2rem;
+  margin-bottom: 1rem;
 }
 
-/* ===== LINHAS DA DEMONSTRAÇÃO ===== */
+/* ENUNCIADO */
+.enunciado {
+  background: var(--amarelo);
+}
 
+/* LINHAS DA PROVA */
 .line {
   min-height: 2.2em;
   margin: 0.4rem 0;
@@ -54,10 +59,13 @@ h1 {
   background: var(--amarelo);
 }
 
-/* ===== BLOCOS ===== */
-
+/* BLOCOS */
 .options {
-  margin-top: 1.5rem;
+  margin-top: 1.2rem;
+  padding: 0.8rem;
+  border: 2px dashed var(--roxo);
+  border-radius: 14px;
+
   display: flex;
   flex-wrap: wrap;
   gap: 0.6rem;
@@ -73,15 +81,14 @@ h1 {
   text-align: center;
 }
 
-/* bloco encaixado vira "linha" */
+/* bloco encaixado vira linha */
 .dropzone .draggable {
   background: transparent;
   padding: 0;
-  cursor: default;
+  cursor: grab;
 }
 
-/* ===== BOTÃO E FEEDBACK ===== */
-
+/* BOTÃO */
 button {
   margin: 1.2rem auto 0;
   display: block;
@@ -92,6 +99,7 @@ button {
   padding: 0.5rem 1.2rem;
 }
 
+/* FEEDBACK */
 #feedback {
   margin-top: 0.8rem;
   text-align: center;
