@@ -3,6 +3,13 @@ const dropzones = document.querySelectorAll(".dropzone");
 const returnZone = document.querySelector(".dropzone-return");
 const feedback = document.getElementById("feedback");
 
+/* EMBARALHAR BLOCOS */
+(function shuffle() {
+  const blocks = Array.from(returnZone.children);
+  blocks.sort(() => Math.random() - 0.5);
+  blocks.forEach(b => returnZone.appendChild(b));
+})();
+
 /* DRAG */
 draggables.forEach(el => {
   el.addEventListener("dragstart", e => {
@@ -27,21 +34,14 @@ dropzones.forEach(zone => {
 
     const id = e.dataTransfer.getData("text/plain");
     const block = document.querySelector(`[data-id="${id}"]`);
-
-    if (!block) return;
-
-    // se já tiver algo, não aceita
-    if (zone.children.length > 0) return;
+    if (!block || zone.children.length > 0) return;
 
     zone.appendChild(block);
-
-    if (window.MathJax) {
-      MathJax.typesetPromise();
-    }
+    MathJax.typesetPromise();
   });
 });
 
-/* DROP DE VOLTA PARA A ÁREA DE OPÇÕES */
+/* DROP DE VOLTA PARA OPÇÕES */
 returnZone.addEventListener("dragover", e => {
   e.preventDefault();
   returnZone.classList.add("hover");
@@ -57,14 +57,10 @@ returnZone.addEventListener("drop", e => {
 
   const id = e.dataTransfer.getData("text/plain");
   const block = document.querySelector(`[data-id="${id}"]`);
-
   if (!block) return;
 
   returnZone.appendChild(block);
-
-  if (window.MathJax) {
-    MathJax.typesetPromise();
-  }
+  MathJax.typesetPromise();
 });
 
 /* VERIFICAÇÃO */
@@ -74,13 +70,10 @@ document.getElementById("check").addEventListener("click", () => {
   dropzones.forEach(zone => {
     const esperado = zone.dataset.expected;
     const child = zone.firstElementChild;
-
-    if (!child || child.dataset.id !== esperado) {
-      correto = false;
-    }
+    if (!child || child.dataset.id !== esperado) correto = false;
   });
 
   feedback.textContent = correto
-    ? "🌟 Demonstração correta! Muito bem!"
-    : "💭 Algo não está certo ainda. Reorganize as linhas!";
+    ? "Demonstração correta."
+    : "Ainda há algo fora de ordem.";
 });
