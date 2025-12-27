@@ -5,35 +5,62 @@ document.addEventListener("DOMContentLoaded", () => {
   const feedback = document.getElementById("feedback");
 
   /* ===============================
-     ATIVAR DRAG EM UM BLOCO
+     DADOS DOS BLOCOS
+     =============================== */
+  const blocksData = [
+    { id: "1", tex: "\\( N \\text{ não é divisível por nenhum dos } p_i \\)" },
+    { id: "2", tex: "\\( N \\text{ é primo ou composto} \\)" },
+    { id: "3", tex: "\\( N \\text{ possui um divisor primo } q \\)" },
+    { id: "4", tex: "\\( q \\notin \\{p_1,\\ldots,p_n\\} \\)" },
+    { id: "5", tex: "\\( \\text{Existe um primo fora da lista} \\)" },
+    { id: "6", tex: "\\( \\text{A hipótese de finitude é falsa} \\)" }
+  ];
+
+  /* ===============================
+     EMBARALHAR (FISHER–YATES)
+     =============================== */
+  function shuffle(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+    }
+  }
+
+  /* ===============================
+     CRIAR BLOCOS
+     =============================== */
+  function createBlocks() {
+    returnZone.innerHTML = "";
+
+    const shuffled = [...blocksData];
+    shuffle(shuffled);
+
+    shuffled.forEach(data => {
+      const div = document.createElement("div");
+      div.className = "draggable";
+      div.dataset.id = data.id;
+      div.draggable = true;
+      div.innerHTML = data.tex;
+
+      enableDrag(div);
+      returnZone.appendChild(div);
+    });
+
+    if (window.MathJax) {
+      MathJax.typesetPromise();
+    }
+  }
+
+  /* ===============================
+     DRAG
      =============================== */
   function enableDrag(el) {
-    el.setAttribute("draggable", "true");
-
     el.addEventListener("dragstart", e => {
       e.dataTransfer.setData("text/plain", el.dataset.id);
     });
   }
 
-  /* ===============================
-     EMBARALHAR BLOCOS
-     =============================== */
-  function shuffleBlocks() {
-    const blocks = Array.from(returnZone.children);
-
-    for (let i = blocks.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [blocks[i], blocks[j]] = [blocks[j], blocks[i]];
-    }
-
-    returnZone.innerHTML = "";
-    blocks.forEach(b => {
-      enableDrag(b);
-      returnZone.appendChild(b);
-    });
-  }
-
-  shuffleBlocks();
+  createBlocks();
 
   /* ===============================
      DROP NAS LINHAS
@@ -60,7 +87,6 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!block) return;
 
       zone.appendChild(block);
-      enableDrag(block);
 
       if (window.MathJax) {
         MathJax.typesetPromise();
@@ -89,7 +115,6 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!block) return;
 
     returnZone.appendChild(block);
-    enableDrag(block);
 
     if (window.MathJax) {
       MathJax.typesetPromise();
@@ -111,8 +136,8 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     feedback.textContent = correto
-      ? "Demonstração correta."
-      : "Ainda há algo fora de ordem.";
+      ? "✨ Demonstração correta."
+      : "💭 Ainda há algo fora de ordem.";
   });
 
 });
