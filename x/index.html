@@ -1,1 +1,83 @@
-gg
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Euclides — Infinitos Primos</title>
+
+  <!-- MathJax -->
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script id="MathJax-script" async
+    src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js">
+  </script>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+<main>
+  <h1>Demonstração do Teorema de Euclides</h1>
+
+  <section class="card">
+    <p>Queremos mostrar que existem infinitos números primos.</p>
+
+    <p>
+      Suponha que \( p_1, p_2, \ldots, p_n \) seja uma lista finita de números primos.
+    </p>
+
+    <p>
+      Considere o número
+      \[
+        N = p_1 p_2 \cdots p_n + 1.
+      \]
+      Esse número não é divisível por nenhum dos \( p_i \).
+    </p>
+
+    <h2>Complete a demonstração</h2>
+    <p>Logo, devemos concluir que:</p>
+
+    <div class="grid-area">
+      <div class="dropzone" data-expected="1"></div>
+      <div class="dropzone" data-expected="2"></div>
+      <div class="dropzone" data-expected="3"></div>
+      <div class="dropzone" data-expected="4"></div>
+      <div class="dropzone" data-expected="5"></div>
+      <div class="dropzone" data-expected="6"></div>
+    </div>
+
+    <div class="options">
+      <div class="draggable" draggable="true" data-id="1">
+        \( N \text{ não é divisível por } p_1, \ldots, p_n \)
+      </div>
+
+      <div class="draggable" draggable="true" data-id="2">
+        \( N \text{ possui um divisor primo } q \)
+      </div>
+
+      <div class="draggable" draggable="true" data-id="3">
+        \( q \notin \{p_1, \ldots, p_n\} \)
+      </div>
+
+      <div class="draggable" draggable="true" data-id="4">
+        \( \text{Existe um primo fora da lista} \)
+      </div>
+
+      <div class="draggable" draggable="true" data-id="5">
+        \( \text{A lista inicial não contém todos os primos} \)
+      </div>
+
+      <div class="draggable" draggable="true" data-id="6">
+        \( \text{Logo, existem infinitos números primos} \)
+      </div>
+    </div>
+
+    <button id="check">Verificar ✨</button>
+    <p id="feedback"></p>
+  </section>
+
+  <footer>✿ integravel.github.io ✿</footer>
+</main>
+
+<script src="script.js"></script>
+</body>
+</html>
