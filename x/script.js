@@ -1,79 +1,118 @@
-const draggables = document.querySelectorAll(".draggable");
-const dropzones = document.querySelectorAll(".dropzone");
-const returnZone = document.querySelector(".dropzone-return");
-const feedback = document.getElementById("feedback");
+document.addEventListener("DOMContentLoaded", () => {
 
-/* EMBARALHAR BLOCOS */
-(function shuffle() {
-  const blocks = Array.from(returnZone.children);
-  blocks.sort(() => Math.random() - 0.5);
-  blocks.forEach(b => returnZone.appendChild(b));
-})();
+  const dropzones = document.querySelectorAll(".dropzone");
+  const returnZone = document.querySelector(".dropzone-return");
+  const feedback = document.getElementById("feedback");
 
-/* DRAG */
-draggables.forEach(el => {
-  el.addEventListener("dragstart", e => {
-    e.dataTransfer.setData("text/plain", el.dataset.id);
+  /* ===============================
+     ATIVAR DRAG EM UM BLOCO
+     =============================== */
+  function enableDrag(el) {
+    el.setAttribute("draggable", "true");
+
+    el.addEventListener("dragstart", e => {
+      e.dataTransfer.setData("text/plain", el.dataset.id);
+    });
+  }
+
+  /* ===============================
+     EMBARALHAR BLOCOS
+     =============================== */
+  function shuffleBlocks() {
+    const blocks = Array.from(returnZone.children);
+
+    for (let i = blocks.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [blocks[i], blocks[j]] = [blocks[j], blocks[i]];
+    }
+
+    returnZone.innerHTML = "";
+    blocks.forEach(b => {
+      enableDrag(b);
+      returnZone.appendChild(b);
+    });
+  }
+
+  shuffleBlocks();
+
+  /* ===============================
+     DROP NAS LINHAS
+     =============================== */
+  dropzones.forEach(zone => {
+
+    zone.addEventListener("dragover", e => {
+      e.preventDefault();
+      zone.classList.add("hover");
+    });
+
+    zone.addEventListener("dragleave", () => {
+      zone.classList.remove("hover");
+    });
+
+    zone.addEventListener("drop", e => {
+      e.preventDefault();
+      zone.classList.remove("hover");
+
+      if (zone.children.length > 0) return;
+
+      const id = e.dataTransfer.getData("text/plain");
+      const block = document.querySelector(`.draggable[data-id="${id}"]`);
+      if (!block) return;
+
+      zone.appendChild(block);
+      enableDrag(block);
+
+      if (window.MathJax) {
+        MathJax.typesetPromise();
+      }
+    });
   });
-});
 
-/* DROP NAS LINHAS */
-dropzones.forEach(zone => {
-  zone.addEventListener("dragover", e => {
+  /* ===============================
+     DROP DE VOLTA PARA OPÇÕES
+     =============================== */
+  returnZone.addEventListener("dragover", e => {
     e.preventDefault();
-    zone.classList.add("hover");
+    returnZone.classList.add("hover");
   });
 
-  zone.addEventListener("dragleave", () => {
-    zone.classList.remove("hover");
+  returnZone.addEventListener("dragleave", () => {
+    returnZone.classList.remove("hover");
   });
 
-  zone.addEventListener("drop", e => {
+  returnZone.addEventListener("drop", e => {
     e.preventDefault();
-    zone.classList.remove("hover");
+    returnZone.classList.remove("hover");
 
     const id = e.dataTransfer.getData("text/plain");
-    const block = document.querySelector(`[data-id="${id}"]`);
-    if (!block || zone.children.length > 0) return;
+    const block = document.querySelector(`.draggable[data-id="${id}"]`);
+    if (!block) return;
 
-    zone.appendChild(block);
-    MathJax.typesetPromise();
-  });
-});
+    returnZone.appendChild(block);
+    enableDrag(block);
 
-/* DROP DE VOLTA PARA OPÇÕES */
-returnZone.addEventListener("dragover", e => {
-  e.preventDefault();
-  returnZone.classList.add("hover");
-});
-
-returnZone.addEventListener("dragleave", () => {
-  returnZone.classList.remove("hover");
-});
-
-returnZone.addEventListener("drop", e => {
-  e.preventDefault();
-  returnZone.classList.remove("hover");
-
-  const id = e.dataTransfer.getData("text/plain");
-  const block = document.querySelector(`[data-id="${id}"]`);
-  if (!block) return;
-
-  returnZone.appendChild(block);
-  MathJax.typesetPromise();
-});
-
-/* VERIFICAÇÃO */
-document.getElementById("check").addEventListener("click", () => {
-  let correto = true;
-
-  dropzones.forEach(zone => {
-    const esperado = zone.dataset.expected;
-    const child = zone.firstElementChild;
-    if (!child || child.dataset.id !== esperado) correto = false;
+    if (window.MathJax) {
+      MathJax.typesetPromise();
+    }
   });
 
-  feedback.textContent = correto
-    ? "Demonstração correta."
-    : "Ainda há algo fora de ordem.";
+  /* ===============================
+     VERIFICAÇÃO
+     =============================== */
+  document.getElementById("check").addEventListener("click", () => {
+    let correto = true;
+
+    dropzones.forEach(zone => {
+      const esperado = zone.dataset.expected;
+      const child = zone.firstElementChild;
+      if (!child || child.dataset.id !== esperado) {
+        correto = false;
+      }
+    });
+
+    feedback.textContent = correto
+      ? "Demonstração correta."
+      : "Ainda há algo fora de ordem.";
+  });
+
 });
