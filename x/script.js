@@ -2,11 +2,15 @@ const draggables = document.querySelectorAll(".draggable");
 const dropzones = document.querySelectorAll(".dropzone");
 const feedback = document.getElementById("feedback");
 
+/* ===== DRAG ===== */
+
 draggables.forEach(el => {
   el.addEventListener("dragstart", e => {
     e.dataTransfer.setData("text/plain", el.dataset.id);
   });
 });
+
+/* ===== DROP ===== */
 
 dropzones.forEach(zone => {
   zone.addEventListener("dragover", e => {
@@ -25,11 +29,21 @@ dropzones.forEach(zone => {
     const id = e.dataTransfer.getData("text/plain");
     const block = document.querySelector(`[data-id="${id}"]`);
 
+    if (!block) return;
+
+    // evita mais de um bloco por grid
     if (zone.children.length === 0) {
       zone.appendChild(block);
+
+      // 🔑 recalcula o LaTeX depois do drop
+      if (window.MathJax) {
+        MathJax.typesetPromise();
+      }
     }
   });
 });
+
+/* ===== VERIFICAÇÃO ===== */
 
 document.getElementById("check").addEventListener("click", () => {
   let correto = true;
