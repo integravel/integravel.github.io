@@ -1,0 +1,114 @@
+:root {
+  --amarelo: #FCF434;
+  --branco: #FFFFFF;
+  --roxo: #9C59D1;
+  --preto: #2C2C2C;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--branco);
+  color: var(--preto);
+  font-family: "Nunito", "Inter", sans-serif;
+  display: flex;
+  justify-content: center;
+}
+
+main {
+  max-width: 820px;
+  width: 100%;
+  padding: 1.6rem 1.2rem 2.2rem;
+}
+
+/* ENUNCIADO */
+.enunciado {
+  margin-bottom: 1.2rem;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+/* LINHAS DO TEXTO */
+.line {
+  min-height: 2em;
+  margin: 0.35rem 0;
+  line-height: 1.5;
+}
+
+/* LINHAS INTERATIVAS */
+.dropzone {
+  border-bottom: 1.2px dotted rgba(156, 89, 209, 0.6);
+  transition: background 0.2s ease;
+}
+
+.dropzone.hover {
+  background: rgba(156, 89, 209, 0.05);
+}
+
+/* ÁREA DOS BLOCOS */
+.options {
+  margin-top: 1.5rem;
+  padding-top: 0.8rem;
+  border-top: 1px solid rgba(156, 89, 209, 0.25);
+
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: center;
+
+  /* garante área de drop mesmo vazia */
+  min-height: 3rem;
+}
+
+/* TEXTO SUAVE QUANDO VAZIA */
+.options:empty::after {
+  content: "Arraste aqui para reorganizar";
+  font-size: 0.8rem;
+  color: rgba(44, 44, 44, 0.4);
+}
+
+/* BLOCOS ARRASTÁVEIS */
+.draggable {
+  background: rgba(156, 89, 209, 0.08);
+  border-radius: 999px;
+  padding: 0.3rem 0.7rem;
+  cursor: grab;
+  font-size: 0.9rem;
+  white-space: nowrap;
+  user-select: none;
+}
+
+/* BLOCO INSERIDO VIRA TEXTO */
+.dropzone .draggable {
+  background: none;
+  padding: 0;
+  border-radius: 0;
+}
+
+/* BOTÃO */
+button {
+  margin: 1.4rem auto 0;
+  display: block;
+  background: var(--roxo);
+  color: var(--branco);
+  border: none;
+  border-radius: 999px;
+  padding: 0.45rem 1.3rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+button:active {
+  transform: scale(0.97);
+}
+
+/* FEEDBACK */
+#feedback {
+  margin-top: 0.8rem;
+  text-align: center;
+  font-weight: 600;
+  font-size: 0.9rem;
+  }
