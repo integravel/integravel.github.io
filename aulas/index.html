@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laboratório Integrável</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            max-width: 100vw; /* Garante que o conteúdo ocupe no máximo 100% da largura da tela */
+            overflow-x: hidden; /* Impede o scroll horizontal */
+        }
+        header {
+            background-color: #000;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            padding: 10px 20px;
+        }
+        header img {
+            height: 40px;
+            margin-right: 20px;
+        }
+        header p {
+            margin: 0;
+        }
+        header a {
+            color: inherit; /* Herda a cor do texto */
+            text-decoration: none; /* Remove o sublinhado do link */
+            display: flex; /* Garante que todo o cabeçalho seja clicável */
+            align-items: center;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            padding: 10px;
+            width: 100%; /* Garante que a grid ocupe a largura total da tela */
+            box-sizing: border-box;
+        }
+        .grid-item {
+            text-align: center;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+            cursor: pointer;
+            height: auto; /* Permite altura flexível */
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 10px;
+        }
+        .grid-item:hover {
+            transform: scale(1.02);
+        }
+        .grid-item a {
+            display: block;
+            text-decoration: none;
+            color: inherit;
+            height: 100%;
+        }
+        .grid-item img {
+            max-width: 100%;
+            height: auto;
+            object-fit: contain; /* Evita cortes na imagem */
+            flex-shrink: 0; /* Impede a imagem de encolher */
+        }
+        .grid-item p {
+            margin: 10px 0 0;
+            color: #555;
+            flex-grow: 1; /* Faz o parágrafo ocupar espaço adicional */
+            text-align: justify; /* Melhor legibilidade em telas menores */
+        }
+        footer {
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center; /* Centraliza o conteúdo do rodapé */
+            align-items: center;
+            padding: 20px;
+            border-top: 1px solid #ddd;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        footer div {
+            display: flex;
+            align-items: center;
+            gap: 20px; /* Espaço maior entre a imagem e o botão */
+            margin: 0 15px; /* Adiciona um pequeno espaçamento entre os dois blocos */
+        }
+        footer img {
+            height: 40px;
+        }
+        footer img.large {
+            height: 50px;
+        }
+        footer button {
+            background-color: #007BFF;
+            color: #fff;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        footer button:hover {
+            background-color: #0056b3;
+        }
+        /* Estilo para dispositivos móveis */
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column;
+                text-align: center;
+            }
+            header img {
+                margin-bottom: 10px;
+            }
+            .grid {
+                grid-template-columns: 1fr; /* Uma coluna */
+                gap: 15px;
+            }
+            .grid-item {
+                height: auto; /* Permite altura dinâmica */
+            }
+            footer {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+        /* Estilo para dispositivos muito pequenos */
+        @media (max-width: 480px) {
+            .grid-item p {
+                font-size: 14px; /* Texto menor */
+            }
+            footer button {
+                padding: 8px 12px; /* Botões menores */
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Cabeçalho com link -->
+    <header>
+        <a href="https://integravel.github.io/">
+            <img src="../imagens/logo.png" alt="Logo da página">
+            <p>Laboratório Integrável é um hub para recursos virtuais, abertos, de Ciências e Matemática, de autoria neurodivergente.</p>
+        </a>
+    </header>
+
+    <!-- O restante do conteúdo -->
+    <div class="grid">
+        <div class="grid-item">
+            <a href="https://drive.google.com/drive/folders/1WMFWa4sJlwz0tOKRAFglmIMwafv93JIo">
+                <img src="01.jpg" alt="Logo 1">
+                <p> Conjuntos, funções, trigonometria no triângulo retângulo.</p>
+            </a>
+        </div>
+        <div class="grid-item">
+            <a href="https://drive.google.com/drive/folders/1MyZUnoxKjzxO3Fcbkxzatguw2SnyIMq_">
+                <img src="02.jpg" alt="Logo 2">
+                <p>Operadores módulo, logaritmo e funções exponenciais.</p>
+            </a>
+        </div>
+        <div class="grid-item">
+            <a href="https://drive.google.com/drive/folders/1K5CwlWP9Tqz4FhGEWzmJ_KYBFBgA_Yc9">
+                <img src="03.jpg" alt="Logo 3">
+                <p>Matrizes, determinantes, áreas, volumes e sólidos de revolução.</p>
+            </a>
+        </div>
+        <div class="grid-item">
+            <a href="https://drive.google.com/drive/folders/1KmfdslSyjZqoKFkJBMqTTNT5LehBpkA-">
+                <img src="04.jpg" alt="Logo 4">
+                <p>P.A., P.G., Análise combinatória, probabilidade e estatística.</p>
+            </a>
+        </div>
+        <div class="grid-item">
+            <a href="https://drive.google.com/drive/folders/1vx200jH9IPvOeCA4Zd1EyK1nsPz0bdJd">
+                <img src="05.jpg" alt="Logo 5">
+                <p>Números complexos, raízes de polinômios de graus maiores que 2.</p>
+            </a>
+        </div>
+        <div class="grid-item">
+            <a href="https://drive.google.com/drive/folders/1RBjeBnahxUh-uCGN4PUIhMrju5-zAozy">
+                <img src="06.jpg" alt="Logo 6">
+                <p>Geometria analítica plana, ponto, retas e cônicas.</p>
+            </a>
+        </div>
+        <div class="grid-item">
+            <a href="https://drive.google.com/drive/folders/1bJ0N1lr4Pow1JXAkMED67pZztOvCKMDz">
+                <img src="07.jpg" alt="Logo 7">
+                <p>Métodos de coleta, análise e interpretação de dados amostrais.</p>
+            </a>
+        </div>
+        <div class="grid-item">
+            <a href="https://drive.google.com/drive/folders/17sdSuCVAeoSW5WHV7art6S2OsMD4oY6r">
+                <img src="08.jpg" alt="Logo 8">
+                <p>Conjunto, função, trigonometria, sequência, limite e continuidade.</p>
+            </a>
+        </div>
+
+    </div>
+
+    <!-- Rodapé -->
+    <footer>
+        <div>
+            <img src="../imagens/logo-sobre.png" alt="Logo sobre" class="large">
+            <button onclick="window.location.href='https://integravel.github.io/sobre'">Mais Informações</button>
+        </div>
+        <div>
+            <img src="../imagens/logo-contato.png" alt="Logo contato">
+            <button onclick="window.location.href='mailto:integravel@gmail.com'">integravel@gmail.com</button>
+        </div>
+    </footer>
+</body>
+</html>
