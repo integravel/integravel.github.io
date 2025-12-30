@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+  <title>Demonstração — Primos Infinitos</title>
+
+  <!-- MathJax -->
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script id="MathJax-script" async
+    src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+<main>
+
+  <!-- ENUNCIADO -->
+  <p class="enunciado">
+    <strong>Teorema.</strong>
+    Existem infinitos números primos.
+  </p>
+
+  <!-- DEMONSTRAÇÃO -->
+  <p class="line">
+    <strong>Demonstração.</strong>
+    Suponha, por absurdo, que exista apenas uma quantidade finita de números primos.
+  </p>
+
+  <p class="line">
+    Seja \( p_1, p_2, \ldots, p_n \) a lista de todos os números primos.
+  </p>
+
+  <p class="line">
+    Considere o número \( N = p_1 p_2 \cdots p_n + 1 \).
+  </p>
+
+  <!-- LINHAS A COMPLETAR -->
+  <div class="line dropzone" data-expected="1"></div>
+  <div class="line dropzone" data-expected="2"></div>
+  <div class="line dropzone" data-expected="3"></div>
+  <div class="line dropzone" data-expected="4"></div>
+  <div class="line dropzone" data-expected="5"></div>
+  <div class="line dropzone" data-expected="6"></div>
+
+  <p class="line">
+    Isso contradiz a hipótese inicial, logo existem infinitos números primos.
+  </p>
+
+  <!-- BLOCOS -->
+  <div class="options dropzone-return" id="options">
+    <div class="draggable" draggable="true" data-id="1">
+      \( N \text{ não é divisível por nenhum dos } p_i \)
+    </div>
+    <div class="draggable" draggable="true" data-id="2">
+      \( N \text{ é primo ou composto} \)
+    </div>
+    <div class="draggable" draggable="true" data-id="3">
+      \( N \text{ possui um divisor primo } q \)
+    </div>
+    <div class="draggable" draggable="true" data-id="4">
+      \( q \notin \{p_1,\ldots,p_n\} \)
+    </div>
+    <div class="draggable" draggable="true" data-id="5">
+      \( \text{Existe um primo fora da lista} \)
+    </div>
+    <div class="draggable" draggable="true" data-id="6">
+      \( \text{A hipótese de finitude é falsa} \)
+    </div>
+  </div>
+
+  <button id="check">Verificar</button>
+  <p id="feedback"></p>
+
+</main>
+
+<script src="script.js"></script>
+</body>
+</html>
