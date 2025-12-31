@@ -4,196 +4,90 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Laboratório Integrável</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            max-width: 100vw; /* Garante que o conteúdo ocupe no máximo 100% da largura da tela */
-            overflow-x: hidden; /* Impede o scroll horizontal */
-        }
-        header {
-            background-color: #000;
-            color: #fff;
-            display: flex;
-            align-items: center;
-            padding: 10px 20px;
-        }
-        header img {
-            height: 40px;
-            margin-right: 20px;
-        }
-        header p {
-            margin: 0;
-        }
-        header a {
-            color: inherit; /* Herda a cor do texto */
-            text-decoration: none; /* Remove o sublinhado do link */
-            display: flex; /* Garante que todo o cabeçalho seja clicável */
-            align-items: center;
-        }
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px; /* Reduz o espaço entre os itens */
-            padding: 10px; /* Reduz o padding */
-            width: 100%; /* Garante que a grid ocupe a largura total da tela */
-            box-sizing: border-box; /* Inclui padding e bordas no cálculo de largura */
-        }
-        .grid-item {
-            text-align: center;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            overflow: hidden;
-            transition: transform 0.3s ease;
-            cursor: pointer;
-        }
-        .grid-item:hover {
-            transform: scale(1.02);
-        }
-        .grid-item a {
-            display: block;
-            text-decoration: none;
-            color: inherit;
-            height: 100%;
-            padding: 10px;
-        }
-        .grid-item img {
-            max-width: 100%;
-            height: 100px;
-            object-fit: contain;
-        }
-        .grid-item p {
-            margin: 10px 0 0;
-            color: #555;
-        }
-        footer {
-            background-color: #f4f4f4;
-            display: flex;
-            justify-content: center; /* Centraliza o conteúdo do rodapé */
-            align-items: center;
-            padding: 20px;
-            border-top: 1px solid #ddd;
-            width: 100%;
-            box-sizing: border-box;
-        }
-        footer div {
-            display: flex;
-            align-items: center;
-            gap: 20px; /* Espaço maior entre a imagem e o botão */
-            margin: 0 15px; /* Adiciona um pequeno espaçamento entre os dois blocos */
-        }
-        footer img {
-            height: 40px;
-        }
-        footer img.large {
-            height: 50px;
-        }
-        footer button {
-            background-color: #007BFF;
-            color: #fff;
-            border: none;
-            padding: 10px 15px;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        footer button:hover {
-            background-color: #0056b3;
-        }
-        /* Estilo para dispositivos móveis */
-        @media (max-width: 768px) {
-            header {
-                flex-direction: column;
-                text-align: center;
-            }
-            header img {
-                margin-bottom: 10px;
-            }
-            .grid {
-                grid-template-columns: 1fr; /* Uma coluna */
-                gap: 15px;
-                padding: 10px;
-            }
-            .grid-item img {
-                height: 120px; /* Aumenta a visibilidade das imagens */
-            }
-            footer {
-                flex-direction: column;
-                text-align: center;
-            }
-        }
 
-        /* Estilo para dispositivos muito pequenos */
-        @media (max-width: 480px) {
-            .grid-item p {
-                font-size: 14px; /* Texto menor */
-            }
-            footer button {
-                padding: 8px 12px; /* Botões menores */
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="css/main.css">
 </head>
 <body>
-    <!-- Cabeçalho com link -->
-    <header>
-        <a href="https://integravel.github.io/">
-            <img src="imagens/logo.png" alt="Logo da página">
-            <p>Laboratório Integrável é um hub para recursos virtuais, abertos, de Ciências e Matemática, de autoria neurodivergente.</p>
-        </a>
-    </header>
 
-    <!-- O restante do conteúdo -->
-    <div class="grid">
-        <div class="grid-item">
+<!-- ===== HEADER ===== -->
+<header class="site-header">
+    <a href="https://integravel.github.io/">
+        <img src="imagens/logo.png" alt="Logo do Laboratório Integrável">
+        <p>
+            Laboratório Integrável é um hub para recursos virtuais, abertos,
+            de Ciências e Matemática, de autoria neurodivergente.
+        </p>
+    </a>
+</header>
+
+<!-- ===== CONTEÚDO ===== -->
+<main class="container">
+
+    <section class="grid">
+
+        <article class="grid-item">
             <a href="https://integravel.github.io/aulas/">
-                <img src="imagens/logo1.png" alt="Logo 1">
+                <img src="imagens/logo1.png" alt="Materiais de aulas">
                 <p>Materiais de aulas</p>
             </a>
-        </div>
-        <div class="grid-item">
+        </article>
+
+        <article class="grid-item">
             <a href="https://integravel.github.io/demonstracoes/">
-                <img src="imagens/logo2.png" alt="Logo 2">
+                <img src="imagens/logo2.png" alt="Demonstrações">
                 <p>Demonstrações por justaposição</p>
             </a>
-        </div>
-        <div class="grid-item">
+        </article>
+
+        <article class="grid-item">
             <a href="https://integravel.github.io/desafios">
-                <img src="imagens/logo6.png" alt="Logo 6">
+                <img src="imagens/logo6.png" alt="Desafios">
                 <p>Desafios de Matemática</p>
             </a>
-        </div>
-        <div class="grid-item">
+        </article>
+
+        <article class="grid-item">
             <a href="https://integravel.github.io/dinamicas">
-                <img src="imagens/logo4.png" alt="Logo 4">
+                <img src="imagens/logo4.png" alt="Dinâmicas">
                 <p>Dinâmicas</p>
             </a>
-        </div>
-        <div class="grid-item">
+        </article>
+
+        <article class="grid-item">
             <a href="https://integravel.github.io/divulgacao">
-                <img src="imagens/logo5.png" alt="Logo 5">
+                <img src="imagens/logo5.png" alt="Divulgação científica">
                 <p>Divulgação científica</p>
             </a>
-        </div>
-        <div class="grid-item">
+        </article>
+
+        <article class="grid-item">
             <a href="gaveta">
-                <img src="imagens/logo9.png" alt="Logo 9">
+                <img src="imagens/logo9.png" alt="Gaveta de projetos">
                 <p>Gaveta de projetos</p>
             </a>
-        </div>
+        </article>
+
+    </section>
+
+</main>
+
+<!-- ===== FOOTER ===== -->
+<footer class="site-footer">
+    <div>
+        <img src="imagens/logo-sobre.png" alt="Logo sobre" class="large">
+        <button data-link="https://integravel.github.io/sobre">
+            Mais informações
+        </button>
     </div>
 
-    <!-- Rodapé -->
-    <footer>
-        <div>
-            <img src="imagens/logo-sobre.png" alt="Logo sobre" class="large">
-            <button onclick="window.location.href='https://integravel.github.io/sobre'">Mais Informações</button>
-        </div>
-        <div>
-            <img src="imagens/logo-contato.png" alt="Logo contato">
-            <button onclick="window.location.href='mailto:integravel@gmail.com'">integravel@gmail.com</button>
-        </div>
-    </footer>
+    <div>
+        <img src="imagens/logo-contato.png" alt="Logo contato">
+        <button data-link="mailto:integravel@gmail.com">
+            integravel@gmail.com
+        </button>
+    </div>
+</footer>
+
+<script src="js/main.js"></script>
 </body>
 </html>
