@@ -1,360 +1,140 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Laboratório Integrável</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      max-width: 100vw;
-      overflow-x: hidden;
-    }
 
-    header {
-      background-color: #000;
-      color: #fff;
-      display: flex;
-      align-items: center;
-      padding: 10px 20px;
-    }
-
-    header img {
-      height: 40px;
-      margin-right: 20px;
-    }
-
-    header p {
-      margin: 0;
-    }
-
-    header a {
-      color: inherit;
-      text-decoration: none;
-      display: flex;
-      align-items: center;
-    }
-
-    .content {
-      padding: 20px;
-      max-width: 800px;
-      margin: 0 auto;
-      line-height: 1.6;
-      text-align: justify;
-    }
-
-    .content h2 {
-      color: #333;
-      margin-top: 20px;
-    }
-
-    .content a {
-      color: #007BFF;
-      text-decoration: none;
-    }
-
-    .content a:hover {
-      text-decoration: underline;
-    }
-
-    footer {
-      background-color: #f4f4f4;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 20px;
-      border-top: 1px solid #ddd;
-      width: 100%;
-      box-sizing: border-box;
-    }
-
-    footer div {
-      display: flex;
-      align-items: center;
-      gap: 20px;
-      margin: 0 15px;
-    }
-
-    footer img {
-      height: 40px;
-    }
-
-    footer img.large {
-      height: 50px;
-    }
-
-    footer button {
-      background-color: #007BFF;
-      color: #fff;
-      border: none;
-      padding: 10px 15px;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-
-    footer button:hover {
-      background-color: #0056b3;
-    }
-
-    .perfil {
-      display: flex;
-      align-items: stretch;
-      margin-top: 30px;
-      gap: 20px;
-    }
-
-    .foto-perfil {
-      height: 100%;
-      object-fit: cover;
-      border-radius: 8px;
-    }
-
-    .descricao-perfil {
-      flex: 1;
-      line-height: 1.6;
-      text-align: justify;
-    }
-
-    @media (max-width: 600px) {
-      .perfil {
-        flex-direction: column;
-        align-items: center;
-        text-align: center;
-      }
-
-      .descricao-perfil {
-        text-align: justify;
-      }
-    }
-  </style>
+  <link rel="stylesheet" href="css/main.css">
 </head>
 <body>
-  <!-- Cabeçalho com link -->
-  <header>
-    <a href="https://integravel.github.io/">
-      <img src="/imagens/logo.png" alt="Logo da página" />
-      <p>Laboratório Integrável é um hub para recursos virtuais, abertos, de Ciências e Matemática, de autoria neurodivergente.</p>
-    </a>
-  </header>
 
-  <!-- Conteúdo principal -->
-  <div class="content">
-    <h2>Geração II</h2>
-    <p>Como a Geração I foi implementada às pressas para atender a demanda de adaptação à pandemia, tão logo quanto começamos a utilizá-la, já identificamos algumas carências, como a necessidade de espaços para informar propriedades conhecidas e a possibilidade de deixar blocos parcialmente ou totalmente editáveis, uma vez que os próprios participantes chegaram a editar alguns segmentos utilizando as funções do editor de slides. Assim, a Geração II procurou implementar na mesma estrutura da Geração anterior, aquilo que acreditávamos ter faltado.</p>
+<!-- ===== HEADER ===== -->
+<header class="site-header">
+  <a href="https://integravel.github.io/">
+    <img src="/imagens/logo.png" alt="Logo do Laboratório Integrável">
+    <p>
+      Laboratório Integrável é um hub para recursos virtuais, abertos,
+      de Ciências e Matemática, de autoria neurodivergente.
+    </p>
+  </a>
+</header>
 
-    <h2>COLETA DE DADOS - 2</h2>
+<!-- ===== CONTEÚDO ===== -->
+<main class="container">
 
-    <p><b>PERÍODO 1</b></p>
-    <a href="https://forms.gle/kGtpVLgbYwCVRh4t9">Exercícios do período 1.1</a><br>
-    <a href="https://drive.google.com/file/d/1cRTim54q1uVrm2tVDfY9btrJ-0712XFI/view?usp=sharing">Gabarito dos exercícios do período 1.1</a><br>
-    <a href="https://forms.gle/XQ3aEx9Bwx44viG38">Exercícios do período 1.2</a><br>
-    <a href="https://drive.google.com/file/d/1EIZ9uhc1kQBvuDbwyyYotZuSDSDTtCqa/view?usp=sharing">Gabarito dos exercícios do período 1.2</a></p>
+  <section class="projeto">
+    <div class="projeto-texto">
+      <h2>Geração II</h2>
+      <p>
+        Como a Geração I foi implementada às pressas para atender a demanda de adaptação
+        à pandemia, tão logo quanto começamos a utilizá-la, já identificamos algumas
+        carências, como a necessidade de espaços para informar propriedades conhecidas
+        e a possibilidade de deixar blocos parcialmente ou totalmente editáveis.
+      </p>
+      <p>
+        Assim, a Geração II procurou implementar, na mesma estrutura da Geração anterior,
+        aquilo que acreditávamos ter faltado.
+      </p>
+    </div>
+  </section>
 
-    <p><b>PERÍODO 2 - GRUPO 1</b></p>
-    <a href="https://forms.gle/GjoYPqoNnPYJ7BPC9">Exercícios do período 2.1</a><br>
-    <a href="https://drive.google.com/file/d/1EtzrObyxjsSSIKtiAlX--iylR9bFsf2y/view?usp=sharing">Gabarito dos exercícios do período 2.1</a> (igual ao Grupo 2)<br>
-    <a href="https://forms.gle/9jraQAJm5FCRgTyo8">Exercícios do período 2.2</a><br>
-    <a href="https://drive.google.com/file/d/1NZf6no_qBwb-dE3PzwZxtTEei2HDA3wN/view?usp=sharing">Gabarito dos exercícios do período 2.2</a> (igual ao Grupo 2)<br>
-    <a href="https://forms.gle/TdCtixXbBDAeNGNi6">Exercícios do período 2.3</a><br>
-    <a href="https://drive.google.com/file/d/1MOfzpXuoG1sc9xnOwYzY9cAFmB33GuZk/view?usp=sharing">Gabarito dos exercícios do período 2.3</a> (igual ao Grupo 2)</p>
+  <section class="texto-longo">
 
-    <p><b>PERÍODO 2 - GRUPO 2</b></p>
-    <a href="https://forms.gle/gfUwySqy8Qr6W74G8">Exercícios do período 2.1</a><br>
-    <a href="https://drive.google.com/file/d/1EtzrObyxjsSSIKtiAlX--iylR9bFsf2y/view?usp=sharing">Gabarito dos exercícios do período 2.1</a> (igual ao Grupo 1)<br>
-    <a href="https://forms.gle/C8u6Qzb3jgpCx1sYA">Exercícios do período 2.2</a><br>
-    <a href="https://drive.google.com/file/d/1NZf6no_qBwb-dE3PzwZxtTEei2HDA3wN/view?usp=sharing">Gabarito dos exercícios do período 2.2</a> (igual ao Grupo 1)<br>
-    <a href="https://forms.gle/e4ezN21tQxRRGCXU7">Exercícios do período 2.3</a><br>
-    <a href="https://drive.google.com/file/d/1MOfzpXuoG1sc9xnOwYzY9cAFmB33GuZk/view?usp=sharing">Gabarito dos exercícios do período 2.3</a> (igual ao Grupo 1)</p>
+    <h3>Coleta de dados – 2</h3>
 
-    <p><b>PERÍODO 3</b></p>
-    <a href="https://forms.gle/eb98PZWwsKnmpCzr8">Exercícios do período 3.1</a><br>
-    <a href="https://drive.google.com/file/d/18nUTMNAwLSwhQacCAHf1tgSGU7Rn1HGk/view?usp=share_link">Gabarito dos exercícios do período 3.1</a><br>
-    <a href="https://forms.gle/ABApwPnEpkuQrWPg6">Exercícios do período 3.2</a><br>
-    <a href="https://drive.google.com/file/d/19ZhHz54icX2F259KJRJ1YMundK47Fj6a/view?usp=share_link">Gabarito dos exercícios do período 3.2</a></p>
+    <p><strong>PERÍODO 1</strong></p>
+    <p>
+      <a href="https://forms.gle/kGtpVLgbYwCVRh4t9">Exercícios do período 1.1</a><br>
+      <a href="https://drive.google.com/file/d/1cRTim54q1uVrm2tVDfY9btrJ-0712XFI/view?usp=sharing">Gabarito dos exercícios do período 1.1</a><br>
+      <a href="https://forms.gle/XQ3aEx9Bwx44viG38">Exercícios do período 1.2</a><br>
+      <a href="https://drive.google.com/file/d/1EIZ9uhc1kQBvuDbwyyYotZuSDSDTtCqa/view?usp=sharing">Gabarito dos exercícios do período 1.2</a>
+    </p>
 
-    <p><b>PERÍODO 4 - GRUPO 1</b></p>
-    <a href="https://forms.gle/8LFptwgf2hxEvcMHA">Exercícios do período 4.1</a><br>
-    <a href="https://drive.google.com/file/d/143OjQEgMKMdTW-ErC8Pmnf0HrsQeeE85/view?usp=sharing">Gabarito dos exercícios do período 4.1</a> (igual ao Grupo 2)<br>
-    <a href="https://forms.gle/TU2URgor9eYhYECg7">Exercícios do período 4.2</a><br>
-    <a href="https://drive.google.com/file/d/1HNmko0I6lfoyNPAq-nQ-nRsE2y80P-rZ/view?usp=share_link">Gabarito dos exercícios do período 4.2</a> (igual ao Grupo 2)<br>
-    <a href="https://forms.gle/Rh3HnhvYaaV619aD8">Exercícios do período 4.3</a><br>
-    <a href="https://drive.google.com/file/d/1CZHZlWjSzF-1AMpnDk46Y2CTz9pZtP2C/view?usp=sharing">Gabarito dos exercícios do período 4.3</a> (igual ao Grupo 2)</p>
+    <p><strong>PERÍODO 2 – GRUPO 1</strong></p>
+    <p>
+      <a href="https://forms.gle/GjoYPqoNnPYJ7BPC9">Exercícios do período 2.1</a><br>
+      <a href="https://drive.google.com/file/d/1EtzrObyxjsSSIKtiAlX--iylR9bFsf2y/view?usp=sharing">Gabarito dos exercícios do período 2.1</a><br>
+      <a href="https://forms.gle/9jraQAJm5FCRgTyo8">Exercícios do período 2.2</a><br>
+      <a href="https://drive.google.com/file/d/1NZf6no_qBwb-dE3PzwZxtTEei2HDA3wN/view?usp=sharing">Gabarito dos exercícios do período 2.2</a><br>
+      <a href="https://forms.gle/TdCtixXbBDAeNGNi6">Exercícios do período 2.3</a><br>
+      <a href="https://drive.google.com/file/d/1MOfzpXuoG1sc9xnOwYzY9cAFmB33GuZk/view?usp=sharing">Gabarito dos exercícios do período 2.3</a>
+    </p>
 
-    <p><b>PERÍODO 4 - GRUPO 2</b></p>
-    <a href="https://forms.gle/Z98JFdMy9bXBKPnJ9">Exercícios do período 4.1</a><br>
-    <a href="https://drive.google.com/file/d/143OjQEgMKMdTW-ErC8Pmnf0HrsQeeE85/view?usp=sharing">Gabarito dos exercícios do período 4.1</a> (igual ao Grupo 1)<br>
-    <a href="https://forms.gle/2vFmqvaxZzhn3sXv6">Exercícios do período 4.2</a><br>
-    <a href="https://drive.google.com/file/d/1HNmko0I6lfoyNPAq-nQ-nRsE2y80P-rZ/view?usp=share_link">Gabarito dos exercícios do período 4.2</a> (igual ao Grupo 1)<br>
-    <a href="https://forms.gle/5zrVDgRWaADBWM6i6">Exercícios do período 4.3</a><br>
-    <a href="https://drive.google.com/file/d/1CZHZlWjSzF-1AMpnDk46Y2CTz9pZtP2C/view?usp=sharing">Gabarito dos exercícios do período 4.3</a> (igual ao Grupo 1)</p>
+    <p><strong>PERÍODO 2 – GRUPO 2</strong></p>
+    <p>
+      <a href="https://forms.gle/gfUwySqy8Qr6W74G8">Exercícios do período 2.1</a><br>
+      <a href="https://drive.google.com/file/d/1EtzrObyxjsSSIKtiAlX--iylR9bFsf2y/view?usp=sharing">Gabarito dos exercícios do período 2.1</a><br>
+      <a href="https://forms.gle/C8u6Qzb3jgpCx1sYA">Exercícios do período 2.2</a><br>
+      <a href="https://drive.google.com/file/d/1NZf6no_qBwb-dE3PzwZxtTEei2HDA3wN/view?usp=sharing">Gabarito dos exercícios do período 2.2</a><br>
+      <a href="https://forms.gle/e4ezN21tQxRRGCXU7">Exercícios do período 2.3</a><br>
+      <a href="https://drive.google.com/file/d/1MOfzpXuoG1sc9xnOwYzY9cAFmB33GuZk/view?usp=sharing">Gabarito dos exercícios do período 2.3</a>
+    </p>
 
-    <p><b>PERÍODO 5</b></p>
-    <a href="https://forms.gle/CSvkHVRkiihKyrav9">Exercícios do período 5.1</a><br>
-    <a href="https://drive.google.com/file/d/15gqohIa6AOJTO7kJlqBG93zb2Ovvgi2q/view?usp=sharing">Gabarito dos exercícios do período 5.1</a><br>
-    <a href="https://forms.gle/HvjHQtwNBPb2AjYu9">Exercícios do período 5.2</a><br>
-    <a href="https://drive.google.com/file/d/1FKQYtaCNC_3t_zAUsBlzwAJ9AXg5kZUJ/view?usp=sharing">Gabarito dos exercícios do período 5.2</a></p>
+    <p><strong>DADOS BRUTOS</strong></p>
+    <p>
+      <a href="https://drive.google.com/drive/folders/1OirvU5-72uxgFaGPugv16LIhRcz17dDD?usp=sharing">
+        Acessar dados brutos
+      </a>
+    </p>
 
-    <p><b><a href="https://drive.google.com/drive/folders/1OirvU5-72uxgFaGPugv16LIhRcz17dDD?usp=sharing">DADOS BRUTOS</a></b><br>
-    Nos dados brutos disponibilizados, as respostas dos 14 participantes que consentiram com a pesquisa encontram-se organizadas em pastas numeradas de P-1 até P-14. Em cada pasta temos as respostas dos Exercícios em .pdf, sem identificação e enumerados da seguinte forma.<br>
-    Período 1.1: 01 e 02<br>
-    Período 1.2: 03 e 04<br>
-    Período 2.1 - Grupo 1: 05 e 06<br>
-    Período 2.1 - Grupo 2: 07<br>
-    Período 2.2 - Grupo 1: 08 e 09<br>
-    Período 2.2 - Grupo 2: 10<br>
-    Período 2.3 - Grupo 1: 11 e 12<br>
-    Período 2.3 - Grupo 2: 13<br>
-    Período 3.1: 14 e 15<br>
-    Período 3.2: 16 e 17<br>
-    Período 4.1 - Grupo 1: 18<br>
-    Período 4.1 - Grupo 2: 19 e 20<br>
-    Período 4.2 - Grupo 1: 21<br>
-    Período 4.2 - Grupo 2: 22 e 23<br>
-    Período 4.3 - Grupo 1: 24<br>
-    Período 4.3 - Grupo 2: 25 e 26<br>
-    Período 5.1: 27 e 28<br>
-    Período 5.2: 29 e 30</p>
+    <h3>Coleta de dados – 3</h3>
 
-    <h2>COLETA DE DADOS - 3</h2>
+    <p><strong>PERÍODO 1</strong></p>
+    <p>
+      <a href="https://forms.gle/SWvLsqJYRXJtbSMk6">Exercícios do período 1.1</a><br>
+      <a href="https://drive.google.com/file/d/1YSIxz9knGI0CMcd38Xjlw575KvKnozSc/view?usp=share_link">Gabarito do período 1.1</a>
+    </p>
 
-    <p><b>PERÍODO 1</b></p>
-    <a href="https://forms.gle/SWvLsqJYRXJtbSMk6">Exercícios do período 1.1</a><br>
-    <a href="https://drive.google.com/file/d/1YSIxz9knGI0CMcd38Xjlw575KvKnozSc/view?usp=share_link">Gabarito dos exercícios do período 1.1</a><br>
-    <a href="https://forms.gle/Nuv17CExmpBqYqvz8">Exercícios do período 1.2</a><br>
-    <a href="https://drive.google.com/file/d/1joy2yf3gVC2hIXKhFvnrTGc7lepIVkLX/view?usp=share_link">Gabarito dos exercícios do período 1.2</a></p>
+    <p><strong>PERÍODO 2</strong></p>
+    <p>
+      <a href="https://forms.gle/yihUaSMK3HPcNrAZA">Exercícios do período 2.1</a><br>
+      <a href="https://drive.google.com/file/d/1QB3Gkwe0dBhs4jHlUiZQsAonmeRCsDre/view?usp=share_link">Gabarito do período 2.1</a>
+    </p>
 
-    <p><b>PERÍODO 2</b></p>
-    <a href="https://forms.gle/yihUaSMK3HPcNrAZA">Exercícios do período 2.1</a><br>
-    <a href="https://drive.google.com/file/d/1QB3Gkwe0dBhs4jHlUiZQsAonmeRCsDre/view?usp=share_link">Gabarito dos exercícios do período 2.1</a><br>
-    <a href="https://forms.gle/qnk6ZHxJU1nmBhAp6">Exercícios do período 2.2</a><br>
-    <a href="https://drive.google.com/file/d/1IOjHWJtS3pLdaR0lJLBmujm4QIEz5rBw/view?usp=share_link">Gabarito dos exercícios do período 2.2</a><br>
-    <a href="https://forms.gle/7KCtX7oUxNDEuoPAA">Exercícios do período 2.3</a><br>
-    <a href="https://drive.google.com/file/d/1hfkxVNI7J-y52sQVBj4js6lIdIYfQn_g/view?usp=share_link">Gabarito dos exercícios do período 2.3</a></p>
+    <p><strong>DADOS BRUTOS</strong></p>
+    <p>
+      <a href="https://drive.google.com/drive/folders/10TpJypiRRlszxIZYYd343GMNndaIaqkn?usp=sharing">
+        Acessar dados brutos
+      </a>
+    </p>
 
-    <p><b>PERÍODO 3</b></p>
-    <a href="https://forms.gle/vvLX8vVDgSJQpfSUA">Exercícios do período 3.1</a><br>
-    <a href="https://drive.google.com/file/d/1KGOvd5-olUXADIrogKG8q0UaGZOHIPrX/view?usp=share_link">Gabarito dos exercícios do período 3.1</a><br>
-    <a href="https://forms.gle/xy2RXCMapKHDSN5u9">Exercícios do período 3.2</a><br>
-    <a href="https://drive.google.com/file/d/1ILClOHHjWibrbCQoH0Y64G8q7r7iw-r9/view?usp=sharing">Gabarito dos exercícios do período 3.2</a></p>
+    <h3>Coleta de dados – 4</h3>
 
-    <p><b>PERÍODO 4</b></p>
-    <a href="https://forms.gle/2bhWD3p9ufvXUiod8">Exercícios do período 4.1</a><br>
-    <a href="https://drive.google.com/file/d/1cyLpV8XlN37RHL7p7UE_mw0qPg8bCdYX/view?usp=share_link">Gabarito dos exercícios do período 4.1</a><br>
-    <a href="https://forms.gle/eWJQ5P1bvu9uUtm77">Exercícios do período 4.2</a><br>
-    <a href="https://drive.google.com/file/d/1tXlmMLKugu23KYj6weqgLTSM6e0xg_Vs/view?usp=share_link">Gabarito dos exercícios do período 4.2</a><br>
-    <a href="https://forms.gle/XueVX63Z4ixjjrqM9">Exercícios do período 4.3</a><br>
-    <a href="https://drive.google.com/file/d/1cCdpyDoiIw7tGYmgBM8L48JIvnNI9tSh/view?usp=share_link">Gabarito dos exercícios do período 4.3</a></p>
+    <p><strong>PERÍODO 1</strong></p>
+    <p>
+      <a href="https://forms.gle/xfVqxR62qdGFmR6UA">Exercícios do período 1.1</a><br>
+      <a href="https://drive.google.com/file/d/1XwoD6BwGqO8YF5pkjc8_Siotv7X-8QAY/view?usp=share_link">Gabarito do período 1.1</a>
+    </p>
 
-    <p><b>PERÍODO 5</b></p>
-    <a href="https://forms.gle/MVW3Diw2hABmR9a6A">Exercícios do período 5.1</a><br>
-    <a href="https://drive.google.com/file/d/10oKrGExhlLHuqvjS4an_7KFLz_CgaQ6-/view?usp=sharing">Gabarito dos exercícios do período 5.1</a><br>
-    <a href="https://forms.gle/txFDxcj3QrCyfx3Z9">Exercícios do período 5.2</a><br>
-    <a href="https://drive.google.com/file/d/1S0vRYZL6JY4wquuydOwDtrV3-Os5lizs/view?usp=share_link">Gabarito dos exercícios do período 5.2</a></p>
+    <p><strong>DADOS BRUTOS</strong></p>
+    <p>
+      <a href="https://drive.google.com/drive/folders/1jD-_mdLvUq2heFkHHjAtZJz_TJ9Qfmfy?usp=share_link">
+        Acessar dados brutos
+      </a>
+    </p>
 
-    <p><b><a href="https://drive.google.com/drive/folders/10TpJypiRRlszxIZYYd343GMNndaIaqkn?usp=sharing">DADOS BRUTOS</a></b><br>
-    Nos dados brutos disponibilizados, as respostas do único participante que consentiu com a pesquisa encontram-se organizadas em .pdf, sem identificação e enumerados da seguinte forma.<br>
-    Período 1.1: 01 e 02<br>
-    Período 1.2: 03 e 04<br>
-    Período 2.1: 05 e 06<br>
-    Período 2.2: 07 e 08<br>
-    Período 2.3: 09<br>
-    Período 3.1: 10 e 11<br>
-    Período 3.2: 12 e 13<br>
-    Período 4.1: 14<br>
-    Período 4.2: 15<br>
-    Período 4.3: 16<br>
-    Período 5.1: 17 e 18<br>
-    Período 5.2: 19 e 20</p>
+  </section>
 
-    <h2>COLETA DE DADOS - 4</h2>
+</main>
 
-    <p><b>PERÍODO 1</b></p>
-    <a href="https://forms.gle/xfVqxR62qdGFmR6UA">Exercícios do período 1.1</a><br>
-    <a href="https://drive.google.com/file/d/1XwoD6BwGqO8YF5pkjc8_Siotv7X-8QAY/view?usp=share_link"> Gabarito dos exercícios do período 1.1</a><br>
-    <a href="https://forms.gle/K7cR6rRi5HoMes7k7">Exercícios do período 1.2</a><br>
-    <a href="https://drive.google.com/file/d/1aPpsQ4gI-c7gkLQHGBe7diQKcJcetDe9/view?usp=share_link">Gabarito dos exercícios do período 1.2</a></p>
-
-    <p><b>PERÍODO 2 - GRUPO 1</b></p>
-    <a href="https://forms.gle/Uc9xSaPH8B5XVCut7">Exercícios do período 2.1</a><br>
-    <a href="https://drive.google.com/file/d/1eE0nsFPZR6OdGQQfIhrM79W7GZRathV2/view?usp=share_link">Gabarito dos exercícios do período 2.1</a> (igual ao Grupo 2)<br>
-    <a href="https://forms.gle/aEG4MNRc5sGkdTCNA">Exercícios do período 2.2</a><br>
-    <a href="https://drive.google.com/file/d/1guhiyLibFoGgOE-fpJFSYE7PwAxrjQdr/view?usp=sharing">Gabarito dos exercícios do período 2.2</a> (igual ao Grupo 2)<br>
-    <a href="https://forms.gle/Pz54BXiWjXTED1YW9">Exercícios do período 2.3</a><br>
-    <a href="https://drive.google.com/file/d/1Fbn7C5xiCgtROdKcJgH05iC3kXIdSRX5/view?usp=share_link">Gabarito dos exercícios do período 2.3</a> (igual ao Grupo 2)</p>
-
-    <p><b>PERÍODO 2 - GRUPO 2</b></p>
-    <a href="https://forms.gle/4j38Nu5AcZEcj6Kx9">Exercícios do período 2.1</a><br>
-    <a href="https://drive.google.com/file/d/1eE0nsFPZR6OdGQQfIhrM79W7GZRathV2/view?usp=share_link">Gabarito dos exercícios do período 2.1</a> (igual ao Grupo 1)<br>
-    <a href="https://forms.gle/VS7uyoWb8DAS4r3w6">Exercícios do período 2.2</a><br>
-    <a href="https://drive.google.com/file/d/1guhiyLibFoGgOE-fpJFSYE7PwAxrjQdr/view?usp=sharing">Gabarito dos exercícios do período 2.2</a> (igual ao Grupo 1)<br>
-    <a href="https://forms.gle/PKBvKeAWQ9SwYpVFA">Exercícios do período 2.3</a><br>
-    <a href="https://drive.google.com/file/d/1Fbn7C5xiCgtROdKcJgH05iC3kXIdSRX5/view?usp=share_link">Gabarito dos exercícios do período 2.3</a> (igual ao Grupo 1)</p>
-
-    <p><b>PERÍODO 3</b></p>
-    <a href="https://forms.gle/4Dpv1Lt8YJH9u2e89">Exercícios do período 3.1</a><br>
-    <a href="https://drive.google.com/file/d/1MWk7qCv01_XWNzvhdITmdV4mnxDPbMkJ/view?usp=sharing">Gabarito dos exercícios do período 3.1</a><br>
-    <a href="https://forms.gle/bMvw82sTBoZA9VMx7">Exercícios do período 3.2</a><br>
-    <a href="https://drive.google.com/file/d/1W_f4x6e_hBU69efxP--3KRhuf7i6z3Cm/view?usp=share_link">Gabarito dos exercícios do período 3.2</a></p>
-
-    <p><b>PERÍODO 4 - GRUPO 1</b></p>
-    <a href="https://forms.gle/3qxQfFBPDeC9Jv47A">Exercícios do período 4.1</a><br>
-    <a href="https://drive.google.com/file/d/1Rlxy3uncULq9y-6NJd5Cs0jNnGK48I5s/view?usp=share_link">Gabarito dos exercícios do período 4.1</a> (igual ao Grupo 2)<br>
-    <a href="https://forms.gle/GK2e4joq9yW3gdJs8">Exercícios do período 4.2</a><br>
-    <a href="https://drive.google.com/file/d/1EJ6enId5SYYZjLCqHvvKnFcl_JewU54g/view?usp=share_link">Gabarito dos exercícios do período 4.2</a> (igual ao Grupo 2)<br>
-    <a href="https://forms.gle/ZFp7RpE19WxUWhnN7">Exercícios do período 4.3</a><br>
-    <a href="https://drive.google.com/file/d/1R292_4YR329OxbDgwBNDKVi1C09D6pmL/view?usp=share_link">Gabarito dos exercícios do período 4.3</a> (igual ao Grupo 2)</p>
-
-    <p><b>PERÍODO 4 - GRUPO 2</b></p>
-    <a href="https://forms.gle/UDRxpGHi1pcs88ua8">Exercícios do período 4.1</a><br>
-    <a href="https://drive.google.com/file/d/1Rlxy3uncULq9y-6NJd5Cs0jNnGK48I5s/view?usp=share_link">Gabarito dos exercícios do período 4.1</a> (igual ao Grupo 1)<br>
-    <a href="https://forms.gle/QBuzHq2Jdq9sNq3u7">Exercícios do período 4.2</a><br>
-    <a href="https://drive.google.com/file/d/1EJ6enId5SYYZjLCqHvvKnFcl_JewU54g/view?usp=share_link">Gabarito dos exercícios do período 4.2</a> (igual ao Grupo 1)<br>
-    <a href="https://forms.gle/gKQs3Cvs2irc2gKy5">Exercícios do período 4.3</a><br>
-    <a href="https://drive.google.com/file/d/1R292_4YR329OxbDgwBNDKVi1C09D6pmL/view?usp=share_link">Gabarito dos exercícios do período 4.3</a> (igual ao Grupo 1)</p>
-
-    <p><b>PERÍODO 5</b></p>
-    <a href="https://forms.gle/TrR76Xppgge7kMSf8">Exercícios do período 5.1</a><br>
-    <a href="https://drive.google.com/file/d/16p_NPiI5Tn52Ysphk6CUY5zT1dEfc671/view?usp=share_link">Gabarito dos exercícios do período 5.1</a><br>
-    <a href="https://forms.gle/2V5oi8iqMA3jogA76">Exercícios do período 5.2</a><br>
-    <a href="https://drive.google.com/file/d/1OuBUtTFrUB2879nflpqLE5QPVkDAhgxC/view?usp=share_link">Gabarito dos exercícios do período 5.2</a></p>
-
-    
-   <p><b><a href="https://drive.google.com/drive/folders/1jD-_mdLvUq2heFkHHjAtZJz_TJ9Qfmfy?usp=share_link">DADOS BRUTOS</a></b><br>
-   Nos dados brutos disponibilizados, as respostas dos 31 participantes que consentiram com a pesquisa encontram-se organizadas em pastas numeradas de P-01 até P-31. Em cada pasta temos as respostas dos Exercícios em .pdf, sem identificação e enumerados da seguinte forma.<br>
-   Período 1.1: 01 e 02<br>
-   Período 1.2: 03 e 04<br>
-   Período 2.1 - Grupo 1: 05 e 06<br>
-   Período 2.1 - Grupo 2: 07<br>
-   Período 2.2 - Grupo 1: 08 e 09<br>
-   Período 2.2 - Grupo 2: 10<br>
-   Período 2.3 - Grupo 1: 11 e 12<br>
-   Período 2.3 - Grupo 2: 13<br>
-   Período 3.1: 14 e 15<br>
-   Período 3.2: 16 e 17<br>
-   Período 4.1 - Grupo 1: 18<br>
-   Período 4.1 - Grupo 2: 19 e 20<br>
-   Período 4.2 - Grupo 1: 21<br>
-   Período 4.2 - Grupo 2: 22 e 23<br>
-   Período 4.3 - Grupo 1: 24<br>
-   Período 4.3 - Grupo 2: 25 e 26<br>
-   Período 5.1: 27 e 28<br>
-   Período 5.2: 29 e 30</p>    
-    
+<!-- ===== FOOTER ===== -->
+<footer class="site-footer">
+  <div>
+    <img src="/imagens/logo-sobre.png" alt="Logo sobre" class="large">
+    <button data-link="https://integravel.github.io/sobre">
+      Mais informações
+    </button>
   </div>
 
-  <!-- Rodapé -->
-  <footer>
-    <div>
-      <img src="/imagens/logo-sobre.png" alt="Logo sobre" class="large" />
-      <button onclick="window.location.href='https://integravel.github.io/sobre'">Mais Informações</button>
-    </div>
-    <div>
-      <img src="/imagens/logo-contato.png" alt="Logo contato" />
-      <button onclick="window.location.href='mailto:integravel@gmail.com'">integravel@gmail.com</button>
-    </div>
-  </footer>
+  <div>
+    <img src="/imagens/logo-contato.png" alt="Logo contato">
+    <button data-link="mailto:integravel@gmail.com">
+      integravel@gmail.com
+    </button>
+  </div>
+</footer>
+
+<script src="js/main.js"></script>
 </body>
 </html>
