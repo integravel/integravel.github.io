@@ -5,6 +5,8 @@ body {
     background: #fff;
 }
 
+/* ===== HEADER ===== */
+
 header {
     background: #000;
     color: #fff;
@@ -23,6 +25,8 @@ header img {
     height: 40px;
 }
 
+/* ===== CONTEÚDO ===== */
+
 .content {
     max-width: 900px;
     margin: auto;
@@ -33,18 +37,27 @@ h2 {
     margin-top: 40px;
 }
 
+/* ===== PERFIL ===== */
+
 .perfil {
     display: flex;
-    gap: 20px;
+    gap: 24px;
     align-items: center;
+    justify-content: center;
+    margin-top: 20px;
 }
 
-.foto-perfil {
-    width: 180px;
-    max-width: 60vw;
-    height: auto;
-    border-radius: 12px;
+/* 🔥 REGRA DEFINITIVA DA FOTO 🔥 */
+.perfil img.foto-perfil {
+    width: 200px !important;
+    height: auto !important;
+    max-height: none !important;
+    max-width: 80vw !important;
+    border-radius: 14px;
+    display: block;
 }
+
+/* ===== BUSCA ===== */
 
 #busca {
     width: 100%;
@@ -52,6 +65,8 @@ h2 {
     margin: 20px 0;
     font-size: 1em;
 }
+
+/* ===== PUBLICAÇÕES ===== */
 
 details {
     background: #f5f5f5;
@@ -104,6 +119,8 @@ summary {
     margin-top: 6px;
 }
 
+/* ===== FOOTER ===== */
+
 footer {
     background: #f4f4f4;
     padding: 20px;
@@ -130,12 +147,15 @@ footer button {
     cursor: pointer;
 }
 
+/* ===== MOBILE ===== */
+
 @media (max-width: 600px) {
     .perfil {
         flex-direction: column;
         text-align: center;
     }
-.foto-perfil {
-    width: 200px;
-}
+
+    .perfil img.foto-perfil {
+        width: 220px !important;
+    }
 }
