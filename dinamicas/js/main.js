@@ -1,13 +1,11 @@
-// Torna os botões do footer navegáveis usando data-link
-document.addEventListener("DOMContentLoaded", () => {
-    const buttons = document.querySelectorAll("button[data-link]");
-
-    buttons.forEach(button => {
-        button.addEventListener("click", () => {
-            const link = button.getAttribute("data-link");
-            if (link) {
-                window.location.href = link;
-            }
-        });
+// Botões do footer sem JS inline
+document.querySelectorAll("button[data-link]").forEach(btn => {
+    btn.addEventListener("click", () => {
+        window.location.href = btn.dataset.link;
     });
 });
+
+// Espaço preparado para futuras melhorias:
+// - filtros
+// - ordenação
+// - carregamento dinâmico
