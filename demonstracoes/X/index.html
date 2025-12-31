@@ -4,89 +4,97 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Laboratório Integrável</title>
+
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       font-family: Arial, sans-serif;
       margin: 0;
       padding: 0;
-      box-sizing: border-box;
       max-width: 100vw;
       overflow-x: hidden;
     }
 
-    header {
+    /* ===== HEADER ===== */
+    .site-header {
       background-color: #000;
       color: #fff;
-      display: flex;
-      align-items: center;
       padding: 10px 20px;
     }
 
-    header img {
-      height: 40px;
-      margin-right: 20px;
+    .site-header a {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      text-decoration: none;
+      color: inherit;
     }
 
-    header p {
+    .site-header img {
+      height: 40px;
+    }
+
+    .site-header p {
       margin: 0;
     }
 
-    header a {
-      color: inherit;
-      text-decoration: none;
-      display: flex;
-      align-items: center;
-    }
-
-    .content {
-      padding: 20px;
+    /* ===== CONTAINER ===== */
+    .container {
       max-width: 800px;
       margin: 0 auto;
+      padding: 20px;
       line-height: 1.6;
       text-align: justify;
     }
 
-    .content h2 {
+    h2 {
       color: #333;
-      margin-top: 20px;
+      margin-top: 30px;
     }
 
-    .content a {
+    a {
       color: #007BFF;
       text-decoration: none;
     }
 
-    .content a:hover {
+    a:hover {
       text-decoration: underline;
     }
 
-    footer {
+    .lista-demonstracoes a {
+      display: block;
+      margin: 4px 0;
+    }
+
+    /* ===== FOOTER ===== */
+    .site-footer {
       background-color: #f4f4f4;
       display: flex;
       justify-content: center;
       align-items: center;
+      gap: 30px;
       padding: 20px;
       border-top: 1px solid #ddd;
-      width: 100%;
-      box-sizing: border-box;
     }
 
-    footer div {
+    .site-footer div {
       display: flex;
       align-items: center;
-      gap: 20px;
-      margin: 0 15px;
+      gap: 15px;
     }
 
-    footer img {
+    .site-footer img {
       height: 40px;
     }
 
-    footer img.large {
+    .site-footer img.large {
       height: 50px;
     }
 
-    footer button {
+    .site-footer button {
       background-color: #007BFF;
       color: #fff;
       border: none;
@@ -95,92 +103,106 @@
       cursor: pointer;
     }
 
-    footer button:hover {
+    .site-footer button:hover {
       background-color: #0056b3;
     }
 
-    .perfil {
-      display: flex;
-      align-items: stretch;
-      margin-top: 30px;
-      gap: 20px;
-    }
-
-    .foto-perfil {
-      height: 100%;
-      object-fit: cover;
-      border-radius: 8px;
-    }
-
-    .descricao-perfil {
-      flex: 1;
-      line-height: 1.6;
-      text-align: justify;
-    }
-
+    /* ===== RESPONSIVO ===== */
     @media (max-width: 600px) {
-      .perfil {
+      .site-header a {
         flex-direction: column;
-        align-items: center;
         text-align: center;
       }
 
-      .descricao-perfil {
-        text-align: justify;
+      .site-footer {
+        flex-direction: column;
       }
     }
   </style>
 </head>
 <body>
-  <!-- Cabeçalho com link -->
-  <header>
-    <a href="https://integravel.github.io/">
-      <img src="/imagens/logo.png" alt="Logo da página" />
-      <p>Laboratório Integrável é um hub para recursos virtuais, abertos, de Ciências e Matemática, de autoria neurodivergente.</p>
-    </a>
-  </header>
 
-  <!-- Conteúdo principal -->
-  <div class="content">
-    <h2>Geração X</h2>
-    <p>Esta Geração surge devido às potencialidades da IA. Pois ao longo dos últimos anos trabalhando com demonstrações por justaposição, pudemos indicar para a IA o que entendíamos como funcional e eficaz na aprendizagem dos estudantes, de modo que também poderíamos manter sua produção sem grandes desafios. Neste ambiente, temos então 12 espaços para preencher com segmentos do texto de uma demonstração, programado em HTML com as peças na forma de arquivos de imagem, viabilizando sua produção em um editor de slides, mas se apresentam ao usuário de forma embaralhada e ao término da demonstração, faz sua autocorreção (identificando quais blocos encontram-se nas posições corretas).</p>
+<!-- ===== HEADER ===== -->
+<header class="site-header">
+  <a href="https://integravel.github.io/">
+    <img src="/imagens/logo.png" alt="Logo do Laboratório Integrável" />
+    <p>
+      Laboratório Integrável é um hub para recursos virtuais, abertos,
+      de Ciências e Matemática, de autoria neurodivergente.
+    </p>
+  </a>
+</header>
 
-    <h2>DEMONSTRAÇÕES</h2>
+<!-- ===== CONTEÚDO ===== -->
+<main class="container">
 
-    <a href="https://integravel.github.io/arrasta/0/">√2 ∉ ℚ</a><br>
-    <a href="https://integravel.github.io/arrasta/1/">Se todos os valores de um conjunto forem iguais, a variância é zero</a><br>
-    <a href="https://integravel.github.io/arrasta/2/">A média amostral tem valor esperado igual à média populacional</a><br>
-    <a href="https://integravel.github.io/arrasta/3/">O valor esperado de uma Poisson é igual a seu parâmetro λ</a><br>
-    <a href="https://integravel.github.io/arrasta/4/">A Correlação de Pearson é simétrica</a><br>
-    <a href="https://integravel.github.io/arrasta/5/">A regressão linear simples minimiza a SQR</a><br>
-    <a href="https://integravel.github.io/arrasta/6/">Propriedade do produto de potencias</a><br>
-    <a href="https://integravel.github.io/arrasta/7/">Propriedade de mudança de base do logaritmo</a><br>
-    <a href="https://integravel.github.io/arrasta/8/">C(n, k) = C(n - 1, k - 1) + C(n - 1, k)</a><br>
-    <a href="https://integravel.github.io/arrasta/9/">Propriedade do complementar da união de dois eventos</a><br>
-    <a href="https://integravel.github.io/arrasta/10/">P(E^c) = 1 - P(E)</a><br>
-    <a href="https://integravel.github.io/arrasta/11/">Soma das frequências relativas é igual a 1</a><br>
-    <a href="https://integravel.github.io/arrasta/12/">Teorema de Pitágoras</a><br>
-    <a href="https://integravel.github.io/arrasta/13/">Lei dos cossenos esférica</a><br>
-    <a href="https://integravel.github.io/arrasta/14/">Teorema de Herão</a><br>
-    <a href="https://integravel.github.io/arrasta/15/">Fórmula da distância de um ponto a uma reta</a><br>
-    <a href="https://integravel.github.io/arrasta/16/">Tang(θ) = sen(θ)/cos(θ)</a><br>
-    <a href="https://integravel.github.io/arrasta/17/">Condição de existência na equação geral da circunferência</a><br>
-   <a href="https://integravel.github.io/arrasta/18/">Estimador de Chapman corrige o viés do captura-recaptura</a><br>
-   <a href="https://integravel.github.io/arrasta/19/">A soma das distâncias aos focos de uma elipse é igual ao eixo maior</a><p>
-      
-    
+  <h2>Geração X</h2>
+
+  <p>
+    Esta Geração surge devido às potencialidades da IA. Pois ao longo
+    dos últimos anos trabalhando com demonstrações por justaposição,
+    pudemos indicar para a IA o que entendíamos como funcional e eficaz
+    na aprendizagem dos estudantes, de modo que também poderíamos manter
+    sua produção sem grandes desafios. Neste ambiente, temos então 12
+    espaços para preencher com segmentos do texto de uma demonstração,
+    programado em HTML com as peças na forma de arquivos de imagem,
+    viabilizando sua produção em um editor de slides, mas se apresentam
+    ao usuário de forma embaralhada e ao término da demonstração,
+    faz sua autocorreção (identificando quais blocos encontram-se nas
+    posições corretas).
+  </p>
+
+  <h2>DEMONSTRAÇÕES</h2>
+
+  <div class="lista-demonstracoes">
+    <a href="https://integravel.github.io/arrasta/0/">√2 ∉ ℚ</a>
+    <a href="https://integravel.github.io/arrasta/1/">Se todos os valores de um conjunto forem iguais, a variância é zero</a>
+    <a href="https://integravel.github.io/arrasta/2/">A média amostral tem valor esperado igual à média populacional</a>
+    <a href="https://integravel.github.io/arrasta/3/">O valor esperado de uma Poisson é igual a seu parâmetro λ</a>
+    <a href="https://integravel.github.io/arrasta/4/">A Correlação de Pearson é simétrica</a>
+    <a href="https://integravel.github.io/arrasta/5/">A regressão linear simples minimiza a SQR</a>
+    <a href="https://integravel.github.io/arrasta/6/">Propriedade do produto de potências</a>
+    <a href="https://integravel.github.io/arrasta/7/">Propriedade de mudança de base do logaritmo</a>
+    <a href="https://integravel.github.io/arrasta/8/">C(n, k) = C(n − 1, k − 1) + C(n − 1, k)</a>
+    <a href="https://integravel.github.io/arrasta/9/">Propriedade do complementar da união de dois eventos</a>
+    <a href="https://integravel.github.io/arrasta/10/">P(Eᶜ) = 1 − P(E)</a>
+    <a href="https://integravel.github.io/arrasta/11/">Soma das frequências relativas é igual a 1</a>
+    <a href="https://integravel.github.io/arrasta/12/">Teorema de Pitágoras</a>
+    <a href="https://integravel.github.io/arrasta/13/">Lei dos cossenos esférica</a>
+    <a href="https://integravel.github.io/arrasta/14/">Teorema de Herão</a>
+    <a href="https://integravel.github.io/arrasta/15/">Fórmula da distância de um ponto a uma reta</a>
+    <a href="https://integravel.github.io/arrasta/16/">Tang(θ) = sen(θ) / cos(θ)</a>
+    <a href="https://integravel.github.io/arrasta/17/">Condição de existência na equação geral da circunferência</a>
+    <a href="https://integravel.github.io/arrasta/18/">Estimador de Chapman corrige o viés do captura-recaptura</a>
+    <a href="https://integravel.github.io/arrasta/19/">A soma das distâncias aos focos de uma elipse é igual ao eixo maior</a>
   </div>
 
-  <!-- Rodapé -->
-  <footer>
-    <div>
-      <img src="/imagens/logo-sobre.png" alt="Logo sobre" class="large" />
-      <button onclick="window.location.href='https://integravel.github.io/sobre'">Mais Informações</button>
-    </div>
-    <div>
-      <img src="/imagens/logo-contato.png" alt="Logo contato" />
-      <button onclick="window.location.href='mailto:integravel@gmail.com'">integravel@gmail.com</button>
-    </div>
-  </footer>
+</main>
+
+<!-- ===== FOOTER ===== -->
+<footer class="site-footer">
+  <div>
+    <img src="/imagens/logo-sobre.png" alt="Logo sobre" class="large" />
+    <button data-link="https://integravel.github.io/sobre">
+      Mais Informações
+    </button>
+  </div>
+
+  <div>
+    <img src="/imagens/logo-contato.png" alt="Logo contato" />
+    <button data-link="mailto:integravel@gmail.com">
+      integravel@gmail.com
+    </button>
+  </div>
+</footer>
+
+<script>
+  document.querySelectorAll("button[data-link]").forEach(button => {
+    button.addEventListener("click", () => {
+      window.location.href = button.dataset.link;
+    });
+  });
+</script>
+
 </body>
 </html>
