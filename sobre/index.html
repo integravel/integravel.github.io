@@ -5,59 +5,89 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Laboratório Integrável</title>
 
-    <link rel="stylesheet" href="style.css">
+    <!-- CSS (com cache-bust) -->
+    <link rel="stylesheet" href="style.css?v=2">
 </head>
 <body>
 
+<!-- ===== HEADER ===== -->
 <header>
     <a href="https://integravel.github.io/">
-        <img src="../imagens/logo.png" alt="Logo">
-        <p>Laboratório Integrável é um hub para recursos virtuais, abertos, de Ciências e Matemática, de autoria neurodivergente.</p>
+        <img src="../imagens/logo.png" alt="Logo do Laboratório Integrável">
+        <p>
+            Laboratório Integrável é um hub para recursos virtuais, abertos,
+            de Ciências e Matemática, de autoria neurodivergente.
+        </p>
     </a>
 </header>
 
+<!-- ===== CONTEÚDO ===== -->
 <main class="content">
 
     <h2>Origem e missão</h2>
-    <p>
-        O Laboratório Integrável surgiu em 2022 como um endereço de e-mail para organizar
-        discussões sobre pequenos projetos e atividades discentes. Com o crescimento dos
-        projetos e o aumento no fluxo de materiais, consolidou-se como um espaço integrador
-        dedicado ao acesso aberto a recursos virtuais de Ciências e Matemática.
+    <p style="text-align: justify;">
+        O Laboratório Integrável surgiu em 2022 como um endereço de e-mail para
+        organizar discussões sobre pequenos projetos e atividades discentes.
+        Com o crescimento dos projetos e o aumento no fluxo de materiais,
+        consolidou-se como um espaço integrador dedicado ao acesso aberto a
+        recursos virtuais de Ciências e Matemática.
     </p>
 
+    <!-- ===== SOBRE ===== -->
     <h2>Sobre</h2>
+
     <div class="perfil">
-        <img src="../imagens/x.jpg" alt="Foto de perfil" class="foto-perfil">
-        <p>
-            Emanuelly é docente do IFRJ com licenciatura em <b>Matemática</b> (USP),
-            Mestrado (UNESP) e Doutorado (UNICAMP), ambos em <b>Ensino de Ciências e Matemática</b>.
-        </p>
+        <img
+            src="../imagens/x.jpg"
+            alt="Foto de Emanuelly"
+            class="foto-perfil"
+        >
+
+        <div class="descricao-perfil">
+            <p style="text-align: justify;">
+                Emanuelly é docente do IFRJ com licenciatura em
+                <b>Matemática</b> (USP), Mestrado (UNESP) e Doutorado (UNICAMP),
+                ambos em <b>Ensino de Ciências e Matemática</b>, com
+                especialização em <b>Informática aplicada à Educação</b> (IFRJ),
+                cursando licenciatura em <b>Química</b> (IFRJ) e especialização
+                em <b>Gestão Escolar</b> (IFFar).
+            </p>
+        </div>
     </div>
 
+    <!-- ===== PUBLICAÇÕES ===== -->
     <h2>Textos acadêmicos</h2>
 
     <input
         type="search"
         id="busca"
         placeholder="Buscar por título, autoria ou palavra-chave..."
+        aria-label="Buscar publicações"
     >
 
     <div id="publicacoes"></div>
 
 </main>
 
+<!-- ===== FOOTER ===== -->
 <footer>
     <div>
-        <img src="../imagens/logo-sobre.png" class="large">
-        <button onclick="location.href='https://integravel.github.io/sobre'">Mais informações</button>
+        <img src="../imagens/logo-sobre.png" alt="Logo sobre" class="large">
+        <button onclick="window.location.href='https://integravel.github.io/sobre'">
+            Mais informações
+        </button>
     </div>
+
     <div>
-        <img src="../imagens/logo-contato.png">
-        <button onclick="location.href='mailto:integravel@gmail.com'">integravel@gmail.com</button>
+        <img src="../imagens/logo-contato.png" alt="Logo contato">
+        <button onclick="window.location.href='mailto:integravel@gmail.com'">
+            integravel@gmail.com
+        </button>
     </div>
 </footer>
 
+<!-- ===== JS ===== -->
 <script src="publicacoes.js"></script>
+
 </body>
 </html>
