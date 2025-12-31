@@ -40,8 +40,10 @@ h2 {
 }
 
 .foto-perfil {
-    max-height: 120px;
-    border-radius: 8px;
+    width: 180px;
+    max-width: 60vw;
+    height: auto;
+    border-radius: 12px;
 }
 
 #busca {
