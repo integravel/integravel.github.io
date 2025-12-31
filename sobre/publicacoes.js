@@ -41,12 +41,12 @@ function renderizar(lista) {
 
       const details = document.createElement("details");
 
-      // 👉 ANO + CONTADOR AUTOMÁTICO
+      // 👉 ANO + CONTADOR SIMPLES
       details.innerHTML = `
         <summary>
           ${ano}
           <span style="font-weight: normal; color: #666; font-size: 0.9em;">
-            (${quantidade} ${quantidade === 1 ? "trabalho" : "trabalhos"})
+            (${quantidade})
           </span>
         </summary>
       `;
