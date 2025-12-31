@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laboratório Integrável</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            max-width: 100vw;
+            overflow-x: hidden;
+        }
+        header {
+            background-color: #000;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            padding: 10px 20px;
+        }
+        header img {
+            height: 40px;
+            margin-right: 20px;
+        }
+        header p {
+            margin: 0;
+        }
+        header a {
+            color: inherit;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+        }
+        .content {
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+        .content h2 {
+            color: #333;
+            margin-top: 20px;
+        }
+        .content a {
+            color: #007BFF;
+            text-decoration: none;
+        }
+        .content a:hover {
+            text-decoration: underline;
+        }
+        footer {
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            border-top: 1px solid #ddd;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        footer div {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin: 0 15px;
+        }
+        footer img {
+            height: 40px;
+        }
+        footer img.large {
+            height: 50px;
+        }
+        footer button {
+            background-color: #007BFF;
+            color: #fff;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        footer button:hover {
+            background-color: #0056b3;
+        }
+
+        .perfil {
+        display: flex;
+        align-items: center; /* centraliza verticalmente */
+        gap: 20px;
+        }
+
+        .foto-perfil {
+        height: auto;
+        max-height: 120px; /* ajusta para ficar próxima à altura do texto */
+        width: auto;
+        border-radius: 8px;
+        }
+
+        .descricao-perfil {
+            flex: 1;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 600px) {
+            .perfil {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+
+            .descricao-perfil {
+                text-align: left;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Cabeçalho com link -->
+    <header>
+        <a href="https://integravel.github.io/">
+            <img src="../imagens/logo.png" alt="Logo da página">
+            <p>Laboratório Integrável é um hub para recursos virtuais, abertos, de Ciências e Matemática, de autoria neurodivergente.</p>
+        </a>
+    </header>
+
+    <!-- Conteúdo principal -->
+    <div class="content">
+        <h2>Origem e missão</h2>
+        <p style="text-align: justify;">O Laboratório Integrável surgiu em 2022 como um endereço de e-mail para organizar discussões sobre pequenos projetos e atividades discentes. Com o crescimento dos projetos e o aumento no fluxo de materiais, consolidou-se como um espaço integrador dedicado ao acesso aberto a recursos virtuais de Ciências e Matemática, valorizando a singularidade de sua autoria neurodivergente.</p>
+
+        <h2>Sobre</h2>
+        <div class="perfil">
+            <img src="../imagens/x.jpg" alt="Logo da página" alt="Foto-perfil" class="foto-perfil">
+            <div class="descricao-perfil">
+            <p style="text-align: justify;"> Emanuelly é docente do IFRJ com licenciatura em <b>Matemática</b> (USP), Mestrado (UNESP) e Doutorado (UNICAMP), ambos em <b>Ensino de Ciências e Matemática</b>, com especialização em <b>Informática aplicada à Educação</b> (IFRJ), cursando licenciatura em <b>Química</b> (IFRJ) e especialização em <b>Gestão Escolar</b> (IFFar).</p>
+            </div>
+        </div>
+
+ <h2>Textos acadêmicos</h2>
+
+    Dados das nossas publicações e segunda via dos arquivos (caso o link original não esteja mais ativo).</p>
+
+    <p><b>2011</b></p>
+
+    <b>Evento e sede:</b> III Enrede (Encontro da rede de professores, pesquisadores e licenciandos de Física e de Matemática) realizado na UFSCar de São Carlos<br>
+    <b>Data:</b> 25 e 26 de Novembro de 2011<br>
+    <b>Link do evento:</b> <a href="https://sites.google.com/site/observatoriodaeducacaoufscar/eventos/iii-enrede">https://sites.google.com/site/observatoriodaeducacaoufscar/eventos/iii-enrede</a><br>
+    <b>Página de trabalhos publicados:</b> <a href="https://sites.google.com/site/observatoriodaeducacaoufscar/eventos/iii-enrede/6-trabalhos-completos">https://sites.google.com/site/observatoriodaeducacaoufscar/eventos/iii-enrede/6-trabalhos-completos</a><br>
+    <b>Título:</b> <a href="https://drive.google.com/file/d/19wgYxS2dGQ_tMWA0G3RgW4n6u4iNYrvl/view?usp=sharing">Aulas de Geometria e seus Ambientes: desde um teatro de arena até uma aula digital</a><br>
+    <b>Palavras-chave:</b> Aula de Geometria; Recursos; Atividades dinâmicas<br> 
+    <b>Autoria:</b> <a href="http://lattes.cnpq.br/6269977294035076">Emanuelly de Paula Dias da Silva</a>; <a href="http://lattes.cnpq.br/5547288349406177">Theófilo Satoshi Okada</a>; <a href="http://lattes.cnpq.br/9497550479769380">Fernando Yoshio Nawate</a></p>
+
+    <p><b>2012</b></p>
+        
+    <b>Evento e sede:</b> IV Jornada Nacional de Educação Matemática e a XVII Jornada Regional de Educação Matemática realizado na Universidade de Passo Fundo<br>
+    <b>Data:</b> 06 a 09 de Maio de 2012<br>
+    <b>Link do evento:</b> <a href="https://www.upf.br/jem/edicoes-anteriores/edicao-2012">https://www.upf.br/jem/edicoes-anteriores/edicao-2012</a><br>
+    <b>Página de trabalhos publicados:</b> <a href="https://www.upf.br/jem/edicoes-anteriores/edicao-2012/anais">https://www.upf.br/jem/edicoes-anteriores/edicao-2012/anais</a><br>
+    <b>Título:</b> <a href="https://drive.google.com/file/d/1-4eXzF_crNU25RiLpiCDciDFzfBHAfPX/view?usp=sharing">Uma abordagem diferenciada para o ensino de Matemática</a><br>
+    <b>Palavras-chave:</b> Estimulo; Extensão; Sala de aula<br> 
+    <b>Autoria:</b> <a href="http://lattes.cnpq.br/6269977294035076">Emanuelly de Paula Dias da Silva</a>; <a href="http://lattes.cnpq.br/9917307073492522">Luana de Souza Pires</a>; <a href="http://lattes.cnpq.br/9940676501925184">Esther Pacheco de Almeida Prado</a></p>
+
+    <b>Evento e sede:</b> I Encontro PIBID USP realizado na USP campus Butantã<br>
+    <b>Data:</b> 23 de Junho de 2012<br>
+    <b>Link do evento:</b> <a href="http://www4.fe.usp.br/eventos/evento?evento=819">http://www4.fe.usp.br/eventos/evento?evento=819</a><br>
+    <b>Página de trabalhos publicados:</b> <a href="https://repositorio.usp.br/item/002334951">https://repositorio.usp.br/item/002334951</a><br>
+    <b>Título:</b> <a href="https://drive.google.com/file/d/1BXQ_vtaUdoyWp5WtgTS0z-qB63h8AyLz/view?usp=sharing">Exploração Estelar – Uma mediação utilizando computadores</a><br>
+    <b>Palavras-chave:</b> Atividades Matemáticas; Computadores; Jogo<br> 
+    <b>Autoria:</b> <a href="http://lattes.cnpq.br/2733847124455188">Thássia Rafaelo Camilo Câmara</a>; <a href="http://lattes.cnpq.br/6269977294035076">Emanuelly de Paula Dias da Silva</a>; <a href="http://lattes.cnpq.br/9940676501925184">Esther Pacheco de Almeida Prado</a>; <a href="https">Maria Laura Trindade</a></p>
+
+    <b>Evento e sede:</b> IV Enrede (Encontro da rede de professores, pesquisadores e licenciandos de Física e de Matemática) realizado na UFSCar de São Carlos<br>
+    <b>Data:</b> 09 e 10 de Novembro de 2012<br>
+    <b>Link do evento:</b> <a href="https://sites.google.com/site/ivenrede/home">https://sites.google.com/site/ivenrede/home</a><br>
+    <b>Página de trabalhos publicados:</b> <a href="https://sites.google.com/site/ivenrede/trabalhos-completos">https://sites.google.com/site/ivenrede/trabalhos-completos</a><br>
+    <b>Título:</b> <a href="https://drive.google.com/file/d/1sFuj11DgLQMFMST2mBECweobpetoXUKZ/view?usp=sharing">TrigoDuel, a Estratégia por trás de uma Grande Batalha</a><br>
+    <b>Palavras-chave:</b> Jogo; Trigonometria; Atividades suplementares<br> 
+    <b>Autoria:</b> <a href="http://lattes.cnpq.br/6269977294035076">Emanuelly de Paula Dias da Silva</a></p>
+        
+    <p><b>2013</b></p>
+
+    <b>Evento e sede:</b> XI ENEM (Encontro Nacional de Educação Matemática) realizado na PUC Curitiba<br>
+    <b>Data:</b> 18 a 21 de Julho de 2013<br>
+    <b>Link do evento:</b> <a href="http://enem2013.pucpr.br/">http://enem2013.pucpr.br/</a><br>
+    <b>Página de trabalhos publicados:</b> <a href="http://sbem.iuri0094.hospedagemdesites.ws/anais/XIENEM/autores_m.html">http://sbem.iuri0094.hospedagemdesites.ws/anais/XIENEM/Autoria_m.html</a><br>
+    <b>Título:</b> <a href="https://drive.google.com/file/d/1IUgKCYS6_U7WJNnNRGIpjYmiVjrPLRgW/view?usp=sharing">RPG na escola, e agora?</a><br>
+    <b>Palavras-chave:</b> RPG; Mediador; Ensino de Matemática; Ensino-Aprendizagem<br> 
+    <b>Autoria:</b> <a href="http://lattes.cnpq.br/2733847124455188">Thássia Rafaelo Camilo Câmara</a>; <a href="http://lattes.cnpq.br/6269977294035076"Emanuelly de Paula Dias da Silva</a></p>
+  
+    <b>Evento e sede:</b> XI ENEM (Encontro Nacional de Educação Matemática) realizado na PUC Curitiba<br>
+    <b>Data:</b> 18 a 21 de Julho de 2013<br>
+    <b>Link do evento:</b> <a href="http://enem2013.pucpr.br/">http://enem2013.pucpr.br/</a><br>
+    <b>Página de trabalhos publicados:</b> <a href="http://sbem.iuri0094.hospedagemdesites.ws/anais/XIENEM/autores_m.html">http://sbem.iuri0094.hospedagemdesites.ws/anais/XIENEM/Autoria_m.html</a><br>
+    <b>Título:</b> <a href="https://drive.google.com/file/d/1sR5A8u337qzVx19IxYnQymrlMLBauRwF/view?usp=sharing">Exploração Halloween, um exemplo de que não é preciso saber programar para desenvolver um jogo virtual</a><br>
+    <b>Palavras-chave:</b> Jogo Virtual; Professores de Educação Básica; Situação Desafiadora<br> 
+    <b>Autoria:</b> <a href="http://lattes.cnpq.br/6269977294035076">Emanuelly de Paula Dias da Silva</a>; <a href="http://lattes.cnpq.br/2733847124455188">Thássia Rafaelo Camilo Câmara</a></p>
+   
+    <b>Evento e sede:</b> VII CIBEM (Congreso Iberomericano de Educación Matemática) realizado em Montevideo – Uruguai<br>
+    <b>Data:</b> 16 a 20 de Setembro de 2013<br>
+    <b>Link do evento:</b> <a href="http://www.cibem7.semur.edu.uy/home.php">http://www.cibem7.semur.edu.uy/home.php</a><br>
+    <b>Página de trabalhos publicados:</b> <a href="http://www.cibem7.semur.edu.uy/home.php">http://www.cibem7.semur.edu.uy/home.php</a><br>
+    <b>Título:</b> <a href="https://drive.google.com/file/d/1yida4lPyla7YWHayn88wFg7f6xTWSFTJ/view?usp=sharing">O que dois gatos, quatro desenhos animados e uma catapulta faziam na escola?</a><br>
+    <b>Palavras-chave:</b> Extensão das Aulas; Jogos; Ensino de Matemática<br> 
+    <b>Autoria:</b> <a href="http://lattes.cnpq.br/6269977294035076">Emanuelly de Paula Dias da Silva</a></p>
+   
+    <b>Evento e sede:</b> VII CIBEM (Congreso Iberomericano de Educación Matemática) realizado em Montevideo – Uruguai<br>
+    <b>Data:</b> 16 a 20 de Setembro de 2013<br>
+    <b>Link do evento:</b> <a href="http://www.cibem7.semur.edu.uy/home.php">http://www.cibem7.semur.edu.uy/home.php</a><br>
+    <b>Página de trabalhos publicados:</b> <a href="http://www.cibem7.semur.edu.uy/home.php">http://www.cibem7.semur.edu.uy/home.php</a><br>
+    <b>Título:</b> <a href="https://drive.google.com/file/d/1v9q98KkE69ixsjbSn2rfxyxqkfGcH3nc/view?usp=sharing">Quebra-cabeças do Teorema das 4 Texturas</a><br>
+    <b>Palavras-chave:</b> Jogo; Alunos com Necessidades Especiais; Ensino de Matemática e Geografia<br> 
+    <b>Autoria:</b> <a href="http://lattes.cnpq.br/6269977294035076">Emanuelly de Paula Dias da Silva</a></p>
+   
+    <b>Evento e sede:</b> VII CIBEM (Congreso Iberomericano de Educación Matemática) realizado em Montevideo – Uruguai<br>
+    <b>Data:</b> 16 a 20 de Setembro de 2013<br>
+    <b>Link do evento:</b> <a href="http://www.cibem7.semur.edu.uy/home.php">http://www.cibem7.semur.edu.uy/home.php</a><br>
+    <b>Página de trabalhos publicados:</b> <a href="http://www.cibem7.semur.edu.uy/home.php">http://www.cibem7.semur.edu.uy/home.php</a><br>
+    <b>Título:</b> <a href="https://drive.google.com/file/d/1upfAEnqz5yYFmR81Mmt7F4nSeH247ZTp/view?usp=sharing">Houston, we have a problem</a><br>
+    <b>Palavras-chave:</b> Improviso; Jogos; Educação Matemática<br> 
+    <b>Autoria:</b> <a href="http://lattes.cnpq.br/6269977294035076">Emanuelly de Paula Dias da Silva</a></p>
+   
+    <b>Evento e sede:</b> XVI SIM (Simpósio de Matemática para a Graduação) realizado na USP São Carlos<br>
+    <b>Data:</b> 2013<br>
+    <b>Link do evento:</b> <a href="http://sim.icmc.usp.br/">http://sim.icmc.usp.br/</a><br>
+    <b>Página de trabalhos publicados:</b> <a href="https://repositorio.usp.br/item/002408150">https://repositorio.usp.br/item/002408150</a><br>
+    <b>Título:</b> <a href="https://drive.google.com/file/d/14KqHwIS25dmKZz4sCYGlXYKz10BUvO0U/view?usp=sharing">Kawabanga</a><br>
+    <b>Palavras-chave:</b><br> 
+    <b>Autoria:</b> <a href="http://lattes.cnpq.br/6269977294035076">Emanuelly de Paula Dias da Silva</a>; <a href="http://lattes.cnpq.br/9940676501925184">Esther Pacheco de Almeida Prado</a></p>
+
+    <p><b>2014</b></p>
+        
+    <b>Evento e sede:</b> XVII SIM (Simpósio de Matemática para a Graduação) realizado na USP São Carlos<br>
+    <b>Data:</b> 26 a 28 de Agosto 2014<br>
+    <b>Link do evento:</b> <a href="http://sim.icmc.usp.br/2014">http://sim.icmc.usp.br/2014</a><br>
+    <b>Página de trabalhos publicados:</b> <a href="https://repositorio.usp.br/item/002507706">https://repositorio.usp.br/item/002507706</a><br>
+    <b>Título:</b> <a href="https://drive.google.com/file/d/1Wq5xSbOUfCpJSmlNRIIfsaS1OYsAxzmH/view?usp=sharing">Resident Evil e os gráficos mal ditos</a><br>
+    <b>Palavras-chave:</b><br> 
+    <b>Autoria:</b> <a href="http://lattes.cnpq.br/6269977294035076">Emanuelly de Paula Dias da Silva</a>; <a href="http://lattes.cnpq.br/7990278071583200">Miriam Cardoso Utsumi</a></p>
+   
+    <b>Evento e sede:</b> VII Semana da Matemática realizada pela Universidade Federal Fluminense<br>
+    <b>Data:</b> 16 a 18 de Outubro de 2014<br>
+    <b>Link do evento:</b> <a href="http://semanamatematicauff2014.weebly.com/">http://semanamatematicauff2014.weebly.com/</a><br>
+    <b>Página de trabalhos publicados:</b> <a href="http://semanamatematicauff2014.weebly.com/cronograma-e-inscriccedilotildees-nas-atividades.html">http://semanamatematicauff2014.weebly.com/cronograma-e-inscriccedilotildees-nas-atividades.html</a><br>
+    <b>Título:</b> <a href="https://drive.google.com/file/d/1p8-kxzeyirRx8twsBuz8zWDuf4RZmZNH/view?usp=sharing">Jogos inclusivos para ensino de matemática através de atividades psicomotoras</a><br>
+    <b>Palavras-chave:</b> Jogos inclusivos; Ensino de Matemática; Alunos com necessidades especiais<br> 
+    <b>Autoria:</b> <a href="http://lattes.cnpq.br/6269977294035076">E
+Emanuelly de Paula Dias da Silva</a></p>
+   
+    <b>Evento e sede:</b> VII Semana da Matemática realizada pela Universidade Federal Fluminense<br>
+    <b>Data:</b> 16 a 18 de Outubro de 2014<br>
+    <b>Link do evento:</b> <a href="http://semanamatematicauff2014.weebly.com/">http://semanamatematicauff2014.weebly.com/</a><br>
+    <b>Página de trabalhos publicados:</b> <a href="http://semanamatematicauff2014.weebly.com/cronograma-e-inscriccedilotildees-nas-atividades.html">http://semanamatematicauff2014.weebly.com/cronograma-e-inscriccedilotildees-nas-atividades.html</a><br>
+    <b>Título:</b> <a href="https://drive.google.com/file/d/1VNIp9rESqoDtAr0ZGYcsTnkibAQjj1DU/view?usp=sharing">Houston, we have a problem</a><br>
+    <b>Palavras-chave:</b> Improvisação; Jogos; Educação Matemática<br> 
+    <b>Autoria:</b> <a href="http://lattes.cnpq.br/6269977294035076">Emanuelly de Paula Dias da Silva</a></p>
+   
+    <b>Evento e sede:</b> V Jornada das Licenciaturas da USP e IX SELIC (Semana da Licenciatura) realizada na USP de São Carlos<br>
+    <b>Data:</b> 23 e 24 de Outubro de 2014<br>
+    <b>Link do evento:</b> <a href="http://vjornadalicenciaturas.icmc.usp.br/">http://vjornadalicenciaturas.icmc.usp.br/</a><br>
+    <b>Página de trabalhos publicados:</b> <a href="http://vjornadalicenciaturas.icmc.usp.br/CD/index_01.htm">http://vjornadalicenciaturas.icmc.usp.br/CD/index_01.htm</a><br>
+    <b>Título:</b> <a href="https://drive.google.com/file/d/1EjDIoEupSoBrb-jg2Zfb7Etc0ttbxlP3/view?usp=sharing">Houston, we have a problem</a><br>
+    <b>Palavras-chave:</b> Improviso; Jogos; Educação Matemática<br> 
+    <b>Autoria:</b> <a href="http://lattes.cnpq.br/6269977294035076">Emanuelly de Paula Dias da Silva</a></p>
+
+    <p><b>2015</b></p>      
+        
+    <b>Evento e sede:</b> 5o Simpósio Aprender com Cultura e Extensão, realizado na USP de São Carlos<br>
+    <b>Data:</b> 17 e 18 de Novembro de 2015<br>
+    <b>Link do evento:</b> <a href="https://prceu.usp.br/aprender/simposio/">https://prceu.usp.br/aprender/simposio/</a><br>
+    <b>Página de trabalhos publicados:</b> <a href="https://prceu.usp.br/aprender/simposio/resumo-dos-projetos-da-area-de-exatas-5o-simposio-2/">https://prceu.usp.br/aprender/simposio/resumo-dos-projetos-da-area-de-exatas-5o-simposio-2/</a><br>
+    <b>Títulos:</b> <a href="https://drive.google.com/file/d/1KLicMVOMcPZ0Is-580DKTPXGkgC6usv1/view?usp=sharing">Elaboração de jogos através da adaptação e do aprimoramento de ferramentas gratuitas para a matemática no Ensino Médio</a> e <a href="https://drive.google.com/file/d/1PvhmadcrmBAqrlzv9Bxyjixi0OKQTzJd/view?usp=sharing">Minicurso: criando jogos no apresentador de slides</a><br>
+    <b>Palavras-chave:</b> Jogos; Ensino; Apresentador de slides<br> 
+    <b>Autoria:</b> <a href="http://lattes.cnpq.br/6269977294035076">Emanuelly de Paula Dias da Silva</a>; <a href="http://lattes.cnpq.br/9940676501925184">Esther Pacheco de Almeida Prado</a></p>
+
+    <p><b>2017</b></p>      
+                
+    <b>Evento e sede:</b> IV ERMAC (Encontro Regional de Matemática Aplicada e Computacional) na Faculdade de Ciências da UNESP de Bauru<br>
+    <b>Data:</b> 02 a 05 de Maio de 2017<br>
+    <b>Link do evento:</b> <a href="https://www.fc.unesp.br/#!/departamentos/matematica/eventos2341/ermac/pagina-inicial/">https://www.fc.unesp.br/#!/departamentos/matematica/eventos2341/ermac/pagina-inicial/</a><br>
+    <b>Página de trabalhos publicados:</b> <a href="https://www.fc.unesp.br/Home/Departamentos/Matematica/ermac/caderno-ermac_2017.pdf">https://www.fc.unesp.br/Home/Departamentos/Matematica/ermac/caderno-ermac_2017.pdf</a><br>
+    <b>Título:</b> <a href="https://drive.google.com/file/d/12G_ZZVhpJ1mJ5zkWWjYxNvfpwt_8hhO2/view?usp=sharing">Jogo digital para o ensino de métodos numéricos</a><br>
+    <b>Palavras-chave:</b> Jogo Digital; Ensino; Métodos Numéricos<br> 
+    <b>Autoria:</b> <a href="http://lattes.cnpq.br/6269977294035076">Emanuelly de Paula Dias da Silva</a></p>
+   
