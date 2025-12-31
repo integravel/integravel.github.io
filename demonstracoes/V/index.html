@@ -4,89 +4,92 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Laboratório Integrável</title>
+
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       font-family: Arial, sans-serif;
       margin: 0;
       padding: 0;
-      box-sizing: border-box;
       max-width: 100vw;
       overflow-x: hidden;
     }
 
-    header {
+    /* ===== HEADER ===== */
+    .site-header {
       background-color: #000;
       color: #fff;
-      display: flex;
-      align-items: center;
       padding: 10px 20px;
     }
 
-    header img {
-      height: 40px;
-      margin-right: 20px;
+    .site-header a {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      text-decoration: none;
+      color: inherit;
     }
 
-    header p {
+    .site-header img {
+      height: 40px;
+    }
+
+    .site-header p {
       margin: 0;
     }
 
-    header a {
-      color: inherit;
-      text-decoration: none;
-      display: flex;
-      align-items: center;
-    }
-
-    .content {
-      padding: 20px;
+    /* ===== CONTAINER ===== */
+    .container {
       max-width: 800px;
       margin: 0 auto;
+      padding: 20px;
       line-height: 1.6;
       text-align: justify;
     }
 
-    .content h2 {
+    h2 {
       color: #333;
-      margin-top: 20px;
+      margin-top: 30px;
     }
 
-    .content a {
+    a {
       color: #007BFF;
       text-decoration: none;
     }
 
-    .content a:hover {
+    a:hover {
       text-decoration: underline;
     }
 
-    footer {
+    /* ===== FOOTER ===== */
+    .site-footer {
       background-color: #f4f4f4;
       display: flex;
       justify-content: center;
       align-items: center;
+      gap: 30px;
       padding: 20px;
       border-top: 1px solid #ddd;
-      width: 100%;
-      box-sizing: border-box;
     }
 
-    footer div {
+    .site-footer div {
       display: flex;
       align-items: center;
-      gap: 20px;
-      margin: 0 15px;
+      gap: 15px;
     }
 
-    footer img {
+    .site-footer img {
       height: 40px;
     }
 
-    footer img.large {
+    .site-footer img.large {
       height: 50px;
     }
 
-    footer button {
+    .site-footer button {
       background-color: #007BFF;
       color: #fff;
       border: none;
@@ -95,70 +98,92 @@
       cursor: pointer;
     }
 
-    footer button:hover {
+    .site-footer button:hover {
       background-color: #0056b3;
     }
 
-    .perfil {
-      display: flex;
-      align-items: stretch;
-      margin-top: 30px;
-      gap: 20px;
-    }
-
-    .foto-perfil {
-      height: 100%;
-      object-fit: cover;
-      border-radius: 8px;
-    }
-
-    .descricao-perfil {
-      flex: 1;
-      line-height: 1.6;
-      text-align: justify;
-    }
-
+    /* ===== RESPONSIVO ===== */
     @media (max-width: 600px) {
-      .perfil {
+      .site-header a {
         flex-direction: column;
-        align-items: center;
         text-align: center;
       }
 
-      .descricao-perfil {
-        text-align: justify;
+      .site-footer {
+        flex-direction: column;
       }
     }
   </style>
 </head>
 <body>
-  <!-- Cabeçalho com link -->
-  <header>
-    <a href="https://integravel.github.io/">
-      <img src="/imagens/logo.png" alt="Logo da página" />
-      <p>Laboratório Integrável é um hub para recursos virtuais, abertos, de Ciências e Matemática, de autoria neurodivergente.</p>
+
+<!-- ===== HEADER ===== -->
+<header class="site-header">
+  <a href="https://integravel.github.io/">
+    <img src="/imagens/logo.png" alt="Logo do Laboratório Integrável" />
+    <p>
+      Laboratório Integrável é um hub para recursos virtuais, abertos,
+      de Ciências e Matemática, de autoria neurodivergente.
+    </p>
+  </a>
+</header>
+
+<!-- ===== CONTEÚDO ===== -->
+<main class="container">
+
+  <h2>Geração V</h2>
+
+  <p>
+    A ideia da Geração IV de consultar uma base de dados das demonstrações
+    conhecidas se mostrou insustentável devido a quantidade de permutações
+    possíveis entre as peças, fazendo com que a maioria dos resultados gerasse
+    a mensagem de que a demonstração ainda não era conhecida (não ajudando
+    realmente o estudante). Além disso, o tamanho as peças da Geração IV fazia
+    com que mesmo demonstrações simples ocupassem a tela inteira. Isso, somado
+    a oportunidade de experimentar este recurso com alunos de graduação, fez
+    com que criassemos uma nova versão ainda no Scratch, com espaço para mais
+    peças, mantendo cores de fácil distinção por daltônicos e menor divergência
+    em displays, usando agora um fundo preto. Também inserimos uma funcionalidade
+    que ao final da demonstração, apareceria na tela a demonstração originalmente
+    pensada com aquelas peças. Afim de mantermos a afetividade que os personagens
+    da Geração anterior trouxeram, inserimos um gatinho preso num balão, que
+    acompanha o cursor do mouse, agarrando e soltando as peças (para disfarçar
+    uma funcionalidade do código que “teleportava” a peça escolhida para o local
+    escolhido, em vez de realmente movimentá-la).
+  </p>
+
+  <h2>
+    <a href="https://scratch.mit.edu/studios/33015909">
+      STUDIO DO SCRATCH
     </a>
-  </header>
+  </h2>
 
-  <!-- Conteúdo principal -->
-  <div class="content">
-    <h2>Geração V</h2>
-    <p>A ideia da Geração IV de consultar uma base de dados das demonstrações conhecidas se mostrou insustentável devido a quantidade de permutações possíveis entre as peças, fazendo com que a maioria dos resultados gerasse a mensagem de que a demonstração ainda não era conhecida (não ajudando realmente o estudante). Além disso, o tamanho as peças da Geração IV fazia com que mesmo demonstrações simples ocupassem a tela inteira. Isso, somado a oportunidade de experimentar este recurso com alunos de graduação, fez com que criassemos uma nova versão ainda no Scratch, com espaço para mais peças, mantendo cores de fácil distinção por daltônicos e menor divergência em displays, usando agora um fundo preto. Também inserimos uma funcionalidade que ao final da demonstração, apareceria na tela a demonstração originalmente pensada com aquelas peças. Afim de mantermos a afetividade que os personagens da Geração anterior trouxeram, inserimos um gatinho preso num balão, que acompanha o cursor do mouse, agarrando e soltando as peças (para disfarçar uma funcionalidade do código que 'teleportava' a peça escolhida para o local escolhido, em vez de realmente movimentá-la).</p>
+</main>
 
-    <h2><a href="https://scratch.mit.edu/studios/33015909">STUDIO DO SCRATCH</a></h2>
-    
+<!-- ===== FOOTER ===== -->
+<footer class="site-footer">
+  <div>
+    <img src="/imagens/logo-sobre.png" alt="Logo sobre" class="large" />
+    <button data-link="https://integravel.github.io/sobre">
+      Mais Informações
+    </button>
   </div>
 
-  <!-- Rodapé -->
-  <footer>
-    <div>
-      <img src="/imagens/logo-sobre.png" alt="Logo sobre" class="large" />
-      <button onclick="window.location.href='https://integravel.github.io/sobre'">Mais Informações</button>
-    </div>
-    <div>
-      <img src="/imagens/logo-contato.png" alt="Logo contato" />
-      <button onclick="window.location.href='mailto:integravel@gmail.com'">integravel@gmail.com</button>
-    </div>
-  </footer>
+  <div>
+    <img src="/imagens/logo-contato.png" alt="Logo contato" />
+    <button data-link="mailto:integravel@gmail.com">
+      integravel@gmail.com
+    </button>
+  </div>
+</footer>
+
+<script>
+  document.querySelectorAll("button[data-link]").forEach(button => {
+    button.addEventListener("click", () => {
+      window.location.href = button.dataset.link;
+    });
+  });
+</script>
+
 </body>
 </html>
