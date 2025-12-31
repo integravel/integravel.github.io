@@ -4,89 +4,97 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Laboratório Integrável</title>
+
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       font-family: Arial, sans-serif;
       margin: 0;
       padding: 0;
-      box-sizing: border-box;
       max-width: 100vw;
       overflow-x: hidden;
     }
 
-    header {
+    /* ===== HEADER ===== */
+    .site-header {
       background-color: #000;
       color: #fff;
-      display: flex;
-      align-items: center;
       padding: 10px 20px;
     }
 
-    header img {
-      height: 40px;
-      margin-right: 20px;
+    .site-header a {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      text-decoration: none;
+      color: inherit;
     }
 
-    header p {
+    .site-header img {
+      height: 40px;
+    }
+
+    .site-header p {
       margin: 0;
     }
 
-    header a {
-      color: inherit;
-      text-decoration: none;
-      display: flex;
-      align-items: center;
-    }
-
-    .content {
-      padding: 20px;
+    /* ===== CONTAINER ===== */
+    .container {
       max-width: 800px;
       margin: 0 auto;
+      padding: 20px;
       line-height: 1.6;
       text-align: justify;
     }
 
-    .content h2 {
+    h2 {
       color: #333;
-      margin-top: 20px;
+      margin-top: 30px;
     }
 
-    .content a {
+    a {
       color: #007BFF;
       text-decoration: none;
     }
 
-    .content a:hover {
+    a:hover {
       text-decoration: underline;
     }
 
-    footer {
+    .lista-demonstracoes a {
+      display: block;
+      margin: 6px 0;
+    }
+
+    /* ===== FOOTER ===== */
+    .site-footer {
       background-color: #f4f4f4;
       display: flex;
       justify-content: center;
       align-items: center;
+      gap: 30px;
       padding: 20px;
       border-top: 1px solid #ddd;
-      width: 100%;
-      box-sizing: border-box;
     }
 
-    footer div {
+    .site-footer div {
       display: flex;
       align-items: center;
-      gap: 20px;
-      margin: 0 15px;
+      gap: 15px;
     }
 
-    footer img {
+    .site-footer img {
       height: 40px;
     }
 
-    footer img.large {
+    .site-footer img.large {
       height: 50px;
     }
 
-    footer button {
+    .site-footer button {
       background-color: #007BFF;
       color: #fff;
       border: none;
@@ -95,73 +103,88 @@
       cursor: pointer;
     }
 
-    footer button:hover {
+    .site-footer button:hover {
       background-color: #0056b3;
     }
 
-    .perfil {
-      display: flex;
-      align-items: stretch;
-      margin-top: 30px;
-      gap: 20px;
-    }
-
-    .foto-perfil {
-      height: 100%;
-      object-fit: cover;
-      border-radius: 8px;
-    }
-
-    .descricao-perfil {
-      flex: 1;
-      line-height: 1.6;
-      text-align: justify;
-    }
-
+    /* ===== RESPONSIVO ===== */
     @media (max-width: 600px) {
-      .perfil {
+      .site-header a {
         flex-direction: column;
-        align-items: center;
         text-align: center;
       }
 
-      .descricao-perfil {
-        text-align: justify;
+      .site-footer {
+        flex-direction: column;
       }
     }
   </style>
 </head>
 <body>
-  <!-- Cabeçalho com link -->
-  <header>
-    <a href="https://integravel.github.io/">
-      <img src="/imagens/logo.png" alt="Logo da página" />
-      <p>Laboratório Integrável é um hub para recursos virtuais, abertos, de Ciências e Matemática, de autoria neurodivergente.</p>
+
+<!-- ===== HEADER ===== -->
+<header class="site-header">
+  <a href="https://integravel.github.io/">
+    <img src="/imagens/logo.png" alt="Logo do Laboratório Integrável" />
+    <p>
+      Laboratório Integrável é um hub para recursos virtuais, abertos,
+      de Ciências e Matemática, de autoria neurodivergente.
+    </p>
+  </a>
+</header>
+
+<!-- ===== CONTEÚDO ===== -->
+<main class="container">
+
+  <h2>Geração XI</h2>
+
+  <p>
+    Após um semestre utilizando a geração X, percebi que sua estrutura
+    seguia muito complexa para meus alunos. Via de regra, eles faziam por
+    tentativa e erro, até acharem todas as combinações corretas e depois
+    compartilhavam entre si para que todos acertassem. Pensando nisso,
+    achei melhor reduzir a quantidade de peças (6 em vez de 12) e também
+    apresentar parte da demonstração montada, de modo que essas peças
+    somente completem o que falta dela. Além disso aproveitei que minha
+    interação com a IA e projetos em javascript melhoraram, para criar
+    um layout que ficasse um pouco mais elegante, inserindo os textos
+    em LaTeX, evitando assim trabalhar com imagens estáticas.
+  </p>
+
+  <h2>DEMONSTRAÇÕES</h2>
+
+  <div class="lista-demonstracoes">
+    <a href="https://integravel.github.io/x/0">
+      Existência de infinitos números primos
     </a>
-  </header>
-
-  <!-- Conteúdo principal -->
-  <div class="content">
-    <h2>Geração XI</h2>
-    <p>Após um semestre utilizando a geração X, percebi que sua estrutura seguia muito complexa para meus alunos. Via de regra, eles faziam por tentativa e erro, até acharem todas as combinações corretas e depois compartilhavam entre si para que todos acertassem. Pensando nisso, achei melhor reduzir a quantidade de peças (6 em vez de 12) e também apresentar parte da demonstração montada, de modo que essas peças somente completem o que falta dela. Além disso aproveitei que minha interação com a IA e projetos em javascript melhoraram, para criar um layout que ficasse um pouco mais elegante, inserindo os textos em LaTeX, evitando assim trabalhar com imagens estáticas.</p>
-
-    <h2>DEMONSTRAÇÕES</h2>
-
-    <a href="https://integravel.github.io/x/0">Existência de infinitos números primos</a><p>
-      
-    
   </div>
 
-  <!-- Rodapé -->
-  <footer>
-    <div>
-      <img src="/imagens/logo-sobre.png" alt="Logo sobre" class="large" />
-      <button onclick="window.location.href='https://integravel.github.io/sobre'">Mais Informações</button>
-    </div>
-    <div>
-      <img src="/imagens/logo-contato.png" alt="Logo contato" />
-      <button onclick="window.location.href='mailto:integravel@gmail.com'">integravel@gmail.com</button>
-    </div>
-  </footer>
+</main>
+
+<!-- ===== FOOTER ===== -->
+<footer class="site-footer">
+  <div>
+    <img src="/imagens/logo-sobre.png" alt="Logo sobre" class="large" />
+    <button data-link="https://integravel.github.io/sobre">
+      Mais Informações
+    </button>
+  </div>
+
+  <div>
+    <img src="/imagens/logo-contato.png" alt="Logo contato" />
+    <button data-link="mailto:integravel@gmail.com">
+      integravel@gmail.com
+    </button>
+  </div>
+</footer>
+
+<script>
+  document.querySelectorAll("button[data-link]").forEach(button => {
+    button.addEventListener("click", () => {
+      window.location.href = button.dataset.link;
+    });
+  });
+</script>
+
 </body>
 </html>
