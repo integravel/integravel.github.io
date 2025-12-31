@@ -1,0 +1,136 @@
+/* ===== BASE ===== */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    line-height: 1.6;
+    background: #fff;
+    overflow-x: hidden;
+}
+
+/* ===== HEADER ===== */
+.site-header {
+    background: #000;
+    color: #fff;
+    padding: 10px 20px;
+}
+
+.site-header a {
+    max-width: 900px;
+    margin: auto;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    text-decoration: none;
+    color: inherit;
+}
+
+.site-header img {
+    height: 40px;
+}
+
+.site-header p {
+    margin: 0;
+}
+
+/* ===== CONTAINER ===== */
+.container {
+    max-width: 900px;
+    margin: auto;
+    padding: 20px;
+}
+
+/* ===== GRID ===== */
+.grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+}
+
+.grid-item {
+    background: #fafafa;
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.grid-item:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+}
+
+.grid-item a {
+    height: 100%;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    text-decoration: none;
+    color: inherit;
+}
+
+.grid-item img {
+    max-height: 120px;
+    margin-bottom: 12px;
+    object-fit: contain;
+    align-self: center;
+}
+
+.grid-item p {
+    margin: 0;
+    font-size: 0.95em;
+    color: #444;
+    text-align: justify;
+}
+
+/* ===== FOOTER ===== */
+.site-footer {
+    background: #f4f4f4;
+    padding: 20px;
+    margin-top: 40px;
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    flex-wrap: wrap;
+}
+
+.site-footer div {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.site-footer img {
+    height: 40px;
+}
+
+.site-footer img.large {
+    height: 50px;
+}
+
+.site-footer button {
+    padding: 10px 15px;
+    border: none;
+    background: #007BFF;
+    color: #fff;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.site-footer button:hover {
+    background: #0056b3;
+}
+
+/* ===== MOBILE ===== */
+@media (max-width: 768px) {
+    .site-header a {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .grid {
+        grid-template-columns: 1fr;
+    }
+
+    .grid-item img {
+        max-height: 150px;
+    }
+}
