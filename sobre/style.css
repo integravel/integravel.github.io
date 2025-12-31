@@ -1,47 +1,47 @@
+/* ===== BASE ===== */
 body {
     font-family: Arial, sans-serif;
     margin: 0;
     line-height: 1.6;
     background: #fff;
+    overflow-x: hidden;
 }
 
 /* ===== HEADER ===== */
-
-header {
+.site-header {
     background: #000;
     color: #fff;
     padding: 10px 20px;
 }
 
-header a {
-    color: inherit;
-    text-decoration: none;
+.site-header a {
+    max-width: 900px;
+    margin: auto;
     display: flex;
-    flex-direction: column; /* Coloca o logo acima do texto */
-    align-items: center;    /* Centraliza horizontalmente */
-    text-align: center;     /* Centraliza o texto */
-    gap: 10px;              /* Espaço entre logo e texto */
+    flex-direction: column; /* logo acima do texto */
+    align-items: center;    /* centraliza horizontalmente */
+    text-align: center;
+    gap: 12px;              /* espaço entre logo e mensagem */
+    text-decoration: none;
+    color: inherit;
 }
 
-header img {
-    max-width: 200px;
-    height: auto;
+.site-header img {
+    height: 40px; /* tamanho do logo do modelo */
 }
 
-/* ===== CONTEÚDO ===== */
+.site-header p {
+    margin: 0;
+}
 
-.content {
+/* ===== CONTAINER ===== */
+.container {
     max-width: 900px;
     margin: auto;
     padding: 20px;
 }
 
-h2 {
-    margin-top: 40px;
-}
-
 /* ===== PERFIL ===== */
-
 .perfil {
     display: flex;
     gap: 24px;
@@ -50,7 +50,6 @@ h2 {
     margin-top: 20px;
 }
 
-/* 🔥 REGRA DEFINITIVA DA FOTO 🔥 */
 .perfil img.foto-perfil {
     width: 200px !important;
     height: auto !important;
@@ -60,8 +59,11 @@ h2 {
     display: block;
 }
 
-/* ===== BUSCA ===== */
+.descricao-perfil {
+    max-width: 600px;
+}
 
+/* ===== BUSCA ===== */
 #busca {
     width: 100%;
     padding: 10px;
@@ -70,7 +72,6 @@ h2 {
 }
 
 /* ===== PUBLICAÇÕES ===== */
-
 details {
     background: #f5f5f5;
     margin-bottom: 15px;
@@ -123,25 +124,31 @@ summary {
 }
 
 /* ===== FOOTER ===== */
-
-footer {
+.site-footer {
     background: #f4f4f4;
     padding: 20px;
+    margin-top: 40px;
     display: flex;
     justify-content: center;
     gap: 40px;
-    margin-top: 40px;
+    flex-wrap: wrap;
 }
 
-footer img {
+.site-footer div {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.site-footer img {
     height: 40px;
 }
 
-footer img.large {
+.site-footer img.large {
     height: 50px;
 }
 
-footer button {
+.site-footer button {
     padding: 10px 15px;
     border: none;
     background: #007BFF;
@@ -150,19 +157,27 @@ footer button {
     cursor: pointer;
 }
 
-/* ===== MOBILE ===== */
+.site-footer button:hover {
+    background: #0056b3;
+}
 
-@media (max-width: 600px) {
+/* ===== MOBILE ===== */
+@media (max-width: 768px) {
+    .site-header a {
+        flex-direction: column;
+        text-align: center;
+    }
+
     .perfil {
         flex-direction: column;
         text-align: center;
     }
 
-    .perfil img.foto-perfil {
-        width: 220px !important;
+    .grid {
+        grid-template-columns: 1fr;
     }
 
-    header a {
-        gap: 8px;
+    .grid-item img {
+        height: 110px;
     }
 }
