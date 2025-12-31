@@ -5,34 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Laboratório Integrável</title>
 
-    <!-- CSS (com cache-bust) -->
-    <link rel="stylesheet" href="style.css?v=2">
-    <style>
-        /* Estilo para o header */
-        header a {
-            display: flex;
-            flex-direction: column; /* Coloca imagem acima do texto */
-            align-items: center;
-            text-decoration: none;
-            color: inherit;
-        }
-
-        header img {
-            max-width: 200px;
-            height: auto;
-            margin-bottom: 1rem; /* Espaço entre logo e texto */
-        }
-
-        header p {
-            text-align: center;
-            max-width: 600px;
-        }
-    </style>
+    <!-- CSS -->
+    <link rel="stylesheet" href="style.css?v=3">
 </head>
 <body>
 
 <!-- ===== HEADER ===== -->
-<header>
+<header class="site-header">
     <a href="https://integravel.github.io/">
         <img src="../imagens/logo.png" alt="Logo do Laboratório Integrável">
         <p>
@@ -43,7 +22,7 @@
 </header>
 
 <!-- ===== CONTEÚDO ===== -->
-<main class="content">
+<main class="container">
 
     <h2>Origem e missão</h2>
     <p style="text-align: justify;">
@@ -58,14 +37,11 @@
     <h2>Sobre</h2>
 
     <div class="perfil">
-        <img
-            src="../imagens/x.jpg"
-            alt="Foto de Emanuelly"
-            class="foto-perfil"
-        >
+        <img src="../imagens/x.jpg" alt="Foto de Emanuelly" class="foto-perfil">
 
         <div class="descricao-perfil">
-            <p style="text-align: justify;">Emanuelly é docente do IFRJ com licenciatura e <b>Matemática</b> (USP), Mestrado (UNESP) e Doutorado (UNICAMP), ambos em <b>Ensino de Ciências e Matemática</b>, com especialização em <b>Informática aplicada à Educação</b> (IFRJ) e em <b>Gestão Escolar</b> (IFFar), cursando licenciatura em <b>Química</b> (IFRJ).
+            <p style="text-align: justify;">
+                Emanuelly é docente do IFRJ com licenciatura e <b>Matemática</b> (USP), Mestrado (UNESP) e Doutorado (UNICAMP), ambos em <b>Ensino de Ciências e Matemática</b>, com especialização em <b>Informática aplicada à Educação</b> (IFRJ) e em <b>Gestão Escolar</b> (IFFar), cursando licenciatura em <b>Química</b> (IFRJ).
             </p>
         </div>
     </div>
@@ -85,7 +61,7 @@
 </main>
 
 <!-- ===== FOOTER ===== -->
-<footer>
+<footer class="site-footer">
     <div>
         <img src="../imagens/logo-sobre.png" alt="Logo sobre" class="large">
         <button onclick="window.location.href='https://integravel.github.io/sobre'">
