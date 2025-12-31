@@ -4,201 +4,169 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Laboratório Integrável</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            max-width: 100vw;
-            overflow-x: hidden;
-        }
-        header {
-            background-color: #000;
-            color: #fff;
-            display: flex;
-            align-items: center;
-            padding: 10px 20px;
-        }
-        header img {
-            height: 40px;
-            margin-right: 20px;
-        }
-        header p {
-            margin: 0;
-        }
-        header a {
-            color: inherit;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-        }
-        .content {
-            padding: 20px;
-            max-width: 800px;
-            margin: 0 auto;
-        }
-        .content .flex-container {
-            display: flex;
-            align-items: center; /* Centraliza o logo verticalmente */
-            gap: 20px;
-        }
-        .content .flex-container img {
-            max-width: 100px;
-            height: auto;
-            flex-shrink: 0;
-        }
-        .content .text-content {
-            display: flex;
-            flex-direction: column;
-            line-height: 1.4; /* Ajuste fino do espaçamento entre linhas */
-        }
-        .content .text-content h2 {
-            margin: 0; /* Remove margens padrão */
-            padding-bottom: 5px; /* Reduz o espaçamento abaixo do título */
-        }
-        .content .text-content p {
-            margin: 0; /* Remove margens padrão do parágrafo */
-        }
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            padding: 10px;
-        }
-        .grid-item {
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            overflow: hidden;
-            transition: transform 0.3s ease;
-        }
-        .grid-item:hover {
-            transform: scale(1.02);
-        }
-        .grid-item a {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-decoration: none;
-            color: inherit;
-            width: 100%;
-            height: 100%;
-        }
-        .grid-item img {
-            max-width: 100%;
-            height: auto;
-        }
-        footer {
-            background-color: #f4f4f4;
-            display: flex;
-            justify-content: center;
-            padding: 20px;
-        }
-        footer div {
-            margin: 0 15px;
-        }
-        footer img {
-            height: 40px;
-        }
-        footer button {
-            background-color: #007BFF;
-            color: #fff;
-            border: none;
-            padding: 10px 15px;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        footer button:hover {
-            background-color: #0056b3;
-        }
-        @media (max-width: 768px) {
-            .grid {
-                grid-template-columns: 1fr;
-            }
-            .content .flex-container {
-                flex-direction: column;
-                align-items: center;
-            }
-        }
-    </style>
+
+    <link rel="stylesheet" href="css/main.css">
 </head>
 <body>
-    <header>
-        <a href="https://integravel.github.io/">
-            <img src="../imagens/logo.png" alt="Logo da página">
-            <p>Laboratório Integrável é um hub para recursos virtuais, abertos, de Ciências e Matemática, de autoria neurodivergente.</p>
-        </a>
-    </header>
 
-    <div class="content">
-        <div class="flex-container">
-            <img src="../imagens/logo6.png" alt="Logo do projeto">
-            <div class="text-content">
-                <h2>Desafios de Matemática</h2>
-                <p>Composições de formas geométricas com uma informação numérica inicial e descrição das demais relações, todos com solução única. <a href="https://desafio.ime.unicamp.br">Abrir um desafio aleatório</a>.</p>
-            </div>
+<!-- ===== HEADER ===== -->
+<header class="site-header">
+    <a href="https://integravel.github.io/">
+        <img src="../imagens/logo.png" alt="Logo do Laboratório Integrável">
+        <p>
+            Laboratório Integrável é um hub para recursos virtuais, abertos,
+            de Ciências e Matemática, de autoria neurodivergente.
+        </p>
+    </a>
+</header>
+
+<!-- ===== DESCRIÇÃO DO PROJETO ===== -->
+<main class="container">
+
+    <section class="projeto">
+        <img src="../imagens/logo6.png" alt="Logo do projeto Desafios de Matemática">
+
+        <div class="projeto-texto">
+            <h2>Desafios de Matemática</h2>
+            <p>
+                Composições de formas geométricas com uma informação numérica inicial
+                e descrição das demais relações, todos com solução única.
+                <a href="https://desafio.ime.unicamp.br">
+                    Abrir um desafio aleatório
+                </a>.
+            </p>
         </div>
+    </section>
+
+    <!-- ===== GRID ===== -->
+    <section class="grid">
+
+        <article class="grid-item">
+            <a href="https://drive.google.com/drive/folders/1XOHtm1iya1p_JtM1kcgw2_iBscRh6E2e">
+                <img src="01.jpg" alt="">
+                <p>Desafios 001 – 030</p>
+            </a>
+        </article>
+
+        <article class="grid-item">
+            <a href="https://drive.google.com/drive/folders/1dNjsSVVRFOifSC7JsPJyO3m1HaS1JXrF">
+                <img src="02.jpg" alt="">
+                <p>Desafios 031 – 060</p>
+            </a>
+        </article>
+
+        <article class="grid-item">
+            <a href="https://drive.google.com/drive/folders/1N9FY7mEFayxAut2GvHEgwMJtvDeUN8ht">
+                <img src="03.jpg" alt="">
+                <p>Desafios 061 – 090</p>
+            </a>
+        </article>
+
+        <article class="grid-item">
+            <a href="https://drive.google.com/drive/folders/1T-QJZcwknLSb68vg3f3AYS9sE1n1d56J">
+                <img src="04.jpg" alt="">
+                <p>Desafios 091 – 120</p>
+            </a>
+        </article>
+
+        <article class="grid-item">
+            <a href="https://drive.google.com/drive/folders/1r8yebRVWa9_jOL3iPzB8R3L3h5tk1sHm">
+                <img src="05.jpg" alt="">
+                <p>Desafios 121 – 150</p>
+            </a>
+        </article>
+
+        <article class="grid-item">
+            <a href="https://drive.google.com/drive/folders/12IQKS6I50TVQboAtFibfOyRDw_xafKPs">
+                <img src="06.jpg" alt="">
+                <p>Desafios 151 – 180</p>
+            </a>
+        </article>
+
+        <article class="grid-item">
+            <a href="https://drive.google.com/drive/folders/1fvHVIrq_YTc9pd46SK1xYg9GTdPext9I">
+                <img src="07.jpg" alt="">
+                <p>Desafios 181 – 210</p>
+            </a>
+        </article>
+
+        <article class="grid-item">
+            <a href="https://drive.google.com/drive/folders/1UzKtz0zlP7QUEoE9HJ6u3rmx57qftBot">
+                <img src="08.jpg" alt="">
+                <p>Desafios 211 – 240</p>
+            </a>
+        </article>
+
+        <article class="grid-item">
+            <a href="https://drive.google.com/drive/folders/1EdmZ1GR2l55fQlBOESvDWtaCLTQtGaaV">
+                <img src="09.jpg" alt="">
+                <p>Desafios 241 – 270</p>
+            </a>
+        </article>
+
+        <article class="grid-item">
+            <a href="https://drive.google.com/drive/folders/1tr7UHRIgtL-Y0mTyVDcutvpgwH8kFRmM">
+                <img src="10.jpg" alt="">
+                <p>Desafios 271 – 300</p>
+            </a>
+        </article>
+
+        <article class="grid-item">
+            <a href="https://drive.google.com/drive/folders/1YVemG6AKSOyQAum_sIbchU7oTo_XUnNu">
+                <img src="11.jpg" alt="">
+                <p>Desafios 301 – 330</p>
+            </a>
+        </article>
+
+        <article class="grid-item">
+            <a href="https://drive.google.com/drive/folders/1t-IWkveXR5-Q5hSYdhOhqfUbsp8ftsEb">
+                <img src="12.jpg" alt="">
+                <p>Desafios 331 – 360</p>
+            </a>
+        </article>
+
+        <article class="grid-item">
+            <a href="https://drive.google.com/drive/folders/1INsTQpGJ7L_G56RbGq0y4n1KMMucM8Nv">
+                <img src="13.jpg" alt="">
+                <p>Desafios 361 – 390</p>
+            </a>
+        </article>
+
+        <article class="grid-item">
+            <a href="https://drive.google.com/drive/folders/1WOGB0XuY_k6RkVi_ht1J1FD3mTpWbYeL">
+                <img src="14.jpg" alt="">
+                <p>Desafios 391 – 420</p>
+            </a>
+        </article>
+
+        <article class="grid-item">
+            <a href="https://drive.google.com/drive/folders/1RIlXwtsGfdr8bnmS0LVT2XRaVEUOJ6f_">
+                <img src="15.jpg" alt="">
+                <p>Desafios 421 – 450</p>
+            </a>
+        </article>
+
+    </section>
+
+</main>
+
+<!-- ===== FOOTER ===== -->
+<footer class="site-footer">
+    <div>
+        <img src="../imagens/logo-sobre.png" alt="Logo sobre" class="large">
+        <button data-link="https://integravel.github.io/sobre">
+            Mais informações
+        </button>
     </div>
 
-    <div class="grid">
-        <div class="grid-item">
-            <a href="https://drive.google.com/drive/folders/1XOHtm1iya1p_JtM1kcgw2_iBscRh6E2e"><img src="01.jpg" alt="Logo 1"><p>Desafios 001 - 030</p></a>
-        </div>
-        <div class="grid-item">
-            <a href="https://drive.google.com/drive/folders/1dNjsSVVRFOifSC7JsPJyO3m1HaS1JXrF"><img src="02.jpg" alt="Logo 2"><p>Desafios 031 - 060</p></a>
-        </div>
-        <div class="grid-item">
-            <a href="https://drive.google.com/drive/folders/1N9FY7mEFayxAut2GvHEgwMJtvDeUN8ht"><img src="03.jpg" alt="Logo 3"><p>Desafios 061 - 090</p></a>
-        </div>
-        <div class="grid-item">
-            <a href="https://drive.google.com/drive/folders/1T-QJZcwknLSb68vg3f3AYS9sE1n1d56J"><img src="04.jpg" alt="Logo 4"><p>Desafios 091 - 120</p></a>
-        </div>
-        <div class="grid-item">
-            <a href="https://drive.google.com/drive/folders/1r8yebRVWa9_jOL3iPzB8R3L3h5tk1sHm"><img src="05.jpg" alt="Logo 5"><p>Desafios 121 - 150</p></a>
-        </div>
-        <div class="grid-item">
-            <a href="https://drive.google.com/drive/folders/12IQKS6I50TVQboAtFibfOyRDw_xafKPs"><img src="06.jpg" alt="Logo 6"><p>Desafios 151 - 180</p></a>
-        </div>
-        <div class="grid-item">
-            <a href="https://drive.google.com/drive/folders/1fvHVIrq_YTc9pd46SK1xYg9GTdPext9I"><img src="07.jpg" alt="Logo 7"><p>Desafios 181 - 210</p></a>
-        </div>
-        <div class="grid-item">
-            <a href="https://drive.google.com/drive/folders/1UzKtz0zlP7QUEoE9HJ6u3rmx57qftBot"><img src="08.jpg" alt="Logo 8"><p>Desafios 211 - 240</p></a>
-        </div>
-        <div class="grid-item">
-            <a href="https://drive.google.com/drive/folders/1EdmZ1GR2l55fQlBOESvDWtaCLTQtGaaV"><img src="09.jpg" alt="Logo 9"><p>Desafios 241 - 270</p></a>
-        </div>
-        <div class="grid-item">
-            <a href="https://drive.google.com/drive/folders/1tr7UHRIgtL-Y0mTyVDcutvpgwH8kFRmM"><img src="10.jpg" alt="Logo 10"><p>Desafios 271 - 300</p></a>
-        </div>
-        <div class="grid-item">
-            <a href="https://drive.google.com/drive/folders/1YVemG6AKSOyQAum_sIbchU7oTo_XUnNu"><img src="11.jpg" alt="Logo 11"><p>Desafios 301 - 330</p></a>
-        </div>
-        <div class="grid-item">
-            <a href="https://drive.google.com/drive/folders/1t-IWkveXR5-Q5hSYdhOhqfUbsp8ftsEb"><img src="12.jpg" alt="Logo 12"><p>Desafios 331 - 360</p></a>
-        </div>
-        <div class="grid-item">
-            <a href="https://drive.google.com/drive/folders/1INsTQpGJ7L_G56RbGq0y4n1KMMucM8Nv"><img src="13.jpg" alt="Logo 13"><p>Desafios 361 - 390</p></a>
-        </div>
-        <div class="grid-item">
-            <a href="https://drive.google.com/drive/folders/1WOGB0XuY_k6RkVi_ht1J1FD3mTpWbYeL"><img src="14.jpg" alt="Logo 14"><p>Desafios 391 - 420</p></a>
-        </div>
-        <div class="grid-item">
-            <a href="https://drive.google.com/drive/folders/1RIlXwtsGfdr8bnmS0LVT2XRaVEUOJ6f_"><img src="15.jpg" alt="Logo 15"><p>Desafios 421 - 450</p></a>
-        </div>
-
+    <div>
+        <img src="../imagens/logo-contato.png" alt="Logo contato">
+        <button data-link="mailto:integravel@gmail.com">
+            integravel@gmail.com
+        </button>
     </div>
+</footer>
 
-    <footer>
-        <div>
-            <img src="../imagens/logo-sobre.png" alt="Logo sobre">
-            <button onclick="window.location.href='https://integravel.github.io/sobre'">Mais Informações</button>
-        </div>
-        <div>
-            <img src="../imagens/logo-contato.png" alt="Logo contato">
-            <button onclick="window.location.href='mailto:integravel@gmail.com'">integravel@gmail.com</button>
-        </div>
-    </footer>
+<script src="js/main.js"></script>
 </body>
 </html>
