@@ -135,4 +135,7 @@ footer button {
         flex-direction: column;
         text-align: center;
     }
+.foto-perfil {
+    width: 200px;
+}
 }
