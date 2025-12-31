@@ -68,10 +68,11 @@ body {
 }
 
 .grid-item img {
-    max-height: 120px;
-    margin-bottom: 12px;
+    width: 100%;
+    max-height: 160px;
     object-fit: contain;
-    align-self: center;
+    display: block;
+    margin: 0 auto 8px auto;
 }
 
 .grid-item p {
