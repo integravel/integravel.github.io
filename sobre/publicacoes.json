@@ -3,16 +3,57 @@
     "ano": 2011,
     "titulo": "Aulas de Geometria e seus Ambientes: desde um teatro de arena até uma aula digital",
     "arquivo": "https://drive.google.com/file/d/19wgYxS2dGQ_tMWA0G3RgW4n6u4iNYrvl/view",
-    "evento": "III Enrede",
+    "evento": "III Enrede (Encontro da rede de professores, pesquisadores e licenciandos de Física e de Matemática)",
     "local": "UFSCar – São Carlos",
     "data": "25 e 26 de novembro de 2011",
     "eventoLink": "https://sites.google.com/site/observatoriodaeducacaoufscar/eventos/iii-enrede",
     "anaisLink": "https://sites.google.com/site/observatoriodaeducacaoufscar/eventos/iii-enrede/6-trabalhos-completos",
-    "palavras": ["Geometria", "Recursos", "Atividades dinâmicas"],
+    "palavras": [
+      "Aula de Geometria",
+      "Recursos",
+      "Atividades dinâmicas"
+    ],
     "autores": [
       {
         "nome": "Emanuelly de Paula Dias da Silva",
         "lattes": "http://lattes.cnpq.br/6269977294035076"
+      },
+      {
+        "nome": "Theófilo Satoshi Okada",
+        "lattes": "http://lattes.cnpq.br/5547288349406177"
+      },
+      {
+        "nome": "Fernando Yoshio Nawate",
+        "lattes": "http://lattes.cnpq.br/9497550479769380"
+      }
+    ]
+  },
+  {
+    "ano": 2012,
+    "titulo": "Uma abordagem diferenciada para o ensino de Matemática",
+    "arquivo": "https://drive.google.com/file/d/1-4eXzF_crNU25RiLpiCDciDFzfBHAfPX/view",
+    "evento": "IV Jornada Nacional de Educação Matemática e XVII Jornada Regional de Educação Matemática",
+    "local": "Universidade de Passo Fundo",
+    "data": "06 a 09 de maio de 2012",
+    "eventoLink": "https://www.upf.br/jem/edicoes-anteriores/edicao-2012",
+    "anaisLink": "https://www.upf.br/jem/edicoes-anteriores/edicao-2012/anais",
+    "palavras": [
+      "Estímulo",
+      "Extensão",
+      "Sala de aula"
+    ],
+    "autores": [
+      {
+        "nome": "Emanuelly de Paula Dias da Silva",
+        "lattes": "http://lattes.cnpq.br/6269977294035076"
+      },
+      {
+        "nome": "Luana de Souza Pires",
+        "lattes": "http://lattes.cnpq.br/9917307073492522"
+      },
+      {
+        "nome": "Esther Pacheco de Almeida Prado",
+        "lattes": "http://lattes.cnpq.br/9940676501925184"
       }
     ]
   }
