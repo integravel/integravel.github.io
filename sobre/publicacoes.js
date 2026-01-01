@@ -1,6 +1,8 @@
 let todas = [];
 
-// Carrega o JSON
+/* =========================
+   CARREGA O JSON
+========================== */
 fetch("publicacoes.json")
   .then(r => r.json())
   .then(dados => {
@@ -8,24 +10,30 @@ fetch("publicacoes.json")
     renderizar(dados);
   });
 
-// Busca em tempo real
+/* =========================
+   BUSCA EM TEMPO REAL
+========================== */
 document.getElementById("busca").addEventListener("input", e => {
   const termo = e.target.value.toLowerCase();
 
   const filtradas = todas.filter(p =>
-    p.titulo.toLowerCase().includes(termo) ||
+    (p.titulo || "").toLowerCase().includes(termo) ||
     (p.palavras || []).join(" ").toLowerCase().includes(termo) ||
-    (p.autores || []).map(a => a.nome).join(" ").toLowerCase().includes(termo)
+    (p.autores || []).map(a => a.nome).join(" ").toLowerCase().includes(termo) ||
+    (p.orientadores || []).map(o => o.nome).join(" ").toLowerCase().includes(termo)
   );
 
   renderizar(filtradas);
 });
 
+/* =========================
+   RENDERIZAÇÃO
+========================== */
 function renderizar(lista) {
   const container = document.getElementById("publicacoes");
   container.innerHTML = "";
 
-  // Agrupa por ano
+  /* AGRUPA POR ANO */
   const porAno = {};
   lista.forEach(p => {
     porAno[p.ano] = porAno[p.ano] || [];
@@ -62,7 +70,7 @@ function renderizar(lista) {
            METADADOS POR TIPO
         ========================== */
 
-        // 🔹 Artigo em periódico
+        // 🔹 ARTIGO EM PERIÓDICO
         if (pub.tipo === "Artigo em Periódico") {
           html += `
             <div class="meta">
@@ -72,7 +80,7 @@ function renderizar(lista) {
           `;
         }
 
-        // 🔹 Monografia acadêmica
+        // 🔹 MONOGRAFIA ACADÊMICA
         else if (pub.tipo === "Monografia Acadêmica") {
           html += `
             <div class="meta">
@@ -81,14 +89,39 @@ function renderizar(lista) {
               ${pub.data}
             </div>
           `;
+
+          if (pub.orientadores && pub.orientadores.length > 0) {
+            const orientador = pub.orientadores[0];
+            const coorientador = pub.orientadores[1];
+
+            html += `
+              <div class="palavras">
+                <b>Orientador:</b>
+                ${orientador.lattes
+                  ? `<a href="${orientador.lattes}" target="_blank">${orientador.nome}</a>`
+                  : orientador.nome}
+              </div>
+            `;
+
+            if (coorientador) {
+              html += `
+                <div class="palavras">
+                  <b>Coorientador:</b>
+                  ${coorientador.lattes
+                    ? `<a href="${coorientador.lattes}" target="_blank">${coorientador.nome}</a>`
+                    : coorientador.nome}
+                </div>
+              `;
+            }
+          }
         }
 
-        // 🔹 Trabalho em evento (padrão)
+        // 🔹 TRABALHO EM EVENTO (PADRÃO)
         else {
           html += `
             <div class="meta">
-              ${pub.evento}${pub.instituicao ? " — " + pub.instituicao : ""}<br>
-              ${pub.data}
+              ${pub.evento || ""}${pub.instituicao ? " — " + pub.instituicao : ""}<br>
+              ${pub.data || ""}
             </div>
           `;
         }
@@ -96,7 +129,6 @@ function renderizar(lista) {
         /* =========================
            LINKS
         ========================== */
-
         const links = [];
 
         if (pub.eventoLink) {
@@ -126,7 +158,6 @@ function renderizar(lista) {
         /* =========================
            PALAVRAS-CHAVE
         ========================== */
-
         if (pub.palavras && pub.palavras.length > 0) {
           html += `
             <div class="palavras">
@@ -138,7 +169,6 @@ function renderizar(lista) {
         /* =========================
            AUTORES
         ========================== */
-
         html += `
           <div class="palavras">
             <b>Autoria:</b>
