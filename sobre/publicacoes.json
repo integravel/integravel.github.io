@@ -1378,10 +1378,12 @@
 ,
 {
   "ano": 2023,
-  "tipo": "Tese de Doutorado",
+  "tipo": "Monografia Acadêmica",
+  "subtipo": "Tese de Doutorado",
   "titulo": "Justapor demonstrações e seu efeito na escrita de demonstrações",
   "arquivo": "https://repositorio.unicamp.br/Busca/Download?codigoArquivo=557097",
-  "instituicao": "UNICAMP – Programa de Pós-Graduação Multiunidades em Ensino de Ciências e Matemática",
+  "programa": "Programa de Pós-Graduação Multiunidades em Ensino de Ciências e Matemática – UNICAMP",
+  "instituicao": "UNICAMP",
   "data": "2023",
   "repositorioLink": "https://repositorio.unicamp.br/Acervo/Detalhe/1338944",
   "palavras": [
