@@ -32,13 +32,12 @@ function renderizar(lista) {
     porAno[p.ano].push(p);
   });
 
-  // Ordena anos (decrescente)
   Object.keys(porAno)
     .sort((a, b) => b - a)
     .forEach(ano => {
 
-      const quantidade = porAno[ano].length;
       const details = document.createElement("details");
+      const quantidade = porAno[ano].length;
 
       details.innerHTML = `
         <summary>
@@ -53,14 +52,17 @@ function renderizar(lista) {
         const art = document.createElement("article");
         art.className = "trabalho";
 
-        // 🔹 Título + arquivo
         let html = `
           <h3>
             <a href="${pub.arquivo}" target="_blank">${pub.titulo}</a>
           </h3>
         `;
 
-        // 🔹 Metadados principais
+        /* =========================
+           METADADOS POR TIPO
+        ========================== */
+
+        // 🔹 Artigo em periódico
         if (pub.tipo === "Artigo em Periódico") {
           html += `
             <div class="meta">
@@ -68,7 +70,21 @@ function renderizar(lista) {
               ${pub.data}
             </div>
           `;
-        } else {
+        }
+
+        // 🔹 Monografia acadêmica
+        else if (pub.tipo === "Monografia Acadêmica") {
+          html += `
+            <div class="meta">
+              <b>${pub.subtipo || "Monografia"}:</b>
+              ${pub.programa || pub.instituicao || ""}<br>
+              ${pub.data}
+            </div>
+          `;
+        }
+
+        // 🔹 Trabalho em evento (padrão)
+        else {
           html += `
             <div class="meta">
               ${pub.evento}${pub.instituicao ? " — " + pub.instituicao : ""}<br>
@@ -77,7 +93,10 @@ function renderizar(lista) {
           `;
         }
 
-        // 🔹 Links
+        /* =========================
+           LINKS
+        ========================== */
+
         const links = [];
 
         if (pub.eventoLink) {
@@ -96,11 +115,18 @@ function renderizar(lista) {
           links.push(`<a href="${pub.publicacaoLink}" target="_blank">Publicação</a>`);
         }
 
+        if (pub.repositorioLink) {
+          links.push(`<a href="${pub.repositorioLink}" target="_blank">Repositório</a>`);
+        }
+
         if (links.length > 0) {
           html += `<div class="links">${links.join(" ")}</div>`;
         }
 
-        // 🔹 Palavras-chave
+        /* =========================
+           PALAVRAS-CHAVE
+        ========================== */
+
         if (pub.palavras && pub.palavras.length > 0) {
           html += `
             <div class="palavras">
@@ -109,7 +135,10 @@ function renderizar(lista) {
           `;
         }
 
-        // 🔹 Autores
+        /* =========================
+           AUTORES
+        ========================== */
+
         html += `
           <div class="palavras">
             <b>Autoria:</b>
