@@ -1601,6 +1601,44 @@
       "lattes": ""
     }
   ]
+},
+{
+  "ano": 2025,
+  "tipo": "Artigo em Periódico",
+  "titulo": "Isomerias moleculares representadas por amigurumis",
+  "arquivo": "https://drive.google.com/file/d/1ZQ3ZbR7y-zC_mHG1JLTjG6eJpVDGp2_y/view?usp=drivesdk",
+  "periodico": "Educação Química en Punto de Vista",
+  "instituicao": "UNILA",
+  "data": "23 de dezembro de 2025",
+  "periodicoLink": "https://revistas.unila.edu.br/eqpv/issue/current",
+  "publicacaoLink": "https://revistas.unila.edu.br/eqpv/article/view/4985",
+  "palavras": [
+    "Amigurumis",
+    "Modelos atômicos",
+    "Analogias"
+  ],
+  "autores": [
+    {
+      "nome": "Emanuelly de Paula Dias da Silva",
+      "lattes": "http://lattes.cnpq.br/6269977294035076"
+    },
+    {
+      "nome": "Rebeca de Oliveira Estrella",
+      "lattes": ""
+    },
+    {
+      "nome": "Carolina Barbosa Paiva",
+      "lattes": ""
+    },
+    {
+      "nome": "Leonardo Fernando de Lemos Schuler",
+      "lattes": ""
+    },
+    {
+      "nome": "Danilo de Aguiar Pereira",
+      "lattes": ""
+    }
+  ]
 }
 
 
