@@ -1639,6 +1639,37 @@
       "lattes": ""
     }
   ]
+},
+{
+  "ano": 2025,
+  "tipo": "Artigo em Periódico",
+  "titulo": "O conceito de experiência na filosofia de Jonh Dewey: Implicações estéticas, éticas, lógicas e pedagógicas",
+  "arquivo": "https://drive.google.com/file/d/1FEqCtyn_bWMgtTCHn2LWg7JVR1OPZ49g/view?usp=drivesdk",
+  "periodico": "Revista Apotheke",
+  "instituicao": "UDESC – Universidade do Estado de Santa Catarina",
+  "data": "26 de setembro de 2025",
+  "periodicoLink": "https://revistas.udesc.br/index.php/apotheke/issue/view/???", 
+  "publicacaoLink": "https://revistas.udesc.br/index.php/apotheke/article/view/27035",
+  "palavras": [
+    "desinteresse",
+    "educação",
+    "estética",
+    "lógica"
+  ],
+  "autores": [
+    {
+      "nome": "Marlon Dantas Trevisan",
+      "lattes": ""
+    },
+    {
+      "nome": "Emanuelly de Paula Dias da Silva",
+      "lattes": "http://lattes.cnpq.br/6269977294035076"
+    },
+    {
+      "nome": "Simone de Cássia Soares da Silva",
+      "lattes": ""
+    }
+  ]
 }
 
 
