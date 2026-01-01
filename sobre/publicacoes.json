@@ -595,21 +595,29 @@
 },
 {
   "ano": 2018,
-  "tipo": "Dissertação de Mestrado",
+  "tipo": "Monografia Acadêmica",
+  "subtipo": "Dissertação de Mestrado",
   "titulo": "Handles – a trajetória de desenvolvimento de um jogo digital para ensino de Matemática",
   "arquivo": "https://repositorio.unesp.br/bitstream/handle/11449/153837/silva_mhpd_me_bauru.pdf",
-  "repositorio": "https://repositorio.unesp.br/items/771533b4-7a8f-42f7-adb6-50de45109cd2",
+  "repositorioLink": "https://repositorio.unesp.br/items/771533b4-7a8f-42f7-adb6-50de45109cd2",
   "instituicao": "UNESP – Faculdade de Ciências de Bauru",
   "programa": "Programa de Pós-Graduação em Educação para a Ciência",
-  "orientador": {
-    "nome": "Wilson Massashiro Yonezawa",
-    "lattes": "http://lattes.cnpq.br/3806652471471086"
-  },
-  "palavras": ["Ensino de Matemática", "Jogo digital", "Game design"],
+  "data": "2018",
+  "palavras": [
+    "Ensino de Matemática",
+    "Jogo digital",
+    "Game design"
+  ],
   "autores": [
     {
       "nome": "Emanuelly de Paula Dias da Silva",
       "lattes": "http://lattes.cnpq.br/6269977294035076"
+    }
+  ],
+  "orientadores": [
+    {
+      "nome": "Wilson Massashiro Yonezawa",
+      "lattes": "http://lattes.cnpq.br/3806652471471086"
     }
   ]
 },
