@@ -18,10 +18,8 @@ body {
     max-width: 900px;
     margin: auto;
     display: flex;
-    flex-direction: column; /* logo acima do texto */
-    align-items: center;    /* centraliza horizontalmente */
-    text-align: center;
-    gap: 12px;              /* espaço entre logo e mensagem */
+    align-items: center;
+    gap: 15px;
     text-decoration: none;
     color: inherit;
 }
