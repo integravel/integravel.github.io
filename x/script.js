@@ -1,143 +1,157 @@
-document.addEventListener("DOMContentLoaded", () => {
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getAuth, signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { getFirestore, doc, setDoc, getDoc, increment } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-  const dropzones = document.querySelectorAll(".dropzone");
-  const returnZone = document.querySelector(".dropzone-return");
-  const feedback = document.getElementById("feedback");
+/* ================= FIREBASE ================= */
 
-  /* ===============================
-     DADOS DOS BLOCOS
-     =============================== */
-  const blocksData = [
-    { id: "1", tex: "\\( N \\text{ não é divisível por nenhum dos } p_i \\)" },
-    { id: "2", tex: "\\( N \\text{ é primo ou composto} \\)" },
-    { id: "3", tex: "\\( N \\text{ possui um divisor primo } q \\)" },
-    { id: "4", tex: "\\( q \\notin \\{p_1,\\ldots,p_n\\} \\)" },
-    { id: "5", tex: "\\( \\text{Existe um primo fora da lista} \\)" },
-    { id: "6", tex: "\\( \\text{A hipótese de finitude é falsa} \\)" }
-  ];
+const firebaseConfig = {
+  apiKey: "AIzaSyAHC2SbdaGCB8wVssDAc7kpFUvbG60q4K0",
+  authDomain: "arrasta-o-x.firebaseapp.com",
+  projectId: "arrasta-o-x",
+  storageBucket: "arrasta-o-x.firebasestorage.app",
+  messagingSenderId: "43422106005",
+  appId: "1:43422106005:web:c9344f9a73db8106c3f69c",
+  measurementId: "G-7ZK2WZ1R48"
+};
 
-  /* ===============================
-     EMBARALHAR (FISHER–YATES)
-     =============================== */
-  function shuffle(array) {
-    for (let i = array.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [array[i], array[j]] = [array[j], array[i]];
-    }
-  }
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const provider = new GoogleAuthProvider();
 
-  /* ===============================
-     CRIAR BLOCOS
-     =============================== */
-  function createBlocks() {
-    returnZone.innerHTML = "";
+let currentUser = null;
+let alreadyCounted = false;
 
-    const shuffled = [...blocksData];
-    shuffle(shuffled);
+document.getElementById("login").addEventListener("click", async () => {
+  const result = await signInWithPopup(auth, provider);
+  currentUser = result.user;
 
-    shuffled.forEach(data => {
-      const div = document.createElement("div");
-      div.className = "draggable";
-      div.dataset.id = data.id;
-      div.draggable = true;
-      div.innerHTML = data.tex;
+  document.getElementById("user").textContent = currentUser.displayName;
 
-      enableDrag(div);
-      returnZone.appendChild(div);
-    });
+  const ref = doc(db, "users", currentUser.uid);
+  const snap = await getDoc(ref);
 
-    if (window.MathJax) {
-      MathJax.typesetPromise();
-    }
-  }
-
-  /* ===============================
-     DRAG
-     =============================== */
-  function enableDrag(el) {
-    el.addEventListener("dragstart", e => {
-      e.dataTransfer.setData("text/plain", el.dataset.id);
+  if (!snap.exists()) {
+    await setDoc(ref, {
+      name: currentUser.displayName,
+      score: 0
     });
   }
+});
 
-  createBlocks();
+/* ================= APP ================= */
 
-  /* ===============================
-     DROP NAS LINHAS
-     =============================== */
+const dropzones = document.querySelectorAll(".dropzone");
+const returnZone = document.querySelector(".dropzone-return");
+
+const blocksData = [
+  { id: "1", tex: "\\( N \\text{ não é divisível por nenhum dos } p_i \\)" },
+  { id: "2", tex: "\\( N \\text{ é primo ou composto} \\)" },
+  { id: "3", tex: "\\( N \\text{ possui um divisor primo } q \\)" },
+  { id: "4", tex: "\\( q \\notin \\{p_1,\\ldots,p_n\\} \\)" },
+  { id: "5", tex: "\\( \\text{Existe um primo fora da lista} \\)" },
+  { id: "6", tex: "\\( \\text{A hipótese de finitude é falsa} \\)" }
+];
+
+function shuffle(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+}
+
+function createBlocks() {
+  alreadyCounted = false;
+  returnZone.innerHTML = "";
+
+  const shuffled = [...blocksData];
+  shuffle(shuffled);
+
+  shuffled.forEach(data => {
+    const div = document.createElement("div");
+    div.className = "draggable";
+    div.dataset.id = data.id;
+    div.draggable = true;
+    div.innerHTML = data.tex;
+
+    div.addEventListener("dragstart", e => {
+      e.dataTransfer.setData("text/plain", data.id);
+    });
+
+    returnZone.appendChild(div);
+  });
+
+  if (window.MathJax) MathJax.typesetPromise();
+}
+
+createBlocks();
+
+function checkIndividual() {
+  let allCorrect = true;
+
   dropzones.forEach(zone => {
+    const esperado = zone.dataset.expected;
+    const child = zone.firstElementChild;
 
-    zone.addEventListener("dragover", e => {
-      e.preventDefault();
-      zone.classList.add("hover");
-    });
+    zone.classList.remove("correct", "wrong");
 
-    zone.addEventListener("dragleave", () => {
-      zone.classList.remove("hover");
-    });
+    if (!child) {
+      allCorrect = false;
+      return;
+    }
 
-    zone.addEventListener("drop", e => {
-      e.preventDefault();
-      zone.classList.remove("hover");
-
-      if (zone.children.length > 0) return;
-
-      const id = e.dataTransfer.getData("text/plain");
-      const block = document.querySelector(`.draggable[data-id="${id}"]`);
-      if (!block) return;
-
-      zone.appendChild(block);
-
-      if (window.MathJax) {
-        MathJax.typesetPromise();
-      }
-    });
+    if (child.dataset.id === esperado) {
+      zone.classList.add("correct");
+    } else {
+      zone.classList.add("wrong");
+      allCorrect = false;
+    }
   });
 
-  /* ===============================
-     DROP DE VOLTA PARA OPÇÕES
-     =============================== */
-  returnZone.addEventListener("dragover", e => {
+  if (allCorrect && !alreadyCounted) {
+    alreadyCounted = true;
+    saveProgress();
+  }
+}
+
+async function saveProgress() {
+  if (!currentUser) return;
+
+  const ref = doc(db, "users", currentUser.uid);
+
+  await setDoc(ref, {
+    score: increment(1)
+  }, { merge: true });
+}
+
+dropzones.forEach(zone => {
+  zone.addEventListener("dragover", e => e.preventDefault());
+
+  zone.addEventListener("drop", e => {
     e.preventDefault();
-    returnZone.classList.add("hover");
-  });
 
-  returnZone.addEventListener("dragleave", () => {
-    returnZone.classList.remove("hover");
-  });
-
-  returnZone.addEventListener("drop", e => {
-    e.preventDefault();
-    returnZone.classList.remove("hover");
+    if (zone.children.length > 0) return;
 
     const id = e.dataTransfer.getData("text/plain");
     const block = document.querySelector(`.draggable[data-id="${id}"]`);
-    if (!block) return;
 
-    returnZone.appendChild(block);
+    zone.appendChild(block);
+    checkIndividual();
 
-    if (window.MathJax) {
-      MathJax.typesetPromise();
-    }
+    if (window.MathJax) MathJax.typesetPromise();
   });
+});
 
-  /* ===============================
-     VERIFICAÇÃO
-     =============================== */
-  document.getElementById("check").addEventListener("click", () => {
-    let correto = true;
+returnZone.addEventListener("dragover", e => e.preventDefault());
 
-    dropzones.forEach(zone => {
-      const esperado = zone.dataset.expected;
-      const child = zone.firstElementChild;
-      if (!child || child.dataset.id !== esperado) {
-        correto = false;
-      }
-    });
+returnZone.addEventListener("drop", e => {
+  e.preventDefault();
 
-    feedback.textContent = correto
-      ? "✨ Demonstração correta."
-      : "💭 Ainda há algo fora de ordem.";
-  });
+  const id = e.dataTransfer.getData("text/plain");
+  const block = document.querySelector(`.draggable[data-id="${id}"]`);
 
+  returnZone.appendChild(block);
+  checkIndividual();
+
+  if (window.MathJax) MathJax.typesetPromise();
 });
