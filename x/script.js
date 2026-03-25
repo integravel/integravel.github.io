@@ -1,55 +1,126 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+document.addEventListener("DOMContentLoaded", () => {
 
-  <title>Demonstração — Primos Infinitos</title>
+  const dropzones = document.querySelectorAll(".dropzone");
+  const returnZone = document.querySelector(".dropzone-return");
 
-  <!-- MathJax -->
-  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-  <script id="MathJax-script" async
-    src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+  const blocksData = [
+    { id: "1", tex: "\\( N \\text{ não é divisível por nenhum dos } p_i \\)" },
+    { id: "2", tex: "\\( N \\text{ é primo ou composto} \\)" },
+    { id: "3", tex: "\\( N \\text{ possui um divisor primo } q \\)" },
+    { id: "4", tex: "\\( q \\notin \\{p_1,\\ldots,p_n\\} \\)" },
+    { id: "5", tex: "\\( \\text{Existe um primo fora da lista} \\)" },
+    { id: "6", tex: "\\( \\text{A hipótese de finitude é falsa} \\)" }
+  ];
 
-  <link rel="stylesheet" href="style.css">
-</head>
+  function shuffle(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+    }
+  }
 
-<body>
-<main>
+  function createBlocks() {
+    returnZone.innerHTML = "";
 
-  <p class="enunciado">
-    <strong>Teorema.</strong>
-    Existem infinitos números primos.
-  </p>
+    const shuffled = [...blocksData];
+    shuffle(shuffled);
 
-  <p class="line">
-    <strong>Demonstração.</strong>
-    Suponha, por absurdo, que exista apenas uma quantidade finita de números primos.
-  </p>
+    shuffled.forEach(data => {
+      const div = document.createElement("div");
+      div.className = "draggable";
+      div.dataset.id = data.id;
+      div.draggable = true;
+      div.innerHTML = data.tex;
 
-  <p class="line">
-    Seja \( p_1, p_2, \ldots, p_n \) a lista de todos os números primos.
-  </p>
+      enableDrag(div);
+      returnZone.appendChild(div);
+    });
 
-  <p class="line">
-    Considere o número \( N = p_1 p_2 \cdots p_n + 1 \).
-  </p>
+    if (window.MathJax) {
+      MathJax.typesetPromise();
+    }
+  }
 
-  <div class="line dropzone" data-expected="1"></div>
-  <div class="line dropzone" data-expected="2"></div>
-  <div class="line dropzone" data-expected="3"></div>
-  <div class="line dropzone" data-expected="4"></div>
-  <div class="line dropzone" data-expected="5"></div>
-  <div class="line dropzone" data-expected="6"></div>
+  function enableDrag(el) {
+    el.addEventListener("dragstart", e => {
+      e.dataTransfer.setData("text/plain", el.dataset.id);
+    });
+  }
 
-  <p class="line">
-    Isso contradiz a hipótese inicial, logo existem infinitos números primos.
-  </p>
+  createBlocks();
 
-  <div class="options dropzone-return" id="options"></div>
+  function checkIndividual() {
+    dropzones.forEach(zone => {
+      const esperado = zone.dataset.expected;
+      const child = zone.firstElementChild;
 
-</main>
+      zone.classList.remove("correct", "wrong");
 
-<script src="script.js"></script>
-</body>
-</html>
+      if (!child) return;
+
+      if (child.dataset.id === esperado) {
+        zone.classList.add("correct");
+      } else {
+        zone.classList.add("wrong");
+      }
+    });
+  }
+
+  dropzones.forEach(zone => {
+
+    zone.addEventListener("dragover", e => {
+      e.preventDefault();
+      zone.classList.add("hover");
+    });
+
+    zone.addEventListener("dragleave", () => {
+      zone.classList.remove("hover");
+    });
+
+    zone.addEventListener("drop", e => {
+      e.preventDefault();
+      zone.classList.remove("hover");
+
+      if (zone.children.length > 0) return;
+
+      const id = e.dataTransfer.getData("text/plain");
+      const block = document.querySelector(`.draggable[data-id="${id}"]`);
+      if (!block) return;
+
+      zone.appendChild(block);
+
+      if (window.MathJax) {
+        MathJax.typesetPromise();
+      }
+
+      checkIndividual();
+    });
+  });
+
+  returnZone.addEventListener("dragover", e => {
+    e.preventDefault();
+    returnZone.classList.add("hover");
+  });
+
+  returnZone.addEventListener("dragleave", () => {
+    returnZone.classList.remove("hover");
+  });
+
+  returnZone.addEventListener("drop", e => {
+    e.preventDefault();
+    returnZone.classList.remove("hover");
+
+    const id = e.dataTransfer.getData("text/plain");
+    const block = document.querySelector(`.draggable[data-id="${id}"]`);
+    if (!block) return;
+
+    returnZone.appendChild(block);
+
+    if (window.MathJax) {
+      MathJax.typesetPromise();
+    }
+
+    checkIndividual();
+  });
+
+});
