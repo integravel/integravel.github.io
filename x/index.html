@@ -17,13 +17,14 @@
 <body>
 <main>
 
-  <!-- ENUNCIADO -->
+  <button id="login">Entrar com Google</button>
+  <p id="user"></p>
+
   <p class="enunciado">
     <strong>Teorema.</strong>
     Existem infinitos números primos.
   </p>
 
-  <!-- DEMONSTRAÇÃO -->
   <p class="line">
     <strong>Demonstração.</strong>
     Suponha, por absurdo, que exista apenas uma quantidade finita de números primos.
@@ -37,7 +38,6 @@
     Considere o número \( N = p_1 p_2 \cdots p_n + 1 \).
   </p>
 
-  <!-- LINHAS A COMPLETAR -->
   <div class="line dropzone" data-expected="1"></div>
   <div class="line dropzone" data-expected="2"></div>
   <div class="line dropzone" data-expected="3"></div>
@@ -49,33 +49,10 @@
     Isso contradiz a hipótese inicial, logo existem infinitos números primos.
   </p>
 
-  <!-- BLOCOS -->
-  <div class="options dropzone-return" id="options">
-    <div class="draggable" draggable="true" data-id="1">
-      \( N \text{ não é divisível por nenhum dos } p_i \)
-    </div>
-    <div class="draggable" draggable="true" data-id="2">
-      \( N \text{ é primo ou composto} \)
-    </div>
-    <div class="draggable" draggable="true" data-id="3">
-      \( N \text{ possui um divisor primo } q \)
-    </div>
-    <div class="draggable" draggable="true" data-id="4">
-      \( q \notin \{p_1,\ldots,p_n\} \)
-    </div>
-    <div class="draggable" draggable="true" data-id="5">
-      \( \text{Existe um primo fora da lista} \)
-    </div>
-    <div class="draggable" draggable="true" data-id="6">
-      \( \text{A hipótese de finitude é falsa} \)
-    </div>
-  </div>
-
-  <button id="check">Verificar</button>
-  <p id="feedback"></p>
+  <div class="options dropzone-return" id="options"></div>
 
 </main>
 
-<script src="script.js"></script>
+<script type="module" src="script.js"></script>
 </body>
 </html>
