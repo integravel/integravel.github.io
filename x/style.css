@@ -26,23 +26,15 @@ main {
 
 .enunciado {
   margin-bottom: 1.2rem;
-  font-size: 1rem;
-  line-height: 1.5;
 }
 
 .line {
   min-height: 2em;
   margin: 0.35rem 0;
-  line-height: 1.5;
 }
 
 .dropzone {
   border-bottom: 1.2px dotted rgba(156, 89, 209, 0.6);
-  transition: background 0.2s ease;
-}
-
-.dropzone.hover {
-  background: rgba(156, 89, 209, 0.05);
 }
 
 .dropzone.correct {
@@ -55,21 +47,10 @@ main {
 
 .options {
   margin-top: 1.5rem;
-  padding-top: 0.8rem;
-  border-top: 1px solid rgba(156, 89, 209, 0.25);
-
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
   justify-content: center;
-
-  min-height: 3rem;
-}
-
-.options:empty::after {
-  content: "Arraste aqui para reorganizar";
-  font-size: 0.8rem;
-  color: rgba(44, 44, 44, 0.4);
 }
 
 .draggable {
@@ -77,13 +58,36 @@ main {
   border-radius: 999px;
   padding: 0.3rem 0.7rem;
   cursor: grab;
-  font-size: 0.9rem;
-  white-space: nowrap;
-  user-select: none;
 }
 
-.dropzone .draggable {
-  background: none;
-  padding: 0;
-  border-radius: 0;
+/* 🐱 */
+
+#pet-container {
+  position: fixed;
+  top: 60px;
+  left: 60px;
+  width: 100px;
+  height: 100px;
+  pointer-events: none;
+  z-index: 999;
 }
+
+#pet {
+  width: 100%;
+}
+
+#pet.flip {
+  transform: scaleX(-1);
+}
+
+#pet-hand {
+  position: absolute;
+  width: 70px;
+  top: -35px;
+  left: 15px;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.pet-happy { transform: scale(1.1); }
+.pet-angry { transform: scale(0.9) rotate(-5deg); }
