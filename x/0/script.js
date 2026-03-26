@@ -83,7 +83,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (window.MathJax) MathJax.typesetPromise();
 
-      /* 🔥 REAÇÃO CORRETA (APENAS UMA) */
       if (id === zone.dataset.expected) {
         onCorrect();
       } else {
@@ -151,7 +150,7 @@ function animate() {
 newTarget();
 animate();
 
-/* 😸 REAÇÕES (SEM BUG) */
+/* 😸 REAÇÕES */
 
 let reacting = false;
 
@@ -162,23 +161,23 @@ function react(sprite, handSprite, className) {
   pet.classList.remove("pet-happy", "pet-angry");
   pet.classList.add(className);
 
-  pet.src = sprite;
-  hand.src = handSprite;
+  pet.src = "../x/" + sprite;
+  hand.src = "../x/" + handSprite;
 
   hand.style.opacity = 1;
 
   setTimeout(() => {
     hand.style.opacity = 0;
     pet.classList.remove(className);
-    pet.src = "../cat_idle.png";
+    pet.src = "../x/cat_idle.png";
     reacting = false;
   }, 700);
 }
 
 function onCorrect() {
-  react("../cat_happy.png", "../hand_pet.png", "../pet-happy");
+  react("cat_happy.png", "hand_pet.png", "pet-happy");
 }
 
 function onWrong() {
-  react("../cat_angry.png", "../hand_grab.png", "../pet-angry");
+  react("cat_angry.png", "hand_grab.png", "pet-angry");
 }
