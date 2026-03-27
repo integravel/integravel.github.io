@@ -7,12 +7,12 @@ document.addEventListener("DOMContentLoaded", () => {
   const hand = document.getElementById("pet-hand");
 
   const blocksData = [
-    { id: "1", tex: "\\( N \\text{ não é divisível por nenhum dos } p_i \\)" },
-    { id: "2", tex: "\\( N \\text{ é primo ou composto} \\)" },
-    { id: "3", tex: "\\( N \\text{ possui um divisor primo } q \\)" },
-    { id: "4", tex: "\\( q \\notin \\{p_1,\\ldots,p_n\\} \\)" },
-    { id: "5", tex: "\\( \\text{Existe um primo fora da lista} \\)" },
-    { id: "6", tex: "\\( \\text{A hipótese de finitude é falsa} \\)" }
+    { id: "1", tex: "\\( 2 = \\frac{a^2}{b^2} \\)" },
+    { id: "2", tex: "\\( 2b^2 = a^2 \\)" },
+    { id: "3", tex: "\\( a \\text{ é par} \\Rightarrow a = 2k \\)" },
+    { id: "4", tex: "\\( 2b^2 = (2k)^2 = 4k^2 \\)" },
+    { id: "5", tex: "\\( b^2 = 2k^2 \\)" },
+    { id: "6", tex: "\\( b \\text{ é par} \\)" }
   ];
 
   function shuffle(array) {
@@ -106,8 +106,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     checkIndividual();
   });
-
-  /* 😸 REAÇÃO ESTÁVEL */
 
   let reacting = false;
 
