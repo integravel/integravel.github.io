@@ -15,6 +15,7 @@
 </head>
 
 <body>
+
 <main>
 
   <p class="enunciado">
@@ -28,13 +29,14 @@
   </p>
 
   <p class="line">
-    Seja \( p_1, p_2, \ldots, p_n \) a lista de todos os números primos.
+    Seja \( p_1, p_2, \ldots, p_n \).
   </p>
 
   <p class="line">
-    Considere o número \( N = p_1 p_2 \cdots p_n + 1 \).
+    Considere \( N = p_1 p_2 \cdots p_n + 1 \).
   </p>
 
+  <!-- DROPZONES -->
   <div class="line dropzone" data-expected="1"></div>
   <div class="line dropzone" data-expected="2"></div>
   <div class="line dropzone" data-expected="3"></div>
@@ -46,14 +48,15 @@
     Isso contradiz a hipótese inicial, logo existem infinitos números primos.
   </p>
 
-  <div class="options dropzone-return" id="options"></div>
+  <!-- BLOCOS -->
+  <div class="options dropzone-return"></div>
 
 </main>
 
-<!-- 🐱 Gatinho -->
-<div id="pet-container">
-  <img id="pet" src="../x/cat_idle.png">
-  <img id="pet-hand" src="">
+<!-- 🐱 GATO -->
+<div id="pet-root">
+  <img id="pet" src="cat_idle.png" draggable="false">
+  <img id="pet-hand" src="" draggable="false">
 </div>
 
 <script src="script.js"></script>
