@@ -3,6 +3,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const dropzones = document.querySelectorAll(".dropzone");
   const returnZone = document.querySelector(".dropzone-return");
 
+  const pet = document.getElementById("pet");
+  const hand = document.getElementById("pet-hand");
+
   const blocksData = [
     { id: "1", tex: "\\( N \\text{ não é divisível por nenhum dos } p_i \\)" },
     { id: "2", tex: "\\( N \\text{ é primo ou composto} \\)" },
@@ -14,7 +17,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function shuffle(array) {
     for (let i = array.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
+      const j = Math.random() * (i + 1) | 0;
       [array[i], array[j]] = [array[j], array[i]];
     }
   }
@@ -66,9 +69,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   dropzones.forEach(zone => {
 
-    zone.addEventListener("dragover", e => {
-      e.preventDefault();
-    });
+    zone.addEventListener("dragover", e => e.preventDefault());
 
     zone.addEventListener("drop", e => {
       e.preventDefault();
@@ -83,19 +84,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (window.MathJax) MathJax.typesetPromise();
 
-      if (id === zone.dataset.expected) {
-        onCorrect();
-      } else {
-        onWrong();
-      }
+      if (id === zone.dataset.expected) onCorrect();
+      else onWrong();
 
       checkIndividual();
     });
   });
 
-  returnZone.addEventListener("dragover", e => {
-    e.preventDefault();
-  });
+  returnZone.addEventListener("dragover", e => e.preventDefault());
 
   returnZone.addEventListener("drop", e => {
     e.preventDefault();
@@ -111,73 +107,46 @@ document.addEventListener("DOMContentLoaded", () => {
     checkIndividual();
   });
 
+  /* 😸 REAÇÃO ESTÁVEL */
+
+  let reacting = false;
+
+  function react(sprite, handSprite, className) {
+    if (reacting) return;
+    reacting = true;
+
+    const img1 = new Image();
+    const img2 = new Image();
+
+    img1.src = sprite;
+    img2.src = handSprite;
+
+    img1.onload = () => {
+      pet.src = img1.src;
+      hand.src = img2.src;
+
+      pet.classList.remove("pet-happy", "pet-angry");
+
+      requestAnimationFrame(() => {
+        pet.classList.add(className);
+        hand.style.opacity = 1;
+      });
+
+      setTimeout(() => {
+        hand.style.opacity = 0;
+        pet.classList.remove(className);
+        pet.src = "cat_idle.png";
+        reacting = false;
+      }, 700);
+    };
+  }
+
+  function onCorrect() {
+    react("cat_happy.png", "hand_pet.png", "pet-happy");
+  }
+
+  function onWrong() {
+    react("cat_angry.png", "hand_grab.png", "pet-angry");
+  }
+
 });
-
-/* 🐱 MOVIMENTO SUAVE */
-
-const pet = document.getElementById("pet");
-const hand = document.getElementById("pet-hand");
-const container = document.getElementById("pet-container");
-
-let pos = { x: 60, y: 60 };
-let target = { x: 200, y: 200 };
-
-function newTarget() {
-  target.x = Math.random() * (window.innerWidth - 120);
-  target.y = Math.random() * (window.innerHeight - 120);
-}
-
-function animate() {
-  let dx = target.x - pos.x;
-  let dy = target.y - pos.y;
-
-  let dist = Math.sqrt(dx * dx + dy * dy);
-
-  if (dist < 5) newTarget();
-
-  pos.x += dx * 0.02;
-  pos.y += dy * 0.02;
-
-  if (dx > 0) pet.classList.remove("flip");
-  else pet.classList.add("flip");
-
-  container.style.left = pos.x + "px";
-  container.style.top = pos.y + "px";
-
-  requestAnimationFrame(animate);
-}
-
-newTarget();
-animate();
-
-/* 😸 REAÇÕES */
-
-let reacting = false;
-
-function react(sprite, handSprite, className) {
-  if (reacting) return;
-  reacting = true;
-
-  pet.classList.remove("pet-happy", "pet-angry");
-  pet.classList.add(className);
-
-  pet.src = "../x/" + sprite;
-  hand.src = "../x/" + handSprite;
-
-  hand.style.opacity = 1;
-
-  setTimeout(() => {
-    hand.style.opacity = 0;
-    pet.classList.remove(className);
-    pet.src = "../x/cat_idle.png";
-    reacting = false;
-  }, 700);
-}
-
-function onCorrect() {
-  react("cat_happy.png", "hand_pet.png", "pet-happy");
-}
-
-function onWrong() {
-  react("cat_angry.png", "hand_grab.png", "pet-angry");
-}
