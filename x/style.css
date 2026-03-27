@@ -67,7 +67,7 @@ main {
   max-width: 100%;
 }
 
-/* 🐱 GATO ULTRA ESTÁVEL */
+/* 🐱 GATO ESTÁVEL + SEM CORTE */
 #pet-root {
   position: fixed;
   inset: auto 16px 16px auto;
@@ -78,16 +78,15 @@ main {
   z-index: 999999;
   pointer-events: none;
 
-  display: block;
-
-  contain: strict; /* 🔥 blindagem total */
+  contain: layout paint;
+  overflow: visible; /* 🔥 permite mão sair sem cortar */
 }
 
-/* reset seguro apenas dentro do gato */
+/* RESET LOCAL */
 #pet-root * {
-  box-sizing: border-box;
   margin: 0;
   padding: 0;
+  box-sizing: border-box;
 }
 
 /* GATO */
@@ -104,15 +103,15 @@ main {
   transition: transform 0.2s ease;
 }
 
-/* MÃO PERFEITAMENTE PROPORCIONAL */
+/* 🖐️ MÃO AJUSTADA */
 #pet-hand {
   position: absolute;
 
-  width: 55%;
+  width: 65%;
   height: auto;
 
-  top: -10%;
-  left: 25%;
+  top: -18%;
+  left: 22%;
 
   opacity: 0;
 
