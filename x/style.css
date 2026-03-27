@@ -18,18 +18,10 @@ body {
   justify-content: center;
 }
 
-/* 🔥 espaço reservado pro gato */
 main {
   max-width: 820px;
   width: 100%;
-  padding: 1.6rem 140px 2.2rem 1.2rem;
-}
-
-/* garante wrap correto */
-main::after {
-  content: "";
-  display: block;
-  clear: both;
+  padding: 1.6rem 140px 2.2rem 1.2rem; /* espaço fixo pro gato */
 }
 
 .enunciado {
@@ -68,22 +60,17 @@ main::after {
   cursor: grab;
 }
 
-/* 🐱 GATO COM WRAP */
+/* 🐱 FIXO E INTELIGENTE */
 #pet-container {
-  float: right;
+  position: absolute;
   width: 110px;
-  margin-left: 20px;
-  margin-top: 45vh;
-  transform: translateY(-50%);
-  position: relative;
+  right: calc((100vw - 820px)/2 + 10px); /* alinha com o main */
+  pointer-events: none;
+  z-index: 10;
 }
 
 #pet {
   width: 100%;
-}
-
-#pet.flip {
-  transform: scaleX(-1);
 }
 
 #pet-hand {
