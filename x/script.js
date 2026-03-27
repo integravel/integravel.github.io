@@ -107,7 +107,7 @@ document.addEventListener("DOMContentLoaded", () => {
     checkIndividual();
   });
 
-  /* 😸 REAÇÃO SEM BUG */
+  /* 😸 REAÇÃO PERFEITA */
 
   let reacting = false;
 
