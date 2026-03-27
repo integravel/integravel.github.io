@@ -1,14 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
 
-  const petRoot = document.getElementById("pet-root");
-
-/* 🔒 trava posição via JS também */
-  Object.assign(petRoot.style, {
-    position: "fixed",
-    right: "16px",
-    bottom: "16px"
-  });
-
   const dropzones = document.querySelectorAll(".dropzone");
   const returnZone = document.querySelector(".dropzone-return");
 
@@ -116,7 +107,7 @@ document.addEventListener("DOMContentLoaded", () => {
     checkIndividual();
   });
 
-  /* 😸 REAÇÕES */
+  /* 😸 REAÇÕES ESTÁVEIS */
 
   let reacting = false;
 
@@ -125,11 +116,13 @@ document.addEventListener("DOMContentLoaded", () => {
     reacting = true;
 
     pet.classList.remove("pet-happy", "pet-angry");
-    pet.classList.add(className);
 
     pet.src = sprite;
     hand.src = handSprite;
 
+    pet.offsetHeight; // força reflow
+
+    pet.classList.add(className);
     hand.style.opacity = 1;
 
     setTimeout(() => {
