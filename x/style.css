@@ -67,19 +67,18 @@ main {
   max-width: 100%;
 }
 
-/* 🐱 GATO ESTÁVEL + SEM CORTE */
+/* 🐱 ÁREA MAIOR (IMPOSSÍVEL CORTAR) */
 #pet-root {
   position: fixed;
   inset: auto 16px 16px auto;
 
-  width: 90px;
-  height: 90px;
+  width: 120px;
+  height: 120px;
 
   z-index: 999999;
   pointer-events: none;
 
-  contain: layout paint;
-  overflow: visible; /* 🔥 permite mão sair sem cortar */
+  overflow: visible;
 }
 
 /* RESET LOCAL */
@@ -92,26 +91,28 @@ main {
 /* GATO */
 #pet {
   position: absolute;
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
 
-  top: 0;
-  left: 0;
+  width: 90px;
+  height: 90px;
+
+  bottom: 0;
+  right: 0;
+
+  object-fit: contain;
 
   opacity: 0.95;
   transition: transform 0.2s ease;
 }
 
-/* 🖐️ MÃO AJUSTADA */
+/* 🖐️ MÃO PERFEITA */
 #pet-hand {
   position: absolute;
 
-  width: 65%;
+  width: 60px;
   height: auto;
 
-  top: -18%;
-  left: 22%;
+  bottom: 65px; /* espaço real acima do gato */
+  right: 15px;
 
   opacity: 0;
 
