@@ -38,14 +38,12 @@ main {
   align-items: center;
 }
 
-/* WRAP CORRETO */
 .dropzone .draggable {
   white-space: normal;
   word-break: break-word;
   max-width: 100%;
 }
 
-/* CORES */
 .dropzone.correct {
   border-bottom: 2px solid #4CAF50;
 }
@@ -73,21 +71,33 @@ main {
   max-width: 100%;
 }
 
-/* 🐱 FIXO (SEM TELEPORTE) */
-#pet-container {
+/* 🐱 SISTEMA BLINDADO */
+#pet-root {
+  all: initial !important;
+
   position: fixed !important;
-  right: 16px;
-  bottom: 16px;
-  width: 90px;
-  z-index: 100;
-  pointer-events: none;
+  right: 16px !important;
+  bottom: 16px !important;
+
+  width: 90px !important;
+  z-index: 9999 !important;
+
+  pointer-events: none !important;
 }
 
+/* reativa elementos internos */
+#pet-root img {
+  all: unset;
+  display: block;
+}
+
+/* gato */
 #pet {
   width: 100%;
   opacity: 0.9;
 }
 
+/* mão */
 #pet-hand {
   position: absolute;
   width: 60px;
@@ -97,5 +107,6 @@ main {
   transition: opacity 0.2s;
 }
 
+/* animações */
 .pet-happy { transform: scale(1.1); }
 .pet-angry { transform: scale(0.9) rotate(-5deg); }
