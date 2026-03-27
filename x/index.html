@@ -16,52 +16,45 @@
 
 <body>
 
-<div class="layout">
+<main>
 
-  <!-- CONTEÚDO -->
-  <main>
+  <p class="enunciado">
+    <strong>Teorema.</strong>
+    Existem infinitos números primos.
+  </p>
 
-    <p class="enunciado">
-      <strong>Teorema.</strong>
-      Existem infinitos números primos.
-    </p>
+  <p class="line">
+    <strong>Demonstração.</strong>
+    Suponha, por absurdo, que exista apenas uma quantidade finita de números primos.
+  </p>
 
-    <p class="line">
-      <strong>Demonstração.</strong>
-      Suponha, por absurdo, que exista apenas uma quantidade finita de números primos.
-    </p>
+  <p class="line">
+    Seja \( p_1, p_2, \ldots, p_n \) a lista de todos os números primos.
+  </p>
 
-    <p class="line">
-      Seja \( p_1, p_2, \ldots, p_n \) a lista de todos os números primos.
-    </p>
+  <p class="line">
+    Considere o número \( N = p_1 p_2 \cdots p_n + 1 \).
+  </p>
 
-    <p class="line">
-      Considere o número \( N = p_1 p_2 \cdots p_n + 1 \).
-    </p>
+  <div class="line dropzone" data-expected="1"></div>
+  <div class="line dropzone" data-expected="2"></div>
+  <div class="line dropzone" data-expected="3"></div>
+  <div class="line dropzone" data-expected="4"></div>
+  <div class="line dropzone" data-expected="5"></div>
+  <div class="line dropzone" data-expected="6"></div>
 
-    <div class="line dropzone" data-expected="1"></div>
-    <div class="line dropzone" data-expected="2"></div>
-    <div class="line dropzone" data-expected="3"></div>
-    <div class="line dropzone" data-expected="4"></div>
-    <div class="line dropzone" data-expected="5"></div>
-    <div class="line dropzone" data-expected="6"></div>
+  <p class="line">
+    Isso contradiz a hipótese inicial, logo existem infinitos números primos.
+  </p>
 
-    <p class="line">
-      Isso contradiz a hipótese inicial, logo existem infinitos números primos.
-    </p>
+  <div class="options dropzone-return" id="options"></div>
 
-    <div class="options dropzone-return" id="options"></div>
+</main>
 
-  </main>
-
-  <!-- 🐱 COLUNA DO GATO -->
-  <aside class="pet-area">
-    <div id="pet-container">
-      <img id="pet" src="cat_idle.png">
-      <img id="pet-hand" src="">
-    </div>
-  </aside>
-
+<!-- 🐱 FORA DO FLUXO -->
+<div id="pet-container">
+  <img id="pet" src="cat_idle.png">
+  <img id="pet-hand" src="">
 </div>
 
 <script src="script.js"></script>
