@@ -6,7 +6,6 @@
 
   <title>Demonstração — Primos Infinitos</title>
 
-  <!-- MathJax -->
   <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
   <script async
     src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
@@ -18,44 +17,56 @@
 
 <main>
 
-  <p class="enunciado">
-    <strong>Teorema.</strong>
-    Existem infinitos números primos.
-  </p>
+  <!-- 🔝 TOPO (FULL WIDTH) -->
+  <section class="full">
+    <p class="enunciado">
+      <strong>Teorema.</strong>
+      Existem infinitos números primos.
+    </p>
 
-  <p class="line">
-    <strong>Demonstração.</strong>
-    Suponha, por absurdo, que exista apenas uma quantidade finita de números primos.
-  </p>
+    <p class="line">
+      <strong>Demonstração.</strong>
+      Suponha, por absurdo, que exista apenas uma quantidade finita de números primos.
+    </p>
 
-  <p class="line">
-    Seja \( p_1, p_2, \ldots, p_n \) a lista de todos os números primos.
-  </p>
+    <p class="line">
+      Seja \( p_1, p_2, \ldots, p_n \).
+    </p>
 
-  <p class="line">
-    Considere o número \( N = p_1 p_2 \cdots p_n + 1 \).
-  </p>
+    <p class="line">
+      Considere \( N = p_1 p_2 \cdots p_n + 1 \).
+    </p>
+  </section>
 
-  <div class="line dropzone" data-expected="1"></div>
-  <div class="line dropzone" data-expected="2"></div>
-  <div class="line dropzone" data-expected="3"></div>
-  <div class="line dropzone" data-expected="4"></div>
-  <div class="line dropzone" data-expected="5"></div>
-  <div class="line dropzone" data-expected="6"></div>
+  <!-- 🔥 MEIO (COM GATO) -->
+  <section class="with-pet">
 
-  <p class="line">
-    Isso contradiz a hipótese inicial, logo existem infinitos números primos.
-  </p>
+    <div class="content">
+      <div class="line dropzone" data-expected="1"></div>
+      <div class="line dropzone" data-expected="2"></div>
+      <div class="line dropzone" data-expected="3"></div>
+      <div class="line dropzone" data-expected="4"></div>
+      <div class="line dropzone" data-expected="5"></div>
+      <div class="line dropzone" data-expected="6"></div>
+    </div>
 
-  <div class="options dropzone-return" id="options"></div>
+    <div id="pet-container">
+      <img id="pet" src="cat_idle.png">
+      <img id="pet-hand" src="">
+    </div>
+
+  </section>
+
+  <!-- 🔽 BAIXO (FULL WIDTH) -->
+  <section class="full">
+    <p class="line">
+      Isso contradiz a hipótese inicial, logo existem infinitos números primos.
+    </p>
+
+    <div class="options dropzone-return"></div>
+  </section>
 
 </main>
-
-<!-- 🐱 -->
-<div id="pet-container">
-  <img id="pet" src="cat_idle.png">
-  <img id="pet-hand" src="">
-</div>
 
 <script src="script.js"></script>
 </body>
