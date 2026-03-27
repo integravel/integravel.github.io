@@ -7,7 +7,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const hand = document.getElementById("pet-hand");
   const container = document.getElementById("pet-container");
 
-  /* 🎯 ALINHA EXATAMENTE COM OS BLOCOS */
+  /* 🎯 ALINHAMENTO PERFEITO */
   function alignPet() {
     const first = dropzones[0];
     const last = dropzones[dropzones.length - 1];
@@ -19,7 +19,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const middle = (rect1.top + rect2.bottom) / 2;
 
-    container.style.top = middle - 55 + window.scrollY + "px";
+    container.style.top = (middle + window.scrollY - 55) + "px";
   }
 
   window.addEventListener("resize", alignPet);
@@ -111,7 +111,7 @@ document.addEventListener("DOMContentLoaded", () => {
       else onWrong();
 
       checkIndividual();
-      alignPet(); // mantém alinhado
+      alignPet();
     });
   });
 
