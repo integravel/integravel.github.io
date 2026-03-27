@@ -107,7 +107,7 @@ document.addEventListener("DOMContentLoaded", () => {
     checkIndividual();
   });
 
-  /* 😸 REAÇÕES ESTÁVEIS */
+  /* 😸 REAÇÃO SEM BUG */
 
   let reacting = false;
 
@@ -115,22 +115,30 @@ document.addEventListener("DOMContentLoaded", () => {
     if (reacting) return;
     reacting = true;
 
-    pet.classList.remove("pet-happy", "pet-angry");
+    const img1 = new Image();
+    const img2 = new Image();
 
-    pet.src = sprite;
-    hand.src = handSprite;
+    img1.src = sprite;
+    img2.src = handSprite;
 
-    pet.offsetHeight; // força reflow
+    img1.onload = () => {
+      pet.src = img1.src;
+      hand.src = img2.src;
 
-    pet.classList.add(className);
-    hand.style.opacity = 1;
+      pet.classList.remove("pet-happy", "pet-angry");
 
-    setTimeout(() => {
-      hand.style.opacity = 0;
-      pet.classList.remove(className);
-      pet.src = "cat_idle.png";
-      reacting = false;
-    }, 700);
+      requestAnimationFrame(() => {
+        pet.classList.add(className);
+        hand.style.opacity = 1;
+      });
+
+      setTimeout(() => {
+        hand.style.opacity = 0;
+        pet.classList.remove(className);
+        pet.src = "cat_idle.png";
+        reacting = false;
+      }, 700);
+    };
   }
 
   function onCorrect() {
