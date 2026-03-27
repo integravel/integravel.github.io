@@ -7,7 +7,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const hand = document.getElementById("pet-hand");
   const container = document.getElementById("pet-container");
 
-  /* 🧠 POSICIONAMENTO INTELIGENTE */
+  /* 🎯 ALINHA EXATAMENTE COM OS BLOCOS */
   function alignPet() {
     const first = dropzones[0];
     const last = dropzones[dropzones.length - 1];
@@ -17,12 +17,14 @@ document.addEventListener("DOMContentLoaded", () => {
     const rect1 = first.getBoundingClientRect();
     const rect2 = last.getBoundingClientRect();
 
-    const middleY = (rect1.top + rect2.bottom) / 2;
+    const middle = (rect1.top + rect2.bottom) / 2;
 
-    container.style.top = middleY - 50 + "px"; // centraliza gato
+    container.style.top = middle - 55 + window.scrollY + "px";
   }
 
   window.addEventListener("resize", alignPet);
+  window.addEventListener("scroll", alignPet);
+
   setTimeout(alignPet, 300);
 
   /* -------- DRAG -------- */
@@ -38,7 +40,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function shuffle(array) {
     for (let i = array.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
+      const j = Math.random() * (i + 1) | 0;
       [array[i], array[j]] = [array[j], array[i]];
     }
   }
@@ -90,9 +92,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   dropzones.forEach(zone => {
 
-    zone.addEventListener("dragover", e => {
-      e.preventDefault();
-    });
+    zone.addEventListener("dragover", e => e.preventDefault());
 
     zone.addEventListener("drop", e => {
       e.preventDefault();
@@ -107,19 +107,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (window.MathJax) MathJax.typesetPromise();
 
-      if (id === zone.dataset.expected) {
-        onCorrect();
-      } else {
-        onWrong();
-      }
+      if (id === zone.dataset.expected) onCorrect();
+      else onWrong();
 
       checkIndividual();
+      alignPet(); // mantém alinhado
     });
   });
 
-  returnZone.addEventListener("dragover", e => {
-    e.preventDefault();
-  });
+  returnZone.addEventListener("dragover", e => e.preventDefault());
 
   returnZone.addEventListener("drop", e => {
     e.preventDefault();
@@ -133,6 +129,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (window.MathJax) MathJax.typesetPromise();
 
     checkIndividual();
+    alignPet();
   });
 
   /* 😸 REAÇÕES */
