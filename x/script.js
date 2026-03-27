@@ -5,6 +5,27 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const pet = document.getElementById("pet");
   const hand = document.getElementById("pet-hand");
+  const container = document.getElementById("pet-container");
+
+  /* 🧠 POSICIONAMENTO INTELIGENTE */
+  function alignPet() {
+    const first = dropzones[0];
+    const last = dropzones[dropzones.length - 1];
+
+    if (!first || !last) return;
+
+    const rect1 = first.getBoundingClientRect();
+    const rect2 = last.getBoundingClientRect();
+
+    const middleY = (rect1.top + rect2.bottom) / 2;
+
+    container.style.top = middleY - 50 + "px"; // centraliza gato
+  }
+
+  window.addEventListener("resize", alignPet);
+  setTimeout(alignPet, 300);
+
+  /* -------- DRAG -------- */
 
   const blocksData = [
     { id: "1", tex: "\\( N \\text{ não é divisível por nenhum dos } p_i \\)" },
