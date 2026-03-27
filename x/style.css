@@ -17,8 +17,7 @@ body {
 main {
   max-width: 900px;
   margin: 0 auto;
-  padding: 1.6rem 16px 140px 16px; 
-  /* espaço embaixo pro gato */
+  padding: 1.6rem 16px 140px 16px; /* espaço pro gato */
 }
 
 /* TEXTO */
@@ -39,13 +38,14 @@ main {
   align-items: center;
 }
 
-/* WRAP */
+/* WRAP CORRETO */
 .dropzone .draggable {
   white-space: normal;
   word-break: break-word;
   max-width: 100%;
 }
 
+/* CORES */
 .dropzone.correct {
   border-bottom: 2px solid #4CAF50;
 }
@@ -73,9 +73,9 @@ main {
   max-width: 100%;
 }
 
-/* 🐱 FIXO NO CANTO INFERIOR */
+/* 🐱 FIXO (SEM TELEPORTE) */
 #pet-container {
-  position: fixed;
+  position: fixed !important;
   right: 16px;
   bottom: 16px;
   width: 90px;
