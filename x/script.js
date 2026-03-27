@@ -1,5 +1,14 @@
 document.addEventListener("DOMContentLoaded", () => {
 
+  const petRoot = document.getElementById("pet-root");
+
+/* 🔒 trava posição via JS também */
+  Object.assign(petRoot.style, {
+    position: "fixed",
+    right: "16px",
+    bottom: "16px"
+  });
+
   const dropzones = document.querySelectorAll(".dropzone");
   const returnZone = document.querySelector(".dropzone-return");
 
