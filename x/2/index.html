@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+  <title>Demonstração — Soma da PA</title>
+
+  <!-- CONFIG MathJax -->
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['\\(', '\\)']]
+      },
+      chtml: {
+        mtextInheritFont: true
+      }
+    };
+  </script>
+
+  <!-- MathJax -->
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script async
+    src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<main>
+
+  <p class="enunciado">
+    <strong>Teorema.</strong>
+    A soma dos \( n \) primeiros termos de uma PA é \( S_n = \frac{n}{2}(a_1 + a_n) \).
+  </p>
+
+  <p class="line">
+    <strong>Demonstração.</strong>
+    Considere \( S_n = a_1 + a_2 + \cdots + a_n \).
+  </p>
+
+  <p class="line">
+    Escrevendo na ordem inversa: \( S_n = a_n + a_{n-1} + \cdots + a_1 \).
+  </p>
+
+  <p class="line">
+    Somando termo a termo: \( 2S_n = (a_1 + a_n) + \cdots + (a_n + a_1) \).
+  </p>
+
+  <!-- DROPZONES -->
+  <div class="line dropzone" data-expected="1"></div>
+  <div class="line dropzone" data-expected="2"></div>
+  <div class="line dropzone" data-expected="3"></div>
+  <div class="line dropzone" data-expected="4"></div>
+  <div class="line dropzone" data-expected="5"></div>
+  <div class="line dropzone" data-expected="6"></div>
+
+  <p class="line">
+    Logo, \( 2S_n = n(a_1 + a_n) \).
+  </p>
+
+  <p class="line">
+    Dividindo por 2, concluímos \( S_n = \frac{n}{2}(a_1 + a_n) \).
+  </p>
+
+  <!-- BLOCOS -->
+  <div class="options dropzone-return"></div>
+
+</main>
+
+<!-- 🐱 GATO -->
+<div id="pet-root">
+  <img id="pet" src="cat_idle.png" draggable="false">
+  <img id="pet-hand" src="" draggable="false">
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
