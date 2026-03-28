@@ -1,133 +1,150 @@
-:root {
-  --preto: #2C2C2C;
-  --roxo: #9C59D1;
-}
+document.addEventListener("DOMContentLoaded", () => {
 
-* {
-  box-sizing: border-box;
-}
+  const dropzones = document.querySelectorAll(".dropzone");
+  const returnZone = document.querySelector(".dropzone-return");
 
-body {
-  margin: 0;
-  font-family: "Nunito", "Inter", sans-serif;
-  color: var(--preto);
-}
+  const pet = document.getElementById("pet");
+  const hand = document.getElementById("pet-hand");
 
-/* ✅ MathJax usar mesma fonte */
-mjx-container {
-  font-family: "Nunito", "Inter", sans-serif !important;
-}
+  const blocksData = [
+    { id: "1", tex: "\\( N \\text{ não é divisível por nenhum dos } p_i \\)" },
+    { id: "2", tex: "\\( N \\text{ é primo ou composto} \\)" },
+    { id: "3", tex: "\\( N \\text{ possui um divisor primo } q \\)" },
+    { id: "4", tex: "\\( q \\notin \\{p_1,\\ldots,p_n\\} \\)" },
+    { id: "5", tex: "\\( \\text{Existe um primo fora da lista} \\)" },
+    { id: "6", tex: "\\( \\text{A hipótese de finitude é falsa} \\)" }
+  ];
 
-/* CONTEÚDO */
-main {
-  max-width: 900px;
-  margin: 0 auto;
-  padding: 1.6rem 16px 140px 16px;
-}
+  function shuffle(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.random() * (i + 1) | 0;
+      [array[i], array[j]] = [array[j], array[i]];
+    }
+  }
 
-/* TEXTO */
-.line {
-  min-height: 2em;
-  margin: 0.4rem 0;
-}
+  function createBlocks() {
+    returnZone.innerHTML = "";
 
-/* DROPZONE */
-.dropzone {
-  border-bottom: 1.2px dotted rgba(156, 89, 209, 0.6);
-  min-height: 2.2em;
-  display: flex;
-  align-items: center;
-}
+    const shuffled = [...blocksData];
+    shuffle(shuffled);
 
-.dropzone .draggable {
-  white-space: normal;
-  word-break: break-word;
-  max-width: 100%;
-}
+    shuffled.forEach(data => {
+      const div = document.createElement("div");
+      div.className = "draggable";
+      div.dataset.id = data.id;
+      div.draggable = true;
+      div.innerHTML = data.tex;
 
-.dropzone.correct {
-  border-bottom: 2px solid #4CAF50;
-}
+      enableDrag(div);
+      returnZone.appendChild(div);
+    });
 
-.dropzone.wrong {
-  border-bottom: 2px solid #E53935;
-}
+    if (window.MathJax) MathJax.typesetPromise();
+  }
 
-/* BLOCOS */
-.options {
-  margin-top: 1.5rem;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.6rem;
-}
+  function enableDrag(el) {
+    el.addEventListener("dragstart", e => {
+      e.dataTransfer.setData("text/plain", el.dataset.id);
+    });
+  }
 
-.draggable {
-  background: rgba(156, 89, 209, 0.08);
-  border-radius: 999px;
-  padding: 0.4rem 0.8rem;
-  cursor: grab;
+  createBlocks();
 
-  white-space: normal;
-  word-break: break-word;
-  max-width: 100%;
-}
+  function checkIndividual() {
+    dropzones.forEach(zone => {
+      const esperado = zone.dataset.expected;
+      const child = zone.firstElementChild;
 
-/* 🐱 ÁREA */
-#pet-root {
-  position: fixed;
-  inset: auto 16px 16px auto;
+      zone.classList.remove("correct", "wrong");
 
-  width: 120px;
-  height: 120px;
+      if (!child) return;
 
-  z-index: 999999;
-  pointer-events: none;
+      if (child.dataset.id === esperado) {
+        zone.classList.add("correct");
+      } else {
+        zone.classList.add("wrong");
+      }
+    });
+  }
 
-  overflow: visible;
-}
+  dropzones.forEach(zone => {
 
-#pet-root * {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
+    zone.addEventListener("dragover", e => e.preventDefault());
 
-/* GATO */
-#pet {
-  position: absolute;
+    zone.addEventListener("drop", e => {
+      e.preventDefault();
 
-  width: 90px;
-  height: 90px;
+      if (zone.children.length > 0) return;
 
-  bottom: 0;
-  right: 0;
+      const id = e.dataTransfer.getData("text/plain");
+      const block = document.querySelector(`.draggable[data-id="${id}"]`);
+      if (!block) return;
 
-  object-fit: contain;
+      zone.appendChild(block);
 
-  opacity: 0.95;
-  transition: transform 0.2s ease;
-}
+      if (window.MathJax) MathJax.typesetPromise();
 
-/* MÃO */
-#pet-hand {
-  position: absolute;
+      if (id === zone.dataset.expected) onCorrect();
+      else onWrong();
 
-  width: 60px;
-  height: auto;
+      checkIndividual();
+    });
+  });
 
-  bottom: 65px;
-  right: 15px;
+  returnZone.addEventListener("dragover", e => e.preventDefault());
 
-  opacity: 0;
-  transform-origin: center;
-  transition: opacity 0.2s ease;
-}
+  returnZone.addEventListener("drop", e => {
+    e.preventDefault();
 
-/* ANIMAÇÕES */
-.pet-happy {
-  transform: scale(1.08);
-}
+    const id = e.dataTransfer.getData("text/plain");
+    const block = document.querySelector(`.draggable[data-id="${id}"]`);
+    if (!block) return;
 
-.pet-angry {
-  transform: scale(0.92) rotate(-6deg);
-}
+    returnZone.appendChild(block);
+
+    if (window.MathJax) MathJax.typesetPromise();
+
+    checkIndividual();
+  });
+
+  let reacting = false;
+
+  function react(sprite, handSprite, className) {
+    if (reacting) return;
+    reacting = true;
+
+    const img1 = new Image();
+    const img2 = new Image();
+
+    img1.src = sprite;
+    img2.src = handSprite;
+
+    img1.onload = () => {
+      pet.src = img1.src;
+      hand.src = img2.src;
+
+      pet.classList.remove("pet-happy", "pet-angry");
+
+      requestAnimationFrame(() => {
+        pet.classList.add(className);
+        hand.style.opacity = 1;
+      });
+
+      setTimeout(() => {
+        hand.style.opacity = 0;
+        pet.classList.remove(className);
+        pet.src = "cat_idle.png";
+        reacting = false;
+      }, 700);
+    };
+  }
+
+  function onCorrect() {
+    react("cat_happy.png", "hand_pet.png", "pet-happy");
+  }
+
+  function onWrong() {
+    react("cat_angry.png", "hand_grab.png", "pet-angry");
+  }
+
+});
