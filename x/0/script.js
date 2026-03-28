@@ -107,8 +107,6 @@ document.addEventListener("DOMContentLoaded", () => {
     checkIndividual();
   });
 
-  /* 😸 REAÇÃO ESTÁVEL */
-
   let reacting = false;
 
   function react(sprite, handSprite, className) {
