@@ -1,150 +1,152 @@
 document.addEventListener("DOMContentLoaded", () => {
 
-  const dropzones = document.querySelectorAll(".dropzone");
-  const returnZone = document.querySelector(".dropzone-return");
+const dropzones = document.querySelectorAll(".dropzone");
+const returnZone = document.querySelector(".dropzone-return");
 
-  const pet = document.getElementById("pet");
-  const hand = document.getElementById("pet-hand");
+const pet = document.getElementById("pet");
+const hand = document.getElementById("pet-hand");
 
-  const blocksData = [
-    { id: "1", tex: "\\( xy = b^{m+n} \\)" },
-    { id: "2", tex: "\\( \\text{Usando a propriedade das potências} \\)" },
-    { id: "3", tex: "\\( \\log_b(xy) = \\log_b(b^{m+n}) \\)" },
-    { id: "4", tex: "\\( \\text{Aplicando logaritmo na base } b \\)" },
-    { id: "5", tex: "\\( \\log_b(b^{m+n}) = m+n \\)" },
-    { id: "6", tex: "\\( \\text{Pela definição de logaritmo} \\)" }
-  ];
+const blocksData = [
+{ id: "1", tex: "\\( xy = b^{m+n} \\)" },
+{ id: "2", tex: "Usando a propriedade das potências" },
+{ id: "3", tex: "\\( \\log_b(xy) = \\log_b(b^{m+n}) \\)" },
+{ id: "4", tex: "Aplicando logaritmo na base \\( b \\)" },
+{ id: "5", tex: "\\( \\log_b(b^{m+n}) = m + n \\)" },
+{ id: "6", tex: "Substituindo \\( m = \\log_b x \\) e \\( n = \\log_b y \\)" }
+];
 
-  function shuffle(array) {
-    for (let i = array.length - 1; i > 0; i--) {
-      const j = Math.random() * (i + 1) | 0;
-      [array[i], array[j]] = [array[j], array[i]];
-    }
-  }
+function shuffle(array) {
+for (let i = array.length - 1; i > 0; i--) {
+const j = Math.random() * (i + 1) | 0;
+[array[i], array[j]] = [array[j], array[i]];
+}
+}
 
-  function createBlocks() {
-    returnZone.innerHTML = "";
+function createBlocks() {
+returnZone.innerHTML = "";
 
-    const shuffled = [...blocksData];
-    shuffle(shuffled);
+const shuffled = [...blocksData];
+shuffle(shuffled);
 
-    shuffled.forEach(data => {
-      const div = document.createElement("div");
-      div.className = "draggable";
-      div.dataset.id = data.id;
-      div.draggable = true;
-      div.innerHTML = data.tex;
+shuffled.forEach(data => {
+const div = document.createElement("div");
+div.className = "draggable";
+div.dataset.id = data.id;
+div.draggable = true;
+div.innerHTML = data.tex;
 
-      enableDrag(div);
-      returnZone.appendChild(div);
-    });
+enableDrag(div);
+returnZone.appendChild(div);
+});
 
-    if (window.MathJax) MathJax.typesetPromise();
-  }
+if (window.MathJax) MathJax.typesetPromise();
+}
 
-  function enableDrag(el) {
-    el.addEventListener("dragstart", e => {
-      e.dataTransfer.setData("text/plain", el.dataset.id);
-    });
-  }
+function enableDrag(el) {
+el.addEventListener("dragstart", e => {
+e.dataTransfer.setData("text/plain", el.dataset.id);
+});
+}
 
-  createBlocks();
+createBlocks();
 
-  function checkIndividual() {
-    dropzones.forEach(zone => {
-      const esperado = zone.dataset.expected;
-      const child = zone.firstElementChild;
+function checkIndividual() {
+dropzones.forEach(zone => {
+const esperado = zone.dataset.expected;
+const child = zone.firstElementChild;
 
-      zone.classList.remove("correct", "wrong");
+zone.classList.remove("correct", "wrong");
 
-      if (!child) return;
+if (!child) return;
 
-      if (child.dataset.id === esperado) {
-        zone.classList.add("correct");
-      } else {
-        zone.classList.add("wrong");
-      }
-    });
-  }
+if (child.dataset.id === esperado) {
+zone.classList.add("correct");
+} else {
+zone.classList.add("wrong");
+}
+});
+}
 
-  dropzones.forEach(zone => {
+dropzones.forEach(zone => {
 
-    zone.addEventListener("dragover", e => e.preventDefault());
+zone.addEventListener("dragover", e => e.preventDefault());
 
-    zone.addEventListener("drop", e => {
-      e.preventDefault();
+zone.addEventListener("drop", e => {
+e.preventDefault();
 
-      if (zone.children.length > 0) return;
+if (zone.children.length > 0) return;
 
-      const id = e.dataTransfer.getData("text/plain");
-      const block = document.querySelector(`.draggable[data-id="${id}"]`);
-      if (!block) return;
+const id = e.dataTransfer.getData("text/plain");
+const block = document.querySelector(`.draggable[data-id="${id}"]`);
+if (!block) return;
 
-      zone.appendChild(block);
+zone.appendChild(block);
 
-      if (window.MathJax) MathJax.typesetPromise();
+if (window.MathJax) MathJax.typesetPromise();
 
-      if (id === zone.dataset.expected) onCorrect();
-      else onWrong();
+if (id === zone.dataset.expected) onCorrect();
+else onWrong();
 
-      checkIndividual();
-    });
-  });
+checkIndividual();
+});
 
-  returnZone.addEventListener("dragover", e => e.preventDefault());
+});
 
-  returnZone.addEventListener("drop", e => {
-    e.preventDefault();
+returnZone.addEventListener("dragover", e => e.preventDefault());
 
-    const id = e.dataTransfer.getData("text/plain");
-    const block = document.querySelector(`.draggable[data-id="${id}"]`);
-    if (!block) return;
+returnZone.addEventListener("drop", e => {
+e.preventDefault();
 
-    returnZone.appendChild(block);
+const id = e.dataTransfer.getData("text/plain");
+const block = document.querySelector(`.draggable[data-id="${id}"]`);
+if (!block) return;
 
-    if (window.MathJax) MathJax.typesetPromise();
+returnZone.appendChild(block);
 
-    checkIndividual();
-  });
+if (window.MathJax) MathJax.typesetPromise();
 
-  let reacting = false;
+checkIndividual();
+});
 
-  function react(sprite, handSprite, className) {
-    if (reacting) return;
-    reacting = true;
+let reacting = false;
 
-    const img1 = new Image();
-    const img2 = new Image();
+function react(sprite, handSprite, className) {
+if (reacting) return;
+reacting = true;
 
-    img1.src = sprite;
-    img2.src = handSprite;
+const img1 = new Image();
+const img2 = new Image();
 
-    img1.onload = () => {
-      pet.src = img1.src;
-      hand.src = img2.src;
+img1.src = sprite;
+img2.src = handSprite;
 
-      pet.classList.remove("pet-happy", "pet-angry");
+img1.onload = () => {
+pet.src = img1.src;
+hand.src = img2.src;
 
-      requestAnimationFrame(() => {
-        pet.classList.add(className);
-        hand.style.opacity = 1;
-      });
+pet.classList.remove("pet-happy", "pet-angry");
 
-      setTimeout(() => {
-        hand.style.opacity = 0;
-        pet.classList.remove(className);
-        pet.src = "cat_idle.png";
-        reacting = false;
-      }, 700);
-    };
-  }
+requestAnimationFrame(() => {
+pet.classList.add(className);
+hand.style.opacity = 1;
+});
 
-  function onCorrect() {
-    react("cat_happy.png", "hand_pet.png", "pet-happy");
-  }
+setTimeout(() => {
+hand.style.opacity = 0;
+pet.classList.remove(className);
+pet.src = "cat_idle.png";
+reacting = false;
+}, 700);
+};
 
-  function onWrong() {
-    react("cat_angry.png", "hand_grab.png", "pet-angry");
-  }
+}
+
+function onCorrect() {
+react("cat_happy.png", "hand_pet.png", "pet-happy");
+}
+
+function onWrong() {
+react("cat_angry.png", "hand_grab.png", "pet-angry");
+}
 
 });
