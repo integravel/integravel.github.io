@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+  <title>Demonstração — Logaritmo do Produto</title>
+
+  <!-- CONFIG MathJax -->
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['\\(', '\\)']]
+      },
+      chtml: {
+        mtextInheritFont: true
+      }
+    };
+  </script>
+
+  <!-- MathJax -->
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script async
+    src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<main>
+
+  <p class="enunciado">
+    <strong>Teorema.</strong>
+    \( \log_b(xy) = \log_b x + \log_b y \), com \( b > 0 \), \( b \neq 1 \).
+  </p>
+
+  <p class="line">
+    <strong>Demonstração.</strong>
+    Sejam \( \log_b x = m \) e \( \log_b y = n \).
+  </p>
+
+  <p class="line">
+    Pela definição de logaritmo: \( x = b^m \) e \( y = b^n \).
+  </p>
+
+  <p class="line">
+    Multiplicando: \( xy = b^m \cdot b^n \).
+  </p>
+
+  <!-- DROPZONES -->
+  <div class="line dropzone" data-expected="1"></div>
+  <div class="line dropzone" data-expected="2"></div>
+  <div class="line dropzone" data-expected="3"></div>
+  <div class="line dropzone" data-expected="4"></div>
+  <div class="line dropzone" data-expected="5"></div>
+  <div class="line dropzone" data-expected="6"></div>
+
+  <p class="line">
+    Pela definição de logaritmo, \( \log_b(b^{m+n}) = m+n \).
+  </p>
+
+  <p class="line">
+    Substituindo \( m \) e \( n \): \( m = \log_b x \), \( n = \log_b y \).
+  </p>
+
+  <p class="line">
+    Obtemos \( \log_b(xy) = m + n \).
+  </p>
+
+  <p class="line">
+    Portanto, \( \log_b(xy) = \log_b x + \log_b y \).
+  </p>
+
+  <!-- BLOCOS -->
+  <div class="options dropzone-return"></div>
+
+</main>
+
+<!-- 🐱 GATO -->
+<div id="pet-root">
+  <img id="pet" src="cat_idle.png" draggable="false">
+  <img id="pet-hand" src="" draggable="false">
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
