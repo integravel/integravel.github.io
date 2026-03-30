@@ -2,17 +2,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
 const dropzones = document.querySelectorAll(".dropzone");
 const returnZone = document.querySelector(".dropzone-return");
-
 const pet = document.getElementById("pet");
 const hand = document.getElementById("pet-hand");
 
 const blocksData = [
-{ id: "1", tex: "\\( xy = b^{m+n} \\)" },
-{ id: "2", tex: "Usando a propriedade das potências" },
-{ id: "3", tex: "\\( \\log_b(xy) = \\log_b(b^{m+n}) \\)" },
-{ id: "4", tex: "Aplicando logaritmo na base \\( b \\)" },
-{ id: "5", tex: "\\( \\log_b(b^{m+n}) = m + n \\)" },
-{ id: "6", tex: "Substituindo \\( m = \\log_b x \\) e \\( n = \\log_b y \\)" }
+{ id: "1", tex: "Considere \\(x \\cdot y\\)." },
+{ id: "2", tex: "Temos \\(x \\cdot y = b^a \\cdot b^c\\)." },
+{ id: "3", tex: "Logo, \\(x \\cdot y = b^{a+c}\\)." },
+{ id: "4", tex: "Aplicando logaritmo: \\(\\log_b(x \\cdot y) = \\log_b(b^{a+c})\\)." },
+{ id: "5", tex: "Pela definição, \\(\\log_b(b^{a+c}) = a + c\\)." },
+{ id: "6", tex: "Portanto, \\(\\log_b(x \\cdot y) = a + c\\)." }
 ];
 
 function shuffle(array) {
@@ -89,7 +88,6 @@ else onWrong();
 
 checkIndividual();
 });
-
 });
 
 returnZone.addEventListener("dragover", e => e.preventDefault());
@@ -138,7 +136,6 @@ pet.src = "cat_idle.png";
 reacting = false;
 }, 700);
 };
-
 }
 
 function onCorrect() {
