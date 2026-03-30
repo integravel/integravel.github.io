@@ -1,0 +1,133 @@
+:root {
+--preto: #2C2C2C;
+--roxo: #9C59D1;
+}
+
+* {
+box-sizing: border-box;
+}
+
+body {
+margin: 0;
+font-family: "Nunito", "Inter", sans-serif;
+color: var(--preto);
+}
+
+/* MathJax */
+mjx-container {
+font-family: "Nunito", "Inter", sans-serif !important;
+}
+
+/* CONTEÚDO */
+main {
+max-width: 900px;
+margin: 0 auto;
+padding: 1.6rem 16px 140px 16px;
+}
+
+/* TEXTO */
+.line {
+min-height: 2em;
+margin: 0.4rem 0;
+}
+
+/* DROPZONE */
+.dropzone {
+border-bottom: 1.2px dotted rgba(156, 89, 209, 0.6);
+min-height: 2.2em;
+display: flex;
+align-items: center;
+}
+
+.dropzone .draggable {
+white-space: normal;
+word-break: break-word;
+max-width: 100%;
+}
+
+.dropzone.correct {
+border-bottom: 2px solid #4CAF50;
+}
+
+.dropzone.wrong {
+border-bottom: 2px solid #E53935;
+}
+
+/* BLOCOS */
+.options {
+margin-top: 1.5rem;
+display: flex;
+flex-wrap: wrap;
+gap: 0.6rem;
+}
+
+.draggable {
+background: rgba(156, 89, 209, 0.08);
+border-radius: 999px;
+padding: 0.4rem 0.8rem;
+cursor: grab;
+
+white-space: normal;
+word-break: break-word;
+max-width: 100%;
+}
+
+/* 🐱 ÁREA */
+#pet-root {
+position: fixed;
+inset: auto 16px 16px auto;
+
+width: 120px;
+height: 120px;
+
+z-index: 999999;
+pointer-events: none;
+
+overflow: visible;
+}
+
+#pet-root * {
+margin: 0;
+padding: 0;
+box-sizing: border-box;
+}
+
+/* GATO */
+#pet {
+position: absolute;
+
+width: 90px;
+height: 90px;
+
+bottom: 0;
+right: 0;
+
+object-fit: contain;
+
+opacity: 0.95;
+transition: transform 0.2s ease;
+}
+
+/* MÃO */
+#pet-hand {
+position: absolute;
+
+width: 60px;
+height: auto;
+
+bottom: 65px;
+right: 15px;
+
+opacity: 0;
+transform-origin: center;
+transition: opacity 0.2s ease;
+}
+
+/* ANIMAÇÕES */
+.pet-happy {
+transform: scale(1.08);
+}
+
+.pet-angry {
+transform: scale(0.92) rotate(-6deg);
+}
