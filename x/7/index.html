@@ -1,64 +1,69 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 
-  <title>Demonstração — Mudança de Base do Logaritmo</title>
+<title>Demonstração — Mudança de Base</title>
 
-  <!-- MathJax -->
-  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-  <script>
-    window.MathJax = {
-      tex: { inlineMath: [['\\(', '\\)'], ['$', '$']] }
-    };
-  </script>
-  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<!-- MathJax -->
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['\\(', '\\)']]
+  },
+  chtml: {
+    mtextInheritFont: true
+  }
+};
+</script>
 
-  <link rel="stylesheet" href="style.css">
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+
+<link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
 <main>
 
-  <h2>Demonstração — Mudança de Base do Logaritmo</h2>
+<p class="enunciado">
+<strong>Teorema.</strong>
+\(\log_b(x) = \frac{\log_a(x)}{\log_a(b)}\), com \(a,b>0\), \(a \neq 1\), \(b \neq 1\), \(x>0\).
+</p>
 
-  <p><strong>Teorema.</strong> Para \(a,b > 0\), \(a \neq 1\), \(b \neq 1\), vale:</p>
-  <p>\[
-  \log_a x = \frac{\log_b x}{\log_b a}
-  \]</p>
+<p class="line">
+<strong>Demonstração.</strong>
+Seja \(\log_b(x) = y\).
+</p>
 
-  <p><strong>Demonstração.</strong></p>
+<p class="line">
+Então \(b^y = x\).
+</p>
 
-  <!-- PARTE INICIAL -->
-  <div class="line">Seja \(y = \log_a x\).</div>
-  <div class="line">Pela definição de logaritmo, temos \(a^y = x\).</div>
+<div class="line dropzone" data-expected="1"></div>
+<div class="line dropzone" data-expected="2"></div>
+<div class="line dropzone" data-expected="3"></div>
+<div class="line dropzone" data-expected="4"></div>
+<div class="line dropzone" data-expected="5"></div>
+<div class="line dropzone" data-expected="6"></div>
 
-  <!-- DRAG DROP -->
-  <div class="line dropzone" data-expected="1"></div>
-  <div class="line dropzone" data-expected="2"></div>
-  <div class="line dropzone" data-expected="3"></div>
-  <div class="line dropzone" data-expected="4"></div>
-  <div class="line dropzone" data-expected="5"></div>
-  <div class="line dropzone" data-expected="6"></div>
+<p class="line">
+Logo, \(\log_b(x) = \frac{\log_a(x)}{\log_a(b)}\).
+</p>
 
-  <!-- PARTE FINAL -->
-  <div class="line">Como \(y = \log_a x\), concluímos que:</div>
-  <div class="line">\[
-  \log_a x = \frac{\log_b x}{\log_b a}
-  \]</div>
-
-  <!-- OPÇÕES -->
-  <div class="options dropzone-return"></div>
+<div class="options dropzone-return"></div>
 
 </main>
 
-<!-- 🐱 -->
+<!-- 🐱 GATO -->
 <div id="pet-root">
-  <img id="pet" src="cat_idle.png">
-  <img id="pet-hand" src="">
+  <img id="pet" src="cat_idle.png" draggable="false">
+  <img id="pet-hand" src="" draggable="false">
 </div>
 
 <script src="script.js"></script>
+
 </body>
 </html>
