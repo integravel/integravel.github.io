@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+<title>Demonstração — Logaritmo da Potência</title>
+
+<!-- MathJax -->
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['\\(', '\\)']]
+  },
+  chtml: {
+    mtextInheritFont: true
+  }
+};
+</script>
+
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<main>
+
+<p class="enunciado">
+<strong>Teorema.</strong>
+\(\log_b(x^k) = k \cdot \log_b(x)\), com \(b>0\), \(b \neq 1\), \(x>0\).
+</p>
+
+<p class="line">
+<strong>Demonstração.</strong>
+Seja \(\log_b(x) = a\).
+</p>
+
+<p class="line">
+Então \(x = b^a\).
+</p>
+
+<div class="line dropzone" data-expected="1"></div>
+<div class="line dropzone" data-expected="2"></div>
+<div class="line dropzone" data-expected="3"></div>
+<div class="line dropzone" data-expected="4"></div>
+<div class="line dropzone" data-expected="5"></div>
+<div class="line dropzone" data-expected="6"></div>
+
+<p class="line">
+Substituindo \(a = \log_b(x)\), concluímos que
+\(\log_b(x^k) = k \cdot \log_b(x)\).
+</p>
+
+<div class="options dropzone-return"></div>
+
+</main>
+
+<!-- 🐱 GATO -->
+<div id="pet-root">
+  <img id="pet" src="cat_idle.png" draggable="false">
+  <img id="pet-hand" src="" draggable="false">
+</div>
+
+<script src="script.js"></script>
+
+</body>
+</html>
