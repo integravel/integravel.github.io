@@ -1,61 +1,71 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Demonstração — Logaritmo do Produto</title>
+<html lang="pt-BR">    
+<head>        
+<meta charset="UTF-8" />      
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>    
 
-  <!-- MathJax config -->
-  <script>
-    window.MathJax = {
-      tex: {
-        inlineMath: [['\', '\']]
-      },
-      chtml: {
-        mtextInheritFont: true
-      }
-    };
-  </script>
+<title>Demonstração — Logaritmo do Produto</title>    
 
-  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<!-- ✅ CONFIG MathJax -->
+<script>      
+window.MathJax = {      
+tex: {      
+inlineMath: [['\\(', '\\)']]      
+},      
+chtml: {      
+mtextInheritFont: true      
+}      
+};      
+</script>    
 
-  <link rel="stylesheet" href="style.css">
-</head>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>    
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>    
 
-<body>
+<link rel="stylesheet" href="style.css">      
+</head>  
 
-<main>
+<body>  
 
-  <p class="enunciado">
-    <strong>Teorema.</strong>
-    \log_b(xy) = \log_b x + \log_b y, com b > 0, b \neq 1.
-  </p>
+<main>    
 
-  <p class="line">
-    <strong>Demonstração.</strong>
-    Sejam \log_b x = m e \log_b y = n.
-  </p>
+<p class="enunciado">      
+<strong>Teorema.</strong>      
+\(\log_b(x \cdot y) = \log_b(x) + \log_b(y)\), com \(b>0\), \(b \neq 1\), \(x>0\), \(y>0\).      
+</p>    
 
-  <p class="line">
-    Pela definição de logaritmo: x = b^m e y = b^n.
-  </p>
+<p class="line">      
+<strong>Demonstração.</strong>      
+Sejam \(\log_b(x) = a\) e \(\log_b(y) = c\).      
+</p>    
 
-  <p class="line">
-    Multiplicando: xy = b^m \cdot b^n.
-  </p>
+<p class="line">      
+Então \(x = b^a\) e \(y = b^c\).      
+</p>    
 
-  <!-- DROPZONES -->
-  <div class="line dropzone" data-expected="1"></div>
-  <div class="line dropzone" data-expected="2"></div>
-  <div class="line dropzone" data-expected="3"></div>
-  <div class="line dropzone" data-expected="4"></div>
-  <div class="line dropzone" data-expected="5"></div>
-  <div class="line dropzone" data-expected="6"></div>
+<!-- DROPZONES -->
+<div class="line dropzone" data-expected="1"></div>      
+<div class="line dropzone" data-expected="2"></div>      
+<div class="line dropzone" data-expected="3"></div>      
+<div class="line dropzone" data-expected="4"></div>      
+<div class="line dropzone" data-expected="5"></div>      
+<div class="line dropzone" data-expected="6"></div>    
 
-  <p class="line">
-    Portanto, \log_b(xy) = \log_b x + \log_b y.
-  </p>
+<p class="line">      
+Substituindo \(a = \log_b(x)\) e \(c = \log_b(y)\), concluímos que      
+\(\log_b(x \cdot y) = \log_b(x) + \log_b(y)\).      
+</p>    
 
-  <!-- BLOCOS -->
-  <div
+<div class="options dropzone-return"></div>  
+
+</main>  
+
+<!-- 🐱 GATO -->
+<div id="pet-root">      
+<img id="pet" src="cat_idle.png" draggable="false">      
+<img id="pet-hand" src="" draggable="false">      
+</div>  
+
+<script src="script.js"></script>  
+
+</body>      
+</html>
