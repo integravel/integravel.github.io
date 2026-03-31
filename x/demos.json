@@ -63,6 +63,31 @@
   "final": [
     "Dividindo por 2, concluímos \\( S_n = \\frac{n}{2}(a_1 + a_n) \\)."
   ]
-}
+},
+
+
+  {
+    "id": "soma_pg",
+    "title": "Soma dos termos de uma PG",
+    "initial": [
+      "<strong>Teorema.</strong> A soma dos \\( n \\) primeiros termos de uma PG é \\( S_n = \\frac{a_1(q^n - 1)}{q - 1} \\), com \\( q \\neq 1 \\).",
+      "<strong>Demonstração.</strong> Seja \\( S_n = a_1 + a_1q + \\cdots + a_1q^{n-1} \\).",
+      "Multiplicando por \\( q \\): \\( qS_n = a_1q + a_1q^2 + \\cdots + a_1q^n \\).",
+      "Subtraindo as expressões: \\( qS_n - S_n = (a_1q + \\cdots + a_1q^n) - (a_1 + \\cdots + a_1q^{n-1}) \\)."
+    ],
+    "blocks": [
+      "\\( \\text{Os termos intermediários se cancelam} \\)",
+      "\\( qS_n - S_n = a_1q^n - a_1 \\)",
+      "\\( \\text{Fatorando ambos os lados} \\)",
+      "\\( S_n(q - 1) = a_1(q^n - 1) \\)",
+      "\\( \\text{Isolando } S_n \\)",
+      "\\( S_n = \\frac{a_1(q^n - 1)}{q - 1} \\)"
+    ],
+    "final": [
+      "Dividindo por \\( q - 1 \\), com \\( q \\neq 1 \\).",
+      "Concluímos \\( S_n = \\frac{a_1(q^n - 1)}{q - 1} \\)."
+    ]
+  }
+
 
 ]
