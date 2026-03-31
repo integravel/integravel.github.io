@@ -162,12 +162,22 @@ function setupGlobalDrag(dropzones, options, prog, demoId) {
       }
     });
 
-    if (!placed && options.contains(target)) {
-      if (!dragged.classList.contains("locked")) {
-        options.appendChild(dragged);
-        delete prog.positions[dragged.dataset.id];
+if (!placed && options.contains(target)) {
+  if (!dragged.classList.contains("locked")) {
+
+    const parentZone = dragged.parentElement;
+
+    options.appendChild(dragged);
+    delete prog.positions[dragged.dataset.id];
+
+    // 🧹 limpa marcação se a zona ficou vazia
+    if (parentZone && parentZone.classList.contains("dropzone")) {
+      if (parentZone.children.length === 0) {
+        parentZone.classList.remove("correct", "wrong");
       }
     }
+  }
+}
 
     dragged.classList.remove("dragging");
     dragged.style.left = "";
