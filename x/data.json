@@ -1,0 +1,25 @@
+{
+  "demonstracoes": [
+    {
+      "id": "raiz2",
+      "titulo": "√2 é irracional",
+      "enunciado": "\\( \\sqrt{2} \\) é irracional.",
+      "inicio": [
+        "Suponha, por absurdo, que \\( \\sqrt{2} \\) seja racional.",
+        "Então \\( \\sqrt{2} = \\frac{a}{b} \\), com \\( a,b \\in \\mathbb{Z} \\) irredutível."
+      ],
+      "blocos": [
+        { "id": "1", "tex": "\\( 2 = \\frac{a^2}{b^2} \\)" },
+        { "id": "2", "tex": "\\( 2b^2 = a^2 \\)" },
+        { "id": "3", "tex": "\\( a \\text{ é par} \\Rightarrow a=2k \\)" },
+        { "id": "4", "tex": "\\( 2b^2 = 4k^2 \\)" },
+        { "id": "5", "tex": "\\( b^2 = 2k^2 \\)" },
+        { "id": "6", "tex": "\\( b \\text{ é par} \\)" }
+      ],
+      "fim": [
+        "Contradição com a irredutibilidade.",
+        "Logo, \\( \\sqrt{2} \\) é irracional."
+      ]
+    }
+  ]
+}
