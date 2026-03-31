@@ -122,8 +122,21 @@ function createBlocks(container, prog) {
 }
 
 function enableDrag(el) {
+  el.setAttribute("draggable", "true");
+
+  el.addEventListener("mousedown", () => {
+    el.style.cursor = "grabbing";
+  });
+
+  el.addEventListener("mouseup", () => {
+    el.style.cursor = "grab";
+  });
+
   el.addEventListener("dragstart", e => {
-    if (el.classList.contains("locked")) return e.preventDefault();
+    if (el.classList.contains("locked")) {
+      e.preventDefault();
+      return;
+    }
     e.dataTransfer.setData("id", el.dataset.id);
   });
 }
