@@ -36,6 +36,7 @@ main {
 .dropzone {
   border-bottom: 1px dotted var(--roxo);
   min-height: 2.2em;
+  transition: border 0.15s ease;
 }
 
 .dropzone.correct {
@@ -64,19 +65,19 @@ main {
   touch-action: none;
 
   position: relative;
+  transition: transform 0.1s ease;
+}
+
+.dragging {
+  position: fixed;
+  z-index: 9999;
+  pointer-events: none;
+  transform: scale(1.08);
 }
 
 .locked {
   opacity: 0.5;
   cursor: default;
-}
-
-/* DRAG ATIVO */
-.dragging {
-  position: fixed;
-  z-index: 9999;
-  pointer-events: none;
-  transform: scale(1.05);
 }
 
 /* BOTÃO */
