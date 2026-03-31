@@ -1,25 +1,23 @@
-{
-  "demos": [
-    {
-      "id": "sqrt2",
-      "titulo": "√2 é irracional",
-      "enunciado": "<strong>Teorema.</strong> \\( \\sqrt{2} \\) é irracional.",
-      "inicio": [
-        "<strong>Demonstração.</strong> Suponha, por absurdo, que \\( \\sqrt{2} \\) seja racional.",
-        "Então \\( \\sqrt{2} = \\frac{a}{b} \\), com \\( a, b \\in \\mathbb{Z} \\) e fração irredutível."
-      ],
-      "meio": [
-        "\\( 2 = \\frac{a^2}{b^2} \\)",
-        "\\( 2b^2 = a^2 \\)",
-        "\\( a \\text{ é par} \\Rightarrow a = 2k \\)",
-        "\\( 2b^2 = (2k)^2 = 4k^2 \\)",
-        "\\( b^2 = 2k^2 \\)",
-        "\\( b \\text{ é par} \\)"
-      ],
-      "final": [
-        "Isso contradiz o fato de que a fração é irredutível.",
-        "Logo, \\( \\sqrt{2} \\) é irracional."
-      ]
-    }
-  ]
-}
+[
+  {
+    "id": "sqrt2",
+    "titulo": "√2 é irracional",
+    "enunciado": "\\( \\sqrt{2} \\) é irracional.",
+    "inicio": [
+      "<strong>Demonstração.</strong> Suponha, por absurdo, que seja racional.",
+      "Então \\( \\sqrt{2} = \\frac{a}{b} \\)."
+    ],
+    "passos": [
+      { "id": "1", "tex": "\\( 2 = \\frac{a^2}{b^2} \\)" },
+      { "id": "2", "tex": "\\( 2b^2 = a^2 \\)" },
+      { "id": "3", "tex": "\\( a \\text{ é par} \\)" },
+      { "id": "4", "tex": "\\( a = 2k \\)" },
+      { "id": "5", "tex": "\\( b^2 = 2k^2 \\)" },
+      { "id": "6", "tex": "\\( b \\text{ é par} \\)" }
+    ],
+    "fim": [
+      "Contradição.",
+      "Logo, \\( \\sqrt{2} \\) é irracional."
+    ]
+  }
+]
