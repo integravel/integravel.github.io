@@ -40,11 +40,7 @@ function renderList() {
 
     const el = document.createElement("div");
     el.className = "demo-item" + (prog.done ? " done" : "");
-    el.innerHTML = `
-  ${prog.done ? "✔️ " : ""}
-  <strong>${d.title}</strong><br>
-  Erros: ${prog.errors}
-`;
+el.innerHTML = `<strong>${d.title}</strong><br>Erros: ${prog.errors}`;
     el.onclick = () => openDemo(d.id);
 
     app.appendChild(el);
