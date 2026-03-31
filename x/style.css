@@ -1,56 +1,71 @@
+:root {
+  --preto: #2C2C2C;
+  --roxo: #9C59D1;
+}
+
 body {
   margin: 0;
-  font-family: sans-serif;
+  font-family: "Nunito", "Inter", sans-serif;
+  color: var(--preto);
+}
+
+mjx-container {
+  font-family: "Nunito", "Inter", sans-serif !important;
 }
 
 main {
-  max-width: 800px;
-  margin: auto;
-  padding: 20px;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 1.6rem;
 }
 
-.card {
-  border: 1px solid #ccc;
-  padding: 10px;
-  margin-bottom: 10px;
-  cursor: pointer;
-}
-
-.back {
-  cursor: pointer;
-  color: blue;
-  margin-bottom: 10px;
+.line {
+  min-height: 2em;
+  margin: 0.4rem 0;
 }
 
 .dropzone {
-  border-bottom: 1px dashed purple;
-  min-height: 30px;
-  margin: 5px 0;
+  border-bottom: 1.2px dotted rgba(156, 89, 209, 0.6);
+  min-height: 2.2em;
+  display: flex;
+  align-items: center;
 }
-
-.dropzone.locked {
-  border-bottom: 2px solid green;
-}
-
-.draggable {
-  display: inline-block;
-  padding: 5px 10px;
-  background: #eee;
-  margin: 5px;
-  cursor: grab;
-}
-
-.options {
-  margin-top: 20px;
-}
-
 
 .dropzone.correct {
   border-bottom: 2px solid #4CAF50;
-  background: rgba(76, 175, 80, 0.08);
 }
 
 .dropzone.wrong {
   border-bottom: 2px solid #E53935;
-  background: rgba(229, 57, 53, 0.08);
+}
+
+.options {
+  margin-top: 1.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.draggable {
+  background: rgba(156, 89, 209, 0.08);
+  border-radius: 999px;
+  padding: 0.4rem 0.8rem;
+  cursor: grab;
+}
+
+button {
+  margin-bottom: 1rem;
+  padding: 0.4rem 0.8rem;
+  cursor: pointer;
+}
+
+.card {
+  padding: 1rem;
+  border: 1px solid #ddd;
+  margin-bottom: 0.5rem;
+  cursor: pointer;
+}
+
+.card.done {
+  border-left: 6px solid #4CAF50;
 }
