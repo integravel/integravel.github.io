@@ -1,60 +1,50 @@
+:root {
+  --roxo: #9C59D1;
+}
+
 body {
-  font-family: sans-serif;
-  background: #fafafa;
   margin: 0;
+  font-family: "Nunito", sans-serif;
+}
+
+main {
+  max-width: 900px;
+  margin: auto;
   padding: 20px;
 }
 
-h2 {
-  margin-bottom: 16px;
-}
-
-/* LISTA DE DEMOS */
+/* LISTA */
 .demo-item {
   padding: 12px;
-  margin: 8px 0;
-  border-radius: 8px;
-  background: #f2f2f2;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  margin-bottom: 10px;
   cursor: pointer;
-  transition: 0.2s;
 }
 
-.demo-item:hover {
-  background: #e0e0e0;
-}
-
-/* ✅ DEMONSTRAÇÃO CONCLUÍDA */
 .demo-item.done {
-  background: #d4edda;
-  border: 2px solid #28a745;
+  border-color: #4CAF50;
 }
 
-.demo-item.done strong {
-  color: #155724;
-}
-
-/* LINHAS */
+/* TEXTO */
 .line {
-  margin: 10px 0;
+  margin: 6px 0;
+  min-height: 2em;
 }
 
-/* DROPZONES */
+/* DROP */
 .dropzone {
-  min-height: 40px;
-  border: 2px dashed #ccc;
-  border-radius: 6px;
-  padding: 6px;
+  border-bottom: 1px dotted var(--roxo);
+  min-height: 2.2em;
+  transition: border 0.15s ease;
 }
 
-/* CORRETO / ERRADO */
 .dropzone.correct {
-  background: #d4edda;
-  border-color: #28a745;
+  border-bottom: 2px solid #4CAF50;
 }
 
 .dropzone.wrong {
-  background: #f8d7da;
-  border-color: #dc3545;
+  border-bottom: 2px solid #E53935;
 }
 
 /* BLOCOS */
@@ -62,37 +52,39 @@ h2 {
   margin-top: 20px;
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 8px;
 }
 
 .draggable {
-  padding: 8px 12px;
-  background: #ffffff;
-  border: 1px solid #ccc;
-  border-radius: 6px;
+  background: rgba(156, 89, 209, 0.1);
+  padding: 6px 10px;
+  border-radius: 999px;
   cursor: grab;
+
   user-select: none;
+  touch-action: none;
+
   position: relative;
+  transition: transform 0.1s ease;
 }
 
-.draggable.dragging {
-  opacity: 0.7;
+.dragging {
   position: fixed;
-  z-index: 1000;
+  z-index: 9999;
   pointer-events: none;
+  transform: scale(1.08);
 }
 
-.draggable.locked {
-  background: #d4edda;
-  border-color: #28a745;
+.locked {
+  opacity: 0.5;
   cursor: default;
 }
 
-/* BOTÃO VOLTAR */
+/* BOTÃO */
 .back-btn {
   margin-bottom: 16px;
   cursor: pointer;
-  color: #007bff;
+  color: var(--roxo);
 }
 
 .demo-item {
