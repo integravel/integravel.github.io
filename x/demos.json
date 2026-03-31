@@ -87,7 +87,29 @@
       "Dividindo por \\( q - 1 \\), com \\( q \\neq 1 \\).",
       "Concluímos \\( S_n = \\frac{a_1(q^n - 1)}{q - 1} \\)."
     ]
-  }
+  },
+
+
+{
+  "id": "log_produto",
+  "title": "Logaritmo do produto",
+  "initial": [
+    "<strong>Teorema.</strong> \\(\\log_b(x \\cdot y) = \\log_b(x) + \\log_b(y)\\), com \\(b>0\\), \\(b \\neq 1\\), \\(x>0\\), \\(y>0\\).",
+    "<strong>Demonstração.</strong> Sejam \\(\\log_b(x) = a\\) e \\(\\log_b(y) = c\\).",
+    "Então \\(x = b^a\\) e \\(y = b^c\\)."
+  ],
+  "blocks": [
+    "Considere \\(x \\cdot y\\).",
+    "Temos \\(x \\cdot y = b^a \\cdot b^c\\).",
+    "Logo, \\(x \\cdot y = b^{a+c}\\).",
+    "Aplicando logaritmo: \\(\\log_b(x \\cdot y) = \\log_b(b^{a+c})\\).",
+    "Pela definição, \\(\\log_b(b^{a+c}) = a + c\\).",
+    "Portanto, \\(\\log_b(x \\cdot y) = a + c\\)."
+  ],
+  "final": [
+    "Substituindo \\(a = \\log_b(x)\\) e \\(c = \\log_b(y)\\), concluímos que \\(\\log_b(x \\cdot y) = \\log_b(x) + \\log_b(y)\\)."
+  ]
+}
 
 
 ]
