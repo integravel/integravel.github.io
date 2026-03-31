@@ -153,6 +153,28 @@
   "final": [
     "Substituindo \\(a = \\log_b(x)\\), concluímos que \\(\\log_b(x^k) = k \\cdot \\log_b(x)\\)."
   ]
+},
+
+
+{
+  "id": "mudanca_base",
+  "title": "Mudança de base do logaritmo",
+  "initial": [
+    "<strong>Teorema.</strong> \\(\\log_b(x) = \\frac{\\log_a(x)}{\\log_a(b)}\\), com \\(a,b>0\\), \\(a \\neq 1\\), \\(b \\neq 1\\), \\(x>0\\).",
+    "<strong>Demonstração.</strong> Seja \\(\\log_b(x) = y\\).",
+    "Então \\(b^y = x\\)."
+  ],
+  "blocks": [
+    "Aplicando logaritmo na base \\(a\\): \\(\\log_a(b^y) = \\log_a(x)\\).",
+    "Pela propriedade da potência: \\(y \\cdot \\log_a(b) = \\log_a(x)\\).",
+    "Isolando \\(y\\): \\(y = \\frac{\\log_a(x)}{\\log_a(b)}\\).",
+    "Mas \\(y = \\log_b(x)\\).",
+    "Substituindo: \\(\\log_b(x) = \\frac{\\log_a(x)}{\\log_a(b)}\\).",
+    "Portanto, a mudança de base está demonstrada."
+  ],
+  "final": [
+    "Logo, \\(\\log_b(x) = \\frac{\\log_a(x)}{\\log_a(b)}\\)."
+  ]
 }
 
 
