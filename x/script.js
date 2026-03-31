@@ -1,7 +1,33 @@
-const app = document.getElementById("app");
+document.addEventListener("DOMContentLoaded", () => {
 
 let DATA = null;
 let current = null;
+
+const app = document.getElementById("app");
+
+/* =========================
+   FALLBACK DATA (IMPORTANTE)
+========================= */
+
+const fallback = [
+  {
+    id: "teste",
+    titulo: "√2 é irracional",
+    enunciado: "\\( \\sqrt{2} \\) é irracional.",
+    inicio: [
+      "Suponha que seja racional",
+      "Então \\( \\sqrt{2} = a/b \\)"
+    ],
+    blocos: [
+      { id: "1", tex: "\\(2 = a^2/b^2\\)" },
+      { id: "2", tex: "\\(2b^2 = a^2\\)" }
+    ],
+    fim: [
+      "Contradição",
+      "Logo irracional"
+    ]
+  }
+];
 
 /* =========================
    LOAD
@@ -11,6 +37,11 @@ fetch("data.json")
   .then(r => r.json())
   .then(json => {
     DATA = json.demonstracoes;
+    renderLista();
+  })
+  .catch(() => {
+    console.warn("Usando fallback");
+    DATA = fallback;
     renderLista();
   });
 
@@ -34,35 +65,26 @@ function saveState(id, state) {
 ========================= */
 
 function renderLista() {
-  app.innerHTML = "";
-
-  const title = document.createElement("h2");
-  title.textContent = "Demonstrações";
-  app.appendChild(title);
+  app.innerHTML = "<h2>Demonstrações</h2>";
 
   DATA.forEach(d => {
     const state = getState(d.id);
-    const total = d.blocos.length;
-    const feitos = Object.keys(state.acertos).length;
 
-    const card = document.createElement("div");
-    card.className = "card";
-
-    card.innerHTML = `
+    const div = document.createElement("div");
+    div.className = "card";
+    div.innerHTML = `
       <strong>${d.titulo}</strong><br>
-      <span class="badge">
-        ${feitos}/${total} completos | erros: ${state.erros}
-      </span>
+      erros: ${state.erros}
     `;
 
-    card.onclick = () => abrirDemo(d.id);
+    div.addEventListener("click", () => abrirDemo(d.id));
 
-    app.appendChild(card);
+    app.appendChild(div);
   });
 }
 
 /* =========================
-   DEMONSTRAÇÃO
+   DEMO
 ========================= */
 
 function abrirDemo(id) {
@@ -71,124 +93,91 @@ function abrirDemo(id) {
 
   app.innerHTML = "";
 
-  /* BOTÃO VOLTAR */
   const back = document.createElement("div");
   back.className = "back";
   back.textContent = "← voltar";
-  back.onclick = renderLista;
+  back.addEventListener("click", renderLista);
   app.appendChild(back);
 
-  /* ENUNCIADO */
-  const enunciado = document.createElement("p");
-  enunciado.innerHTML = `<strong>Teorema.</strong> ${current.enunciado}`;
-  app.appendChild(enunciado);
+  const p = document.createElement("p");
+  p.innerHTML = `<strong>Teorema.</strong> ${current.enunciado}`;
+  app.appendChild(p);
 
-  /* INÍCIO */
-  current.inicio.forEach(l => {
-    const p = document.createElement("p");
-    p.className = "line";
-    p.innerHTML = l;
-    app.appendChild(p);
+  current.inicio.forEach(t => {
+    const el = document.createElement("p");
+    el.innerHTML = t;
+    app.appendChild(el);
   });
 
-  /* DROPZONES */
   current.blocos.forEach(b => {
     const zone = document.createElement("div");
-    zone.className = "line dropzone";
+    zone.className = "dropzone";
     zone.dataset.expected = b.id;
 
-    if (state.acertos[b.id]) {
-      zone.classList.add("locked");
-      zone.innerHTML = b.tex;
-    }
-
     enableDrop(zone, state);
+
     app.appendChild(zone);
   });
 
-  /* FINAL */
-  current.fim.forEach(l => {
-    const p = document.createElement("p");
-    p.className = "line";
-    p.innerHTML = l;
-    app.appendChild(p);
+  current.fim.forEach(t => {
+    const el = document.createElement("p");
+    el.innerHTML = t;
+    app.appendChild(el);
   });
 
-  /* BLOCOS DISPONÍVEIS */
   const options = document.createElement("div");
   options.className = "options";
   app.appendChild(options);
 
-  const livres = current.blocos.filter(b => !state.acertos[b.id]);
-  shuffle(livres);
+  current.blocos.forEach(b => {
+    const el = document.createElement("div");
+    el.className = "draggable";
+    el.draggable = true;
+    el.dataset.id = b.id;
+    el.innerHTML = b.tex;
 
-  livres.forEach(b => {
-    options.appendChild(createBlock(b));
+    el.addEventListener("dragstart", e => {
+      console.log("drag", b.id); // DEBUG
+      e.dataTransfer.setData("text/plain", b.id);
+    });
+
+    options.appendChild(el);
   });
 
-  MathJax.typesetPromise();
+  if (window.MathJax) MathJax.typesetPromise();
 }
 
 /* =========================
-   DRAG & DROP
+   DROP (VERSÃO SEGURA)
 ========================= */
 
-function createBlock(data) {
-  const div = document.createElement("div");
-  div.className = "draggable";
-  div.draggable = true;
-  div.dataset.id = data.id;
-  div.innerHTML = data.tex;
-
-  div.addEventListener("dragstart", e => {
-    e.dataTransfer.setData("text/plain", data.id);
-  });
-
-  return div;
-}
-
 function enableDrop(zone, state) {
+
   zone.addEventListener("dragover", e => {
-    e.preventDefault(); // ESSENCIAL
+    e.preventDefault();
   });
 
   zone.addEventListener("drop", e => {
     e.preventDefault();
 
-    if (zone.classList.contains("locked")) return;
-
     const id = e.dataTransfer.getData("text/plain");
+    console.log("drop recebido:", id); // DEBUG
 
     if (!id) return;
 
     if (id === zone.dataset.expected) {
-      const bloco = current.blocos.find(b => b.id === id);
-
-      zone.innerHTML = bloco.tex;
+      zone.textContent = "✔ correto";
       zone.classList.add("locked");
 
       state.acertos[id] = true;
       saveState(current.id, state);
 
-      const el = document.querySelector(`.draggable[data-id="${id}"]`);
-      if (el) el.remove();
-
     } else {
       state.erros++;
       saveState(current.id, state);
+      alert("errado");
     }
-
-    MathJax.typesetPromise();
   });
 }
 
-/* =========================
-   UTIL
-========================= */
-
-function shuffle(arr) {
-  for (let i = arr.length - 1; i > 0; i--) {
-    const j = Math.random() * (i + 1) | 0;
-    [arr[i], arr[j]] = [arr[j], arr[i]];
-  }
-}
+});
