@@ -37,7 +37,7 @@ main {
   color: #666;
 }
 
-/* DEMONSTRAÇÃO */
+/* DEMO */
 .line {
   margin: 0.5rem 0;
 }
@@ -67,9 +67,9 @@ main {
   cursor: grab;
 }
 
-/* BOTÃO */
 .back {
   margin-bottom: 10px;
   cursor: pointer;
   color: var(--roxo);
+  font-weight: bold;
 }
