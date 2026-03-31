@@ -170,12 +170,13 @@ function setupGlobalDrag(dropzones, options, prog, demoId) {
       }
     });
 
-    if (!placed && options.contains(target)) {
-      if (!dragged.classList.contains("locked")) {
-        options.appendChild(dragged);
-        delete prog.positions[dragged.dataset.id];
-      }
-    }
+// ✅ devolve para a área de opções se NÃO foi colocado em nenhuma dropzone
+if (!placed) {
+  if (!dragged.classList.contains("locked")) {
+    options.appendChild(dragged);
+    delete prog.positions[dragged.dataset.id];
+  }
+}
 
     // limpa zona de origem se ficou vazia
     if (originZone && originZone.classList.contains("dropzone")) {
