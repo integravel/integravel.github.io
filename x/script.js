@@ -3,6 +3,10 @@ const app = document.getElementById("app");
 let DATA = null;
 let current = null;
 
+/* =========================
+   LOAD
+========================= */
+
 fetch("data.json")
   .then(r => r.json())
   .then(json => {
@@ -30,26 +34,30 @@ function saveState(id, state) {
 ========================= */
 
 function renderLista() {
-  app.innerHTML = "<h2>Demonstrações</h2>";
+  app.innerHTML = "";
+
+  const title = document.createElement("h2");
+  title.textContent = "Demonstrações";
+  app.appendChild(title);
 
   DATA.forEach(d => {
     const state = getState(d.id);
     const total = d.blocos.length;
     const feitos = Object.keys(state.acertos).length;
 
-    const div = document.createElement("div");
-    div.className = "card";
+    const card = document.createElement("div");
+    card.className = "card";
 
-    div.innerHTML = `
+    card.innerHTML = `
       <strong>${d.titulo}</strong><br>
       <span class="badge">
         ${feitos}/${total} completos | erros: ${state.erros}
       </span>
     `;
 
-    div.onclick = () => abrirDemo(d.id);
+    card.onclick = () => abrirDemo(d.id);
 
-    app.appendChild(div);
+    app.appendChild(card);
   });
 }
 
@@ -61,18 +69,30 @@ function abrirDemo(id) {
   current = DATA.find(d => d.id === id);
   const state = getState(id);
 
-  app.innerHTML = `
-    <div class="back">← voltar</div>
-    <p><strong>Teorema.</strong> ${current.enunciado}</p>
-  `;
+  app.innerHTML = "";
 
-  document.querySelector(".back").onclick = renderLista;
+  /* BOTÃO VOLTAR */
+  const back = document.createElement("div");
+  back.className = "back";
+  back.textContent = "← voltar";
+  back.onclick = renderLista;
+  app.appendChild(back);
 
+  /* ENUNCIADO */
+  const enunciado = document.createElement("p");
+  enunciado.innerHTML = `<strong>Teorema.</strong> ${current.enunciado}`;
+  app.appendChild(enunciado);
+
+  /* INÍCIO */
   current.inicio.forEach(l => {
-    app.innerHTML += `<p class="line">${l}</p>`;
+    const p = document.createElement("p");
+    p.className = "line";
+    p.innerHTML = l;
+    app.appendChild(p);
   });
 
-  current.blocos.forEach((b, i) => {
+  /* DROPZONES */
+  current.blocos.forEach(b => {
     const zone = document.createElement("div");
     zone.className = "line dropzone";
     zone.dataset.expected = b.id;
@@ -86,10 +106,15 @@ function abrirDemo(id) {
     app.appendChild(zone);
   });
 
+  /* FINAL */
   current.fim.forEach(l => {
-    app.innerHTML += `<p class="line">${l}</p>`;
+    const p = document.createElement("p");
+    p.className = "line";
+    p.innerHTML = l;
+    app.appendChild(p);
   });
 
+  /* BLOCOS DISPONÍVEIS */
   const options = document.createElement("div");
   options.className = "options";
   app.appendChild(options);
@@ -98,8 +123,7 @@ function abrirDemo(id) {
   shuffle(livres);
 
   livres.forEach(b => {
-    const el = createBlock(b);
-    options.appendChild(el);
+    options.appendChild(createBlock(b));
   });
 
   MathJax.typesetPromise();
@@ -117,21 +141,25 @@ function createBlock(data) {
   div.innerHTML = data.tex;
 
   div.addEventListener("dragstart", e => {
-    e.dataTransfer.setData("id", data.id);
+    e.dataTransfer.setData("text/plain", data.id);
   });
 
   return div;
 }
 
 function enableDrop(zone, state) {
-  zone.addEventListener("dragover", e => e.preventDefault());
+  zone.addEventListener("dragover", e => {
+    e.preventDefault(); // ESSENCIAL
+  });
 
   zone.addEventListener("drop", e => {
     e.preventDefault();
 
     if (zone.classList.contains("locked")) return;
 
-    const id = e.dataTransfer.getData("id");
+    const id = e.dataTransfer.getData("text/plain");
+
+    if (!id) return;
 
     if (id === zone.dataset.expected) {
       const bloco = current.blocos.find(b => b.id === id);
@@ -142,7 +170,8 @@ function enableDrop(zone, state) {
       state.acertos[id] = true;
       saveState(current.id, state);
 
-      document.querySelector(`.draggable[data-id="${id}"]`)?.remove();
+      const el = document.querySelector(`.draggable[data-id="${id}"]`);
+      if (el) el.remove();
 
     } else {
       state.erros++;
