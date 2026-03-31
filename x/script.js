@@ -3,6 +3,10 @@ const app = document.getElementById("app");
 let DEMOS = [];
 let currentDemo = null;
 
+let dragged = null;
+let offsetX = 0;
+let offsetY = 0;
+
 init();
 
 async function init() {
@@ -11,12 +15,10 @@ async function init() {
   renderList();
 }
 
-/* =========================
-   STORAGE
-========================= */
+/* STORAGE */
 
 function getProgress(id) {
-  return JSON.parse(localStorage.getItem("demo_" + id)) || {
+  return JSON.parse(localStorage.getItem(id)) || {
     positions: {},
     errors: 0,
     done: false
@@ -24,36 +26,27 @@ function getProgress(id) {
 }
 
 function saveProgress(id, data) {
-  localStorage.setItem("demo_" + id, JSON.stringify(data));
+  localStorage.setItem(id, JSON.stringify(data));
 }
 
-/* =========================
-   LISTA
-========================= */
+/* LISTA */
 
 function renderList() {
   app.innerHTML = "<h2>Demonstrações</h2>";
 
-  DEMOS.forEach(demo => {
-    const prog = getProgress(demo.id);
+  DEMOS.forEach(d => {
+    const prog = getProgress(d.id);
 
-    const div = document.createElement("div");
-    div.className = "demo-item" + (prog.done ? " done" : "");
+    const el = document.createElement("div");
+    el.className = "demo-item" + (prog.done ? " done" : "");
+    el.innerHTML = `<strong>${d.title}</strong><br>Erros: ${prog.errors}`;
+    el.onclick = () => openDemo(d.id);
 
-    div.innerHTML = `
-      <strong>${demo.title}</strong><br>
-      Erros: ${prog.errors}
-    `;
-
-    div.onclick = () => openDemo(demo.id);
-
-    app.appendChild(div);
+    app.appendChild(el);
   });
 }
 
-/* =========================
-   DEMONSTRAÇÃO
-========================= */
+/* DEMO */
 
 function openDemo(id) {
   currentDemo = DEMOS.find(d => d.id === id);
@@ -65,10 +58,9 @@ function openDemo(id) {
   back.className = "back-btn";
   back.textContent = "← Voltar";
   back.onclick = renderList;
-
   app.appendChild(back);
 
-  currentDemo.initial.forEach(t => addLine(t));
+  currentDemo.initial.forEach(addLine);
 
   const dropzones = [];
 
@@ -80,22 +72,20 @@ function openDemo(id) {
     dropzones.push(dz);
   });
 
-  currentDemo.final.forEach(t => addLine(t));
+  currentDemo.final.forEach(addLine);
 
   const options = document.createElement("div");
   options.className = "options";
   app.appendChild(options);
 
-  createBlocks(options, prog);
+  createBlocks(options);
 
-  enableDrop(dropzones, options, prog, id);
+  restore(dropzones, options, prog);
 
-  restorePositions(dropzones, options, prog);
+  setupGlobalDrag(dropzones, options, prog, id);
 
-if (window.MathJax) {
-  MathJax.typesetClear();
-  MathJax.typesetPromise();
-}}
+  setTimeout(typeset, 0);
+}
 
 function addLine(tex) {
   const p = document.createElement("p");
@@ -104,130 +94,128 @@ function addLine(tex) {
   app.appendChild(p);
 }
 
-/* =========================
-   BLOCOS
-========================= */
+/* BLOCOS */
 
-function createBlocks(container, prog) {
-  const shuffled = [...currentDemo.blocks]
-    .sort(() => Math.random() - 0.5);
+function createBlocks(container) {
+  const shuffled = [...currentDemo.blocks].sort(() => Math.random() - 0.5);
 
-  shuffled.forEach((b, i) => {
-    const div = document.createElement("div");
-    div.className = "draggable";
-    div.dataset.id = i + 1;
-    div.innerHTML = b;
+  shuffled.forEach(b => {
+    const id = currentDemo.blocks.indexOf(b) + 1;
 
-    enableDrag(div);
-    container.appendChild(div);
+    const el = document.createElement("div");
+    el.className = "draggable";
+    el.dataset.id = id;
+    el.innerHTML = b;
+
+    setupDrag(el);
+    container.appendChild(el);
   });
 }
 
-function enableDrag(el) {
-  el.setAttribute("draggable", "true");
+/* DRAG CUSTOM */
 
-  el.addEventListener("mousedown", () => {
-    el.style.cursor = "grabbing";
-  });
+function setupDrag(el) {
+  el.addEventListener("pointerdown", e => {
+    if (el.classList.contains("locked")) return;
 
-  el.addEventListener("mouseup", () => {
-    el.style.cursor = "grab";
-  });
+    dragged = el;
 
-  el.addEventListener("dragstart", e => {
-    if (el.classList.contains("locked")) {
-      e.preventDefault();
-      return;
-    }
-    e.dataTransfer.setData("id", el.dataset.id);
+    const rect = el.getBoundingClientRect();
+    offsetX = e.clientX - rect.left;
+    offsetY = e.clientY - rect.top;
+
+    el.classList.add("dragging");
   });
 }
 
-/* =========================
-   DROP + LÓGICA
-========================= */
+function setupGlobalDrag(dropzones, options, prog, demoId) {
 
-function enableDrop(dropzones, options, prog, id) {
+  window.onpointermove = e => {
+    if (!dragged) return;
 
-  dropzones.forEach(zone => {
+    dragged.style.left = e.clientX - offsetX + "px";
+    dragged.style.top = e.clientY - offsetY + "px";
+  };
 
-    zone.addEventListener("dragover", e => e.preventDefault());
+  window.onpointerup = e => {
+    if (!dragged) return;
 
-    zone.addEventListener("drop", e => {
-      e.preventDefault();
+    const target = document.elementFromPoint(e.clientX, e.clientY);
 
-      if (zone.children.length > 0) return;
+    let placed = false;
 
-      const idBlock = e.dataTransfer.getData("id");
-      const block = document.querySelector(`[data-id="${idBlock}"]`);
+    dropzones.forEach(zone => {
+      if (zone.contains(target) && zone.children.length === 0) {
 
-      zone.appendChild(block);
+        zone.appendChild(dragged);
 
-      const correct = idBlock === zone.dataset.expected;
+        const correct = dragged.dataset.id === zone.dataset.expected;
 
-      zone.classList.add(correct ? "correct" : "wrong");
+        zone.classList.add(correct ? "correct" : "wrong");
 
-      if (correct) {
-        block.classList.add("locked");
-      } else {
-        prog.errors++;
+        if (correct) dragged.classList.add("locked");
+        else prog.errors++;
+
+        prog.positions[dragged.dataset.id] = zone.dataset.expected;
+
+        placed = true;
       }
-
-      prog.positions[idBlock] = zone.dataset.expected;
-      checkCompletion(dropzones, prog);
-
-      saveProgress(id, prog);
     });
-  });
 
-  options.addEventListener("dragover", e => e.preventDefault());
+    if (!placed && options.contains(target)) {
+      if (!dragged.classList.contains("locked")) {
+        options.appendChild(dragged);
+        delete prog.positions[dragged.dataset.id];
+      }
+    }
 
-  options.addEventListener("drop", e => {
-    e.preventDefault();
+    dragged.classList.remove("dragging");
+    dragged.style.left = "";
+    dragged.style.top = "";
 
-    const idBlock = e.dataTransfer.getData("id");
-    const block = document.querySelector(`[data-id="${idBlock}"]`);
+    checkCompletion(dropzones, prog);
+    saveProgress(demoId, prog);
 
-    if (block.classList.contains("locked")) return;
+    dragged = null;
 
-    options.appendChild(block);
-    delete prog.positions[idBlock];
-
-    saveProgress(id, prog);
-  });
+    typeset();
+  };
 }
 
-/* =========================
-   RESTAURAR
-========================= */
+/* RESTORE */
 
-function restorePositions(dropzones, options, prog) {
+function restore(dropzones, options, prog) {
   Object.entries(prog.positions).forEach(([id, pos]) => {
-    const block = document.querySelector(`[data-id="${id}"]`);
+    const el = document.querySelector(`[data-id="${id}"]`);
     const zone = dropzones[pos - 1];
 
-    zone.appendChild(block);
+    zone.appendChild(el);
 
     if (id == zone.dataset.expected) {
       zone.classList.add("correct");
-      block.classList.add("locked");
+      el.classList.add("locked");
     } else {
       zone.classList.add("wrong");
     }
   });
 }
 
-/* =========================
-   COMPLETO
-========================= */
+/* COMPLETO */
 
-function checkCompletion(dropzones, prog) {
-  const allCorrect = dropzones.every(z => {
-    const child = z.firstChild;
-    return child && child.dataset.id === z.dataset.expected;
+function checkCompletion(zones, prog) {
+  const done = zones.every(z => {
+    const c = z.firstChild;
+    return c && c.dataset.id === z.dataset.expected;
   });
 
-  if (allCorrect) {
-    prog.done = true;
+  if (done) prog.done = true;
+}
+
+/* MATHJAX */
+
+function typeset() {
+  if (window.MathJax) {
+    MathJax.typesetClear();
+    MathJax.typesetPromise();
   }
 }
