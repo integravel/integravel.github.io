@@ -26,7 +26,7 @@ function renderMenu() {
 
   DATA.demos.forEach(d => {
     const p = getProgress(d.id);
-    const done = p.locked.length === 6;
+    const done = p.locked.length === d.meio.length;
 
     const div = document.createElement("div");
     div.className = "card " + (done ? "done" : "");
@@ -46,14 +46,17 @@ function renderDemo(demo) {
     <p class="enunciado">${demo.enunciado}</p>
   `;
 
+  // início
   demo.inicio.forEach(t => {
     app.innerHTML += `<p class="line">${t}</p>`;
   });
 
+  // dropzones (6)
   demo.meio.forEach((_, i) => {
     app.innerHTML += `<div class="line dropzone" data-index="${i}"></div>`;
   });
 
+  // final
   demo.final.forEach(t => {
     app.innerHTML += `<p class="line">${t}</p>`;
   });
@@ -70,20 +73,20 @@ function renderDemo(demo) {
 
   shuffle(blocks);
 
-  // criar todos blocos
+  // criar blocos
   blocks.forEach(b => {
     const el = createBlock(b, progress);
     options.appendChild(el);
   });
 
-  // restaurar posições salvas
+  // restaurar posições (inclui ERRADOS também)
   Object.entries(progress.positions).forEach(([id, zoneIndex]) => {
     const el = document.querySelector(`[data-id="${id}"]`);
     const zone = zones[zoneIndex];
     if (el && zone) zone.appendChild(el);
   });
 
-  // configurar zonas
+  // configurar dropzones
   zones.forEach(zone => {
     const index = Number(zone.dataset.index);
 
@@ -122,7 +125,7 @@ function renderDemo(demo) {
     });
   });
 
-  // voltar blocos
+  // voltar para área de opções
   options.addEventListener("dragover", e => e.preventDefault());
 
   options.addEventListener("drop", e => {
@@ -130,43 +133,40 @@ function renderDemo(demo) {
 
     const id = Number(e.dataTransfer.getData("id"));
 
-    if (progress.locked.includes(id)) return; // não remove correto
+    // não remove bloco correto
+    if (progress.locked.includes(id)) return;
 
     const block = document.querySelector(`[data-id="${id}"]`);
     options.appendChild(block);
 
     delete progress.positions[id];
 
-    // limpar cores
-    zones.forEach(z => z.classList.remove("wrong"));
-
     saveProgress(demo.id, progress);
   });
 
-// aplicar estado visual inicial (CORRIGIDO)
-zones.forEach(zone => {
-  const index = Number(zone.dataset.index);
-  const child = zone.firstElementChild;
+  // aplicar estado visual inicial (ESSENCIAL)
+  zones.forEach(zone => {
+    const index = Number(zone.dataset.index);
+    const child = zone.firstElementChild;
 
-  zone.classList.remove("correct", "wrong");
+    zone.classList.remove("correct", "wrong");
 
-  if (!child) return;
+    if (!child) return;
 
-  const id = Number(child.dataset.id);
+    const id = Number(child.dataset.id);
 
-  if (progress.locked.includes(id)) {
-    zone.classList.add("correct");
-    child.draggable = false;
-    child.classList.add("locked");
-  } else {
-    // mantém bloco errado VISÍVEL e MARCADO
-    if (id === index) {
+    if (progress.locked.includes(id)) {
       zone.classList.add("correct");
+      child.draggable = false;
+      child.classList.add("locked");
     } else {
-      zone.classList.add("wrong");
+      if (id === index) {
+        zone.classList.add("correct");
+      } else {
+        zone.classList.add("wrong");
+      }
     }
-  }
-});
+  });
 
   typeset();
 }
