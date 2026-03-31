@@ -1,26 +1,230 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Laboratório Integrável</title>
+:root {
+  --preto: #2C2C2C;
+  --roxo: #9C59D1;
+}
 
-  <script>
-    window.MathJax = {
-      tex: { inlineMath: [['\\(', '\\)']] },
-      chtml: { mtextInheritFont: true }
-    };
-  </script>
+body {
+  margin: 0;
+  font-family: "Nunito", "Inter", sans-serif;
+  color: var(--preto);
+}
 
-  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+mjx-container {
+  font-family: "Nunito", "Inter", sans-serif !important;
+}
 
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
+main {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 1.6rem;
+}
 
-<main id="app"></main>
+.line {
+  min-height: 2em;
+  margin: 0.4rem 0;
+}
 
-<script src="script.js"></script>
-</body>
-</html>
+.dropzone {
+  border-bottom: 1.2px dotted rgba(156, 89, 209, 0.6);
+  min-height: 2.2em;
+  display: flex;
+  align-items: center;
+}
+
+.dropzone.correct {
+  border-bottom: 2px solid #4CAF50;
+}
+
+.dropzone.wrong {
+  border-bottom: 2px solid #E53935;
+}
+
+.options {
+  margin-top: 1.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.draggable {
+  background: rgba(156, 89, 209, 0.08);
+  border-radius: 999px;
+  padding: 0.4rem 0.8rem;
+  cursor: grab;
+}
+
+button {
+  margin-bottom: 1rem;
+  padding: 0.4rem 0.8rem;
+  cursor: pointer;
+}
+
+.card {
+  padding: 1rem;
+  border: 1px solid #ddd;
+  margin-bottom: 0.5rem;
+  cursor: pointer;
+}
+
+.card.done {
+  border-left: 6px solid #4CAF50;
+}
+
+const app = document.getElementById("app");
+
+let DATA = null;
+
+fetch("data.json")
+  .then(r => r.json())
+  .then(json => {
+    DATA = json;
+    renderMenu();
+  });
+
+function getProgress(id) {
+  return JSON.parse(localStorage.getItem("demo_" + id)) || {
+    acertos: [],
+    erros: 0
+  };
+}
+
+function saveProgress(id, data) {
+  localStorage.setItem("demo_" + id, JSON.stringify(data));
+}
+
+function renderMenu() {
+  app.innerHTML = "<h2>Demonstrações</h2>";
+
+  DATA.demos.forEach(d => {
+    const prog = getProgress(d.id);
+    const done = prog.acertos.length === d.meio.length;
+
+    const div = document.createElement("div");
+    div.className = "card " + (done ? "done" : "");
+    div.innerHTML = `
+      <strong>${d.titulo}</strong><br>
+      Erros: ${prog.erros}
+    `;
+
+    div.onclick = () => renderDemo(d);
+
+    app.appendChild(div);
+  });
+}
+
+function renderDemo(demo) {
+  const progress = getProgress(demo.id);
+
+  app.innerHTML = `
+    <button onclick="renderMenu()">← Voltar</button>
+    <p class="enunciado">${demo.enunciado}</p>
+  `;
+
+  demo.inicio.forEach(t => {
+    app.innerHTML += `<p class="line">${t}</p>`;
+  });
+
+  demo.meio.forEach((_, i) => {
+    app.innerHTML += `<div class="line dropzone" data-index="${i}"></div>`;
+  });
+
+  demo.final.forEach(t => {
+    app.innerHTML += `<p class="line">${t}</p>`;
+  });
+
+  app.innerHTML += `<div class="options"></div>`;
+
+  const options = app.querySelector(".options");
+
+  const blocks = demo.meio.map((tex, i) => ({
+    id: i,
+    tex
+  }));
+
+  shuffle(blocks);
+
+  blocks.forEach(b => {
+    if (!progress.acertos.includes(b.id)) {
+      const el = createBlock(b);
+      options.appendChild(el);
+    }
+  });
+
+  const zones = document.querySelectorAll(".dropzone");
+
+  zones.forEach(zone => {
+    const index = Number(zone.dataset.index);
+
+    if (progress.acertos.includes(index)) {
+      const el = createBlock({ id: index, tex: demo.meio[index] });
+      el.draggable = false;
+      zone.appendChild(el);
+      zone.classList.add("correct");
+    }
+
+    zone.addEventListener("dragover", e => e.preventDefault());
+
+    zone.addEventListener("drop", e => {
+      e.preventDefault();
+
+      if (zone.children.length > 0) return;
+
+      const id = Number(e.dataTransfer.getData("id"));
+      const block = document.querySelector(`[data-id="${id}"]`);
+
+      zone.appendChild(block);
+
+      if (id === index) {
+        zone.classList.add("correct");
+        progress.acertos.push(id);
+      } else {
+        zone.classList.add("wrong");
+        progress.erros++;
+      }
+
+      saveProgress(demo.id, progress);
+      typeset();
+    });
+  });
+
+  options.addEventListener("dragover", e => e.preventDefault());
+
+  options.addEventListener("drop", e => {
+    e.preventDefault();
+    const id = e.dataTransfer.getData("id");
+    const block = document.querySelector(`[data-id="${id}"]`);
+    options.appendChild(block);
+  });
+
+  typeset();
+}
+
+function createBlock(b) {
+  const el = document.createElement("div");
+  el.className = "draggable";
+  el.dataset.id = b.id;
+  el.innerHTML = b.tex;
+  el.draggable = true;
+
+  el.addEventListener("dragstart", e => {
+    e.dataTransfer.setData("id", b.id);
+  });
+
+  return el;
+}
+
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.random() * (i + 1) | 0;
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+}
+
+function typeset() {
+  if (window.MathJax) MathJax.typesetPromise();
+}
+
+.draggable.locked {
+  cursor: default;
+  opacity: 0.7;
+}
