@@ -131,6 +131,28 @@
   "final": [
     "Substituindo \\(a = \\log_b(x)\\) e \\(c = \\log_b(y)\\), concluímos que \\(\\log_b\\!\\left(\\frac{x}{y}\\right) = \\log_b(x) - \\log_b(y)\\)."
   ]
+},
+
+
+{
+  "id": "log_potencia",
+  "title": "Logaritmo da potência",
+  "initial": [
+    "<strong>Teorema.</strong> \\(\\log_b(x^k) = k \\cdot \\log_b(x)\\), com \\(b>0\\), \\(b \\neq 1\\), \\(x>0\\).",
+    "<strong>Demonstração.</strong> Seja \\(\\log_b(x) = a\\).",
+    "Então \\(x = b^a\\)."
+  ],
+  "blocks": [
+    "Considere \\(x^k\\).",
+    "Temos \\(x^k = (b^a)^k\\).",
+    "Logo, \\(x^k = b^{ak}\\).",
+    "Aplicando logaritmo: \\(\\log_b(x^k) = \\log_b(b^{ak})\\).",
+    "Pela definição, \\(\\log_b(b^{ak}) = ak\\).",
+    "Portanto, \\(\\log_b(x^k) = ak\\)."
+  ],
+  "final": [
+    "Substituindo \\(a = \\log_b(x)\\), concluímos que \\(\\log_b(x^k) = k \\cdot \\log_b(x)\\)."
+  ]
 }
 
 
