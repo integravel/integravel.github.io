@@ -92,8 +92,10 @@ function openDemo(id) {
 
   restorePositions(dropzones, options, prog);
 
-  if (window.MathJax) MathJax.typesetPromise();
-}
+if (window.MathJax) {
+  MathJax.typesetClear();
+  MathJax.typesetPromise();
+}}
 
 function addLine(tex) {
   const p = document.createElement("p");
