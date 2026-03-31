@@ -1,183 +1,153 @@
-document.addEventListener("DOMContentLoaded", () => {
-
-let DATA = null;
-let current = null;
-
 const app = document.getElementById("app");
 
-/* =========================
-   FALLBACK DATA (IMPORTANTE)
-========================= */
-
-const fallback = [
-  {
-    id: "teste",
-    titulo: "√2 é irracional",
-    enunciado: "\\( \\sqrt{2} \\) é irracional.",
-    inicio: [
-      "Suponha que seja racional",
-      "Então \\( \\sqrt{2} = a/b \\)"
-    ],
-    blocos: [
-      { id: "1", tex: "\\(2 = a^2/b^2\\)" },
-      { id: "2", tex: "\\(2b^2 = a^2\\)" }
-    ],
-    fim: [
-      "Contradição",
-      "Logo irracional"
-    ]
-  }
-];
-
-/* =========================
-   LOAD
-========================= */
+let DATA = null;
 
 fetch("data.json")
   .then(r => r.json())
   .then(json => {
-    DATA = json.demonstracoes;
-    renderLista();
-  })
-  .catch(() => {
-    console.warn("Usando fallback");
-    DATA = fallback;
-    renderLista();
+    DATA = json;
+    renderMenu();
   });
 
-/* =========================
-   STORAGE
-========================= */
-
-function getState(id) {
+function getProgress(id) {
   return JSON.parse(localStorage.getItem("demo_" + id)) || {
-    acertos: {},
+    acertos: [],
     erros: 0
   };
 }
 
-function saveState(id, state) {
-  localStorage.setItem("demo_" + id, JSON.stringify(state));
+function saveProgress(id, data) {
+  localStorage.setItem("demo_" + id, JSON.stringify(data));
 }
 
-/* =========================
-   LISTA
-========================= */
-
-function renderLista() {
+function renderMenu() {
   app.innerHTML = "<h2>Demonstrações</h2>";
 
-  DATA.forEach(d => {
-    const state = getState(d.id);
+  DATA.demos.forEach(d => {
+    const prog = getProgress(d.id);
+    const done = prog.acertos.length === d.meio.length;
 
     const div = document.createElement("div");
-    div.className = "card";
+    div.className = "card " + (done ? "done" : "");
     div.innerHTML = `
       <strong>${d.titulo}</strong><br>
-      erros: ${state.erros}
+      Erros: ${prog.erros}
     `;
 
-    div.addEventListener("click", () => abrirDemo(d.id));
+    div.onclick = () => renderDemo(d);
 
     app.appendChild(div);
   });
 }
 
-/* =========================
-   DEMO
-========================= */
+function renderDemo(demo) {
+  const progress = getProgress(demo.id);
 
-function abrirDemo(id) {
-  current = DATA.find(d => d.id === id);
-  const state = getState(id);
+  app.innerHTML = `
+    <button onclick="renderMenu()">← Voltar</button>
+    <p class="enunciado">${demo.enunciado}</p>
+  `;
 
-  app.innerHTML = "";
-
-  const back = document.createElement("div");
-  back.className = "back";
-  back.textContent = "← voltar";
-  back.addEventListener("click", renderLista);
-  app.appendChild(back);
-
-  const p = document.createElement("p");
-  p.innerHTML = `<strong>Teorema.</strong> ${current.enunciado}`;
-  app.appendChild(p);
-
-  current.inicio.forEach(t => {
-    const el = document.createElement("p");
-    el.innerHTML = t;
-    app.appendChild(el);
+  demo.inicio.forEach(t => {
+    app.innerHTML += `<p class="line">${t}</p>`;
   });
 
-  current.blocos.forEach(b => {
-    const zone = document.createElement("div");
-    zone.className = "dropzone";
-    zone.dataset.expected = b.id;
-
-    enableDrop(zone, state);
-
-    app.appendChild(zone);
+  demo.meio.forEach((_, i) => {
+    app.innerHTML += `<div class="line dropzone" data-index="${i}"></div>`;
   });
 
-  current.fim.forEach(t => {
-    const el = document.createElement("p");
-    el.innerHTML = t;
-    app.appendChild(el);
+  demo.final.forEach(t => {
+    app.innerHTML += `<p class="line">${t}</p>`;
   });
 
-  const options = document.createElement("div");
-  options.className = "options";
-  app.appendChild(options);
+  app.innerHTML += `<div class="options"></div>`;
 
-  current.blocos.forEach(b => {
-    const el = document.createElement("div");
-    el.className = "draggable";
-    el.draggable = true;
-    el.dataset.id = b.id;
-    el.innerHTML = b.tex;
+  const options = app.querySelector(".options");
 
-    el.addEventListener("dragstart", e => {
-      console.log("drag", b.id); // DEBUG
-      e.dataTransfer.setData("text/plain", b.id);
-    });
+  const blocks = demo.meio.map((tex, i) => ({
+    id: i,
+    tex
+  }));
 
-    options.appendChild(el);
-  });
+  shuffle(blocks);
 
-  if (window.MathJax) MathJax.typesetPromise();
-}
-
-/* =========================
-   DROP (VERSÃO SEGURA)
-========================= */
-
-function enableDrop(zone, state) {
-
-  zone.addEventListener("dragover", e => {
-    e.preventDefault();
-  });
-
-  zone.addEventListener("drop", e => {
-    e.preventDefault();
-
-    const id = e.dataTransfer.getData("text/plain");
-    console.log("drop recebido:", id); // DEBUG
-
-    if (!id) return;
-
-    if (id === zone.dataset.expected) {
-      zone.textContent = "✔ correto";
-      zone.classList.add("locked");
-
-      state.acertos[id] = true;
-      saveState(current.id, state);
-
-    } else {
-      state.erros++;
-      saveState(current.id, state);
-      alert("errado");
+  blocks.forEach(b => {
+    if (!progress.acertos.includes(b.id)) {
+      const el = createBlock(b);
+      options.appendChild(el);
     }
   });
+
+  const zones = document.querySelectorAll(".dropzone");
+
+  zones.forEach(zone => {
+    const index = Number(zone.dataset.index);
+
+    if (progress.acertos.includes(index)) {
+      const el = createBlock({ id: index, tex: demo.meio[index] });
+      el.draggable = false;
+      zone.appendChild(el);
+      zone.classList.add("correct");
+    }
+
+    zone.addEventListener("dragover", e => e.preventDefault());
+
+    zone.addEventListener("drop", e => {
+      e.preventDefault();
+
+      if (zone.children.length > 0) return;
+
+      const id = Number(e.dataTransfer.getData("id"));
+      const block = document.querySelector(`[data-id="${id}"]`);
+
+      zone.appendChild(block);
+
+      if (id === index) {
+        zone.classList.add("correct");
+        progress.acertos.push(id);
+      } else {
+        zone.classList.add("wrong");
+        progress.erros++;
+      }
+
+      saveProgress(demo.id, progress);
+      typeset();
+    });
+  });
+
+  options.addEventListener("dragover", e => e.preventDefault());
+
+  options.addEventListener("drop", e => {
+    e.preventDefault();
+    const id = e.dataTransfer.getData("id");
+    const block = document.querySelector(`[data-id="${id}"]`);
+    options.appendChild(block);
+  });
+
+  typeset();
 }
 
-});
+function createBlock(b) {
+  const el = document.createElement("div");
+  el.className = "draggable";
+  el.dataset.id = b.id;
+  el.innerHTML = b.tex;
+  el.draggable = true;
+
+  el.addEventListener("dragstart", e => {
+    e.dataTransfer.setData("id", b.id);
+  });
+
+  return el;
+}
+
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.random() * (i + 1) | 0;
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+}
+
+function typeset() {
+  if (window.MathJax) MathJax.typesetPromise();
+}
