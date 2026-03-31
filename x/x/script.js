@@ -142,25 +142,37 @@ function setupGlobalDrag(dropzones, options, prog, demoId) {
 
     const target = document.elementFromPoint(e.clientX, e.clientY);
 
+    const originZone = dragged.parentElement;
+    
     let placed = false;
 
-    dropzones.forEach(zone => {
-      if (zone.contains(target) && zone.children.length === 0) {
+ let placed = false;
 
-        zone.appendChild(dragged);
+dropzones.forEach(zone => {
+  if (zone.contains(target) && zone.children.length === 0) {
 
-        const correct = dragged.dataset.id === zone.dataset.expected;
+    zone.appendChild(dragged);
 
-        zone.classList.add(correct ? "correct" : "wrong");
+    const correct = dragged.dataset.id === zone.dataset.expected;
 
-        if (correct) dragged.classList.add("locked");
-        else prog.errors++;
+    zone.classList.add(correct ? "correct" : "wrong");
 
-        prog.positions[dragged.dataset.id] = zone.dataset.expected;
+    if (correct) dragged.classList.add("locked");
+    else prog.errors++;
 
-        placed = true;
-      }
-    });
+    prog.positions[dragged.dataset.id] = zone.dataset.expected;
+
+    placed = true;
+  }
+});
+
+// 🧹 limpa zona de origem se ficou vazia
+if (originZone && originZone.classList.contains("dropzone")) {
+  if (originZone.children.length === 0) {
+    originZone.classList.remove("correct", "wrong");
+  }
+}
+    
 
 if (!placed && options.contains(target)) {
   if (!dragged.classList.contains("locked")) {
