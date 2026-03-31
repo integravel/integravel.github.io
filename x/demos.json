@@ -41,5 +41,28 @@
     "final": [
       "Isso contradiz a hipótese inicial, logo existem infinitos números primos."
     ]
-  }
+  },
+
+{
+  "id": "soma_pa",
+  "title": "Soma dos termos de uma PA",
+  "initial": [
+    "<strong>Teorema.</strong> A soma dos \\( n \\) primeiros termos de uma PA é \\( S_n = \\frac{n}{2}(a_1 + a_n) \\).",
+    "<strong>Demonstração.</strong> Considere \\( S_n = a_1 + a_2 + \\cdots + a_n \\).",
+    "Escrevendo na ordem inversa: \\( S_n = a_n + a_{n-1} + \\cdots + a_1 \\).",
+    "Somando termo a termo: \\( 2S_n = (a_1 + a_n) + \\cdots + (a_n + a_1) \\)."
+  ],
+  "blocks": [
+    "\\( \\text{Cada par tem a forma } (a_1 + a_n) \\)",
+    "\\( \\text{Todos os pares têm a mesma soma} \\)",
+    "\\( \\text{Existem } n \\text{ termos} \\)",
+    "\\( \\text{Logo há } n \\text{ parcelas iguais} \\)",
+    "\\( 2S_n = n(a_1 + a_n) \\)",
+    "\\( S_n = \\frac{n}{2}(a_1 + a_n) \\)"
+  ],
+  "final": [
+    "Logo, \\( 2S_n = n(a_1 + a_n) \\).",
+    "Dividindo por 2, concluímos \\( S_n = \\frac{n}{2}(a_1 + a_n) \\)."
+  ]
+}
 ]
