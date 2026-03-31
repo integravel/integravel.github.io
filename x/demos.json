@@ -109,6 +109,28 @@
   "final": [
     "Substituindo \\(a = \\log_b(x)\\) e \\(c = \\log_b(y)\\), concluímos que \\(\\log_b(x \\cdot y) = \\log_b(x) + \\log_b(y)\\)."
   ]
+},
+
+
+{
+  "id": "log_quociente",
+  "title": "Logaritmo do quociente",
+  "initial": [
+    "<strong>Teorema.</strong> \\(\\log_b\\!\\left(\\frac{x}{y}\\right) = \\log_b(x) - \\log_b(y)\\), com \\(b>0\\), \\(b \\neq 1\\), \\(x>0\\), \\(y>0\\).",
+    "<strong>Demonstração.</strong> Sejam \\(\\log_b(x) = a\\) e \\(\\log_b(y) = c\\).",
+    "Então \\(x = b^a\\) e \\(y = b^c\\)."
+  ],
+  "blocks": [
+    "Considere \\(\\frac{x}{y}\\).",
+    "Temos \\(\\frac{x}{y} = \\frac{b^a}{b^c}\\).",
+    "Logo, \\(\\frac{x}{y} = b^{a-c}\\).",
+    "Aplicando logaritmo: \\(\\log_b\\!\\left(\\frac{x}{y}\\right) = \\log_b(b^{a-c})\\).",
+    "Pela definição, \\(\\log_b(b^{a-c}) = a - c\\).",
+    "Portanto, \\(\\log_b\\!\\left(\\frac{x}{y}\\right) = a - c\\)."
+  ],
+  "final": [
+    "Substituindo \\(a = \\log_b(x)\\) e \\(c = \\log_b(y)\\), concluímos que \\(\\log_b\\!\\left(\\frac{x}{y}\\right) = \\log_b(x) - \\log_b(y)\\)."
+  ]
 }
 
 
