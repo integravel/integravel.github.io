@@ -6,6 +6,7 @@ let currentDemo = null;
 let dragged = null;
 let offsetX = 0;
 let offsetY = 0;
+let originZone = null;
 
 init();
 
@@ -79,7 +80,6 @@ function openDemo(id) {
   app.appendChild(options);
 
   createBlocks(options);
-
   restore(dropzones, options, prog);
 
   setupGlobalDrag(dropzones, options, prog, id);
@@ -112,13 +112,19 @@ function createBlocks(container) {
   });
 }
 
-/* DRAG CUSTOM */
+/* DRAG */
 
 function setupDrag(el) {
   el.addEventListener("pointerdown", e => {
     if (el.classList.contains("locked")) return;
 
     dragged = el;
+    originZone = el.parentElement;
+
+    // 🧹 LIMPA IMEDIATAMENTE a zona de origem
+    if (originZone && originZone.classList.contains("dropzone")) {
+      originZone.classList.remove("correct", "wrong");
+    }
 
     const rect = el.getBoundingClientRect();
     offsetX = e.clientX - rect.left;
@@ -141,55 +147,39 @@ function setupGlobalDrag(dropzones, options, prog, demoId) {
     if (!dragged) return;
 
     const target = document.elementFromPoint(e.clientX, e.clientY);
-
-    const originZone = dragged.parentElement;
-    
     let placed = false;
 
- let placed = false;
+    dropzones.forEach(zone => {
+      if (zone.contains(target) && zone.children.length === 0) {
 
-dropzones.forEach(zone => {
-  if (zone.contains(target) && zone.children.length === 0) {
+        zone.appendChild(dragged);
 
-    zone.appendChild(dragged);
+        const correct = dragged.dataset.id === zone.dataset.expected;
 
-    const correct = dragged.dataset.id === zone.dataset.expected;
+        zone.classList.add(correct ? "correct" : "wrong");
 
-    zone.classList.add(correct ? "correct" : "wrong");
+        if (correct) dragged.classList.add("locked");
+        else prog.errors++;
 
-    if (correct) dragged.classList.add("locked");
-    else prog.errors++;
+        prog.positions[dragged.dataset.id] = zone.dataset.expected;
 
-    prog.positions[dragged.dataset.id] = zone.dataset.expected;
+        placed = true;
+      }
+    });
 
-    placed = true;
-  }
-});
-
-// 🧹 limpa zona de origem se ficou vazia
-if (originZone && originZone.classList.contains("dropzone")) {
-  if (originZone.children.length === 0) {
-    originZone.classList.remove("correct", "wrong");
-  }
-}
-    
-
-if (!placed && options.contains(target)) {
-  if (!dragged.classList.contains("locked")) {
-
-    const parentZone = dragged.parentElement;
-
-    options.appendChild(dragged);
-    delete prog.positions[dragged.dataset.id];
-
-    // 🧹 limpa marcação se a zona ficou vazia
-    if (parentZone && parentZone.classList.contains("dropzone")) {
-      if (parentZone.children.length === 0) {
-        parentZone.classList.remove("correct", "wrong");
+    if (!placed && options.contains(target)) {
+      if (!dragged.classList.contains("locked")) {
+        options.appendChild(dragged);
+        delete prog.positions[dragged.dataset.id];
       }
     }
-  }
-}
+
+    // 🧹 limpa origem se ficou vazia
+    if (originZone && originZone.classList.contains("dropzone")) {
+      if (originZone.children.length === 0) {
+        originZone.classList.remove("correct", "wrong");
+      }
+    }
 
     dragged.classList.remove("dragging");
     dragged.style.left = "";
@@ -199,6 +189,7 @@ if (!placed && options.contains(target)) {
     saveProgress(demoId, prog);
 
     dragged = null;
+    originZone = null;
 
     typeset();
   };
