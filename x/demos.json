@@ -19,5 +19,27 @@
       "Contradição.",
       "Logo, \\( \\sqrt{2} \\) é irracional."
     ]
+  },
+
+  {
+    "id": "primos_infinitos",
+    "title": "Existem infinitos números primos",
+    "initial": [
+      "<strong>Teorema.</strong> Existem infinitos números primos.",
+      "<strong>Demonstração.</strong> Suponha, por absurdo, que exista apenas uma quantidade finita de números primos.",
+      "Seja \\( p_1, p_2, \\ldots, p_n \\).",
+      "Considere \\( N = p_1 p_2 \\cdots p_n + 1 \\)."
+    ],
+    "blocks": [
+      "\\( N \\text{ não é divisível por nenhum dos } p_i \\)",
+      "\\( N \\text{ é primo ou composto} \\)",
+      "\\( N \\text{ possui um divisor primo } q \\)",
+      "\\( q \\notin \\{p_1,\\ldots,p_n\\} \\)",
+      "\\( \\text{Existe um primo fora da lista} \\)",
+      "\\( \\text{A hipótese de finitude é falsa} \\)"
+    ],
+    "final": [
+      "Isso contradiz a hipótese inicial, logo existem infinitos números primos."
+    ]
   }
 ]
