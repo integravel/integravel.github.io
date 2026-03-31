@@ -43,3 +43,14 @@ main {
 .options {
   margin-top: 20px;
 }
+
+
+.dropzone.correct {
+  border-bottom: 2px solid #4CAF50;
+  background: rgba(76, 175, 80, 0.08);
+}
+
+.dropzone.wrong {
+  border-bottom: 2px solid #E53935;
+  background: rgba(229, 57, 53, 0.08);
+}
