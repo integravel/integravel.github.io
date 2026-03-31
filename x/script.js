@@ -1,150 +1,165 @@
-document.addEventListener("DOMContentLoaded", () => {
+const app = document.getElementById("app");
 
-  const dropzones = document.querySelectorAll(".dropzone");
-  const returnZone = document.querySelector(".dropzone-return");
+let DATA = null;
+let current = null;
 
-  const pet = document.getElementById("pet");
-  const hand = document.getElementById("pet-hand");
-
-  const blocksData = [
-    { id: "1", tex: "\\( N \\text{ não é divisível por nenhum dos } p_i \\)" },
-    { id: "2", tex: "\\( N \\text{ é primo ou composto} \\)" },
-    { id: "3", tex: "\\( N \\text{ possui um divisor primo } q \\)" },
-    { id: "4", tex: "\\( q \\notin \\{p_1,\\ldots,p_n\\} \\)" },
-    { id: "5", tex: "\\( \\text{Existe um primo fora da lista} \\)" },
-    { id: "6", tex: "\\( \\text{A hipótese de finitude é falsa} \\)" }
-  ];
-
-  function shuffle(array) {
-    for (let i = array.length - 1; i > 0; i--) {
-      const j = Math.random() * (i + 1) | 0;
-      [array[i], array[j]] = [array[j], array[i]];
-    }
-  }
-
-  function createBlocks() {
-    returnZone.innerHTML = "";
-
-    const shuffled = [...blocksData];
-    shuffle(shuffled);
-
-    shuffled.forEach(data => {
-      const div = document.createElement("div");
-      div.className = "draggable";
-      div.dataset.id = data.id;
-      div.draggable = true;
-      div.innerHTML = data.tex;
-
-      enableDrag(div);
-      returnZone.appendChild(div);
-    });
-
-    if (window.MathJax) MathJax.typesetPromise();
-  }
-
-  function enableDrag(el) {
-    el.addEventListener("dragstart", e => {
-      e.dataTransfer.setData("text/plain", el.dataset.id);
-    });
-  }
-
-  createBlocks();
-
-  function checkIndividual() {
-    dropzones.forEach(zone => {
-      const esperado = zone.dataset.expected;
-      const child = zone.firstElementChild;
-
-      zone.classList.remove("correct", "wrong");
-
-      if (!child) return;
-
-      if (child.dataset.id === esperado) {
-        zone.classList.add("correct");
-      } else {
-        zone.classList.add("wrong");
-      }
-    });
-  }
-
-  dropzones.forEach(zone => {
-
-    zone.addEventListener("dragover", e => e.preventDefault());
-
-    zone.addEventListener("drop", e => {
-      e.preventDefault();
-
-      if (zone.children.length > 0) return;
-
-      const id = e.dataTransfer.getData("text/plain");
-      const block = document.querySelector(`.draggable[data-id="${id}"]`);
-      if (!block) return;
-
-      zone.appendChild(block);
-
-      if (window.MathJax) MathJax.typesetPromise();
-
-      if (id === zone.dataset.expected) onCorrect();
-      else onWrong();
-
-      checkIndividual();
-    });
+fetch("data.json")
+  .then(r => r.json())
+  .then(json => {
+    DATA = json.demonstracoes;
+    renderLista();
   });
 
-  returnZone.addEventListener("dragover", e => e.preventDefault());
+/* =========================
+   STORAGE
+========================= */
 
-  returnZone.addEventListener("drop", e => {
+function getState(id) {
+  return JSON.parse(localStorage.getItem("demo_" + id)) || {
+    acertos: {},
+    erros: 0
+  };
+}
+
+function saveState(id, state) {
+  localStorage.setItem("demo_" + id, JSON.stringify(state));
+}
+
+/* =========================
+   LISTA
+========================= */
+
+function renderLista() {
+  app.innerHTML = "<h2>Demonstrações</h2>";
+
+  DATA.forEach(d => {
+    const state = getState(d.id);
+    const total = d.blocos.length;
+    const feitos = Object.keys(state.acertos).length;
+
+    const div = document.createElement("div");
+    div.className = "card";
+
+    div.innerHTML = `
+      <strong>${d.titulo}</strong><br>
+      <span class="badge">
+        ${feitos}/${total} completos | erros: ${state.erros}
+      </span>
+    `;
+
+    div.onclick = () => abrirDemo(d.id);
+
+    app.appendChild(div);
+  });
+}
+
+/* =========================
+   DEMONSTRAÇÃO
+========================= */
+
+function abrirDemo(id) {
+  current = DATA.find(d => d.id === id);
+  const state = getState(id);
+
+  app.innerHTML = `
+    <div class="back">← voltar</div>
+    <p><strong>Teorema.</strong> ${current.enunciado}</p>
+  `;
+
+  document.querySelector(".back").onclick = renderLista;
+
+  current.inicio.forEach(l => {
+    app.innerHTML += `<p class="line">${l}</p>`;
+  });
+
+  current.blocos.forEach((b, i) => {
+    const zone = document.createElement("div");
+    zone.className = "line dropzone";
+    zone.dataset.expected = b.id;
+
+    if (state.acertos[b.id]) {
+      zone.classList.add("locked");
+      zone.innerHTML = b.tex;
+    }
+
+    enableDrop(zone, state);
+    app.appendChild(zone);
+  });
+
+  current.fim.forEach(l => {
+    app.innerHTML += `<p class="line">${l}</p>`;
+  });
+
+  const options = document.createElement("div");
+  options.className = "options";
+  app.appendChild(options);
+
+  const livres = current.blocos.filter(b => !state.acertos[b.id]);
+  shuffle(livres);
+
+  livres.forEach(b => {
+    const el = createBlock(b);
+    options.appendChild(el);
+  });
+
+  MathJax.typesetPromise();
+}
+
+/* =========================
+   DRAG & DROP
+========================= */
+
+function createBlock(data) {
+  const div = document.createElement("div");
+  div.className = "draggable";
+  div.draggable = true;
+  div.dataset.id = data.id;
+  div.innerHTML = data.tex;
+
+  div.addEventListener("dragstart", e => {
+    e.dataTransfer.setData("id", data.id);
+  });
+
+  return div;
+}
+
+function enableDrop(zone, state) {
+  zone.addEventListener("dragover", e => e.preventDefault());
+
+  zone.addEventListener("drop", e => {
     e.preventDefault();
 
-    const id = e.dataTransfer.getData("text/plain");
-    const block = document.querySelector(`.draggable[data-id="${id}"]`);
-    if (!block) return;
+    if (zone.classList.contains("locked")) return;
 
-    returnZone.appendChild(block);
+    const id = e.dataTransfer.getData("id");
 
-    if (window.MathJax) MathJax.typesetPromise();
+    if (id === zone.dataset.expected) {
+      const bloco = current.blocos.find(b => b.id === id);
 
-    checkIndividual();
+      zone.innerHTML = bloco.tex;
+      zone.classList.add("locked");
+
+      state.acertos[id] = true;
+      saveState(current.id, state);
+
+      document.querySelector(`.draggable[data-id="${id}"]`)?.remove();
+
+    } else {
+      state.erros++;
+      saveState(current.id, state);
+    }
+
+    MathJax.typesetPromise();
   });
+}
 
-  let reacting = false;
+/* =========================
+   UTIL
+========================= */
 
-  function react(sprite, handSprite, className) {
-    if (reacting) return;
-    reacting = true;
-
-    const img1 = new Image();
-    const img2 = new Image();
-
-    img1.src = sprite;
-    img2.src = handSprite;
-
-    img1.onload = () => {
-      pet.src = img1.src;
-      hand.src = img2.src;
-
-      pet.classList.remove("pet-happy", "pet-angry");
-
-      requestAnimationFrame(() => {
-        pet.classList.add(className);
-        hand.style.opacity = 1;
-      });
-
-      setTimeout(() => {
-        hand.style.opacity = 0;
-        pet.classList.remove(className);
-        pet.src = "cat_idle.png";
-        reacting = false;
-      }, 700);
-    };
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.random() * (i + 1) | 0;
+    [arr[i], arr[j]] = [arr[j], arr[i]];
   }
-
-  function onCorrect() {
-    react("cat_happy.png", "hand_pet.png", "pet-happy");
-  }
-
-  function onWrong() {
-    react("cat_angry.png", "hand_grab.png", "pet-angry");
-  }
-
-});
+}
