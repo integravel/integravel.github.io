@@ -80,3 +80,12 @@ main {
   cursor: pointer;
   color: var(--roxo);
 }
+
+.draggable {
+  user-select: none;
+  -webkit-user-drag: element;
+}
+
+.options, .dropzone {
+  user-select: none;
+}
