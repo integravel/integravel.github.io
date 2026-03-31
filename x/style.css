@@ -1,26 +1,68 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Laboratório Integrável</title>
+:root {
+  --roxo: #9C59D1;
+  --preto: #2C2C2C;
+}
 
-  <script>
-    window.MathJax = {
-      tex: { inlineMath: [['\\(', '\\)']] },
-      chtml: { mtextInheritFont: true }
-    };
-  </script>
+body {
+  margin: 0;
+  font-family: "Nunito", sans-serif;
+  color: var(--preto);
+}
 
-  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+.hidden {
+  display: none;
+}
 
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
+main {
+  max-width: 900px;
+  margin: auto;
+  padding: 20px;
+}
 
-<main id="app"></main>
+/* LISTA */
+.item {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
+  cursor: pointer;
+}
 
-<script src="script.js"></script>
-</body>
-</html>
+.item:hover {
+  background: #f5f5f5;
+}
+
+/* TEXTO */
+.line {
+  margin: 8px 0;
+  min-height: 2em;
+}
+
+/* DROP */
+.dropzone {
+  border-bottom: 1px dotted var(--roxo);
+  min-height: 2em;
+}
+
+.correct {
+  border-bottom: 2px solid #4CAF50;
+}
+
+.wrong {
+  border-bottom: 2px solid #E53935;
+}
+
+/* BLOCOS */
+.options {
+  margin-top: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.draggable {
+  background: rgba(156, 89, 209, 0.1);
+  border-radius: 20px;
+  padding: 6px 10px;
+  cursor: grab;
+}
