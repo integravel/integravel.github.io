@@ -65,13 +65,16 @@ function openDemo(id) {
 
   const dropzones = [];
 
-  currentDemo.blocks.forEach((_, i) => {
+  // ✅ AGORA TOTALMENTE DINÂMICO
+  const total = currentDemo.blocks.length;
+
+  for (let i = 0; i < total; i++) {
     const dz = document.createElement("div");
     dz.className = "line dropzone";
-    dz.dataset.expected = i + 1;
+    dz.dataset.expected = String(i + 1);
     app.appendChild(dz);
     dropzones.push(dz);
-  });
+  }
 
   currentDemo.final.forEach(addLine);
 
@@ -100,7 +103,7 @@ function createBlocks(container) {
   const shuffled = [...currentDemo.blocks].sort(() => Math.random() - 0.5);
 
   shuffled.forEach(b => {
-    const id = currentDemo.blocks.indexOf(b) + 1;
+    const id = String(currentDemo.blocks.indexOf(b) + 1);
 
     const el = document.createElement("div");
     el.className = "draggable";
@@ -121,7 +124,7 @@ function setupDrag(el) {
     dragged = el;
     originZone = el.parentElement;
 
-    // 🧹 LIMPA IMEDIATAMENTE a zona de origem
+    // limpa visual imediatamente
     if (originZone && originZone.classList.contains("dropzone")) {
       originZone.classList.remove("correct", "wrong");
     }
@@ -174,7 +177,7 @@ function setupGlobalDrag(dropzones, options, prog, demoId) {
       }
     }
 
-    // 🧹 limpa origem se ficou vazia
+    // limpa zona de origem se ficou vazia
     if (originZone && originZone.classList.contains("dropzone")) {
       if (originZone.children.length === 0) {
         originZone.classList.remove("correct", "wrong");
@@ -202,9 +205,11 @@ function restore(dropzones, options, prog) {
     const el = document.querySelector(`[data-id="${id}"]`);
     const zone = dropzones[pos - 1];
 
+    if (!el || !zone) return;
+
     zone.appendChild(el);
 
-    if (id == zone.dataset.expected) {
+    if (id === zone.dataset.expected) {
       zone.classList.add("correct");
       el.classList.add("locked");
     } else {
