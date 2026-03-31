@@ -1,82 +1,218 @@
-:root {
-  --preto: #2C2C2C;
-  --roxo: #9C59D1;
+const app = document.getElementById("app");
+
+let DEMOS = [];
+let currentDemo = null;
+
+init();
+
+async function init() {
+  const res = await fetch("demos.json");
+  DEMOS = await res.json();
+  renderList();
 }
 
-body {
-  margin: 0;
-  font-family: "Nunito", "Inter", sans-serif;
-  color: var(--preto);
+/* =========================
+   STORAGE
+========================= */
+
+function getProgress(id) {
+  return JSON.parse(localStorage.getItem("demo_" + id)) || {
+    positions: {},
+    errors: 0,
+    done: false
+  };
 }
 
-mjx-container {
-  font-family: inherit !important;
+function saveProgress(id, data) {
+  localStorage.setItem("demo_" + id, JSON.stringify(data));
 }
 
-main {
-  max-width: 900px;
-  margin: 0 auto;
-  padding: 1.6rem 16px 80px;
+/* =========================
+   LISTA
+========================= */
+
+function renderList() {
+  app.innerHTML = "<h2>Demonstrações</h2>";
+
+  DEMOS.forEach(demo => {
+    const prog = getProgress(demo.id);
+
+    const div = document.createElement("div");
+    div.className = "demo-item" + (prog.done ? " done" : "");
+
+    div.innerHTML = `
+      <strong>${demo.title}</strong><br>
+      Erros: ${prog.errors}
+    `;
+
+    div.onclick = () => openDemo(demo.id);
+
+    app.appendChild(div);
+  });
 }
 
-/* LISTA */
-.demo-item {
-  padding: 12px;
-  border: 1px solid #ddd;
-  border-radius: 10px;
-  margin-bottom: 10px;
-  cursor: pointer;
+/* =========================
+   DEMONSTRAÇÃO
+========================= */
+
+function openDemo(id) {
+  currentDemo = DEMOS.find(d => d.id === id);
+  const prog = getProgress(id);
+
+  app.innerHTML = "";
+
+  const back = document.createElement("div");
+  back.className = "back-btn";
+  back.textContent = "← Voltar";
+  back.onclick = renderList;
+
+  app.appendChild(back);
+
+  currentDemo.initial.forEach(t => addLine(t));
+
+  const dropzones = [];
+
+  currentDemo.blocks.forEach((_, i) => {
+    const dz = document.createElement("div");
+    dz.className = "line dropzone";
+    dz.dataset.expected = i + 1;
+    app.appendChild(dz);
+    dropzones.push(dz);
+  });
+
+  currentDemo.final.forEach(t => addLine(t));
+
+  const options = document.createElement("div");
+  options.className = "options";
+  app.appendChild(options);
+
+  createBlocks(options, prog);
+
+  enableDrop(dropzones, options, prog, id);
+
+  restorePositions(dropzones, options, prog);
+
+  if (window.MathJax) MathJax.typesetPromise();
 }
 
-.demo-item.done {
-  border-color: #4CAF50;
+function addLine(tex) {
+  const p = document.createElement("p");
+  p.className = "line";
+  p.innerHTML = tex;
+  app.appendChild(p);
 }
 
-/* TEXTO */
-.line {
-  margin: 0.4rem 0;
-  min-height: 2em;
+/* =========================
+   BLOCOS
+========================= */
+
+function createBlocks(container, prog) {
+  const shuffled = [...currentDemo.blocks]
+    .sort(() => Math.random() - 0.5);
+
+  shuffled.forEach((b, i) => {
+    const div = document.createElement("div");
+    div.className = "draggable";
+    div.dataset.id = i + 1;
+    div.innerHTML = b;
+
+    enableDrag(div);
+    container.appendChild(div);
+  });
 }
 
-/* DROP */
-.dropzone {
-  border-bottom: 1px dotted rgba(156, 89, 209, 0.6);
-  min-height: 2.2em;
-  display: flex;
-  align-items: center;
+function enableDrag(el) {
+  el.addEventListener("dragstart", e => {
+    if (el.classList.contains("locked")) return e.preventDefault();
+    e.dataTransfer.setData("id", el.dataset.id);
+  });
 }
 
-.dropzone.correct {
-  border-bottom: 2px solid #4CAF50;
+/* =========================
+   DROP + LÓGICA
+========================= */
+
+function enableDrop(dropzones, options, prog, id) {
+
+  dropzones.forEach(zone => {
+
+    zone.addEventListener("dragover", e => e.preventDefault());
+
+    zone.addEventListener("drop", e => {
+      e.preventDefault();
+
+      if (zone.children.length > 0) return;
+
+      const idBlock = e.dataTransfer.getData("id");
+      const block = document.querySelector(`[data-id="${idBlock}"]`);
+
+      zone.appendChild(block);
+
+      const correct = idBlock === zone.dataset.expected;
+
+      zone.classList.add(correct ? "correct" : "wrong");
+
+      if (correct) {
+        block.classList.add("locked");
+      } else {
+        prog.errors++;
+      }
+
+      prog.positions[idBlock] = zone.dataset.expected;
+      checkCompletion(dropzones, prog);
+
+      saveProgress(id, prog);
+    });
+  });
+
+  options.addEventListener("dragover", e => e.preventDefault());
+
+  options.addEventListener("drop", e => {
+    e.preventDefault();
+
+    const idBlock = e.dataTransfer.getData("id");
+    const block = document.querySelector(`[data-id="${idBlock}"]`);
+
+    if (block.classList.contains("locked")) return;
+
+    options.appendChild(block);
+    delete prog.positions[idBlock];
+
+    saveProgress(id, prog);
+  });
 }
 
-.dropzone.wrong {
-  border-bottom: 2px solid #E53935;
+/* =========================
+   RESTAURAR
+========================= */
+
+function restorePositions(dropzones, options, prog) {
+  Object.entries(prog.positions).forEach(([id, pos]) => {
+    const block = document.querySelector(`[data-id="${id}"]`);
+    const zone = dropzones[pos - 1];
+
+    zone.appendChild(block);
+
+    if (id == zone.dataset.expected) {
+      zone.classList.add("correct");
+      block.classList.add("locked");
+    } else {
+      zone.classList.add("wrong");
+    }
+  });
 }
 
-/* BLOCOS */
-.options {
-  margin-top: 1.5rem;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.6rem;
-}
+/* =========================
+   COMPLETO
+========================= */
 
-.draggable {
-  background: rgba(156, 89, 209, 0.08);
-  border-radius: 999px;
-  padding: 0.4rem 0.8rem;
-  cursor: grab;
-}
+function checkCompletion(dropzones, prog) {
+  const allCorrect = dropzones.every(z => {
+    const child = z.firstChild;
+    return child && child.dataset.id === z.dataset.expected;
+  });
 
-.locked {
-  opacity: 0.6;
-  cursor: default;
-}
-
-/* BOTÃO */
-.back-btn {
-  margin-bottom: 16px;
-  cursor: pointer;
-  color: var(--roxo);
+  if (allCorrect) {
+    prog.done = true;
+  }
 }
