@@ -223,3 +223,8 @@ function shuffle(arr) {
 function typeset() {
   if (window.MathJax) MathJax.typesetPromise();
 }
+
+.draggable.locked {
+  cursor: default;
+  opacity: 0.7;
+}
