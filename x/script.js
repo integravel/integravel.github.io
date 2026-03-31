@@ -11,9 +11,14 @@ let originZone = null;
 init();
 
 async function init() {
-  const res = await fetch("demos.json");
-  DEMOS = await res.json();
-  renderList();
+  try {
+    const res = await fetch("demos.json");
+    DEMOS = await res.json();
+    renderList();
+  } catch (e) {
+    app.innerHTML = "<p>Erro ao carregar o JSON.</p>";
+    console.error(e);
+  }
 }
 
 /* STORAGE */
@@ -40,7 +45,7 @@ function renderList() {
 
     const el = document.createElement("div");
     el.className = "demo-item" + (prog.done ? " done" : "");
-    el.innerHTML = `<strong>${d.title}</strong><br>Erros: ${prog.errors}`;
+    el.innerHTML = `<strong>${d.title}</strong>`;
     el.onclick = () => openDemo(d.id);
 
     app.appendChild(el);
@@ -65,7 +70,6 @@ function openDemo(id) {
 
   const dropzones = [];
 
-  // ✅ AGORA TOTALMENTE DINÂMICO
   const total = currentDemo.blocks.length;
 
   for (let i = 0; i < total; i++) {
@@ -102,8 +106,8 @@ function addLine(tex) {
 function createBlocks(container) {
   const shuffled = [...currentDemo.blocks].sort(() => Math.random() - 0.5);
 
-  shuffled.forEach(b => {
-    const id = String(currentDemo.blocks.indexOf(b) + 1);
+  shuffled.forEach((b, index) => {
+    const id = String(index + 1);
 
     const el = document.createElement("div");
     el.className = "draggable";
@@ -124,7 +128,6 @@ function setupDrag(el) {
     dragged = el;
     originZone = el.parentElement;
 
-    // limpa visual imediatamente
     if (originZone && originZone.classList.contains("dropzone")) {
       originZone.classList.remove("correct", "wrong");
     }
@@ -177,7 +180,6 @@ function setupGlobalDrag(dropzones, options, prog, demoId) {
       }
     }
 
-    // limpa zona de origem se ficou vazia
     if (originZone && originZone.classList.contains("dropzone")) {
       if (originZone.children.length === 0) {
         originZone.classList.remove("correct", "wrong");
