@@ -1,22 +1,16 @@
 :root {
-  --preto: #2C2C2C;
   --roxo: #9C59D1;
 }
 
 body {
   margin: 0;
-  font-family: "Nunito", "Inter", sans-serif;
-  color: var(--preto);
-}
-
-mjx-container {
-  font-family: inherit !important;
+  font-family: "Nunito", sans-serif;
 }
 
 main {
   max-width: 900px;
-  margin: 0 auto;
-  padding: 1.6rem 16px 80px;
+  margin: auto;
+  padding: 20px;
 }
 
 /* LISTA */
@@ -34,16 +28,14 @@ main {
 
 /* TEXTO */
 .line {
-  margin: 0.4rem 0;
+  margin: 6px 0;
   min-height: 2em;
 }
 
 /* DROP */
 .dropzone {
-  border-bottom: 1px dotted rgba(156, 89, 209, 0.6);
+  border-bottom: 1px dotted var(--roxo);
   min-height: 2.2em;
-  display: flex;
-  align-items: center;
 }
 
 .dropzone.correct {
@@ -56,22 +48,35 @@ main {
 
 /* BLOCOS */
 .options {
-  margin-top: 1.5rem;
+  margin-top: 20px;
   display: flex;
   flex-wrap: wrap;
-  gap: 0.6rem;
+  gap: 8px;
 }
 
 .draggable {
-  background: rgba(156, 89, 209, 0.08);
+  background: rgba(156, 89, 209, 0.1);
+  padding: 6px 10px;
   border-radius: 999px;
-  padding: 0.4rem 0.8rem;
   cursor: grab;
+
+  user-select: none;
+  touch-action: none;
+
+  position: relative;
 }
 
 .locked {
-  opacity: 0.6;
+  opacity: 0.5;
   cursor: default;
+}
+
+/* DRAG ATIVO */
+.dragging {
+  position: fixed;
+  z-index: 9999;
+  pointer-events: none;
+  transform: scale(1.05);
 }
 
 /* BOTÃO */
@@ -79,13 +84,4 @@ main {
   margin-bottom: 16px;
   cursor: pointer;
   color: var(--roxo);
-}
-
-.draggable {
-  user-select: none;
-  -webkit-user-drag: element;
-}
-
-.options, .dropzone {
-  user-select: none;
 }
