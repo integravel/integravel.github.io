@@ -175,6 +175,28 @@
   "final": [
     "Logo, \\(\\log_b(x) = \\frac{\\log_a(x)}{\\log_a(b)}\\)."
   ]
+},
+
+
+{
+  "id": "bhaskara",
+  "title": "Fórmula de Bhaskara",
+  "initial": [
+    "<strong>Teorema.</strong> As soluções de \\(ax^2 + bx + c = 0\\), com \\(a \\neq 0\\), são \\(x = \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}\\).",
+    "<strong>Demonstração.</strong> Considere a equação \\(ax^2 + bx + c = 0\\).",
+    "Dividindo por \\(a\\): \\(x^2 + \\frac{b}{a}x + \\frac{c}{a} = 0\\)."
+  ],
+  "blocks": [
+    "Isolando o termo constante: \\(x^2 + \\frac{b}{a}x = -\\frac{c}{a}\\).",
+    "Completando o quadrado: somamos \\(\\left(\\frac{b}{2a}\\right)^2\\) aos dois lados.",
+    "\\(x^2 + \\frac{b}{a}x + \\left(\\frac{b}{2a}\\right)^2 = -\\frac{c}{a} + \\left(\\frac{b}{2a}\\right)^2\\).",
+    "O lado esquerdo torna-se \\(\\left(x + \\frac{b}{2a}\\right)^2\\).",
+    "Simplificando o lado direito: \\(\\frac{b^2 - 4ac}{4a^2}\\).",
+    "Extraindo a raiz: \\(x + \\frac{b}{2a} = \\pm \\frac{\\sqrt{b^2 - 4ac}}{2a}\\)."
+  ],
+  "final": [
+    "Isolando \\(x\\), obtemos \\(x = \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}\\)."
+  ]
 }
 
 
