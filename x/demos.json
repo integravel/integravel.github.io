@@ -197,6 +197,28 @@
   "final": [
     "Isolando \\(x\\), obtemos \\(x = \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}\\)."
   ]
+},
+
+
+{
+  "id": "soma_produto",
+  "title": "Soma e produto das raízes",
+  "initial": [
+    "<strong>Teorema.</strong> Se \\(x_1\\) e \\(x_2\\) são raízes de \\(ax^2 + bx + c = 0\\), com \\(a \\neq 0\\), então \\(x_1 + x_2 = -\\frac{b}{a}\\) e \\(x_1 x_2 = \\frac{c}{a}\\).",
+    "<strong>Demonstração.</strong> Seja \\(ax^2 + bx + c = 0\\).",
+    "Se \\(x_1\\) e \\(x_2\\) são raízes, então \\(a(x - x_1)(x - x_2) = 0\\)."
+  ],
+  "blocks": [
+    "Expandindo: \\(a(x^2 - (x_1 + x_2)x + x_1 x_2) = 0\\).",
+    "Distribuindo \\(a\\): \\(ax^2 - a(x_1 + x_2)x + a x_1 x_2 = 0\\).",
+    "Comparando com \\(ax^2 + bx + c = 0\\).",
+    "Identificamos os coeficientes correspondentes.",
+    "\\(-a(x_1 + x_2) = b\\).",
+    "\\(a x_1 x_2 = c\\)."
+  ],
+  "final": [
+    "Logo, \\(x_1 + x_2 = -\\frac{b}{a}\\) e \\(x_1 x_2 = \\frac{c}{a}\\)."
+  ]
 }
 
 
