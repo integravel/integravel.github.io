@@ -1,0 +1,58 @@
+{
+  "levels": [
+    {
+      "rows": 2,
+      "columns": 4,
+      "jars": [
+        {
+          "type": "transparent",
+          "count": 3
+        },
+        {
+          "type": "opaque",
+          "count": 2
+        },
+        {
+          "type": "transparent",
+          "count": 3
+        }
+      ]
+    },
+    {
+      "rows": 3,
+      "columns": 4,
+      "jars": [
+        {
+          "type": "opaque",
+          "count": 5
+        },
+        {
+          "type": "transparent",
+          "count": 4
+        },
+        {
+          "type": "opaque",
+          "count": 2
+        }
+      ]
+    },
+    {
+      "rows": 4,
+      "columns": 5,
+      "jars": [
+        {
+          "type": "transparent",
+          "count": 6
+        },
+        {
+          "type": "opaque",
+          "count": 9
+        },
+        {
+          "type": "transparent",
+          "count": 8
+        }
+      ]
+    }
+  ]
+}
