@@ -1,51 +1,71 @@
-const board = document.getElementById("board");
-  e.preventDefault();
+async function loadPhase() {
+  const response = await fetch("fase.json");
+  const data = await response.json();
 
-  const index = Number(e.dataTransfer.getData("jar"));
-  const jar = jarArea.children[index];
+  createBoard(data.rows, data.cols);
+  createJars(data.jars);
+}
 
-  if (jar.classList.contains("used")) return;
+function createBoard(rows, cols) {
+  const board = document.getElementById("board");
 
-  jar.classList.add("used");
+  board.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
 
-  const amount = levels[currentLevel].jars[index].count;
-  const freeCells = [...document.querySelectorAll(".cell:not(.filled)")];
+  const total = rows * cols;
 
-  for (let i = 0; i < amount; i++) {
-    if (i < freeCells.length) {
-      freeCells[i].classList.add("filled");
-      freeCells[i].style.setProperty("--rot", `${Math.random() * 30 - 15}deg`);
-    } else {
-      errors++;
-    }
+  for (let i = 0; i < total; i++) {
+    const cell = document.createElement("div");
+    cell.className = "cell";
+
+    cell.addEventListener("dragover", (event) => {
+      event.preventDefault();
+      cell.classList.add("drop-target");
+    });
+
+    cell.addEventListener("dragleave", () => {
+      cell.classList.remove("drop-target");
+    });
+
+    cell.addEventListener("drop", (event) => {
+      event.preventDefault();
+      cell.classList.remove("drop-target");
+
+      if (cell.textContent !== "") return;
+
+      const jarId = event.dataTransfer.getData("text/plain");
+      const jar = document.getElementById(jarId);
+
+      const quantity = Number(jar.dataset.amount);
+
+      cell.textContent = "🐞".repeat(quantity);
+      jar.classList.add("used");
+    });
+
+    board.appendChild(cell);
   }
+}
 
-  errorCount.textContent = errors;
+function createJars(jars) {
+  const jarArea = document.getElementById("jarArea");
 
-  const allUsed = [...document.querySelectorAll(".jar")].every(j => j.classList.contains("used"));
+  jars.forEach((amount, index) => {
+    const jar = document.createElement("div");
+    jar.className = "jar";
+    jar.id = `jar-${index}`;
+    jar.draggable = true;
+    jar.dataset.amount = amount;
 
-  if (allUsed) {
-    const remaining = document.querySelectorAll(".cell:not(.filled)").length;
+    jar.innerHTML = `
+      <div class="jar-top">${amount}</div>
+      <div class="jar-body">🐞</div>
+    `;
 
-    if (remaining === 0) {
-      message.textContent = "✅ Quadro completo!";
-      message.style.color = "green";
-    } else {
-      message.textContent = `⚠️ Ainda faltam ${remaining} espaços.`;
-      message.style.color = "#b57a00";
-    }
+    jar.addEventListener("dragstart", (event) => {
+      event.dataTransfer.setData("text/plain", jar.id);
+    });
 
-    if (currentLevel < levels.length - 1) {
-      nextButton.hidden = false;
-    } else {
-      nextButton.hidden = false;
-      nextButton.textContent = `Fim do jogo! Erros totais: ${errors}`;
-      nextButton.disabled = true;
-    }
-  }
-});
+    jarArea.appendChild(jar);
+  });
+}
 
-nextButton.addEventListener("click", () => {
-  currentLevel++;
-  loadLevel();
-});
+loadPhase();
