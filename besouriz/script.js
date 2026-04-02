@@ -1,52 +1,4 @@
 let totalCells = 0;
-  const board = document.getElementById("board");
-
-  board.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
-
-  const total = rows * cols;
-
-  for (let i = 0; i < total; i++) {
-    const cell = document.createElement("div");
-    cell.className = "cell";
-
-    cell.addEventListener("dragover", (event) => {
-      event.preventDefault();
-      cell.classList.add("drop-target");
-    });
-
-    cell.addEventListener("dragleave", () => {
-      cell.classList.remove("drop-target");
-    });
-
-    cell.addEventListener("drop", (event) => {
-      event.preventDefault();
-      cell.classList.remove("drop-target");
-
-      if (cell.textContent !== "") return;
-
-      const jarId = event.dataTransfer.getData("text/plain");
-      const jar = document.getElementById(jarId);
-
-      const quantity = Number(jar.dataset.amount);
-
-      cell.textContent = "🐞".repeat(quantity);
-      jar.classList.add("used");
-    });
-
-    board.appendChild(cell);
-  }
-}
-
-function createJars(jars) {
-  const jarArea = document.getElementById("jarArea");
-
-  jars.forEach((amount, index) => {
-    const jar = document.createElement("div");
-    jar.className = "jar";
-    jar.id = `jar-${index}`;
-    jar.draggable = true;
-    jar.dataset.amount = amount;
-
     jar.innerHTML = `
       <div class="jar-top">${amount}</div>
       <div class="jar-body">🐞</div>
@@ -60,4 +12,62 @@ function createJars(jars) {
   });
 }
 
-loadPhase();
+function handleDrop(event) {
+  event.preventDefault();
+  event.currentTarget.classList.remove("drop-target");
+
+  const jarId = event.dataTransfer.getData("text/plain");
+  const jar = document.getElementById(jarId);
+
+  if (!jar || jar.classList.contains("used")) {
+    return;
+  }
+
+  const amount = Number(jar.dataset.amount);
+
+  const emptyCells = [...document.querySelectorAll(".cell")].filter(
+    (cell) => cell.dataset.filled === "false"
+  );
+
+  const placed = Math.min(amount, emptyCells.length);
+  const leftover = amount - placed;
+
+  for (let i = 0; i < placed; i++) {
+    emptyCells[i].textContent = "🐞";
+    emptyCells[i].dataset.filled = "true";
+    filledCells++;
+  }
+
+  overflowErrors += leftover;
+
+  jar.classList.add("used");
+
+  if (filledCells === totalCells) {
+    setTimeout(() => {
+      if (overflowErrors === 0) {
+        alert(`Fase ${currentPhase + 1} concluída sem erros!`);
+      } else {
+        alert(
+          `Fase ${currentPhase + 1} concluída com ${overflowErrors} besouro(s) sobrando.`
+        );
+      }
+
+      if (currentPhase < phases.length - 1) {
+        startPhase(currentPhase + 1);
+      } else {
+        alert("Você terminou todas as fases!");
+      }
+    }, 150);
+  }
+}
+
+function shuffle(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+
+  return array;
+}
+
+loadPhases();
