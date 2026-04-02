@@ -3,27 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Quadro Entomológico</title>
+  <title>BesouriZ</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="game">
-    <h1>🪲 Quadro Entomológico</h1>
+  <main class="app">
+    <section class="board-section">
+      <div id="board" class="board"></div>
+    </section>
 
-    <div class="hud">
-      <div>Nível: <span id="level-number">1</span></div>
-      <div>Erros: <span id="error-count">0</span></div>
-    </div>
-
-    <div id="board"></div>
-
-    <div id="message"></div>
-
-    <h2>Jarros</h2>
-    <div id="jar-area"></div>
-
-    <button id="next-button" hidden>Próximo nível</button>
-  </div>
+    <section class="jar-section">
+      <div id="jarArea" class="jar-area"></div>
+    </section>
+  </main>
 
   <script src="script.js"></script>
 </body>
