@@ -123,3 +123,8 @@ body {
     width: 48px;
   }
 }
+
+
+.board.drop-target {
+  outline: 3px dashed #ff9800;
+}
