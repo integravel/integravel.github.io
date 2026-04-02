@@ -1,64 +1,54 @@
-* {
-  width: 110px;
-  height: 150px;
-  position: relative;
-  cursor: grab;
-  user-select: none;
+body {
 }
 
 .jar.used {
-  opacity: 0.35;
+  opacity: 0.3;
   pointer-events: none;
 }
 
 .lid {
-  width: 90px;
+  width: 100px;
   height: 24px;
-  background: #654321;
-  border-radius: 8px 8px 4px 4px;
-  margin: 0 auto;
+  margin: auto;
+  background: #7b522c;
+  border-radius: 10px 10px 4px 4px;
   color: white;
   display: flex;
-  align-items: center;
   justify-content: center;
+  align-items: center;
   font-weight: bold;
 }
 
 .jar-body {
   width: 90px;
-  height: 110px;
-  margin: 0 auto;
-  border: 3px solid #555;
+  height: 120px;
+  margin: auto;
   border-radius: 0 0 18px 18px;
+  border: 4px solid #555;
   position: relative;
   overflow: hidden;
 }
 
-.jar.transparent .jar-body {
-  background: rgba(180, 230, 255, 0.45);
+.transparent .jar-body {
+  background: rgba(170, 220, 255, 0.5);
 }
 
-.jar.opaque .jar-body {
-  background: #8ca3b5;
+.opaque .jar-body {
+  background: #8296a8;
 }
 
-.bug-preview {
+.preview-bug {
   position: absolute;
-  font-size: 18px;
+  font-size: 20px;
 }
 
 #next-button {
   display: block;
-  margin: 30px auto 0;
-  padding: 12px 26px;
-  font-size: 18px;
+  margin: 30px auto;
+  padding: 12px 24px;
   border: none;
   border-radius: 10px;
-  background: #3e8e41;
+  background: #3a8c41;
   color: white;
-  cursor: pointer;
-}
-
-#next-button:hover {
-  background: #2e7031;
+  font-size: 18px;
 }
