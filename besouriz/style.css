@@ -19,7 +19,7 @@ body {
   display: flex;
   flex-direction: column;
   padding: 16px;
-  gap: 24px;
+  gap: 12px;
 }
 
 .board-section {
@@ -48,7 +48,7 @@ body {
 }
 
 .jar-section {
-  margin-top: auto;
+  margin-top: 8px;
 }
 
 .jar-area {
