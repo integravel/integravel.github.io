@@ -66,9 +66,8 @@ bpmInput.oninput = () => {
   bpmValue.innerText = bpm;
 };
 
-// velocidade baseada no BPM
 function getSpeed(){
-  return bpm / 45; // ajuste fino
+  return bpm / 45;
 }
 
 // ===== CONFIG =====
@@ -301,9 +300,9 @@ function drawStaff(){
     ctx.stroke();
   }
 
-  // 🎼 CLAVE CORRIGIDA (ponto central na 2ª linha)
+  // 🎼 CLAVE DESCIDA UMA LINHA (CORREÇÃO)
   ctx.font = "120px serif";
-  ctx.fillText("𝄞", 70, mid + space);
+  ctx.fillText("𝄞", 70, mid + 2*space - 8);
 }
 
 function drawNote(n,color){
