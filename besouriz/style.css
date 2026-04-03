@@ -1,215 +1,77 @@
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-  font-family: "Georgia", serif;
-}
-
 body {
+  font-family: sans-serif;
   background: #f4f1ea;
-  min-height: 100vh;
-  display: flex;
-  justify-content: center;
-}
-
-.app {
-  width: 100%;
-  max-width: 700px;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  padding: 16px;
-  gap: 16px;
-}
-
-/* BOARD */
-
-.board {
-  display: grid;
-  gap: 6px;
-  background: #d8d2c2;
-  padding: 10px;
-  border-radius: 12px;
-  box-shadow: inset 0 0 0 2px #b8b09f;
-}
-
-.cell {
-  width: 54px;
-  height: 54px;
-  background: #fffdf8;
-  border-radius: 6px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 24px;
-
-  transition: transform 0.2s, background 0.2s;
-}
-
-.cell:hover {
-  background: #f3efe6;
-  transform: scale(1.05);
-}
-
-/* JARS */
-
-.jar-area {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
-  gap: 18px;
-}
-
-.jar {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  cursor: grab;
-  user-select: none;
-
-  transition: transform 0.2s ease;
-}
-
-.jar:hover {
-  transform: scale(1.08);
-}
-
-.jar.dragging {
-  opacity: 0.7;
-  transform: scale(1.15);
-}
-
-.jar-top {
-  width: 56px;
-  height: 24px;
-  border-radius: 999px;
-  background: #eae6dc;
-  border: 2px solid #8c8370;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-weight: bold;
-  color: #5f5747;
-}
-
-.jar-body {
-  width: 72px;
-  height: 95px;
-  margin-top: -6px;
-  border-radius: 0 0 14px 14px;
-  background: #c9c1ae;
-  border: 2px solid #8c8370;
-
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 2px;
-  padding: 6px;
-}
-
-/* besouros dentro do pote */
-.jar-body span {
-  font-size: 16px;
   text-align: center;
 }
 
-/* USED */
-
-.jar.used {
-  opacity: 0.3;
-  transform: scale(0.9);
+.app {
+  max-width: 500px;
+  margin: auto;
 }
 
-/* DROP */
-
-.board.drop-target {
-  outline: 3px dashed #8c8370;
-  transform: scale(1.02);
+#board {
+  display: grid;
+  gap: 6px;
+  margin: 20px;
+  transition: 0.3s;
 }
 
-/* RESPONSIVO */
-
-@media (max-width: 500px) {
-  .cell {
-    width: 44px;
-    height: 44px;
-  }
-
-  .jar-body {
-    width: 62px;
-    height: 78px;
-  }
-}
-
-#hud {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px 14px;
-  background: #eae6dc;
-  border: 1px solid #b8b09f;
-  border-radius: 10px;
-  font-size: 14px;
-  color: #5f5747;
-}
-
-#hud {
+.cell {
+  background: #e6e1d6;
+  border: 1px solid #b9b2a3;
+  height: 50px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 10px;
+  justify-content: center;
+  font-size: 20px;
+  transition: 0.2s;
+}
+
+#jarArea {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
   padding: 10px;
-  background: #eae6dc;
-  border: 1px solid #b8b09f;
-  border-radius: 10px;
-  font-size: 13px;
 }
 
-#progressBar {
-  width: 120px;
-  height: 6px;
-  background: #d0c8b5;
-  border-radius: 10px;
+.jar {
+  width: 70px;
+  cursor: grab;
+  transition: 0.2s;
+}
+
+.jar:active {
+  transform: scale(0.95);
+}
+
+/* topo */
+.jar-top {
+  background: #a89f8d;
+  color: white;
+  font-size: 12px;
+  border-radius: 6px 6px 0 0;
+  padding: 2px;
+}
+
+/* corpo estilo vidro */
+.jar-body {
+  height: 90px;
+  border-radius: 0 0 14px 14px;
+  background: linear-gradient(#d8d2c2, #c4bda8);
+  border: 2px solid #8c8370;
+
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-content: flex-start;
+  gap: 2px;
+  padding: 6px;
   overflow: hidden;
-  margin-top: 4px;
+
+  box-shadow: inset 0 0 6px rgba(0,0,0,0.15);
 }
 
-#progressFill {
-  height: 100%;
-  width: 0%;
-  background: #8c8370;
-  transition: width 0.3s ease;
-}
-
-#stars {
-  font-size: 18px;
-}
-
-#score {
-  font-weight: bold;
-}
-
-
-#map span {
-  display: inline-block;
-  width: 10px;
-  height: 10px;
-  margin: 2px;
-  border-radius: 50%;
-  background: #c0b8a5;
-  cursor: pointer;
-}
-
-#map span.current {
-  background: #5f5747;
-}
-
-#map span.done {
-  background: #8c8370;
-}
-
-#controls button {
-  border: none;
-  background: #d8d2c2;
-  padding: 4px 8px;
-  border-radius: 6px;
-  cursor: pointer;
+.jar-body span {
+  font-size: 13px;
 }
