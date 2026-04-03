@@ -3,14 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Partitura Real - Violino</title>
+<title>Partitura Violino</title>
 
 <style>
 body {
   margin: 0;
   background: #fafafa;
-  font-family: serif;
   overflow: hidden;
+  font-family: serif;
 }
 
 #ui {
@@ -31,14 +31,9 @@ button, input {
   left: 50%;
   transform: translate(-50%, -50%);
   background: white;
-  border: 1px solid #ccc;
   padding: 20px;
+  border: 1px solid #ccc;
   display: none;
-  flex-direction: column;
-}
-
-canvas {
-  display: block;
 }
 </style>
 </head>
@@ -71,7 +66,7 @@ function resize(){
 resize();
 window.addEventListener("resize", resize);
 
-// Configuração musical
+// Notas reais
 const notesMap = [
   "E4","F4","G4","A4","B4",
   "C5","D5","E5","F5","G5",
@@ -91,59 +86,51 @@ let notes = [];
 let running = false;
 let startTime;
 let speed;
-let beatWidth = 80;
-let beatsPerMeasure = 4;
+let bpmVal = 90;
 
 // Toque
-let touchStartTime = 0;
 let currentNote = null;
+let touchStartTime = 0;
 
 // Áudio
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
-function play(freq, duration){
+// Conversões
+function getNote(y){
+  let idx = Math.round((y - staffTop)/(lineSpacing/2));
+  idx = Math.max(0, Math.min(notesMap.length-1, idx));
+  return notesMap[idx];
+}
+
+function getY(note){
+  return staffTop + notesMap.indexOf(note)*(lineSpacing/2);
+}
+
+// Áudio contínuo (para slide)
+function startOsc(freq){
   const osc = audioCtx.createOscillator();
   const gain = audioCtx.createGain();
 
-  osc.frequency.value = freq;
   osc.type = "sine";
+  osc.frequency.value = freq;
 
   osc.connect(gain);
   gain.connect(audioCtx.destination);
 
+  gain.gain.value = 0.3;
+
   osc.start();
-  gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
-  gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
 
-  osc.stop(audioCtx.currentTime + duration);
-}
-
-// Converter posição em nota musical real
-function getNote(y){
-  let index = Math.round((y - staffTop) / (lineSpacing/2));
-  index = Math.max(0, Math.min(notesMap.length-1, index));
-  return notesMap[index];
-}
-
-function getY(note){
-  let index = notesMap.indexOf(note);
-  return staffTop + index*(lineSpacing/2);
-}
-
-// Determinar duração musical
-function getDuration(ms){
-  if(ms < 150) return "colcheia";
-  if(ms < 350) return "seminima";
-  if(ms < 700) return "minima";
-  return "semibreve";
+  return {osc, gain};
 }
 
 // Desenho
-function drawStaff(){
+function drawStaff(offset){
   lineSpacing = height/12;
-  staffTop = height/2 - (2*lineSpacing);
+  staffTop = height/2 - 2*lineSpacing;
 
   ctx.strokeStyle = "black";
+
   for(let i=0;i<5;i++){
     let y = staffTop + i*lineSpacing;
     ctx.beginPath();
@@ -152,18 +139,9 @@ function drawStaff(){
     ctx.stroke();
   }
 
-  // clave de sol
+  // clave de sol móvel
   ctx.font = `${lineSpacing*4}px serif`;
-  ctx.fillText("𝄞", 20, staffTop + lineSpacing*3);
-
-  // barras de compasso
-  ctx.strokeStyle = "#999";
-  for(let i=0;i<width;i+=beatWidth*beatsPerMeasure){
-    ctx.beginPath();
-    ctx.moveTo(i, staffTop);
-    ctx.lineTo(i, staffTop + 4*lineSpacing);
-    ctx.stroke();
-  }
+  ctx.fillText("𝄞", 40 - offset, staffTop + lineSpacing*3);
 }
 
 function drawNote(n){
@@ -171,52 +149,19 @@ function drawNote(n){
 
   ctx.fillStyle = "black";
 
-  // semibreve
-  if(n.type === "semibreve"){
-    ctx.beginPath();
-    ctx.ellipse(n.x, y, 10, 7, 0, 0, Math.PI*2);
-    ctx.stroke();
-  }
+  ctx.beginPath();
+  ctx.ellipse(n.x, y, 10, 7, 0, 0, Math.PI*2);
+  ctx.fill();
 
-  // mínima
-  else if(n.type === "minima"){
-    ctx.beginPath();
-    ctx.ellipse(n.x, y, 10, 7, 0, 0, Math.PI*2);
-    ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(n.x+10, y);
+  ctx.lineTo(n.x+10, y-35);
+  ctx.stroke();
 
+  if(n.slidePath){
     ctx.beginPath();
-    ctx.moveTo(n.x+10, y);
-    ctx.lineTo(n.x+10, y-35);
-    ctx.stroke();
-  }
-
-  // semínima
-  else if(n.type === "seminima"){
-    ctx.beginPath();
-    ctx.ellipse(n.x, y, 10, 7, 0, 0, Math.PI*2);
-    ctx.fill();
-
-    ctx.beginPath();
-    ctx.moveTo(n.x+10, y);
-    ctx.lineTo(n.x+10, y-35);
-    ctx.stroke();
-  }
-
-  // colcheia
-  else{
-    ctx.beginPath();
-    ctx.ellipse(n.x, y, 10, 7, 0, 0, Math.PI*2);
-    ctx.fill();
-
-    ctx.beginPath();
-    ctx.moveTo(n.x+10, y);
-    ctx.lineTo(n.x+10, y-35);
-    ctx.stroke();
-
-    // bandeirinha
-    ctx.beginPath();
-    ctx.moveTo(n.x+10, y-35);
-    ctx.quadraticCurveTo(n.x+25, y-25, n.x+10, y-15);
+    ctx.moveTo(n.x, n.slidePath[0]);
+    ctx.lineTo(n.x+15, n.slidePath[1]);
     ctx.stroke();
   }
 
@@ -233,12 +178,15 @@ function drawNote(n){
 function loop(){
   if(!running) return;
 
+  let time = performance.now() - startTime;
+  let offset = time * speed;
+
   ctx.clearRect(0,0,width,height);
 
-  drawStaff();
+  drawStaff(offset);
 
   notes.forEach(n=>{
-    n.x -= speed;
+    n.x = width - (offset - n.startX);
     drawNote(n);
   });
 
@@ -250,13 +198,14 @@ function start(){
   notes = [];
   running = true;
   startTime = performance.now();
-  speed = parseInt(bpm.value)/60 * 2;
+  bpmVal = parseInt(bpm.value);
+  speed = bpmVal/60 * 100;
   loop();
 }
 
 function stop(){
   running = false;
-  menu.style.display = "flex";
+  menu.style.display = "block";
 }
 
 function restart(){
@@ -264,21 +213,32 @@ function restart(){
   menu.style.display = "none";
 }
 
-// Reprodução
+// Playback correto
 function playComposition(){
-  let t = audioCtx.currentTime;
+  let beatDur = 60 / bpmVal;
 
   notes.forEach(n=>{
-    let dur = {
-      colcheia:0.2,
-      seminima:0.4,
-      minima:0.8,
-      semibreve:1.6
-    }[n.type];
+    let start = n.startTime/1000;
+    let dur = n.duration/1000;
 
-    play(freqMap[n.note], dur);
-    t += dur;
+    setTimeout(()=>{
+      playTone(freqMap[n.note], dur);
+    }, start*1000);
   });
+}
+
+function playTone(freq, duration){
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+
+  osc.frequency.value = freq;
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+
+  osc.start();
+  gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+  osc.stop(audioCtx.currentTime + duration);
 }
 
 // PDF
@@ -290,27 +250,49 @@ function savePDF(){
 canvas.addEventListener("touchstart", e=>{
   if(!running) return;
 
-  let y = e.touches[0].clientY;
+  let t = e.touches[0];
+  let y = t.clientY;
+
   touchStartTime = performance.now();
 
   let note = getNote(y);
+  let freq = freqMap[note];
+
+  let oscObj = startOsc(freq);
 
   currentNote = {
-    x: width-60,
-    note: note,
-    type: "seminima"
+    note,
+    startTime: performance.now() - startTime,
+    duration: 0,
+    startX: (performance.now() - startTime) * speed,
+    oscObj,
+    slidePath: [y,y]
   };
 
   notes.push(currentNote);
 });
 
+canvas.addEventListener("touchmove", e=>{
+  if(!currentNote) return;
+
+  let y = e.touches[0].clientY;
+  let note = getNote(y);
+
+  currentNote.note = note;
+  currentNote.slidePath[1] = y;
+
+  currentNote.oscObj.osc.frequency.value = freqMap[note];
+});
+
 canvas.addEventListener("touchend", e=>{
   if(!currentNote) return;
 
-  let dur = performance.now() - touchStartTime;
-  currentNote.type = getDuration(dur);
+  currentNote.duration = performance.now() - touchStartTime;
 
-  play(freqMap[currentNote.note], dur/1000);
+  currentNote.oscObj.gain.gain.exponentialRampToValueAtTime(
+    0.001,
+    audioCtx.currentTime + 0.2
+  );
 
   currentNote = null;
 });
