@@ -20,42 +20,23 @@ body {
   padding: 10px;
 }
 
-/* ===== CONTAINER ===== */
+/* ===== GRID ===== */
 #boardContainer {
-  height: 340px;
   display: flex;
   justify-content: center;
   align-items: center;
+  min-height: 300px;
 }
 
-/* ===== BLOCO 3D ===== */
-#board3D {
-  position: relative;
-  transform: rotateX(55deg) rotateZ(45deg);
-  transform-style: preserve-3d;
-}
-
-/* ===== CAMADAS ===== */
-.layer {
-  position: absolute;
+#board {
   display: grid;
-  gap: 4px;
+  gap: 6px;
 }
 
-.layer[data-depth="0"] {
-  transform: translateZ(0px);
-}
-
-.layer[data-depth="1"] {
-  transform: translateZ(-45px) translateX(12px) translateY(12px);
-  opacity: 0.85;
-}
-
-/* ===== CÉLULAS ===== */
+/* células */
 .cell {
-  width: 26px;
-  height: 26px;
-
+  width: 30px;
+  height: 30px;
   background: #f0eadf;
   border: 2px solid #cfc6b8;
   border-radius: 6px;
@@ -63,9 +44,6 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-
-  /* corrige perspectiva */
-  transform: rotateZ(-45deg) rotateX(-55deg);
 }
 
 /* ===== JARROS ===== */
@@ -141,9 +119,8 @@ function generatePhase() {
 
   let rows = Math.floor(Math.random() * 10) + 1;
   let cols = Math.floor(Math.random() * 10) + 1;
-  let depth = Math.random() < 0.4 ? 2 : 1;
 
-  const total = rows * cols * depth;
+  const total = rows * cols;
 
   // solução base
   let solution = [];
@@ -168,7 +145,7 @@ function generatePhase() {
 
   let jars = shuffle(solution.concat(extras));
 
-  return { rows, cols, depth, jars };
+  return { rows, cols, jars };
 }
 
 // ===== LOAD =====
@@ -176,40 +153,30 @@ function loadPhase(){
 
   const data = generatePhase();
 
-  totalCells = data.rows * data.cols * data.depth;
+  totalCells = data.rows * data.cols;
   filledCells = 0;
   overflowErrors = 0;
   totalJars = data.jars.length;
 
-  boardContainer.innerHTML = "<div id='board3D'></div>";
+  boardContainer.innerHTML = "<div id='board'></div>";
   jarArea.innerHTML = "";
   feedback.textContent = "";
 
-  const board3D = document.getElementById("board3D");
+  const board = document.getElementById("board");
 
-  // cria camadas 3D
-  for (let d = 0; d < data.depth; d++) {
+  board.style.gridTemplateColumns = `repeat(${data.cols},30px)`;
 
-    let layer = document.createElement("div");
-    layer.className = "layer";
-    layer.dataset.depth = d;
-
-    layer.style.gridTemplateColumns = `repeat(${data.cols},26px)`;
-
-    for (let i=0;i<data.rows * data.cols;i++){
-      let c = document.createElement("div");
-      c.className="cell";
-      c.dataset.filled="false";
-      layer.appendChild(c);
-    }
-
-    board3D.appendChild(layer);
+  for (let i=0;i<data.rows * data.cols;i++){
+    let c = document.createElement("div");
+    c.className="cell";
+    c.dataset.filled="false";
+    board.appendChild(c);
   }
 
   createJars(data.jars);
 }
 
-// ===== JARS =====
+// ===== JARROS =====
 function createJars(jars){
 
   jars.forEach((amount,i)=>{
@@ -238,46 +205,44 @@ function createJars(jars){
 // ===== DROP =====
 function enableDrop(){
 
-  document.querySelectorAll(".layer").forEach(layer => {
+  const board = document.getElementById("board");
 
-    layer.ondragover=e=>e.preventDefault();
+  board.ondragover = e => e.preventDefault();
 
-    layer.ondrop=e=>{
-      e.preventDefault();
+  board.ondrop = e => {
+    e.preventDefault();
 
-      const jar = document.getElementById(
-        e.dataTransfer.getData("text")
-      );
+    const jar = document.getElementById(
+      e.dataTransfer.getData("text")
+    );
 
-      if(!jar)return;
+    if(!jar)return;
 
-      let amount = Number(jar.dataset.amount);
+    let amount = Number(jar.dataset.amount);
 
-      let empty = [...document.querySelectorAll(".cell")]
-        .filter(c=>c.dataset.filled==="false");
+    let empty = [...document.querySelectorAll(".cell")]
+      .filter(c=>c.dataset.filled==="false");
 
-      empty = shuffle(empty);
+    empty = shuffle(empty);
 
-      let place = Math.min(amount, empty.length);
-      let extra = amount - place;
+    let place = Math.min(amount, empty.length);
+    let extra = amount - place;
 
-      for(let i=0;i<place;i++){
-        empty[i].textContent="🐞";
-        empty[i].dataset.filled="true";
-      }
+    for(let i=0;i<place;i++){
+      empty[i].textContent="🐞";
+      empty[i].dataset.filled="true";
+    }
 
-      if(extra>0) overflowErrors += extra;
+    if(extra>0) overflowErrors += extra;
 
-      filledCells += place;
+    filledCells += place;
 
-      jar.style.transform="scale(0)";
-      jar.style.opacity="0";
-      setTimeout(()=>jar.remove(),200);
+    jar.style.transform="scale(0)";
+    jar.style.opacity="0";
+    setTimeout(()=>jar.remove(),200);
 
-      checkEnd();
-    };
-
-  });
+    checkEnd();
+  };
 }
 
 // ===== END =====
