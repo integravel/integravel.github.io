@@ -6,6 +6,7 @@
 <title>Besouros</title>
 
 <style>
+
 body {
   font-family: sans-serif;
   background: #f6f3ed;
@@ -52,12 +53,14 @@ body {
   width: 60px;
   margin: auto;
   cursor: grab;
+  transition: 0.2s;
 }
 
 .jar-top {
   background: #a8c7b8;
   font-size: 12px;
   border-radius: 8px 8px 0 0;
+  padding: 2px;
 }
 
 .jar-body {
@@ -71,7 +74,9 @@ body {
 
 #feedback {
   height: 24px;
+  font-size: 16px;
 }
+
 </style>
 </head>
 
@@ -79,13 +84,15 @@ body {
 
 <div class="app">
   <div id="feedback"></div>
-  <div id="boardContainer"><div id="board"></div></div>
+  <div id="boardContainer">
+    <div id="board"></div>
+  </div>
   <div id="jarArea"></div>
 </div>
 
 <script>
 
-// ===== STORAGE =====
+// ===== SAVE =====
 let save = JSON.parse(localStorage.getItem("besourosSave")) || {
   phase: 0,
   wins: 0,
@@ -94,10 +101,16 @@ let save = JSON.parse(localStorage.getItem("besourosSave")) || {
 
 let currentPhase = save.phase;
 
+// ===== STATE =====
+let totalCells = 0;
+let filledCells = 0;
+let overflowErrors = 0;
+let totalJars = 0;
+
 // ===== UTIL =====
 function shuffle(a){ return a.sort(()=>Math.random()-0.5); }
 
-// ===== GERADOR COM SOLUÇÃO GARANTIDA =====
+// ===== GERADOR =====
 function generatePhase() {
 
   const skill = save.wins / (save.wins + save.fails + 1);
@@ -112,10 +125,10 @@ function generatePhase() {
 
   const total = rows * cols;
 
-  let jars = [];
+  // ===== SOLUÇÃO BASE =====
+  let solution = [];
   let sum = 0;
 
-  // cria números maiores primeiro (gera estratégia)
   while (sum < total) {
 
     let max = Math.min(6 + Math.floor(skill * 4), total - sum);
@@ -123,16 +136,26 @@ function generatePhase() {
 
     let value = Math.floor(Math.random() * (max - min + 1)) + min;
 
-    jars.push(value);
+    solution.push(value);
     sum += value;
   }
 
-  // ordena: grandes primeiro aumenta dificuldade real
+  // ===== EXTRAS =====
+  let extras = [];
+  let extraCount = 3 + Math.floor(Math.random() * 3);
+
+  for (let i = 0; i < extraCount; i++) {
+    let val = Math.floor(Math.random() * (6 + Math.floor(skill * 4))) + 1;
+    extras.push(val);
+  }
+
+  let jars = solution.concat(extras);
+
+  // ordena parcialmente
   jars.sort((a,b)=>b-a);
 
-  // embaralha levemente (não totalmente aleatório)
   for (let i = jars.length - 1; i > 0; i--) {
-    if (Math.random() < 0.4) {
+    if (Math.random() < 0.5) {
       let j = Math.floor(Math.random() * (i+1));
       [jars[i], jars[j]] = [jars[j], jars[i]];
     }
@@ -149,6 +172,7 @@ function loadPhase() {
   totalCells = data.rows * data.cols;
   filledCells = 0;
   overflowErrors = 0;
+  totalJars = data.jars.length;
 
   board.innerHTML = "";
   jarArea.innerHTML = "";
@@ -160,6 +184,7 @@ function loadPhase() {
 
 // ===== BOARD =====
 function createBoard(r,c){
+
   board.style.gridTemplateColumns = `repeat(${c},30px)`;
 
   for(let i=0;i<r*c;i++){
@@ -232,7 +257,9 @@ function enableDrop(){
 
     filledCells += place;
 
-    jar.remove();
+    jar.style.transform = "scale(0)";
+    jar.style.opacity = "0";
+    setTimeout(()=> jar.remove(), 200);
 
     checkEnd();
   };
@@ -244,10 +271,10 @@ function checkEnd(){
   if(filledCells === totalCells){
 
     if(overflowErrors === 0){
-      feedback.textContent = "Perfeito! ✨";
+      feedback.textContent = `Perfeito! Usou ${totalJars - document.querySelectorAll('.jar').length} de ${totalJars} jarros ✨`;
       save.wins++;
     } else {
-      feedback.textContent = `Quase! Sobraram ${overflowErrors}`;
+      feedback.textContent = `Quase! Sobraram ${overflowErrors} 🐞`;
       save.fails++;
     }
 
@@ -256,7 +283,7 @@ function checkEnd(){
 
     localStorage.setItem("besourosSave", JSON.stringify(save));
 
-    setTimeout(loadPhase, 800);
+    setTimeout(loadPhase, 900);
   }
 }
 
@@ -264,10 +291,6 @@ function checkEnd(){
 const board = document.getElementById("board");
 const jarArea = document.getElementById("jarArea");
 const feedback = document.getElementById("feedback");
-
-let totalCells=0;
-let filledCells=0;
-let overflowErrors=0;
 
 loadPhase();
 
