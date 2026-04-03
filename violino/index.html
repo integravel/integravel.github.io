@@ -63,7 +63,6 @@ const noteSteps = {
 "A4":3,"B4":4,"C5":5,"D5":6,"E5":7,"F5":8
 };
 
-let sequence = [];
 let correctNotes = [];
 let playerNotes = [];
 
@@ -80,7 +79,7 @@ let cursorX = 180;
 // ===== ÁUDIO =====
 const audioCtx = new (window.AudioContext||window.webkitAudioContext)();
 
-function playNoteDynamic(f, duration){
+function playNote(f){
   const osc = audioCtx.createOscillator();
   const gain = audioCtx.createGain();
 
@@ -93,9 +92,9 @@ function playNoteDynamic(f, duration){
   osc.start();
 
   gain.gain.setValueAtTime(0.8, audioCtx.currentTime);
-  gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+  gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.6);
 
-  osc.stop(audioCtx.currentTime + duration);
+  osc.stop(audioCtx.currentTime + 0.6);
 }
 
 // ===== POSIÇÃO =====
@@ -130,7 +129,7 @@ function getNoteFromY(y){
   return best;
 }
 
-// ===== SEQUÊNCIA COM LIMITE =====
+// ===== SEQUÊNCIA =====
 function newSequence(){
 
   correctNotes = [];
@@ -140,33 +139,31 @@ function newSequence(){
 
   let usableWidth = endX - startX;
 
-  let totalUnits = 0;
-  let durations = [];
+  let weights = [];
+  let totalWeight = 0;
 
   for(let i=0;i<difficulty;i++){
-    let d = Math.random()*0.8 + 0.2;
-    durations.push(d);
-    totalUnits += d;
+    let w = Math.random()*1 + 0.5;
+    weights.push(w);
+    totalWeight += w;
   }
 
-  let unitWidth = usableWidth / totalUnits;
+  let unitWidth = usableWidth / totalWeight;
 
   let x = startX;
 
   for(let i=0;i<difficulty;i++){
 
     let note = notes[Math.floor(Math.random()*notes.length)];
-    let duration = durations[i];
 
     correctNotes.push({
       x:x,
       y:getYFromNote(note),
       note:note,
-      duration:duration,
       played:false
     });
 
-    x += duration * unitWidth;
+    x += weights[i] * unitWidth;
   }
 
   document.getElementById("difficulty").innerText = difficulty;
@@ -192,7 +189,7 @@ function update(){
 
     correctNotes.forEach(n=>{
       if(!n.played && cursorX >= n.x){
-        playNoteDynamic(freq[n.note], n.duration);
+        playNote(freq[n.note]);
         n.played = true;
       }
     });
@@ -204,32 +201,21 @@ function update(){
 }
 
 // ===== INPUT =====
-let touchStartTime = 0;
-let touchPos = null;
-
 canvas.addEventListener("touchstart",e=>{
   if(playing || showCorrection) return;
+  if(playerNotes.length >= difficulty) return;
+
   let t = e.touches[0];
-  touchStartTime = performance.now();
-  touchPos = {x:t.clientX, y:t.clientY};
-});
 
-canvas.addEventListener("touchend",e=>{
-  if(!touchPos) return;
-
-  let duration = (performance.now() - touchStartTime)/1000;
-  let noteName = getNoteFromY(touchPos.y);
+  let noteName = getNoteFromY(t.clientY);
 
   playerNotes.push({
-    x:touchPos.x,
+    x:t.clientX,
     y:getYFromNote(noteName),
-    note:noteName,
-    duration:duration
+    note:noteName
   });
 
-  playNoteDynamic(freq[noteName], duration);
-
-  touchPos = null;
+  playNote(freq[noteName]);
 
   if(playerNotes.length === difficulty){
     evaluate();
@@ -247,9 +233,8 @@ function evaluate(){
     let dy = playerNotes[i].y - correctNotes[i].y;
 
     let dist = Math.sqrt(dx*dx + dy*dy);
-    let durDiff = Math.abs(playerNotes[i].duration - correctNotes[i].duration);
 
-    let acc = Math.max(0, 100 - dist - durDiff*100);
+    let acc = Math.max(0, 100 - dist);
 
     total += acc;
     totalAccuracy += acc;
@@ -295,7 +280,7 @@ function drawStaff(){
   ctx.fillText("𝄞", 70, solLineY - 8);
 }
 
-// ===== NOTAS (VISUAL LIMPO) =====
+// ===== NOTAS =====
 function drawSingleNote(n, color){
 
   ctx.fillStyle = color;
@@ -305,16 +290,8 @@ function drawSingleNote(n, color){
   ctx.ellipse(n.x,n.y,12,9,0,0,Math.PI*2);
   ctx.fill();
 
-  // haste
+  // haste simples
   ctx.fillRect(n.x+10, n.y-40, 2, 40);
-
-  // bandeiras simples (se curta)
-  if(n.duration < 0.4){
-    ctx.beginPath();
-    ctx.moveTo(n.x+12, n.y-40);
-    ctx.quadraticCurveTo(n.x+25, n.y-30, n.x+10, n.y-20);
-    ctx.stroke();
-  }
 }
 
 function drawNotes(){
