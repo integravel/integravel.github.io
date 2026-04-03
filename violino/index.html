@@ -202,7 +202,7 @@ function update(){
   }
 }
 
-// ===== INPUT CORRIGIDO =====
+// ===== INPUT (SEM SOM DO USUÁRIO) =====
 canvas.addEventListener("touchstart",e=>{
   if(!playing) return;
   if(playerNotes.length >= difficulty) return;
@@ -212,12 +212,12 @@ canvas.addEventListener("touchstart",e=>{
   let noteName = getNoteFromY(t.clientY);
 
   playerNotes.push({
-    x: t.clientX, // ← CORRETO
+    x: t.clientX,
     y: getYFromNote(noteName),
     note: noteName
   });
 
-  playNote(freq[noteName]);
+  // ❌ REMOVIDO: playNote(...)
 });
 
 // ===== AVALIAÇÃO =====
