@@ -92,8 +92,8 @@ let difficulty = 3;
 let mode = "idle";
 let cursorX = 180;
 
-let startDelay = 40;
-let delayCounter = 0;
+// 🎯 distância antes da primeira nota
+const leadDistance = 120;
 
 // ===== ÁUDIO =====
 const audioCtx = new (window.AudioContext||window.webkitAudioContext)();
@@ -174,9 +174,10 @@ function newSequence(){
 
 // ===== PLAYBACK =====
 function startPlayback(){
-  cursorX = 180;
+  let firstNoteX = correctNotes[0].x;
+  cursorX = firstNoteX - leadDistance;
+
   mode = "playing";
-  delayCounter = startDelay;
   correctNotes.forEach(n=>n.played=false);
 }
 
@@ -215,8 +216,11 @@ function finish(){
 
 function playUser(){
   if(mode !== "input") return;
+
+  let firstNoteX = playerNotes[0]?.x || 180;
+  cursorX = firstNoteX - leadDistance;
+
   mode = "playbackUser";
-  cursorX = 180;
   playerNotes.forEach(n=>n.played=false);
 }
 
@@ -253,11 +257,6 @@ function update(){
 
   if(mode === "playing"){
     cursorX += getSpeed();
-
-    if(delayCounter > 0){
-      delayCounter--;
-      return;
-    }
 
     correctNotes.forEach(n=>{
       if(!n.played && cursorX >= n.x){
@@ -300,7 +299,6 @@ function drawStaff(){
     ctx.stroke();
   }
 
-  // 🎼 CLAVE DESCIDA UMA LINHA (CORREÇÃO)
   ctx.font = "120px serif";
   ctx.fillText("𝄞", 70, mid + 2*space - 8);
 }
