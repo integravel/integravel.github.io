@@ -1,22 +1,38 @@
 let totalCells = 0;
 let filledCells = 0;
 let overflowErrors = 0;
+let currentPhase = 0;
 
-async function loadPhase() {
-  const response = await fetch("fase.json");
-  const data = await response.json();
+// DUAS FASES
+const phases = [
+  {
+    rows: 3,
+    cols: 3,
+    jars: [4, 1, 2, 1, 2, 3]
+  },
+  {
+    rows: 4,
+    cols: 4,
+    jars: [5, 3, 4, 2, 1, 6, 3]
+  }
+];
 
-  // reset estado
+function shuffle(array) {
+  return array.sort(() => Math.random() - 0.5);
+}
+
+function loadPhase() {
+  const data = phases[currentPhase];
+
   totalCells = data.rows * data.cols;
   filledCells = 0;
   overflowErrors = 0;
 
-  // limpar tela
   document.getElementById("board").innerHTML = "";
   document.getElementById("jarArea").innerHTML = "";
 
   createBoard(data.rows, data.cols);
-  createJars(data.jars);
+  createJars(shuffle([...data.jars]));
 }
 
 function createBoard(rows, cols) {
@@ -45,12 +61,17 @@ function createJars(jars) {
     jar.draggable = true;
     jar.dataset.amount = amount;
 
+    // cria besouros visuais
+    let bugs = "";
+    for (let i = 0; i < amount; i++) {
+      bugs += "<span>🐞</span>";
+    }
+
     jar.innerHTML = `
       <div class="jar-top">${amount}</div>
-      <div class="jar-body">🐞</div>
+      <div class="jar-body">${bugs}</div>
     `;
 
-    // DRAG START (suave)
     jar.addEventListener("dragstart", (event) => {
       event.dataTransfer.setData("text/plain", jar.id);
 
@@ -59,7 +80,6 @@ function createJars(jars) {
       }, 0);
     });
 
-    // DRAG END
     jar.addEventListener("dragend", () => {
       jar.classList.remove("dragging");
     });
@@ -97,7 +117,6 @@ function enableBoardDrops() {
     const toPlace = Math.min(amount, emptyCells.length);
     const extra = amount - toPlace;
 
-    // animação suave de distribuição
     for (let i = 0; i < toPlace; i++) {
       const cell = emptyCells[i];
 
@@ -105,7 +124,6 @@ function enableBoardDrops() {
         cell.textContent = "🐞";
         cell.dataset.filled = "true";
 
-        // efeito "pop"
         cell.style.transform = "scale(1.3)";
         setTimeout(() => {
           cell.style.transform = "scale(1)";
@@ -130,12 +148,25 @@ function checkEnd() {
   if (filledCells === totalCells) {
     setTimeout(() => {
       if (overflowErrors === 0) {
-        alert("🌸 Perfeito! Todos os besourinhos foram acomodados! 🐞💕");
+        alert("Perfeito! Avançando para a próxima fase...");
       } else {
-        alert(`😢 Ops! Sobraram ${overflowErrors} besourinhos...`);
+        alert(`Sobraram ${overflowErrors} besouros.`);
       }
-    }, 300);
+
+      nextPhase();
+    }, 400);
   }
+}
+
+function nextPhase() {
+  currentPhase++;
+
+  if (currentPhase >= phases.length) {
+    alert("Você completou todas as fases! 🎉");
+    currentPhase = 0;
+  }
+
+  loadPhase();
 }
 
 loadPhase();
