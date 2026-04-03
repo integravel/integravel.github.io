@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Violino Interativo PRO</title>
+<title>Tetris Musical - Violino</title>
 
 <style>
 body {
@@ -32,8 +32,8 @@ button,input{
 <div id="ui">
 BPM <input type="number" id="bpm" value="90">
 <button onclick="start()">Iniciar</button>
-<button onclick="stop()">Parar</button>
 <button onclick="playAll()">Ouvir</button>
+<button onclick="savePDF()">Salvar PDF</button>
 </div>
 
 <canvas id="canvas"></canvas>
@@ -50,264 +50,187 @@ function resize(){
 resize();
 window.addEventListener("resize",resize);
 
-// ===== SOM REAL (sample leve) =====
-const audioCtx = new (window.AudioContext||window.webkitAudioContext)();
-let violinBuffer = null;
-
-async function loadSample(){
-  const url = "https://cdn.jsdelivr.net/gh/gleitz/midi-js-soundfonts@master/FluidR3_GM/violin-mp3/C4.mp3";
-  const res = await fetch(url);
-  const array = await res.arrayBuffer();
-  violinBuffer = await audioCtx.decodeAudioData(array);
-}
-loadSample();
-
-function playViolin(freq, dur){
-  if(!violinBuffer) return;
-
-  const src = audioCtx.createBufferSource();
-  const gain = audioCtx.createGain();
-
-  src.buffer = violinBuffer;
-
-  const baseFreq = 261.63; // C4
-  src.playbackRate.value = freq/baseFreq;
-
-  src.connect(gain);
-  gain.connect(audioCtx.destination);
-
-  gain.gain.setValueAtTime(0.4, audioCtx.currentTime);
-  gain.gain.linearRampToValueAtTime(0.001, audioCtx.currentTime + dur);
-
-  src.start();
-  src.stop(audioCtx.currentTime + dur);
-}
+// ===== CONFIG =====
+const COLS = 8;
+const ROWS = 12;
+let grid = [];
+let cellW, cellH;
 
 // ===== NOTAS =====
 const notesMap = [
 "E4","F4","G4","A4","B4",
 "C5","D5","E5","F5","G5",
-"A5","B5","C6"
+"A5","B5"
 ];
 
 const freqMap = {
 "E4":329,"F4":349,"G4":392,"A4":440,"B4":494,
 "C5":523,"D5":587,"E5":659,"F5":698,"G5":784,
-"A5":880,"B5":988,"C6":1046
+"A5":880,"B5":988
 };
 
-let staffTop,space;
+// ===== ÁUDIO =====
+const audioCtx = new (window.AudioContext||window.webkitAudioContext)();
 
-// ===== ESTADO =====
-let notes=[];
-let running=false;
-let speed;
-let startTime;
+function play(freq){
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
 
-const playX=120;
+  osc.frequency.value = freq;
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
 
-// ===== FUNÇÕES =====
-function getNote(y){
-  let i=Math.round((y-staffTop)/(space/2));
-  i=Math.max(0,Math.min(notesMap.length-1,i));
-  return notesMap[i];
+  osc.start();
+  gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.5);
+  osc.stop(audioCtx.currentTime+0.5);
 }
 
-function getY(n){
-  return staffTop + notesMap.indexOf(n)*(space/2);
-}
+// ===== PEÇAS =====
+const shapes = [
+  [[0,0],[1,0],[2,0],[3,0],[4,0]], // linha
+  [[0,0],[0,1],[1,1],[2,1],[2,2]],
+  [[1,0],[0,1],[1,1],[2,1],[1,2]]
+];
 
-function getType(d){
-  if(d<150) return "eighth";
-  if(d<350) return "quarter";
-  if(d<700) return "half";
-  return "whole";
-}
+let current;
 
-// ===== DESENHO =====
-function drawStaff(){
-  space = H/12;
-  staffTop = H/2 - 2*space;
-
-  ctx.strokeStyle="black";
-
-  for(let i=0;i<5;i++){
-    let y=staffTop+i*space;
-    ctx.beginPath();
-    ctx.moveTo(0,y);
-    ctx.lineTo(W,y);
-    ctx.stroke();
+// ===== JOGO =====
+function initGrid(){
+  grid=[];
+  for(let r=0;r<ROWS;r++){
+    grid[r]=Array(COLS).fill(null);
   }
 }
 
-function drawClef(x){
-  ctx.font=`${space*4}px serif`;
-  ctx.fillText("𝄞",x,staffTop+space*3);
+function spawnPiece(){
+  let shape = shapes[Math.floor(Math.random()*shapes.length)];
+
+  current = {
+    shape,
+    x: Math.floor(COLS/2),
+    y: 0,
+    pitch: 5
+  };
 }
 
-function drawNote(n){
-  let y=getY(n.note);
-
-  // cabeça
-  if(n.type==="whole"||n.type==="half"){
-    ctx.beginPath();
-    ctx.ellipse(n.x,y,10,7,0,0,Math.PI*2);
-    ctx.stroke();
-  }else{
-    ctx.beginPath();
-    ctx.ellipse(n.x,y,10,7,0,0,Math.PI*2);
-    ctx.fill();
-  }
-
-  // haste
-  if(n.type!=="whole"){
-    let up = y > staffTop+2*space;
-    ctx.beginPath();
-    if(up){
-      ctx.moveTo(n.x-10,y);
-      ctx.lineTo(n.x-10,y+30);
-    }else{
-      ctx.moveTo(n.x+10,y);
-      ctx.lineTo(n.x+10,y-30);
-    }
-    ctx.stroke();
-  }
-
-  // colcheia bandeira
-  if(n.type==="eighth"){
-    ctx.beginPath();
-    ctx.moveTo(n.x+10,y-30);
-    ctx.quadraticCurveTo(n.x+25,y-20,n.x+10,y-10);
-    ctx.stroke();
-  }
-
-  // linhas suplementares
-  if(y<staffTop||y>staffTop+4*space){
-    ctx.beginPath();
-    ctx.moveTo(n.x-12,y);
-    ctx.lineTo(n.x+12,y);
-    ctx.stroke();
-  }
-
-  // ligadura (slide)
-  if(n.tie){
-    ctx.beginPath();
-    ctx.moveTo(n.x,y);
-    ctx.quadraticCurveTo(n.x+20,y-20,n.x+40,n.tieY);
-    ctx.stroke();
-  }
+function canMove(dx,dy){
+  return current.shape.every(p=>{
+    let x = current.x + p[0] + dx;
+    let y = current.y + p[1] + dy;
+    return x>=0 && x<COLS && y<ROWS && (!grid[y] || !grid[y][x]);
+  });
 }
 
-// agrupamento colcheias
-function drawBeams(){
-  for(let i=0;i<notes.length-1;i++){
-    let a=notes[i], b=notes[i+1];
-    if(a.type==="eighth" && b.type==="eighth"){
-      ctx.beginPath();
-      ctx.moveTo(a.x+10,getY(a.note)-30);
-      ctx.lineTo(b.x+10,getY(b.note)-30);
-      ctx.stroke();
-    }
-  }
-}
-
-// ===== LOOP =====
-function loop(){
-  if(!running) return;
-
-  let t = performance.now()-startTime;
-
-  ctx.clearRect(0,0,W,H);
-
-  drawStaff();
-
-  // playhead
-  ctx.strokeStyle="red";
-  ctx.beginPath();
-  ctx.moveTo(playX,0);
-  ctx.lineTo(playX,H);
-  ctx.stroke();
-
-  // clave
-  drawClef(200 - t*speed);
-
-  notes.forEach(n=>{
-    n.x -= speed;
-
-    if(!n.played && n.x<=playX){
-      playViolin(freqMap[n.note], n.duration/1000 || 0.4);
-      n.played=true;
-    }
-
-    drawNote(n);
+function merge(){
+  current.shape.forEach(p=>{
+    let x=current.x+p[0];
+    let y=current.y+p[1];
+    grid[y][x] = current.pitch;
+    play(freqMap[notesMap[current.pitch]]);
   });
 
-  drawBeams();
+  clearLines();
+  spawnPiece();
+}
 
-  requestAnimationFrame(loop);
+function clearLines(){
+  for(let c=0;c<COLS;c++){
+    let full=true;
+    for(let r=0;r<ROWS;r++){
+      if(!grid[r][c]) full=false;
+    }
+
+    if(full){
+      for(let r=0;r<ROWS;r++){
+        grid[r][c]=null;
+      }
+    }
+  }
 }
 
 // ===== CONTROLE =====
-function start(){
-  notes=[];
-  running=true;
-  startTime=performance.now();
-  speed=parseInt(bpm.value)/60*2;
-  loop();
-}
-
-function stop(){
-  running=false;
-}
-
-// playback completo
-function playAll(){
-  let t=0;
-  notes.forEach(n=>{
-    setTimeout(()=>{
-      playViolin(freqMap[n.note], n.duration/1000||0.4);
-    },t);
-    t += n.duration||200;
-  });
-}
-
-// ===== TOQUE =====
-let current=null;
-let t0=0;
-
-canvas.addEventListener("touchstart",e=>{
-  if(!running) return;
-
-  let y=e.touches[0].clientY;
-  t0=performance.now();
-
-  current={
-    x:W,
-    note:getNote(y),
-    duration:0
-  };
-
-  notes.push(current);
-});
-
 canvas.addEventListener("touchmove",e=>{
   if(!current) return;
 
   let y=e.touches[0].clientY;
-
-  current.note=getNote(y);
-  current.tie=true;
-  current.tieY=y;
+  current.pitch = Math.floor((y/H)*notesMap.length);
 });
 
-canvas.addEventListener("touchend",e=>{
-  if(!current) return;
+// ===== LOOP =====
+let lastDrop=0;
+let speed=500;
+let running=false;
 
-  current.duration = performance.now()-t0;
-  current.type = getType(current.duration);
+function loop(t){
+  if(!running) return;
 
-  current=null;
-});
+  if(t-lastDrop>speed){
+    if(canMove(0,1)){
+      current.y++;
+    }else{
+      merge();
+    }
+    lastDrop=t;
+  }
+
+  draw();
+  requestAnimationFrame(loop);
+}
+
+// ===== DESENHO =====
+function draw(){
+  ctx.clearRect(0,0,W,H);
+
+  cellW = W/COLS;
+  cellH = H/ROWS;
+
+  // grid
+  for(let r=0;r<ROWS;r++){
+    for(let c=0;c<COLS;c++){
+      if(grid[r][c]!=null){
+        drawNote(c,r,grid[r][c]);
+      }
+    }
+  }
+
+  // peça atual
+  current.shape.forEach(p=>{
+    drawNote(current.x+p[0], current.y+p[1], current.pitch);
+  });
+}
+
+function drawNote(c,r,pitch){
+  let x=c*cellW;
+  let y=r*cellH;
+
+  ctx.fillStyle="black";
+  ctx.beginPath();
+  ctx.ellipse(x+cellW/2,y+cellH/2,8,6,0,0,Math.PI*2);
+  ctx.fill();
+}
+
+// ===== CONTROLES =====
+function start(){
+  initGrid();
+  spawnPiece();
+  running=true;
+  loop(0);
+}
+
+function playAll(){
+  grid.forEach(col=>{
+    col.forEach(p=>{
+      if(p!=null){
+        play(freqMap[notesMap[p]]);
+      }
+    });
+  });
+}
+
+function savePDF(){
+  window.print();
+}
 
 </script>
 
