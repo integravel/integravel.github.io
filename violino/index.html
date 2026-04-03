@@ -27,10 +27,6 @@ body{
 button,input{
   font-size:16px;
 }
-
-#accuracyBox{
-  font-size:16px;
-}
 </style>
 </head>
 
@@ -40,7 +36,8 @@ button,input{
   BPM <input type="number" id="bpm" value="80">
   <button onclick="startGame()">Iniciar</button>
   <button onclick="repeatSequence()">Repetir</button>
-  <span id="accuracyBox">Precisão: <span id="accuracy">0%</span></span>
+  <span>Precisão: <span id="accuracy">0%</span></span>
+  <span>Notas: <span id="difficulty">5</span></span>
 </div>
 
 <canvas id="canvas"></canvas>
@@ -80,13 +77,15 @@ let showCorrection = false;
 let totalAccuracy = 0;
 let totalNotes = 0;
 
+let difficulty = 5;
+
 let cursorX = 180;
 let cursorSpeed = 0;
 
 // ===== ÁUDIO =====
 const audioCtx = new (window.AudioContext||window.webkitAudioContext)();
 
-function playNote(f){
+function playNoteDynamic(f, duration){
   const osc = audioCtx.createOscillator();
   const gain = audioCtx.createGain();
 
@@ -99,12 +98,12 @@ function playNote(f){
   osc.start();
 
   gain.gain.setValueAtTime(0.8, audioCtx.currentTime);
-  gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.6);
+  gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
 
-  osc.stop(audioCtx.currentTime+0.6);
+  osc.stop(audioCtx.currentTime + duration);
 }
 
-// ===== POSIÇÃO DAS NOTAS =====
+// ===== POSIÇÃO =====
 function getYFromNote(note){
   let mid = H/2;
   let space = 32;
@@ -136,28 +135,39 @@ function getNoteFromY(y){
   return best;
 }
 
-// ===== SEQUÊNCIA =====
+// ===== SEQUÊNCIA COM RITMO =====
 function newSequence(){
   sequence = [];
-  for(let i=0;i<5;i++){
-    sequence.push(notes[Math.floor(Math.random()*notes.length)]);
+  correctNotes = [];
+
+  let x = 180;
+
+  for(let i=0;i<difficulty;i++){
+
+    let note = notes[Math.floor(Math.random()*notes.length)];
+
+    let duration = Math.random()*0.8 + 0.2; // 0.2s a 1s
+
+    sequence.push(note);
+
+    correctNotes.push({
+      x:x,
+      y:getYFromNote(note),
+      note:note,
+      duration:duration,
+      played:false
+    });
+
+    x += 100 + duration*200; // espaçamento variável
   }
 
-  correctNotes = sequence.map((n,i)=>({
-    x:180 + i*120,
-    y:getYFromNote(n),
-    note:n,
-    played:false
-  }));
+  document.getElementById("difficulty").innerText = difficulty;
 }
 
 // ===== PLAYBACK =====
 function startPlayback(){
-  let bpm = document.getElementById("bpm").value;
-  let tempo = 60000/bpm;
-
   cursorX = 180;
-  cursorSpeed = 120 / (tempo/16);
+  cursorSpeed = 2;
 
   playing = true;
   correctNotes.forEach(n=>n.played=false);
@@ -176,54 +186,73 @@ function update(){
 
     correctNotes.forEach(n=>{
       if(!n.played && cursorX >= n.x){
-        playNote(freq[n.note]);
+        playNoteDynamic(freq[n.note], n.duration);
         n.played = true;
       }
     });
 
-    if(cursorX > 180 + 5*120){
+    if(cursorX > W){
       playing = false;
     }
   }
 }
 
-// ===== INPUT =====
+// ===== INPUT COM DURAÇÃO =====
+let touchStartTime = 0;
+let currentTouch = null;
+
 canvas.addEventListener("touchstart",e=>{
-  if(playing) return;
-  if(playerNotes.length >= 5) return;
-  if(showCorrection) return;
+  if(playing || showCorrection) return;
 
   let t = e.touches[0];
 
-  let x = t.clientX;
-  let y = t.clientY;
+  touchStartTime = performance.now();
+  currentTouch = {
+    x:t.clientX,
+    y:t.clientY
+  };
+});
 
-  let noteName = getNoteFromY(y);
+canvas.addEventListener("touchend",e=>{
+  if(!currentTouch) return;
+
+  let duration = (performance.now() - touchStartTime)/1000;
+
+  let noteName = getNoteFromY(currentTouch.y);
 
   playerNotes.push({
-    x:x,
+    x:currentTouch.x,
     y:getYFromNote(noteName),
-    note:noteName
+    note:noteName,
+    duration:duration
   });
 
-  playNote(freq[noteName]);
+  playNoteDynamic(freq[noteName], duration);
 
-  if(playerNotes.length === 5){
+  currentTouch = null;
+
+  if(playerNotes.length === difficulty){
     evaluate();
   }
 });
 
-// ===== AVALIAÇÃO =====
+// ===== AVALIAÇÃO INTELIGENTE =====
 function evaluate(){
-  let maxDist = 200;
-  let tolerance = maxDist * 0.1;
 
-  for(let i=0;i<5;i++){
+  let total = 0;
+
+  for(let i=0;i<difficulty;i++){
+
     let dx = playerNotes[i].x - correctNotes[i].x;
     let dy = playerNotes[i].y - correctNotes[i].y;
 
     let dist = Math.sqrt(dx*dx + dy*dy);
-    let acc = dist <= tolerance ? 100 : Math.max(0, 100 - (dist/maxDist)*100);
+
+    let durDiff = Math.abs(playerNotes[i].duration - correctNotes[i].duration);
+
+    let acc = Math.max(0, 100 - dist - durDiff*100);
+
+    total += acc;
 
     totalAccuracy += acc;
     totalNotes++;
@@ -231,6 +260,16 @@ function evaluate(){
 
   let avg = Math.round(totalAccuracy / totalNotes);
   document.getElementById("accuracy").innerText = avg + "%";
+
+  let roundAvg = total / difficulty;
+
+  // ===== DIFICULDADE ADAPTATIVA =====
+  if(roundAvg > 80 && difficulty < 10){
+    difficulty++;
+  }
+  else if(roundAvg < 50 && difficulty > 3){
+    difficulty--;
+  }
 
   showCorrection = true;
 
@@ -248,8 +287,6 @@ function drawStaff(){
   let mid = H/2;
   let space = 32;
 
-  ctx.lineWidth = 2;
-
   for(let i=-2;i<=2;i++){
     ctx.beginPath();
     ctx.moveTo(80, mid + i*space);
@@ -262,26 +299,38 @@ function drawStaff(){
   ctx.font = "120px serif";
   ctx.textBaseline = "middle";
 
-  let clefYOffset = -8;
-
-  ctx.fillText("𝄞", 70, solLineY + clefYOffset);
+  ctx.fillText("𝄞", 70, solLineY - 8);
 }
 
-// ===== DESENHO =====
+// ===== DESENHO DAS NOTAS =====
 function drawNotes(){
+
   playerNotes.forEach(n=>{
     ctx.fillStyle="blue";
+
+    let width = 20 + n.duration*60;
+
     ctx.beginPath();
     ctx.ellipse(n.x,n.y,14,10,0,0,Math.PI*2);
     ctx.fill();
+
+    ctx.fillRect(n.x, n.y-40, 3, 40); // haste
+
+    ctx.fillRect(n.x, n.y-5, width, 10); // duração
   });
 
   if(showCorrection){
     correctNotes.forEach(n=>{
       ctx.fillStyle="red";
+
+      let width = 20 + n.duration*60;
+
       ctx.beginPath();
       ctx.ellipse(n.x,n.y,14,10,0,0,Math.PI*2);
       ctx.fill();
+
+      ctx.fillRect(n.x, n.y-40, 3, 40);
+      ctx.fillRect(n.x, n.y-5, width, 10);
     });
   }
 }
@@ -289,7 +338,6 @@ function drawNotes(){
 function drawCursor(){
   if(playing){
     ctx.strokeStyle="green";
-    ctx.lineWidth=3;
     ctx.beginPath();
     ctx.moveTo(cursorX,0);
     ctx.lineTo(cursorX,H);
