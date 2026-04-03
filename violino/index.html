@@ -49,7 +49,7 @@ function resize(){
 resize();
 window.addEventListener("resize",resize);
 
-// ===== NOTAS =====
+// ===== CONFIG =====
 const notes = [
 "E4","F4","G4","A4","B4",
 "C5","D5","E5","F5","G5",
@@ -67,6 +67,7 @@ let playerNotes = [];
 let correctNotes = [];
 let playing = false;
 let score = 0;
+let showCorrection = false;
 
 // ===== ÁUDIO =====
 const audioCtx = new (window.AudioContext||window.webkitAudioContext)();
@@ -128,6 +129,7 @@ function getNoteFromY(y){
 canvas.addEventListener("touchstart",e=>{
   if(playing) return;
   if(playerNotes.length >= 5) return;
+  if(showCorrection) return;
 
   let touch = e.touches[0];
 
@@ -176,11 +178,12 @@ function evaluate(){
   score += Math.round(total);
   document.getElementById("score").innerText = score;
 
-  // 🔥 mostra resultado corretamente
-  draw(true);
+  // 🔴 ativa modo correção
+  showCorrection = true;
+  draw();
 
-  // 🔁 reinicia mantendo score
   setTimeout(()=>{
+    showCorrection = false;
     playerNotes = [];
     correctNotes = [];
 
@@ -208,7 +211,7 @@ function drawStaff(){
   ctx.fillText("𝄞", 60, mid+30);
 }
 
-function drawNotes(showCorrect=false){
+function drawNotes(){
 
   // jogador
   playerNotes.forEach(n=>{
@@ -218,8 +221,8 @@ function drawNotes(showCorrect=false){
     ctx.fill();
   });
 
-  // corretas
-  if(showCorrect){
+  // corretas (AGORA FUNCIONA)
+  if(showCorrection){
     correctNotes.forEach(n=>{
       ctx.fillStyle="red";
       ctx.beginPath();
@@ -231,10 +234,10 @@ function drawNotes(showCorrect=false){
   ctx.fillStyle="black";
 }
 
-function draw(showCorrect=false){
+function draw(){
   ctx.clearRect(0,0,W,H);
   drawStaff();
-  drawNotes(showCorrect);
+  drawNotes();
 }
 
 // ===== START =====
@@ -244,6 +247,8 @@ function startGame(){
 
   playerNotes=[];
   correctNotes=[];
+  showCorrection=false;
+
   newSequence();
   playSequence();
   draw();
