@@ -36,6 +36,10 @@ body{
 
   <span>Precisão: <span id="accuracy">0%</span></span>
   <span>Notas: <span id="difficulty">3</span></span>
+
+  <span>BPM:</span>
+  <input type="range" min="40" max="180" value="90" id="bpm">
+  <span id="bpmValue">90</span>
 </div>
 
 <canvas id="canvas"></canvas>
@@ -51,6 +55,21 @@ function resize(){
 }
 resize();
 window.addEventListener("resize",resize);
+
+// ===== BPM =====
+let bpmInput = document.getElementById("bpm");
+let bpmValue = document.getElementById("bpmValue");
+
+let bpm = 90;
+bpmInput.oninput = () => {
+  bpm = Number(bpmInput.value);
+  bpmValue.innerText = bpm;
+};
+
+// velocidade baseada no BPM
+function getSpeed(){
+  return bpm / 45; // ajuste fino
+}
 
 // ===== CONFIG =====
 const notes = ["C4","D4","E4","F4","G4","A4","B4","C5","D5","E5","F5"];
@@ -72,11 +91,9 @@ let playerNotes = [];
 let difficulty = 3;
 
 let mode = "idle";
-
 let cursorX = 180;
 
-// 🎯 delay antes da primeira nota
-let startDelay = 40; // frames (~0.6s)
+let startDelay = 40;
 let delayCounter = 0;
 
 // ===== ÁUDIO =====
@@ -166,7 +183,6 @@ function startPlayback(){
 
 function repeatSequence(){
   if(mode === "playing") return;
-  // NÃO limpa playerNotes aqui 👇
   startPlayback();
 }
 
@@ -220,12 +236,8 @@ function evaluate(){
   let avg = Math.round(total / difficulty);
   document.getElementById("accuracy").innerText = avg + "%";
 
-  if(avg >= 66 && difficulty < 10){
-    difficulty++;
-  }
-  else if(avg < 33 && difficulty > 3){
-    difficulty--;
-  }
+  if(avg >= 66 && difficulty < 10) difficulty++;
+  else if(avg < 33 && difficulty > 3) difficulty--;
 
   mode = "correcting";
 
@@ -241,9 +253,8 @@ function evaluate(){
 function update(){
 
   if(mode === "playing"){
-    cursorX += 2;
+    cursorX += getSpeed();
 
-    // ⏳ espera antes de tocar a primeira nota
     if(delayCounter > 0){
       delayCounter--;
       return;
@@ -262,7 +273,7 @@ function update(){
   }
 
   if(mode === "playbackUser"){
-    cursorX += 2;
+    cursorX += getSpeed();
 
     playerNotes.forEach(n=>{
       if(!n.played && cursorX >= n.x){
@@ -290,8 +301,9 @@ function drawStaff(){
     ctx.stroke();
   }
 
+  // 🎼 CLAVE CORRIGIDA (ponto central na 2ª linha)
   ctx.font = "120px serif";
-  ctx.fillText("𝄞", 70, mid + space - 8);
+  ctx.fillText("𝄞", 70, mid + space);
 }
 
 function drawNote(n,color){
