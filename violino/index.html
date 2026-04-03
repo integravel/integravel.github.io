@@ -33,7 +33,7 @@ body{
   <button onclick="startGame()">Iniciar</button>
   <button onclick="repeatSequence()">Repetir</button>
   <span>Precisão: <span id="accuracy">0%</span></span>
-  <span>Notas: <span id="difficulty">1</span></span>
+  <span>Notas: <span id="difficulty">3</span></span>
 </div>
 
 <canvas id="canvas"></canvas>
@@ -66,7 +66,7 @@ const noteSteps = {
 let correctNotes = [];
 let playerNotes = [];
 
-let difficulty = 1;
+let difficulty = 3;
 
 let playing = false;
 let showCorrection = false;
@@ -129,7 +129,7 @@ function getNoteFromY(y){
   return best;
 }
 
-// ===== SEQUÊNCIA COM DIFICULDADE =====
+// ===== SEQUÊNCIA =====
 function newSequence(){
 
   correctNotes = [];
@@ -138,30 +138,20 @@ function newSequence(){
   let endX = W - 80;
   let usableWidth = endX - startX;
 
-  // intensidade da irregularidade cresce com dificuldade
-  let irregularity = difficulty / 10; // 0 → 1
+  let irregularity = Math.max(0, (difficulty-3)/7);
 
   let weights = [];
   let totalWeight = 0;
 
   for(let i=0;i<difficulty;i++){
-
-    let base = 1;
-
-    // irregularidade progressiva
     let variation = (Math.random()*2 - 1) * irregularity;
-
-    let w = base + variation;
-
-    // evita valores negativos ou muito pequenos
-    w = Math.max(0.3, w);
+    let w = Math.max(0.5, 1 + variation);
 
     weights.push(w);
     totalWeight += w;
   }
 
   let unitWidth = usableWidth / totalWeight;
-
   let x = startX;
 
   for(let i=0;i<difficulty;i++){
@@ -212,9 +202,9 @@ function update(){
   }
 }
 
-// ===== INPUT =====
+// ===== INPUT CORRIGIDO =====
 canvas.addEventListener("touchstart",e=>{
-  if(playing || showCorrection) return;
+  if(!playing) return;
   if(playerNotes.length >= difficulty) return;
 
   let t = e.touches[0];
@@ -222,24 +212,21 @@ canvas.addEventListener("touchstart",e=>{
   let noteName = getNoteFromY(t.clientY);
 
   playerNotes.push({
-    x:t.clientX,
-    y:getYFromNote(noteName),
-    note:noteName
+    x: t.clientX, // ← CORRETO
+    y: getYFromNote(noteName),
+    note: noteName
   });
 
   playNote(freq[noteName]);
-
-  if(playerNotes.length === difficulty){
-    evaluate();
-  }
 });
 
 // ===== AVALIAÇÃO =====
 function evaluate(){
 
   let total = 0;
+  let count = Math.min(playerNotes.length, correctNotes.length);
 
-  for(let i=0;i<difficulty;i++){
+  for(let i=0;i<count;i++){
 
     let dx = playerNotes[i].x - correctNotes[i].x;
     let dy = playerNotes[i].y - correctNotes[i].y;
@@ -253,14 +240,13 @@ function evaluate(){
     totalNotes++;
   }
 
-  let avg = Math.round(totalAccuracy / totalNotes);
+  let avg = totalNotes ? Math.round(totalAccuracy / totalNotes) : 0;
   document.getElementById("accuracy").innerText = avg + "%";
 
-  let roundAvg = total / difficulty;
+  let roundAvg = count ? total / count : 0;
 
-  // ajuste adaptativo (mais estável)
   if(roundAvg > 85 && difficulty < 10) difficulty++;
-  else if(roundAvg < 50 && difficulty > 1) difficulty--;
+  else if(roundAvg < 50 && difficulty > 3) difficulty--;
 
   showCorrection = true;
 
@@ -272,7 +258,7 @@ function evaluate(){
   },2000);
 }
 
-// ===== CLAVE =====
+// ===== DESENHO =====
 function drawStaff(){
 
   let mid = H/2;
@@ -293,18 +279,14 @@ function drawStaff(){
   ctx.fillText("𝄞", 70, solLineY - 8);
 }
 
-// ===== NOTAS (APENAS CABEÇA) =====
 function drawSingleNote(n, color){
-
   ctx.fillStyle = color;
-
   ctx.beginPath();
   ctx.ellipse(n.x,n.y,12,9,0,0,Math.PI*2);
   ctx.fill();
 }
 
 function drawNotes(){
-
   playerNotes.forEach(n=>drawSingleNote(n,"blue"));
 
   if(showCorrection){
@@ -332,6 +314,11 @@ function draw(){
 function loop(){
   update();
   draw();
+
+  if(!playing && !showCorrection && correctNotes.length){
+    evaluate();
+  }
+
   requestAnimationFrame(loop);
 }
 loop();
@@ -346,7 +333,7 @@ function startGame(){
   playerNotes=[];
   showCorrection=false;
 
-  difficulty = 1;
+  difficulty = 3;
 
   newSequence();
   startPlayback();
