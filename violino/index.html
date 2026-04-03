@@ -3,14 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Partitura Interativa - Violino</title>
+<title>Partitura Real - Violino</title>
 
 <style>
 body {
   margin: 0;
-  background: #111;
-  color: white;
-  font-family: sans-serif;
+  background: #fafafa;
+  font-family: serif;
   overflow: hidden;
 }
 
@@ -26,22 +25,20 @@ button, input {
   margin: 5px;
 }
 
-#canvas {
-  width: 100vw;
-  height: 100vh;
-  display: block;
-}
-
 #menu {
   position: fixed;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background: #222;
+  background: white;
+  border: 1px solid #ccc;
   padding: 20px;
   display: none;
   flex-direction: column;
-  gap: 10px;
+}
+
+canvas {
+  display: block;
 }
 </style>
 </head>
@@ -74,15 +71,28 @@ function resize(){
 resize();
 window.addEventListener("resize", resize);
 
-// Linhas da partitura
-const lines = 5;
-let lineSpacing;
+// Configuração musical
+const notesMap = [
+  "E4","F4","G4","A4","B4",
+  "C5","D5","E5","F5","G5",
+  "A5","B5","C6"
+];
+
+const freqMap = {
+  "E4":329,"F4":349,"G4":392,"A4":440,"B4":494,
+  "C5":523,"D5":587,"E5":659,"F5":698,"G5":784,
+  "A5":880,"B5":988,"C6":1046
+};
+
+let lineSpacing, staffTop;
 
 // Estado
 let notes = [];
 let running = false;
-let speed = 1;
 let startTime;
+let speed;
+let beatWidth = 80;
+let beatsPerMeasure = 4;
 
 // Toque
 let touchStartTime = 0;
@@ -91,77 +101,132 @@ let currentNote = null;
 // Áudio
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
-// Frequências aproximadas (violino simplificado)
-function getFrequency(y){
-  const scale = [
-    196, 220, 247, 262, 294,
-    330, 349, 392, 440, 494
-  ];
-  let index = Math.floor((y / height) * scale.length);
-  return scale[Math.max(0, Math.min(scale.length-1, index))];
-}
-
-function playFreq(freq, duration){
+function play(freq, duration){
   const osc = audioCtx.createOscillator();
   const gain = audioCtx.createGain();
 
-  osc.type = "sine";
   osc.frequency.value = freq;
+  osc.type = "sine";
 
   osc.connect(gain);
   gain.connect(audioCtx.destination);
 
   osc.start();
-
   gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
   gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
 
   osc.stop(audioCtx.currentTime + duration);
 }
 
-// Iniciar
-function start(){
-  notes = [];
-  running = true;
-  startTime = performance.now();
-  speed = parseInt(document.getElementById("bpm").value) / 60 * 100;
-  loop();
+// Converter posição em nota musical real
+function getNote(y){
+  let index = Math.round((y - staffTop) / (lineSpacing/2));
+  index = Math.max(0, Math.min(notesMap.length-1, index));
+  return notesMap[index];
 }
 
-// Parar
-function stop(){
-  running = false;
-  document.getElementById("menu").style.display = "flex";
+function getY(note){
+  let index = notesMap.indexOf(note);
+  return staffTop + index*(lineSpacing/2);
 }
 
-// Reiniciar
-function restart(){
-  document.getElementById("menu").style.display = "none";
-  notes = [];
+// Determinar duração musical
+function getDuration(ms){
+  if(ms < 150) return "colcheia";
+  if(ms < 350) return "seminima";
+  if(ms < 700) return "minima";
+  return "semibreve";
 }
 
-// Ouvir composição
-function playComposition(){
-  let t = audioCtx.currentTime;
-  notes.forEach(n => {
-    const dur = n.duration / 1000;
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
+// Desenho
+function drawStaff(){
+  lineSpacing = height/12;
+  staffTop = height/2 - (2*lineSpacing);
 
-    osc.frequency.value = n.freq;
-    osc.connect(gain);
-    gain.connect(audioCtx.destination);
+  ctx.strokeStyle = "black";
+  for(let i=0;i<5;i++){
+    let y = staffTop + i*lineSpacing;
+    ctx.beginPath();
+    ctx.moveTo(0,y);
+    ctx.lineTo(width,y);
+    ctx.stroke();
+  }
 
-    osc.start(t);
-    osc.stop(t + dur);
+  // clave de sol
+  ctx.font = `${lineSpacing*4}px serif`;
+  ctx.fillText("𝄞", 20, staffTop + lineSpacing*3);
 
-    t += dur;
-  });
+  // barras de compasso
+  ctx.strokeStyle = "#999";
+  for(let i=0;i<width;i+=beatWidth*beatsPerMeasure){
+    ctx.beginPath();
+    ctx.moveTo(i, staffTop);
+    ctx.lineTo(i, staffTop + 4*lineSpacing);
+    ctx.stroke();
+  }
 }
 
-// PDF (simples via print)
-function savePDF(){
-  window.print();
+function drawNote(n){
+  let y = getY(n.note);
+
+  ctx.fillStyle = "black";
+
+  // semibreve
+  if(n.type === "semibreve"){
+    ctx.beginPath();
+    ctx.ellipse(n.x, y, 10, 7, 0, 0, Math.PI*2);
+    ctx.stroke();
+  }
+
+  // mínima
+  else if(n.type === "minima"){
+    ctx.beginPath();
+    ctx.ellipse(n.x, y, 10, 7, 0, 0, Math.PI*2);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(n.x+10, y);
+    ctx.lineTo(n.x+10, y-35);
+    ctx.stroke();
+  }
+
+  // semínima
+  else if(n.type === "seminima"){
+    ctx.beginPath();
+    ctx.ellipse(n.x, y, 10, 7, 0, 0, Math.PI*2);
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.moveTo(n.x+10, y);
+    ctx.lineTo(n.x+10, y-35);
+    ctx.stroke();
+  }
+
+  // colcheia
+  else{
+    ctx.beginPath();
+    ctx.ellipse(n.x, y, 10, 7, 0, 0, Math.PI*2);
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.moveTo(n.x+10, y);
+    ctx.lineTo(n.x+10, y-35);
+    ctx.stroke();
+
+    // bandeirinha
+    ctx.beginPath();
+    ctx.moveTo(n.x+10, y-35);
+    ctx.quadraticCurveTo(n.x+25, y-25, n.x+10, y-15);
+    ctx.stroke();
+  }
+
+  // linhas suplementares
+  if(y < staffTop || y > staffTop + 4*lineSpacing){
+    ctx.beginPath();
+    ctx.moveTo(n.x-12, y);
+    ctx.lineTo(n.x+12, y);
+    ctx.stroke();
+  }
 }
 
 // Loop
@@ -170,83 +235,90 @@ function loop(){
 
   ctx.clearRect(0,0,width,height);
 
-  lineSpacing = height / 6;
+  drawStaff();
 
-  // desenhar linhas
-  ctx.strokeStyle = "white";
-  ctx.lineWidth = 2;
-  for(let i=1;i<=lines;i++){
-    let y = i * lineSpacing;
-    ctx.beginPath();
-    ctx.moveTo(0,y);
-    ctx.lineTo(width,y);
-    ctx.stroke();
-  }
-
-  let time = performance.now() - startTime;
-
-  // desenhar notas
-  notes.forEach(n => {
-    n.x -= speed * 0.016;
-
-    ctx.beginPath();
-    ctx.arc(n.x, n.y, 8, 0, Math.PI*2);
-    ctx.fill();
-
-    if(n.slide){
-      ctx.beginPath();
-      ctx.moveTo(n.x, n.y);
-      ctx.lineTo(n.x+20, n.slideY);
-      ctx.stroke();
-    }
+  notes.forEach(n=>{
+    n.x -= speed;
+    drawNote(n);
   });
 
   requestAnimationFrame(loop);
 }
 
-// Eventos de toque
-canvas.addEventListener("touchstart", e => {
+// Controle
+function start(){
+  notes = [];
+  running = true;
+  startTime = performance.now();
+  speed = parseInt(bpm.value)/60 * 2;
+  loop();
+}
+
+function stop(){
+  running = false;
+  menu.style.display = "flex";
+}
+
+function restart(){
+  notes = [];
+  menu.style.display = "none";
+}
+
+// Reprodução
+function playComposition(){
+  let t = audioCtx.currentTime;
+
+  notes.forEach(n=>{
+    let dur = {
+      colcheia:0.2,
+      seminima:0.4,
+      minima:0.8,
+      semibreve:1.6
+    }[n.type];
+
+    play(freqMap[n.note], dur);
+    t += dur;
+  });
+}
+
+// PDF
+function savePDF(){
+  window.print();
+}
+
+// Toque
+canvas.addEventListener("touchstart", e=>{
   if(!running) return;
 
-  const touch = e.touches[0];
+  let y = e.touches[0].clientY;
   touchStartTime = performance.now();
 
-  const freq = getFrequency(touch.clientY);
+  let note = getNote(y);
 
   currentNote = {
-    x: width - 50,
-    y: touch.clientY,
-    freq: freq,
-    duration: 0
+    x: width-60,
+    note: note,
+    type: "seminima"
   };
 
   notes.push(currentNote);
 });
 
-canvas.addEventListener("touchmove", e => {
+canvas.addEventListener("touchend", e=>{
   if(!currentNote) return;
 
-  const touch = e.touches[0];
+  let dur = performance.now() - touchStartTime;
+  currentNote.type = getDuration(dur);
 
-  currentNote.slide = true;
-  currentNote.slideY = touch.clientY;
-});
-
-canvas.addEventListener("touchend", e => {
-  if(!currentNote) return;
-
-  let duration = performance.now() - touchStartTime;
-  currentNote.duration = duration;
-
-  playFreq(currentNote.freq, duration/1000);
+  play(freqMap[currentNote.note], dur/1000);
 
   currentNote = null;
 });
 
 // orientação
 function checkOrientation(){
-  if(window.innerWidth < window.innerHeight){
-    alert("Vire o celular na horizontal");
+  if(window.innerHeight > window.innerWidth){
+    alert("Use na horizontal");
   }
 }
 checkOrientation();
@@ -255,4 +327,4 @@ window.addEventListener("resize", checkOrientation);
 </script>
 
 </body>
-  </html>
+</html>
