@@ -51,9 +51,7 @@ resize();
 window.addEventListener("resize",resize);
 
 // ===== CONFIG =====
-const notes = [
-"C4","D4","E4","F4","G4","A4","B4","C5","D5","E5","F5"
-];
+const notes = ["C4","D4","E4","F4","G4","A4","B4","C5","D5","E5","F5"];
 
 const freq = {
 "C4":261,"D4":294,"E4":329,"F4":349,"G4":392,
@@ -103,17 +101,14 @@ function playNote(f){
 function getYFromNote(note){
   let mid = H/2;
   let space = 32;
-
   let bottomLineY = mid + 2*space;
   let step = space/2;
-
   return bottomLineY - (noteSteps[note]*step);
 }
 
 function getNoteFromY(y){
   let mid = H/2;
   let space = 32;
-
   let bottomLineY = mid + 2*space;
   let step = space/2;
 
@@ -191,7 +186,7 @@ canvas.addEventListener("touchstart",e=>{
   if(playerNotes.length >= 5) return;
   if(showCorrection) return;
 
-  let t = e.touches[0]; // ✅ corrigido
+  let t = e.touches[0];
 
   let x = t.clientX;
   let y = t.clientY;
@@ -221,7 +216,6 @@ function evaluate(){
     let dy = playerNotes[i].y - correctNotes[i].y;
 
     let dist = Math.sqrt(dx*dx + dy*dy);
-
     let acc = dist <= tolerance ? 100 : Math.max(0, 100 - (dist/maxDist)*100);
 
     totalAccuracy += acc;
@@ -241,12 +235,41 @@ function evaluate(){
   },2000);
 }
 
+// ===== CLAVE PERFEITA =====
+function drawTrebleClef(x, y, scale){
+
+  ctx.lineWidth = 3;
+  ctx.strokeStyle = "black";
+
+  ctx.beginPath();
+
+  // espiral central (ALINHADA NA LINHA DO SOL)
+  ctx.arc(x, y, 12*scale, 0, Math.PI*2);
+
+  // haste
+  ctx.moveTo(x, y - 60*scale);
+  ctx.bezierCurveTo(
+    x - 20*scale, y - 30*scale,
+    x + 20*scale, y + 20*scale,
+    x, y + 80*scale
+  );
+
+  // curva inferior
+  ctx.bezierCurveTo(
+    x - 30*scale, y + 60*scale,
+    x + 10*scale, y + 40*scale,
+    x, y + 20*scale
+  );
+
+  ctx.stroke();
+}
+
 // ===== DESENHO =====
 function drawStaff(){
+
   let mid = H/2;
   let space = 32;
 
-  ctx.strokeStyle = "black";
   ctx.lineWidth = 2;
 
   for(let i=-2;i<=2;i++){
@@ -256,15 +279,13 @@ function drawStaff(){
     ctx.stroke();
   }
 
+  // linha do SOL (referência absoluta)
   let solLineY = mid + space;
 
-  ctx.font = "80px serif";
-  ctx.textBaseline = "alphabetic";
-
-  ctx.fillText("𝄞", 70, solLineY + 26);
+  drawTrebleClef(110, solLineY, 1);
 }
 
-// ===== DESENHO =====
+// ===== NOTAS =====
 function drawNotes(){
   playerNotes.forEach(n=>{
     ctx.fillStyle="blue";
