@@ -3,6 +3,7 @@ let filledCells = 0;
 let overflowErrors = 0;
 let currentPhase = 0;
 let score = 0;
+let completedPhases = [];
 
 // fases
 const phases = [
@@ -11,29 +12,49 @@ const phases = [
   { rows: 5, cols: 5, jars: [8, 6, 5, 4, 3, 2, 1, 7] }
 ];
 
-// carregar progresso salvo
+// ===== SAVE =====
 function loadSave() {
   const save = JSON.parse(localStorage.getItem("besouriz_save"));
   if (save) {
     currentPhase = save.phase || 0;
     score = save.score || 0;
+    completedPhases = save.completed || [];
   }
 }
 
-// salvar progresso
 function saveGame() {
   localStorage.setItem("besouriz_save", JSON.stringify({
     phase: currentPhase,
-    score: score
+    score: score,
+    completed: completedPhases
   }));
 }
 
-// embaralhar
+// ===== AUDIO =====
+function playPop() {
+  const ctx = new (window.AudioContext || window.webkitAudioContext)();
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+
+  osc.type = "sine";
+  osc.frequency.value = 600;
+
+  gain.gain.setValueAtTime(0.1, ctx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.2);
+
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+
+  osc.start();
+  osc.stop(ctx.currentTime + 0.2);
+}
+
+// ===== UTIL =====
 function shuffle(array) {
   return array.sort(() => Math.random() - 0.5);
 }
 
-// HUD
+// ===== HUD =====
 function createHUD() {
   const app = document.querySelector(".app");
 
@@ -45,12 +66,21 @@ function createHUD() {
       <div id="levelInfo"></div>
       <div id="progressBar"><div id="progressFill"></div></div>
     </div>
+
+    <div id="map"></div>
+
+    <div id="controls">
+      <button id="restartBtn">↻</button>
+    </div>
+
     <div id="stars"></div>
     <div id="score"></div>
     <div id="overflowInfo"></div>
   `;
 
   app.prepend(hud);
+
+  document.getElementById("restartBtn").onclick = () => loadPhase();
 }
 
 function updateHUD() {
@@ -58,19 +88,38 @@ function updateHUD() {
     `Fase ${currentPhase + 1} / ${phases.length}`;
 
   document.getElementById("overflowInfo").textContent =
-    overflowErrors > 0
-      ? `Sobras: ${overflowErrors}`
-      : "Perfeito";
+    overflowErrors > 0 ? `Sobras: ${overflowErrors}` : "Perfeito";
 
   document.getElementById("score").textContent =
-    `Pontuação: ${score}`;
+    `Score: ${score}`;
 
-  // progresso
   const progress = (filledCells / totalCells) * 100;
   document.getElementById("progressFill").style.width = progress + "%";
+
+  renderMap();
 }
 
-// estrelas
+// ===== MAPA =====
+function renderMap() {
+  const map = document.getElementById("map");
+  map.innerHTML = "";
+
+  phases.forEach((_, i) => {
+    const dot = document.createElement("span");
+
+    if (i === currentPhase) dot.classList.add("current");
+    if (completedPhases.includes(i)) dot.classList.add("done");
+
+    dot.onclick = () => {
+      currentPhase = i;
+      loadPhase();
+    };
+
+    map.appendChild(dot);
+  });
+}
+
+// ===== ESTRELAS =====
 function calculateStars() {
   if (overflowErrors === 0) return 3;
   if (overflowErrors <= 2) return 2;
@@ -86,7 +135,7 @@ function renderStars(qtd) {
   }
 }
 
-// carregar fase
+// ===== FASE =====
 function loadPhase() {
   const data = phases[currentPhase];
 
@@ -114,7 +163,7 @@ function loadPhase() {
   }, 300);
 }
 
-// tabuleiro
+// ===== BOARD =====
 function createBoard(rows, cols) {
   const board = document.getElementById("board");
   board.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
@@ -129,7 +178,7 @@ function createBoard(rows, cols) {
   enableBoardDrops();
 }
 
-// jarros
+// ===== JAR =====
 function createJars(jars) {
   const jarArea = document.getElementById("jarArea");
 
@@ -152,8 +201,8 @@ function createJars(jars) {
       <div class="jar-body">${bugs}</div>
     `;
 
-    jar.addEventListener("dragstart", (event) => {
-      event.dataTransfer.setData("text/plain", jar.id);
+    jar.addEventListener("dragstart", (e) => {
+      e.dataTransfer.setData("text/plain", jar.id);
       setTimeout(() => jar.classList.add("dragging"), 0);
     });
 
@@ -165,7 +214,33 @@ function createJars(jars) {
   });
 }
 
-// drop
+// ===== ANIMAÇÃO BESOURO =====
+function animateBug(fromEl, toEl) {
+  const bug = document.createElement("div");
+  bug.textContent = "🐞";
+  bug.style.position = "fixed";
+  bug.style.zIndex = 999;
+
+  const from = fromEl.getBoundingClientRect();
+  const to = toEl.getBoundingClientRect();
+
+  bug.style.left = from.left + "px";
+  bug.style.top = from.top + "px";
+
+  document.body.appendChild(bug);
+
+  bug.animate([
+    { transform: "translate(0,0)" },
+    { transform: `translate(${to.left - from.left}px, ${to.top - from.top}px)` }
+  ], {
+    duration: 400,
+    easing: "ease-out"
+  });
+
+  setTimeout(() => bug.remove(), 400);
+}
+
+// ===== DROP =====
 function enableBoardDrops() {
   const board = document.getElementById("board");
 
@@ -199,18 +274,16 @@ function enableBoardDrops() {
       const cell = emptyCells[i];
 
       setTimeout(() => {
+        animateBug(jar, cell);
+
         cell.textContent = "🐞";
         cell.dataset.filled = "true";
 
-        cell.style.transform = "scale(1.3)";
-        setTimeout(() => {
-          cell.style.transform = "scale(1)";
-        }, 150);
+        playPop();
 
-      }, i * 80);
-
-      filledCells++;
-      updateHUD();
+        filledCells++;
+        updateHUD();
+      }, i * 120);
     }
 
     if (extra > 0) overflowErrors += extra;
@@ -222,7 +295,7 @@ function enableBoardDrops() {
   });
 }
 
-// fim
+// ===== FIM =====
 function checkEnd() {
   if (filledCells === totalCells) {
     setTimeout(() => {
@@ -231,23 +304,25 @@ function checkEnd() {
 
       score += stars * 10;
 
+      if (!completedPhases.includes(currentPhase)) {
+        completedPhases.push(currentPhase);
+      }
+
       nextPhase();
-    }, 600);
+    }, 700);
   }
 }
 
 function nextPhase() {
   currentPhase++;
 
-  if (currentPhase >= phases.length) {
-    currentPhase = 0;
-  }
+  if (currentPhase >= phases.length) currentPhase = 0;
 
   saveGame();
   loadPhase();
 }
 
-// init
+// ===== INIT =====
 loadSave();
 createHUD();
 loadPhase();
