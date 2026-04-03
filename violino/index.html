@@ -127,20 +127,25 @@ function getNoteFromY(y){
 // ===== INPUT =====
 canvas.addEventListener("touchstart",e=>{
   if(playing) return;
+  if(playerNotes.length >= 5) return;
 
   let touch = e.touches[0];
+
+  let x = touch.clientX;
   let y = touch.clientY;
 
   let noteIndex = getNoteFromY(y);
   noteIndex = Math.max(0, Math.min(notes.length-1, noteIndex));
 
-  let x = 150 + playerNotes.length*100;
-
-  playerNotes.push({x, y:getYFromNote(noteIndex), note:noteIndex});
+  playerNotes.push({
+    x: x,
+    y: getYFromNote(noteIndex),
+    note: noteIndex
+  });
 
   playNote(freq[notes[noteIndex]]);
 
-  if(playerNotes.length === sequence.length){
+  if(playerNotes.length === 5){
     evaluate();
   }
 
@@ -151,20 +156,20 @@ canvas.addEventListener("touchstart",e=>{
 function evaluate(){
 
   correctNotes = sequence.map((n,i)=>({
-    x:150 + i*100,
+    x:150 + i*120,
     y:getYFromNote(n),
     note:n
   }));
 
   let total = 0;
 
-  for(let i=0;i<sequence.length;i++){
+  for(let i=0;i<5;i++){
     let dx = playerNotes[i].x - correctNotes[i].x;
     let dy = playerNotes[i].y - correctNotes[i].y;
 
     let dist = Math.sqrt(dx*dx + dy*dy);
 
-    let points = Math.max(0, 100 - dist);
+    let points = Math.max(0, 100 - dist*0.5);
     total += points;
   }
 
