@@ -294,4 +294,24 @@ function checkEnd() {
     if (overflowErrors === 0) {
       feedback.textContent = "Perfeito! ✨";
     } else {
-      feedback.textContent = `Quase! Sob
+      feedback.textContent = `Quase! Sobraram ${overflowErrors} 🐞`;
+    }
+
+    setTimeout(()=>{
+      currentPhase++;
+      loadPhase();
+    }, 700);
+  }
+}
+
+// ===== INIT =====
+const board = document.getElementById("board");
+const jarArea = document.getElementById("jarArea");
+const feedback = document.getElementById("feedback");
+
+loadPhase();
+
+</script>
+
+</body>
+</html>
