@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tetris Musical - Violino</title>
+<title>Ditado Musical - Violino</title>
 
 <style>
 body {
@@ -24,16 +24,19 @@ button,input{
   font-size:16px;
   margin:5px;
 }
+
+canvas{
+  display:block;
+}
 </style>
 </head>
 
 <body>
 
 <div id="ui">
-BPM <input type="number" id="bpm" value="90">
-<button onclick="start()">Iniciar</button>
-<button onclick="playAll()">Ouvir</button>
-<button onclick="savePDF()">Salvar PDF</button>
+BPM <input type="number" id="bpm" value="80">
+<button onclick="startGame()">Iniciar</button>
+<p>Pontos: <span id="score">0</span></p>
 </div>
 
 <canvas id="canvas"></canvas>
@@ -51,185 +54,161 @@ resize();
 window.addEventListener("resize",resize);
 
 // ===== CONFIG =====
-const COLS = 8;
-const ROWS = 12;
-let grid = [];
-let cellW, cellH;
-
-// ===== NOTAS =====
-const notesMap = [
+const notes = [
 "E4","F4","G4","A4","B4",
 "C5","D5","E5","F5","G5",
-"A5","B5"
+"A5"
 ];
 
-const freqMap = {
+const freq = {
 "E4":329,"F4":349,"G4":392,"A4":440,"B4":494,
 "C5":523,"D5":587,"E5":659,"F5":698,"G5":784,
-"A5":880,"B5":988
+"A5":880
 };
+
+let sequence = [];
+let playerInput = [];
+let playing = false;
+let score = 0;
 
 // ===== ÁUDIO =====
 const audioCtx = new (window.AudioContext||window.webkitAudioContext)();
 
-function play(freq){
+function playNote(f){
   const osc = audioCtx.createOscillator();
   const gain = audioCtx.createGain();
 
-  osc.frequency.value = freq;
+  osc.frequency.value = f;
+  osc.type = "sine";
+
   osc.connect(gain);
   gain.connect(audioCtx.destination);
 
   osc.start();
   gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
-  gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.5);
-  osc.stop(audioCtx.currentTime+0.5);
+  gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.6);
+  osc.stop(audioCtx.currentTime+0.6);
 }
 
-// ===== PEÇAS =====
-const shapes = [
-  [[0,0],[1,0],[2,0],[3,0],[4,0]], // linha
-  [[0,0],[0,1],[1,1],[2,1],[2,2]],
-  [[1,0],[0,1],[1,1],[2,1],[1,2]]
-];
-
-let current;
-
-// ===== JOGO =====
-function initGrid(){
-  grid=[];
-  for(let r=0;r<ROWS;r++){
-    grid[r]=Array(COLS).fill(null);
+// ===== GERAR SEQUÊNCIA =====
+function newSequence(){
+  sequence = [];
+  for(let i=0;i<5;i++){
+    let n = Math.floor(Math.random()*notes.length);
+    sequence.push(n);
   }
 }
 
-function spawnPiece(){
-  let shape = shapes[Math.floor(Math.random()*shapes.length)];
+// ===== TOCAR SEQUÊNCIA =====
+async function playSequence(){
+  playing = true;
+  let bpm = document.getElementById("bpm").value;
+  let tempo = 60000/bpm;
 
-  current = {
-    shape,
-    x: Math.floor(COLS/2),
-    y: 0,
-    pitch: 5
-  };
-}
-
-function canMove(dx,dy){
-  return current.shape.every(p=>{
-    let x = current.x + p[0] + dx;
-    let y = current.y + p[1] + dy;
-    return x>=0 && x<COLS && y<ROWS && (!grid[y] || !grid[y][x]);
-  });
-}
-
-function merge(){
-  current.shape.forEach(p=>{
-    let x=current.x+p[0];
-    let y=current.y+p[1];
-    grid[y][x] = current.pitch;
-    play(freqMap[notesMap[current.pitch]]);
-  });
-
-  clearLines();
-  spawnPiece();
-}
-
-function clearLines(){
-  for(let c=0;c<COLS;c++){
-    let full=true;
-    for(let r=0;r<ROWS;r++){
-      if(!grid[r][c]) full=false;
-    }
-
-    if(full){
-      for(let r=0;r<ROWS;r++){
-        grid[r][c]=null;
-      }
-    }
+  for(let n of sequence){
+    playNote(freq[notes[n]]);
+    await new Promise(r=>setTimeout(r,tempo));
   }
+
+  // som de reinício
+  playNote(200);
+  playing = false;
 }
 
-// ===== CONTROLE =====
-canvas.addEventListener("touchmove",e=>{
-  if(!current) return;
+// ===== INPUT =====
+canvas.addEventListener("touchstart",e=>{
+  if(playing) return;
 
-  let y=e.touches[0].clientY;
-  current.pitch = Math.floor((y/H)*notesMap.length);
-});
+  let y = e.touches[0].clientY;
+  let noteIndex = Math.floor((y/H)*notes.length);
 
-// ===== LOOP =====
-let lastDrop=0;
-let speed=500;
-let running=false;
+  playerInput.push(noteIndex);
+  playNote(freq[notes[noteIndex]]);
 
-function loop(t){
-  if(!running) return;
-
-  if(t-lastDrop>speed){
-    if(canMove(0,1)){
-      current.y++;
-    }else{
-      merge();
-    }
-    lastDrop=t;
+  if(playerInput.length === sequence.length){
+    checkResult();
   }
 
   draw();
-  requestAnimationFrame(loop);
+});
+
+// ===== RESULTADO =====
+function checkResult(){
+  let correct = 0;
+
+  for(let i=0;i<sequence.length;i++){
+    if(sequence[i] === playerInput[i]) correct++;
+  }
+
+  score += correct;
+  document.getElementById("score").innerText = score;
+
+  playerInput = [];
+
+  setTimeout(()=>{
+    newSequence();
+    playSequence();
+  },800);
 }
 
 // ===== DESENHO =====
-function draw(){
-  ctx.clearRect(0,0,W,H);
+function drawStaff(){
+  let mid = H/2;
+  let space = 15;
 
-  cellW = W/COLS;
-  cellH = H/ROWS;
+  ctx.strokeStyle="black";
 
-  // grid
-  for(let r=0;r<ROWS;r++){
-    for(let c=0;c<COLS;c++){
-      if(grid[r][c]!=null){
-        drawNote(c,r,grid[r][c]);
-      }
-    }
+  for(let i=-2;i<=2;i++){
+    ctx.beginPath();
+    ctx.moveTo(50, mid + i*space);
+    ctx.lineTo(W-50, mid + i*space);
+    ctx.stroke();
   }
 
-  // peça atual
-  current.shape.forEach(p=>{
-    drawNote(current.x+p[0], current.y+p[1], current.pitch);
+  // clave de sol
+  ctx.font="60px serif";
+  ctx.fillText("𝄞", 60, mid+20);
+}
+
+function drawNotes(){
+  let mid = H/2;
+  let space = 15;
+
+  sequence.forEach((n,i)=>{
+    let x = 150 + i*80;
+    let y = mid - (n-5)*space;
+
+    ctx.beginPath();
+    ctx.ellipse(x,y,10,7,0,0,Math.PI*2);
+    ctx.fill();
+  });
+
+  playerInput.forEach((n,i)=>{
+    let x = 150 + i*80;
+    let y = mid - (n-5)*space;
+
+    ctx.fillStyle="blue";
+    ctx.beginPath();
+    ctx.ellipse(x,y,10,7,0,0,Math.PI*2);
+    ctx.fill();
+    ctx.fillStyle="black";
   });
 }
 
-function drawNote(c,r,pitch){
-  let x=c*cellW;
-  let y=r*cellH;
-
-  ctx.fillStyle="black";
-  ctx.beginPath();
-  ctx.ellipse(x+cellW/2,y+cellH/2,8,6,0,0,Math.PI*2);
-  ctx.fill();
+function draw(){
+  ctx.clearRect(0,0,W,H);
+  drawStaff();
+  drawNotes();
 }
 
-// ===== CONTROLES =====
-function start(){
-  initGrid();
-  spawnPiece();
-  running=true;
-  loop(0);
-}
+// ===== START =====
+function startGame(){
+  score=0;
+  document.getElementById("score").innerText = score;
 
-function playAll(){
-  grid.forEach(col=>{
-    col.forEach(p=>{
-      if(p!=null){
-        play(freqMap[notesMap[p]]);
-      }
-    });
-  });
-}
-
-function savePDF(){
-  window.print();
+  newSequence();
+  playSequence();
+  draw();
 }
 
 </script>
