@@ -3,7 +3,7 @@ let filledCells = 0;
 let overflowErrors = 0;
 let currentPhase = 0;
 
-// DUAS FASES
+// Fases
 const phases = [
   {
     rows: 3,
@@ -17,6 +17,7 @@ const phases = [
   }
 ];
 
+// Embaralhar jarros
 function shuffle(array) {
   return array.sort(() => Math.random() - 0.5);
 }
@@ -61,10 +62,12 @@ function createJars(jars) {
     jar.draggable = true;
     jar.dataset.amount = amount;
 
-    // cria besouros visuais
+    // tamanho adaptativo dos besouros
+    const size = amount >= 7 ? 11 : amount >= 5 ? 12 : amount >= 3 ? 13 : 15;
+
     let bugs = "";
     for (let i = 0; i < amount; i++) {
-      bugs += "<span>🐞</span>";
+      bugs += `<span style="font-size:${size}px">🐞</span>`;
     }
 
     jar.innerHTML = `
@@ -72,6 +75,7 @@ function createJars(jars) {
       <div class="jar-body">${bugs}</div>
     `;
 
+    // drag suave
     jar.addEventListener("dragstart", (event) => {
       event.dataTransfer.setData("text/plain", jar.id);
 
@@ -117,6 +121,7 @@ function enableBoardDrops() {
     const toPlace = Math.min(amount, emptyCells.length);
     const extra = amount - toPlace;
 
+    // animação suave
     for (let i = 0; i < toPlace; i++) {
       const cell = emptyCells[i];
 
