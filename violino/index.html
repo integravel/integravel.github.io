@@ -60,7 +60,6 @@ const freq = {
 "A4":440,"B4":494,"C5":523,"D5":587,"E5":659,"F5":698
 };
 
-// passos relativos ao E4
 const noteSteps = {
 "C4":-2,"D4":-1,"E4":0,"F4":1,"G4":2,
 "A4":3,"B4":4,"C5":5,"D5":6,"E5":7,"F5":8
@@ -76,7 +75,7 @@ let showCorrection = false;
 let totalAccuracy = 0;
 let totalNotes = 0;
 
-let cursorX = 150;
+let cursorX = 180;
 let cursorSpeed = 0;
 
 // ===== ÁUDIO =====
@@ -102,9 +101,8 @@ function playNote(f){
 
 // ===== POSIÇÃO DAS NOTAS =====
 function getYFromNote(note){
-
   let mid = H/2;
-  let space = 32; // leve ajuste visual
+  let space = 32;
 
   let bottomLineY = mid + 2*space;
   let step = space/2;
@@ -113,7 +111,6 @@ function getYFromNote(note){
 }
 
 function getNoteFromY(y){
-
   let mid = H/2;
   let space = 32;
 
@@ -154,7 +151,6 @@ function newSequence(){
 
 // ===== PLAYBACK =====
 function startPlayback(){
-
   let bpm = document.getElementById("bpm").value;
   let tempo = 60000/bpm;
 
@@ -162,20 +158,17 @@ function startPlayback(){
   cursorSpeed = 120 / (tempo/16);
 
   playing = true;
-
   correctNotes.forEach(n=>n.played=false);
 }
 
 function repeatSequence(){
   if(playing || showCorrection) return;
-
   playerNotes = [];
   startPlayback();
 }
 
 // ===== LOOP =====
 function update(){
-
   if(playing){
     cursorX += cursorSpeed;
 
@@ -198,7 +191,7 @@ canvas.addEventListener("touchstart",e=>{
   if(playerNotes.length >= 5) return;
   if(showCorrection) return;
 
-  let t = e.touches[0;
+  let t = e.touches[0]; // ✅ corrigido
 
   let x = t.clientX;
   let y = t.clientY;
@@ -220,12 +213,10 @@ canvas.addEventListener("touchstart",e=>{
 
 // ===== AVALIAÇÃO =====
 function evaluate(){
-
   let maxDist = 200;
   let tolerance = maxDist * 0.1;
 
   for(let i=0;i<5;i++){
-
     let dx = playerNotes[i].x - correctNotes[i].x;
     let dy = playerNotes[i].y - correctNotes[i].y;
 
@@ -245,7 +236,6 @@ function evaluate(){
   setTimeout(()=>{
     showCorrection = false;
     playerNotes = [];
-
     newSequence();
     startPlayback();
   },2000);
@@ -253,7 +243,6 @@ function evaluate(){
 
 // ===== DESENHO =====
 function drawStaff(){
-
   let mid = H/2;
   let space = 32;
 
@@ -267,50 +256,17 @@ function drawStaff(){
     ctx.stroke();
   }
 
-  // ===== CLAVE PERFEITAMENTE AJUSTADA =====
+  let solLineY = mid + space;
 
-  let solLineY = mid + space; // linha do G4
-
-  ctx.font = "80px serif"; // menor (proporcional)
+  ctx.font = "80px serif";
   ctx.textBaseline = "alphabetic";
 
-  // ajuste fino MUITO importante
   ctx.fillText("𝄞", 70, solLineY + 26);
 }
 
-// linhas suplementares
-function drawLedgerLines(x, note){
-
-  let y = getYFromNote(note);
-  let mid = H/2;
-  let space = 32;
-
-  let topLine = mid - 2*space;
-  let bottomLine = mid + 2*space;
-
-  if(y < topLine){
-    for(let ly = topLine - space; ly >= y; ly -= space){
-      ctx.beginPath();
-      ctx.moveTo(x-20, ly);
-      ctx.lineTo(x+20, ly);
-      ctx.stroke();
-    }
-  }
-
-  if(y > bottomLine){
-    for(let ly = bottomLine + space; ly <= y; ly += space){
-      ctx.beginPath();
-      ctx.moveTo(x-20, ly);
-      ctx.lineTo(x+20, ly);
-      ctx.stroke();
-    }
-  }
-}
-
+// ===== DESENHO =====
 function drawNotes(){
-
   playerNotes.forEach(n=>{
-    drawLedgerLines(n.x,n.note);
     ctx.fillStyle="blue";
     ctx.beginPath();
     ctx.ellipse(n.x,n.y,14,10,0,0,Math.PI*2);
@@ -319,7 +275,6 @@ function drawNotes(){
 
   if(showCorrection){
     correctNotes.forEach(n=>{
-      drawLedgerLines(n.x,n.note);
       ctx.fillStyle="red";
       ctx.beginPath();
       ctx.ellipse(n.x,n.y,14,10,0,0,Math.PI*2);
