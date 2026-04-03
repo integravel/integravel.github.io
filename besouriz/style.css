@@ -186,3 +186,30 @@ body {
 #score {
   font-weight: bold;
 }
+
+
+#map span {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin: 2px;
+  border-radius: 50%;
+  background: #c0b8a5;
+  cursor: pointer;
+}
+
+#map span.current {
+  background: #5f5747;
+}
+
+#map span.done {
+  background: #8c8370;
+}
+
+#controls button {
+  border: none;
+  background: #d8d2c2;
+  padding: 4px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+}
