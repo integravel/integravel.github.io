@@ -49,7 +49,7 @@ function resize(){
 resize();
 window.addEventListener("resize",resize);
 
-// ===== NOTAS =====
+// ===== CONFIG =====
 const notes = [
 "E4","F4","G4","A4","B4",
 "C5","D5","E5","F5","G5",
@@ -63,7 +63,8 @@ const freq = {
 };
 
 let sequence = [];
-let playerInput = [];
+let playerNotes = [];
+let correctNotes = [];
 let playing = false;
 let score = 0;
 
@@ -106,57 +107,86 @@ async function playSequence(){
     await new Promise(r=>setTimeout(r,tempo));
   }
 
-  playNote(200); // som de reinício
+  playNote(200);
   playing = false;
+}
+
+// ===== MAPEAMENTO =====
+function getYFromNote(n){
+  let mid = H/2;
+  let space = 35;
+  return mid - (n-5)*space;
+}
+
+function getNoteFromY(y){
+  let mid = H/2;
+  let space = 35;
+  return Math.round(5 - (y-mid)/space);
 }
 
 // ===== INPUT =====
 canvas.addEventListener("touchstart",e=>{
   if(playing) return;
 
-  let y = e.touches[0].clientY;
+  let touch = e.touches[0];
+  let y = touch.clientY;
 
-  let noteIndex = Math.floor((y/H)*notes.length);
+  let noteIndex = getNoteFromY(y);
   noteIndex = Math.max(0, Math.min(notes.length-1, noteIndex));
 
-  playerInput.push(noteIndex);
+  let x = 150 + playerNotes.length*100;
+
+  playerNotes.push({x, y:getYFromNote(noteIndex), note:noteIndex});
 
   playNote(freq[notes[noteIndex]]);
 
-  if(playerInput.length === sequence.length){
-    checkResult();
+  if(playerNotes.length === sequence.length){
+    evaluate();
   }
 
   draw();
 });
 
-// ===== RESULTADO =====
-function checkResult(){
-  let correct = 0;
+// ===== AVALIAÇÃO =====
+function evaluate(){
+
+  correctNotes = sequence.map((n,i)=>({
+    x:150 + i*100,
+    y:getYFromNote(n),
+    note:n
+  }));
+
+  let total = 0;
 
   for(let i=0;i<sequence.length;i++){
-    if(sequence[i] === playerInput[i]) correct++;
+    let dx = playerNotes[i].x - correctNotes[i].x;
+    let dy = playerNotes[i].y - correctNotes[i].y;
+
+    let dist = Math.sqrt(dx*dx + dy*dy);
+
+    let points = Math.max(0, 100 - dist);
+    total += points;
   }
 
-  score += correct;
+  score += Math.round(total);
   document.getElementById("score").innerText = score;
 
-  playerInput = [];
+  draw(true);
 
   setTimeout(()=>{
+    playerNotes=[];
+    correctNotes=[];
     newSequence();
     playSequence();
-  },800);
+  },1500);
 }
 
 // ===== DESENHO =====
 function drawStaff(){
   let mid = H/2;
+  let space = 35;
 
-  let space = 35; // 🔥 aumentamos bastante
-
-  ctx.lineWidth = 2;
-  ctx.strokeStyle="black";
+  ctx.lineWidth=2;
 
   for(let i=-2;i<=2;i++){
     ctx.beginPath();
@@ -165,29 +195,37 @@ function drawStaff(){
     ctx.stroke();
   }
 
-  // clave de sol
   ctx.font="90px serif";
   ctx.fillText("𝄞", 60, mid+30);
 }
 
-function drawPlayerNotes(){
-  let mid = H/2;
-  let space = 35;
+function drawNotes(showCorrect=false){
 
-  playerInput.forEach((n,i)=>{
-    let x = 150 + i*100;
-    let y = mid - (n-5)*space;
-
+  // jogador
+  playerNotes.forEach(n=>{
+    ctx.fillStyle="blue";
     ctx.beginPath();
-    ctx.ellipse(x,y,14,10,0,0,Math.PI*2);
+    ctx.ellipse(n.x,n.y,14,10,0,0,Math.PI*2);
     ctx.fill();
   });
+
+  // corretas
+  if(showCorrect){
+    correctNotes.forEach(n=>{
+      ctx.fillStyle="red";
+      ctx.beginPath();
+      ctx.ellipse(n.x,n.y,14,10,0,0,Math.PI*2);
+      ctx.fill();
+    });
+  }
+
+  ctx.fillStyle="black";
 }
 
-function draw(){
+function draw(showCorrect=false){
   ctx.clearRect(0,0,W,H);
   drawStaff();
-  drawPlayerNotes();
+  drawNotes(showCorrect);
 }
 
 // ===== START =====
@@ -195,7 +233,8 @@ function startGame(){
   score=0;
   document.getElementById("score").innerText = score;
 
-  playerInput=[];
+  playerNotes=[];
+  correctNotes=[];
   newSequence();
   playSequence();
   draw();
