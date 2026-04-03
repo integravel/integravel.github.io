@@ -3,178 +3,104 @@ let filledCells = 0;
 let overflowErrors = 0;
 let currentPhase = 0;
 let score = 0;
-let completedPhases = [];
 
-// fases
-const phases = [
+// ===== FASES FIXAS =====
+const basePhases = [
   { rows: 3, cols: 3, jars: [4, 1, 2, 1, 2, 3] },
   { rows: 4, cols: 4, jars: [5, 3, 4, 2, 1, 6, 3] },
   { rows: 5, cols: 5, jars: [8, 6, 5, 4, 3, 2, 1, 7] }
 ];
 
-// ===== SAVE =====
-function loadSave() {
-  const save = JSON.parse(localStorage.getItem("besouriz_save"));
-  if (save) {
-    currentPhase = save.phase || 0;
-    score = save.score || 0;
-    completedPhases = save.completed || [];
-  }
-}
-
-function saveGame() {
-  localStorage.setItem("besouriz_save", JSON.stringify({
-    phase: currentPhase,
-    score: score,
-    completed: completedPhases
-  }));
-}
+let currentData = null;
 
 // ===== UTIL =====
-function shuffle(array) {
-  return array.sort(() => Math.random() - 0.5);
+function shuffle(arr) {
+  return arr.sort(() => Math.random() - 0.5);
 }
 
-// ===== HUD =====
-function createHUD() {
-  const app = document.querySelector(".app");
+// ===== DIFICULDADE INTELIGENTE =====
+function getDifficultyFactor() {
+  let factor = 1;
 
-  const hud = document.createElement("div");
-  hud.id = "hud";
+  if (overflowErrors === 0) factor += 0.5;
+  if (overflowErrors >= 3) factor -= 0.3;
 
-  hud.innerHTML = `
-    <div>
-      <div id="levelInfo"></div>
-      <div id="progressBar"><div id="progressFill"></div></div>
-    </div>
-
-    <div id="map"></div>
-
-    <div id="controls">
-      <button id="restartBtn">Reiniciar</button>
-    </div>
-
-    <div id="stars"></div>
-    <div id="score"></div>
-    <div id="overflowInfo"></div>
-  `;
-
-  app.prepend(hud);
-
-  document.getElementById("restartBtn").onclick = () => loadPhase();
+  return Math.max(0.7, Math.min(2, factor));
 }
 
-function updateHUD() {
-  document.getElementById("levelInfo").textContent =
-    `Fase ${currentPhase + 1} / ${phases.length}`;
+function generateDynamicPhase() {
+  const factor = getDifficultyFactor();
 
-  document.getElementById("overflowInfo").textContent =
-    overflowErrors > 0 ? `Sobras: ${overflowErrors}` : "Perfeito";
+  const size = Math.floor(3 + factor * 2);
+  const total = size * size;
 
-  document.getElementById("score").textContent =
-    `Score: ${score}`;
+  let jars = [];
+  let sum = 0;
 
-  const progress = (filledCells / totalCells) * 100;
-  document.getElementById("progressFill").style.width = progress + "%";
-
-  renderMap();
-}
-
-// ===== MAPA =====
-function renderMap() {
-  const map = document.getElementById("map");
-  map.innerHTML = "";
-
-  phases.forEach((_, i) => {
-    const dot = document.createElement("span");
-
-    if (i === currentPhase) dot.classList.add("current");
-    if (completedPhases.includes(i)) dot.classList.add("done");
-
-    dot.onclick = () => {
-      currentPhase = i;
-      loadPhase();
-    };
-
-    map.appendChild(dot);
-  });
-}
-
-// ===== ESTRELAS =====
-function calculateStars() {
-  if (overflowErrors === 0) return 3;
-  if (overflowErrors <= 2) return 2;
-  return 1;
-}
-
-function renderStars(qtd) {
-  const starsDiv = document.getElementById("stars");
-  starsDiv.innerHTML = "";
-
-  for (let i = 0; i < 3; i++) {
-    starsDiv.innerHTML += i < qtd ? "⭐" : "☆";
+  while (sum < total) {
+    let value = Math.floor(Math.random() * (3 + factor * 4)) + 1;
+    jars.push(value);
+    sum += value;
   }
+
+  return {
+    rows: size,
+    cols: size,
+    jars: shuffle(jars)
+  };
 }
 
-// ===== FASE =====
+// ===== LOAD =====
 function loadPhase() {
-  const data = phases[currentPhase];
+  if (currentPhase < basePhases.length) {
+    currentData = basePhases[currentPhase];
+  } else {
+    currentData = generateDynamicPhase();
+  }
 
-  totalCells = data.rows * data.cols;
+  totalCells = currentData.rows * currentData.cols;
   filledCells = 0;
   overflowErrors = 0;
 
   const board = document.getElementById("board");
   const jarArea = document.getElementById("jarArea");
 
-  board.style.opacity = 0;
-  jarArea.style.opacity = 0;
+  board.innerHTML = "";
+  jarArea.innerHTML = "";
 
-  setTimeout(() => {
-    board.innerHTML = "";
-    jarArea.innerHTML = "";
-
-    createBoard(data.rows, data.cols);
-    createJars(shuffle([...data.jars]));
-
-    updateHUD();
-
-    board.style.opacity = 1;
-    jarArea.style.opacity = 1;
-  }, 300);
+  createBoard(currentData.rows, currentData.cols);
+  createJars(currentData.jars);
 }
 
 // ===== BOARD =====
-function createBoard(rows, cols) {
+function createBoard(r, c) {
   const board = document.getElementById("board");
-  board.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+  board.style.gridTemplateColumns = `repeat(${c},1fr)`;
 
-  for (let i = 0; i < rows * cols; i++) {
+  for (let i = 0; i < r * c; i++) {
     const cell = document.createElement("div");
     cell.className = "cell";
     cell.dataset.filled = "false";
     board.appendChild(cell);
   }
 
-  enableBoardDrops();
+  enableDrop();
 }
 
 // ===== JAR =====
 function createJars(jars) {
-  const jarArea = document.getElementById("jarArea");
+  const area = document.getElementById("jarArea");
 
-  jars.forEach((amount, index) => {
+  jars.forEach((amount, i) => {
     const jar = document.createElement("div");
     jar.className = "jar";
-    jar.id = `jar-${index}`;
+    jar.id = "jar-" + i;
     jar.draggable = true;
     jar.dataset.amount = amount;
 
-    const size = amount >= 7 ? 11 : amount >= 5 ? 12 : amount >= 3 ? 13 : 15;
-
     let bugs = "";
-    for (let i = 0; i < amount; i++) {
-      bugs += `<span style="font-size:${size}px">🐞</span>`;
+    for (let j = 0; j < amount; j++) {
+      bugs += "<span>🐞</span>";
     }
 
     jar.innerHTML = `
@@ -182,111 +108,64 @@ function createJars(jars) {
       <div class="jar-body">${bugs}</div>
     `;
 
-    jar.addEventListener("dragstart", (e) => {
-      e.dataTransfer.setData("text/plain", jar.id);
-      setTimeout(() => jar.classList.add("dragging"), 0);
+    jar.addEventListener("dragstart", e => {
+      e.dataTransfer.setData("text", jar.id);
     });
 
-    jar.addEventListener("dragend", () => {
-      jar.classList.remove("dragging");
-    });
-
-    jarArea.appendChild(jar);
+    area.appendChild(jar);
   });
 }
 
 // ===== DROP =====
-function enableBoardDrops() {
+function enableDrop() {
   const board = document.getElementById("board");
 
-  board.addEventListener("dragover", (e) => {
+  board.ondragover = e => e.preventDefault();
+
+  board.ondrop = e => {
     e.preventDefault();
-    board.classList.add("drop-target");
-  });
 
-  board.addEventListener("dragleave", () => {
-    board.classList.remove("drop-target");
-  });
-
-  board.addEventListener("drop", (event) => {
-    event.preventDefault();
-    board.classList.remove("drop-target");
-
-    const jarId = event.dataTransfer.getData("text/plain");
-    const jar = document.getElementById(jarId);
+    const jar = document.getElementById(
+      e.dataTransfer.getData("text")
+    );
 
     if (!jar || jar.classList.contains("used")) return;
 
     let amount = Number(jar.dataset.amount);
 
-    const cells = document.querySelectorAll(".cell");
-    const emptyCells = [...cells].filter(c => c.dataset.filled === "false");
+    let empty = [...document.querySelectorAll(".cell")]
+      .filter(c => c.dataset.filled === "false");
 
-    const toPlace = Math.min(amount, emptyCells.length);
-    const extra = amount - toPlace;
+    // 🔥 distribuição aleatória
+    empty = shuffle(empty);
 
-    let animationsDone = 0;
+    const place = Math.min(amount, empty.length);
+    const extra = amount - place;
 
-    for (let i = 0; i < toPlace; i++) {
-      const cell = emptyCells[i];
-
-      setTimeout(() => {
-        cell.textContent = "🐞";
-        cell.dataset.filled = "true";
-
-        cell.style.transform = "scale(1.3)";
-        setTimeout(() => {
-          cell.style.transform = "scale(1)";
-          animationsDone++;
-
-          // só avança quando TODAS animações terminarem
-          if (animationsDone === toPlace) {
-            checkEnd();
-          }
-
-        }, 150);
-
-        filledCells++;
-        updateHUD();
-
-      }, i * 80);
+    for (let i = 0; i < place; i++) {
+      empty[i].textContent = "🐞";
+      empty[i].dataset.filled = "true";
     }
 
     if (extra > 0) overflowErrors += extra;
 
+    filledCells += place;
+
     jar.classList.add("used");
 
-    updateHUD();
-  });
+    checkEnd();
+  };
 }
 
 // ===== FIM =====
 function checkEnd() {
   if (filledCells === totalCells) {
-    const stars = calculateStars();
-    renderStars(stars);
-
-    score += stars * 10;
-
-    if (!completedPhases.includes(currentPhase)) {
-      completedPhases.push(currentPhase);
-    }
-
-    saveGame();
-
     setTimeout(() => {
-      nextPhase();
+      currentPhase++;
+      loadPhase();
     }, 400);
   }
 }
 
-function nextPhase() {
-  currentPhase++;
-  if (currentPhase >= phases.length) currentPhase = 0;
-  loadPhase();
-}
-
 // ===== INIT =====
-loadSave();
-createHUD();
 loadPhase();
