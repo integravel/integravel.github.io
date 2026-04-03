@@ -30,25 +30,6 @@ function saveGame() {
   }));
 }
 
-// ===== AUDIO =====
-function playPop() {
-  const ctx = new (window.AudioContext || window.webkitAudioContext)();
-  const osc = ctx.createOscillator();
-  const gain = ctx.createGain();
-
-  osc.type = "sine";
-  osc.frequency.value = 600;
-
-  gain.gain.setValueAtTime(0.1, ctx.currentTime);
-  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.2);
-
-  osc.connect(gain);
-  gain.connect(ctx.destination);
-
-  osc.start();
-  osc.stop(ctx.currentTime + 0.2);
-}
-
 // ===== UTIL =====
 function shuffle(array) {
   return array.sort(() => Math.random() - 0.5);
@@ -70,7 +51,7 @@ function createHUD() {
     <div id="map"></div>
 
     <div id="controls">
-      <button id="restartBtn">↻</button>
+      <button id="restartBtn">Reiniciar</button>
     </div>
 
     <div id="stars"></div>
@@ -214,32 +195,6 @@ function createJars(jars) {
   });
 }
 
-// ===== ANIMAÇÃO BESOURO =====
-function animateBug(fromEl, toEl) {
-  const bug = document.createElement("div");
-  bug.textContent = "🐞";
-  bug.style.position = "fixed";
-  bug.style.zIndex = 999;
-
-  const from = fromEl.getBoundingClientRect();
-  const to = toEl.getBoundingClientRect();
-
-  bug.style.left = from.left + "px";
-  bug.style.top = from.top + "px";
-
-  document.body.appendChild(bug);
-
-  bug.animate([
-    { transform: "translate(0,0)" },
-    { transform: `translate(${to.left - from.left}px, ${to.top - from.top}px)` }
-  ], {
-    duration: 400,
-    easing: "ease-out"
-  });
-
-  setTimeout(() => bug.remove(), 400);
-}
-
 // ===== DROP =====
 function enableBoardDrops() {
   const board = document.getElementById("board");
@@ -270,20 +225,31 @@ function enableBoardDrops() {
     const toPlace = Math.min(amount, emptyCells.length);
     const extra = amount - toPlace;
 
+    let animationsDone = 0;
+
     for (let i = 0; i < toPlace; i++) {
       const cell = emptyCells[i];
 
       setTimeout(() => {
-        animateBug(jar, cell);
-
         cell.textContent = "🐞";
         cell.dataset.filled = "true";
 
-        playPop();
+        cell.style.transform = "scale(1.3)";
+        setTimeout(() => {
+          cell.style.transform = "scale(1)";
+          animationsDone++;
+
+          // só avança quando TODAS animações terminarem
+          if (animationsDone === toPlace) {
+            checkEnd();
+          }
+
+        }, 150);
 
         filledCells++;
         updateHUD();
-      }, i * 120);
+
+      }, i * 80);
     }
 
     if (extra > 0) overflowErrors += extra;
@@ -291,34 +257,32 @@ function enableBoardDrops() {
     jar.classList.add("used");
 
     updateHUD();
-    checkEnd();
   });
 }
 
 // ===== FIM =====
 function checkEnd() {
   if (filledCells === totalCells) {
+    const stars = calculateStars();
+    renderStars(stars);
+
+    score += stars * 10;
+
+    if (!completedPhases.includes(currentPhase)) {
+      completedPhases.push(currentPhase);
+    }
+
+    saveGame();
+
     setTimeout(() => {
-      const stars = calculateStars();
-      renderStars(stars);
-
-      score += stars * 10;
-
-      if (!completedPhases.includes(currentPhase)) {
-        completedPhases.push(currentPhase);
-      }
-
       nextPhase();
-    }, 700);
+    }, 400);
   }
 }
 
 function nextPhase() {
   currentPhase++;
-
   if (currentPhase >= phases.length) currentPhase = 0;
-
-  saveGame();
   loadPhase();
 }
 
