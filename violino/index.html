@@ -235,36 +235,7 @@ function evaluate(){
   },2000);
 }
 
-// ===== CLAVE PERFEITA =====
-function drawTrebleClef(x, y, scale){
-
-  ctx.lineWidth = 3;
-  ctx.strokeStyle = "black";
-
-  ctx.beginPath();
-
-  // espiral central (ALINHADA NA LINHA DO SOL)
-  ctx.arc(x, y, 12*scale, 0, Math.PI*2);
-
-  // haste
-  ctx.moveTo(x, y - 60*scale);
-  ctx.bezierCurveTo(
-    x - 20*scale, y - 30*scale,
-    x + 20*scale, y + 20*scale,
-    x, y + 80*scale
-  );
-
-  // curva inferior
-  ctx.bezierCurveTo(
-    x - 30*scale, y + 60*scale,
-    x + 10*scale, y + 40*scale,
-    x, y + 20*scale
-  );
-
-  ctx.stroke();
-}
-
-// ===== DESENHO =====
+// ===== CLAVE PADRÃO (CORRIGIDA) =====
 function drawStaff(){
 
   let mid = H/2;
@@ -279,10 +250,16 @@ function drawStaff(){
     ctx.stroke();
   }
 
-  // linha do SOL (referência absoluta)
+  // linha do SOL (segunda de baixo)
   let solLineY = mid + space;
 
-  drawTrebleClef(110, solLineY, 1);
+  ctx.font = "120px serif";
+  ctx.textBaseline = "middle";
+
+  // ajuste fino calibrado 🔥
+  let clefYOffset = -8;
+
+  ctx.fillText("𝄞", 70, solLineY + clefYOffset);
 }
 
 // ===== NOTAS =====
