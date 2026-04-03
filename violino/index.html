@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Partitura Interativa - Violino</title>
+
+<style>
+body {
+  margin: 0;
+  background: #111;
+  color: white;
+  font-family: sans-serif;
+  overflow: hidden;
+}
+
+#ui {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  z-index: 10;
+}
+
+button, input {
+  font-size: 16px;
+  margin: 5px;
+}
+
+#canvas {
+  width: 100vw;
+  height: 100vh;
+  display: block;
+}
+
+#menu {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #222;
+  padding: 20px;
+  display: none;
+  flex-direction: column;
+  gap: 10px;
+}
+</style>
+</head>
+
+<body>
+
+<div id="ui">
+  BPM: <input type="number" id="bpm" value="90">
+  <button onclick="start()">Iniciar</button>
+  <button onclick="stop()">Parar</button>
+</div>
+
+<canvas id="canvas"></canvas>
+
+<div id="menu">
+  <button onclick="restart()">Reiniciar</button>
+  <button onclick="playComposition()">Ouvir</button>
+  <button onclick="savePDF()">Salvar PDF</button>
+</div>
+
+<script>
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+
+let width, height;
+function resize(){
+  width = canvas.width = window.innerWidth;
+  height = canvas.height = window.innerHeight;
+}
+resize();
+window.addEventListener("resize", resize);
+
+// Linhas da partitura
+const lines = 5;
+let lineSpacing;
+
+// Estado
+let notes = [];
+let running = false;
+let speed = 1;
+let startTime;
+
+// Toque
+let touchStartTime = 0;
+let currentNote = null;
+
+// Áudio
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+// Frequências aproximadas (violino simplificado)
+function getFrequency(y){
+  const scale = [
+    196, 220, 247, 262, 294,
+    330, 349, 392, 440, 494
+  ];
+  let index = Math.floor((y / height) * scale.length);
+  return scale[Math.max(0, Math.min(scale.length-1, index))];
+}
+
+function playFreq(freq, duration){
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+
+  osc.type = "sine";
+  osc.frequency.value = freq;
+
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+
+  osc.start();
+
+  gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+
+  osc.stop(audioCtx.currentTime + duration);
+}
+
+// Iniciar
+function start(){
+  notes = [];
+  running = true;
+  startTime = performance.now();
+  speed = parseInt(document.getElementById("bpm").value) / 60 * 100;
+  loop();
+}
+
+// Parar
+function stop(){
+  running = false;
+  document.getElementById("menu").style.display = "flex";
+}
+
+// Reiniciar
+function restart(){
+  document.getElementById("menu").style.display = "none";
+  notes = [];
+}
+
+// Ouvir composição
+function playComposition(){
+  let t = audioCtx.currentTime;
+  notes.forEach(n => {
+    const dur = n.duration / 1000;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+
+    osc.frequency.value = n.freq;
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+
+    osc.start(t);
+    osc.stop(t + dur);
+
+    t += dur;
+  });
+}
+
+// PDF (simples via print)
+function savePDF(){
+  window.print();
+}
+
+// Loop
+function loop(){
+  if(!running) return;
+
+  ctx.clearRect(0,0,width,height);
+
+  lineSpacing = height / 6;
+
+  // desenhar linhas
+  ctx.strokeStyle = "white";
+  ctx.lineWidth = 2;
+  for(let i=1;i<=lines;i++){
+    let y = i * lineSpacing;
+    ctx.beginPath();
+    ctx.moveTo(0,y);
+    ctx.lineTo(width,y);
+    ctx.stroke();
+  }
+
+  let time = performance.now() - startTime;
+
+  // desenhar notas
+  notes.forEach(n => {
+    n.x -= speed * 0.016;
+
+    ctx.beginPath();
+    ctx.arc(n.x, n.y, 8, 0, Math.PI*2);
+    ctx.fill();
+
+    if(n.slide){
+      ctx.beginPath();
+      ctx.moveTo(n.x, n.y);
+      ctx.lineTo(n.x+20, n.slideY);
+      ctx.stroke();
+    }
+  });
+
+  requestAnimationFrame(loop);
+}
+
+// Eventos de toque
+canvas.addEventListener("touchstart", e => {
+  if(!running) return;
+
+  const touch = e.touches[0];
+  touchStartTime = performance.now();
+
+  const freq = getFrequency(touch.clientY);
+
+  currentNote = {
+    x: width - 50,
+    y: touch.clientY,
+    freq: freq,
+    duration: 0
+  };
+
+  notes.push(currentNote);
+});
+
+canvas.addEventListener("touchmove", e => {
+  if(!currentNote) return;
+
+  const touch = e.touches[0];
+
+  currentNote.slide = true;
+  currentNote.slideY = touch.clientY;
+});
+
+canvas.addEventListener("touchend", e => {
+  if(!currentNote) return;
+
+  let duration = performance.now() - touchStartTime;
+  currentNote.duration = duration;
+
+  playFreq(currentNote.freq, duration/1000);
+
+  currentNote = null;
+});
+
+// orientação
+function checkOrientation(){
+  if(window.innerWidth < window.innerHeight){
+    alert("Vire o celular na horizontal");
+  }
+}
+checkOrientation();
+window.addEventListener("resize", checkOrientation);
+
+</script>
+
+</body>
+  </html>
