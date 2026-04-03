@@ -49,7 +49,7 @@ function resize(){
 resize();
 window.addEventListener("resize",resize);
 
-// ===== CONFIG =====
+// ===== NOTAS =====
 const notes = [
 "E4","F4","G4","A4","B4",
 "C5","D5","E5","F5","G5",
@@ -111,7 +111,7 @@ async function playSequence(){
   playing = false;
 }
 
-// ===== MAPEAMENTO =====
+// ===== MAPA =====
 function getYFromNote(n){
   let mid = H/2;
   let space = 35;
@@ -169,21 +169,25 @@ function evaluate(){
 
     let dist = Math.sqrt(dx*dx + dy*dy);
 
-    let points = Math.max(0, 100 - dist*0.5);
+    let points = Math.max(0, 100 - dist * 1.2);
     total += points;
   }
 
   score += Math.round(total);
   document.getElementById("score").innerText = score;
 
+  // 🔥 mostra resultado corretamente
   draw(true);
 
+  // 🔁 reinicia mantendo score
   setTimeout(()=>{
-    playerNotes=[];
-    correctNotes=[];
+    playerNotes = [];
+    correctNotes = [];
+
     newSequence();
     playSequence();
-  },1500);
+    draw();
+  },1800);
 }
 
 // ===== DESENHO =====
