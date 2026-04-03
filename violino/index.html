@@ -60,6 +60,12 @@ const freq = {
 "A4":440,"B4":494,"C5":523,"D5":587,"E5":659,"F5":698
 };
 
+// índice real relativo ao E4 (linha de baixo)
+const noteSteps = {
+"C4":-2,"D4":-1,"E4":0,"F4":1,"G4":2,
+"A4":3,"B4":4,"C5":5,"D5":6,"E5":7,"F5":8
+};
+
 let sequence = [];
 let playerNotes = [];
 let correctNotes = [];
@@ -67,11 +73,9 @@ let correctNotes = [];
 let playing = false;
 let showCorrection = false;
 
-// precisão acumulada
 let totalAccuracy = 0;
 let totalNotes = 0;
 
-// cursor
 let cursorX = 150;
 let cursorSpeed = 0;
 
@@ -96,28 +100,51 @@ function playNote(f){
   osc.stop(audioCtx.currentTime+0.6);
 }
 
-// ===== POSIÇÕES =====
-function getYFromNote(n){
+// ===== POSIÇÃO REAL DAS NOTAS =====
+function getYFromNote(note){
+
   let mid = H/2;
-  let step = 35/2;
-  return mid - (n-5)*step;
+  let space = 35;
+
+  let bottomLineY = mid + 2*space; // E4
+
+  let step = space/2;
+
+  return bottomLineY - (noteSteps[note]*step);
 }
 
 function getNoteFromY(y){
-  let mid = H/2;
-  let step = 35/2;
 
-  let raw = (mid - y)/step + 5;
+  let mid = H/2;
+  let space = 35;
+
+  let bottomLineY = mid + 2*space;
+  let step = space/2;
+
+  let raw = (bottomLineY - y)/step;
   let index = Math.round(raw);
 
-  return Math.max(0, Math.min(10, index));
+  let keys = Object.keys(noteSteps);
+
+  let best = "C4";
+  let minDiff = Infinity;
+
+  keys.forEach(k=>{
+    let diff = Math.abs(noteSteps[k] - index);
+    if(diff < minDiff){
+      minDiff = diff;
+      best = k;
+    }
+  });
+
+  return best;
 }
 
 // ===== SEQUÊNCIA =====
 function newSequence(){
   sequence = [];
   for(let i=0;i<5;i++){
-    sequence.push(Math.floor(Math.random()*notes.length));
+    sequence.push(notes[Math.floor(Math.random()*notes.length)]);
   }
 
   correctNotes = sequence.map((n,i)=>({
@@ -142,7 +169,6 @@ function startPlayback(){
   correctNotes.forEach(n=>n.played=false);
 }
 
-// 🔁 repetir sequência
 function repeatSequence(){
   if(playing || showCorrection) return;
 
@@ -158,7 +184,7 @@ function update(){
 
     correctNotes.forEach(n=>{
       if(!n.played && cursorX >= n.x){
-        playNote(freq[notes[n.note]]);
+        playNote(freq[n.note]);
         n.played = true;
       }
     });
@@ -180,15 +206,15 @@ canvas.addEventListener("touchstart",e=>{
   let x = t.clientX;
   let y = t.clientY;
 
-  let noteIndex = getNoteFromY(y);
+  let noteName = getNoteFromY(y);
 
   playerNotes.push({
     x:x,
-    y:getYFromNote(noteIndex),
-    note:noteIndex
+    y:getYFromNote(noteName),
+    note:noteName
   });
 
-  playNote(freq[notes[noteIndex]]);
+  playNote(freq[noteName]);
 
   if(playerNotes.length === 5){
     evaluate();
@@ -243,7 +269,6 @@ function drawStaff(){
   ctx.strokeStyle = "black";
   ctx.lineWidth = 2;
 
-  // linhas do pentagrama
   for(let i=-2;i<=2;i++){
     ctx.beginPath();
     ctx.moveTo(50, mid + i*space);
@@ -251,23 +276,50 @@ function drawStaff(){
     ctx.stroke();
   }
 
-  // === CLAVE DE SOL CORRETA ===
-
-  // segunda linha = linha do SOL
-  let solLineY = mid - space;
+  // CLAVE DE SOL (linha do G4)
+  let solLineY = mid + space;
 
   ctx.font = "110px serif";
   ctx.textBaseline = "middle";
 
-  // ajuste fino visual
-  let clefY = solLineY + 5;
+  ctx.fillText("𝄞", 60, solLineY - 10);
+}
 
-  ctx.fillText("𝄞", 60, clefY);
+// linhas suplementares
+function drawLedgerLines(x, note){
+
+  let y = getYFromNote(note);
+  let mid = H/2;
+  let space = 35;
+
+  let topLine = mid - 2*space;
+  let bottomLine = mid + 2*space;
+
+  ctx.strokeStyle = "black";
+
+  if(y < topLine){
+    for(let ly = topLine - space; ly >= y; ly -= space){
+      ctx.beginPath();
+      ctx.moveTo(x-20, ly);
+      ctx.lineTo(x+20, ly);
+      ctx.stroke();
+    }
+  }
+
+  if(y > bottomLine){
+    for(let ly = bottomLine + space; ly <= y; ly += space){
+      ctx.beginPath();
+      ctx.moveTo(x-20, ly);
+      ctx.lineTo(x+20, ly);
+      ctx.stroke();
+    }
+  }
 }
 
 function drawNotes(){
 
   playerNotes.forEach(n=>{
+    drawLedgerLines(n.x,n.note);
     ctx.fillStyle="blue";
     ctx.beginPath();
     ctx.ellipse(n.x,n.y,14,10,0,0,Math.PI*2);
@@ -276,6 +328,7 @@ function drawNotes(){
 
   if(showCorrection){
     correctNotes.forEach(n=>{
+      drawLedgerLines(n.x,n.note);
       ctx.fillStyle="red";
       ctx.beginPath();
       ctx.ellipse(n.x,n.y,14,10,0,0,Math.PI*2);
