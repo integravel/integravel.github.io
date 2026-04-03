@@ -50,8 +50,18 @@ function createJars(jars) {
       <div class="jar-body">🐞</div>
     `;
 
+    // DRAG START (suave)
     jar.addEventListener("dragstart", (event) => {
       event.dataTransfer.setData("text/plain", jar.id);
+
+      setTimeout(() => {
+        jar.classList.add("dragging");
+      }, 0);
+    });
+
+    // DRAG END
+    jar.addEventListener("dragend", () => {
+      jar.classList.remove("dragging");
     });
 
     jarArea.appendChild(jar);
@@ -87,10 +97,22 @@ function enableBoardDrops() {
     const toPlace = Math.min(amount, emptyCells.length);
     const extra = amount - toPlace;
 
-    // distribuir besouros
+    // animação suave de distribuição
     for (let i = 0; i < toPlace; i++) {
-      emptyCells[i].textContent = "🐞";
-      emptyCells[i].dataset.filled = "true";
+      const cell = emptyCells[i];
+
+      setTimeout(() => {
+        cell.textContent = "🐞";
+        cell.dataset.filled = "true";
+
+        // efeito "pop"
+        cell.style.transform = "scale(1.3)";
+        setTimeout(() => {
+          cell.style.transform = "scale(1)";
+        }, 150);
+
+      }, i * 80);
+
       filledCells++;
     }
 
@@ -108,11 +130,11 @@ function checkEnd() {
   if (filledCells === totalCells) {
     setTimeout(() => {
       if (overflowErrors === 0) {
-        alert("✔️ Perfeito! Nenhum besouro sobrou.");
+        alert("🌸 Perfeito! Todos os besourinhos foram acomodados! 🐞💕");
       } else {
-        alert(`⚠️ Sobraram ${overflowErrors} besouro(s).`);
+        alert(`😢 Ops! Sobraram ${overflowErrors} besourinhos...`);
       }
-    }, 150);
+    }, 300);
   }
 }
 
