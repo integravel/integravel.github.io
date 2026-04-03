@@ -75,6 +75,10 @@ let mode = "idle";
 
 let cursorX = 180;
 
+// 🎯 delay antes da primeira nota
+let startDelay = 40; // frames (~0.6s)
+let delayCounter = 0;
+
 // ===== ÁUDIO =====
 const audioCtx = new (window.AudioContext||window.webkitAudioContext)();
 
@@ -156,12 +160,13 @@ function newSequence(){
 function startPlayback(){
   cursorX = 180;
   mode = "playing";
+  delayCounter = startDelay;
   correctNotes.forEach(n=>n.played=false);
 }
 
 function repeatSequence(){
   if(mode === "playing") return;
-  playerNotes = [];
+  // NÃO limpa playerNotes aqui 👇
   startPlayback();
 }
 
@@ -200,7 +205,7 @@ function playUser(){
   playerNotes.forEach(n=>n.played=false);
 }
 
-// ===== AVALIAÇÃO + DIFICULDADE =====
+// ===== AVALIAÇÃO =====
 function evaluate(){
   let total = 0;
 
@@ -215,7 +220,6 @@ function evaluate(){
   let avg = Math.round(total / difficulty);
   document.getElementById("accuracy").innerText = avg + "%";
 
-  // 🎯 AJUSTE DE DIFICULDADE
   if(avg >= 66 && difficulty < 10){
     difficulty++;
   }
@@ -238,6 +242,12 @@ function update(){
 
   if(mode === "playing"){
     cursorX += 2;
+
+    // ⏳ espera antes de tocar a primeira nota
+    if(delayCounter > 0){
+      delayCounter--;
+      return;
+    }
 
     correctNotes.forEach(n=>{
       if(!n.played && cursorX >= n.x){
