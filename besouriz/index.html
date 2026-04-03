@@ -2,37 +2,44 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Besouros</title>
 
 <style>
+
 body {
   font-family: sans-serif;
   background: #f6f3ed;
+  margin: 0;
   text-align: center;
 }
 
 .app {
-  max-width: 500px;
-  margin: auto;
+  max-width: 100%;
+  padding: 10px;
+  box-sizing: border-box;
 }
 
+/* GRID RESPONSIVA */
 #board {
   display: grid;
-  gap: 8px;
-  margin: 20px;
+  gap: 6px;
+  margin: 10px 0;
 }
 
+/* células adaptativas */
 .cell {
   background: #f0eadf;
   border: 2px solid #cfc6b8;
-  height: 52px;
   border-radius: 10px;
+
+  aspect-ratio: 1 / 1;
 
   display: flex;
   align-items: center;
   justify-content: center;
 
-  font-size: 20px;
+  font-size: clamp(14px, 4vw, 22px);
   transition: 0.2s;
 }
 
@@ -47,22 +54,18 @@ body {
 
 /* jarros */
 #jarArea {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 14px;
-  padding: 10px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+  gap: 10px;
+  padding: 5px;
 }
 
 .jar {
-  width: 72px;
+  width: 100%;
+  max-width: 70px;
+  margin: auto;
   cursor: grab;
   transition: 0.2s;
-  position: relative;
-}
-
-.jar:hover {
-  transform: translateY(-4px) scale(1.03);
 }
 
 .jar:active {
@@ -79,9 +82,7 @@ body {
 }
 
 .jar-body {
-  height: 92px;
-  border-radius: 0 0 18px 18px;
-
+  border-radius: 0 0 16px 16px;
   background: linear-gradient(#e8f2ee, #d7e6df);
   border: 2px solid #aabfb6;
 
@@ -89,19 +90,16 @@ body {
   flex-wrap: wrap;
   justify-content: center;
   align-content: flex-start;
-  gap: 3px;
-  padding: 6px;
-  overflow: hidden;
 
-  box-shadow: inset 0 0 6px rgba(0,0,0,0.1),
-              0 3px 6px rgba(0,0,0,0.08);
+  gap: 2px;
+  padding: 5px;
+
+  min-height: 70px;
 }
 
-/* besouros animados */
 .jar-body span {
-  font-size: 13px;
-  display: inline-block;
-  animation: wiggle 1.8s infinite ease-in-out;
+  font-size: clamp(10px, 3vw, 14px);
+  animation: wiggle 2s infinite ease-in-out;
 }
 
 @keyframes wiggle {
@@ -109,12 +107,12 @@ body {
   50% { transform: rotate(5deg); }
 }
 
-/* feedback de fase */
+/* feedback */
 #feedback {
-  font-size: 18px;
-  margin-top: 10px;
+  font-size: clamp(14px, 4vw, 18px);
   height: 24px;
 }
+
 </style>
 </head>
 
@@ -200,7 +198,8 @@ function loadPhase() {
 
 // ===== BOARD =====
 function createBoard(r,c) {
-  board.style.gridTemplateColumns = `repeat(${c},1fr)`;
+
+  board.style.gridTemplateColumns = `repeat(${c}, 1fr)`;
 
   for (let i=0;i<r*c;i++) {
     let cell = document.createElement("div");
@@ -276,10 +275,8 @@ function enableDrop() {
 
     filledCells += place;
 
-    // 🔥 remove jarro
     jar.style.transform = "scale(0)";
     jar.style.opacity = "0";
-
     setTimeout(()=> jar.remove(), 200);
 
     checkEnd();
@@ -290,11 +287,8 @@ function enableDrop() {
 function checkEnd() {
   if (filledCells === totalCells) {
 
-    if (overflowErrors === 0) {
-      feedback.textContent = "Perfeito! ✨";
-    } else {
-      feedback.textContent = "Quase! 🐞";
-    }
+    feedback.textContent =
+      overflowErrors === 0 ? "Perfeito! ✨" : "Quase! 🐞";
 
     setTimeout(()=>{
       currentPhase++;
