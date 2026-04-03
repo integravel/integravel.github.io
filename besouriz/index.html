@@ -22,7 +22,7 @@ body {
 
 /* área fixa da grid */
 #boardContainer {
-  height: 340px; /* altura fixa */
+  height: 340px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -150,18 +150,27 @@ function shuffle(arr) {
   return arr.sort(() => Math.random() - 0.5);
 }
 
-// ===== NOVA LÓGICA DE TAMANHO =====
-function getGridSize() {
-  const base = 3 + Math.floor(currentPhase * 0.6);
-  const variation = Math.floor(Math.random() * 3) - 1; // -1,0,1
-  return Math.max(3, Math.min(10, base + variation));
-}
-
-// ===== DIFICULDADE =====
+// ===== GERADOR RETANGULAR =====
 function generateDynamicPhase() {
 
-  const size = getGridSize();
-  const total = size * size;
+  const base = 3 + Math.floor(currentPhase * 0.5);
+
+  let rows = base + Math.floor(Math.random() * 3) - 1;
+  let cols = base + Math.floor(Math.random() * 3) - 1;
+
+  rows = Math.max(3, Math.min(10, rows));
+  cols = Math.max(3, Math.min(10, cols));
+
+  // evita quadrado repetido
+  if (rows === cols) {
+    if (Math.random() > 0.5) {
+      rows = Math.min(10, rows + 1);
+    } else {
+      cols = Math.min(10, cols + 1);
+    }
+  }
+
+  const total = rows * cols;
 
   let jars = [];
   let sum = 0;
@@ -173,8 +182,8 @@ function generateDynamicPhase() {
   }
 
   return {
-    rows: size,
-    cols: size,
+    rows: rows,
+    cols: cols,
     jars: shuffle(jars)
   };
 }
