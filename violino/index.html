@@ -24,10 +24,6 @@ button,input{
   font-size:16px;
   margin:5px;
 }
-
-canvas{
-  display:block;
-}
 </style>
 </head>
 
@@ -53,7 +49,7 @@ function resize(){
 resize();
 window.addEventListener("resize",resize);
 
-// ===== CONFIG =====
+// ===== NOTAS =====
 const notes = [
 "E4","F4","G4","A4","B4",
 "C5","D5","E5","F5","G5",
@@ -90,18 +86,18 @@ function playNote(f){
   osc.stop(audioCtx.currentTime+0.6);
 }
 
-// ===== GERAR SEQUÊNCIA =====
+// ===== SEQUÊNCIA =====
 function newSequence(){
   sequence = [];
   for(let i=0;i<5;i++){
-    let n = Math.floor(Math.random()*notes.length);
-    sequence.push(n);
+    sequence.push(Math.floor(Math.random()*notes.length));
   }
 }
 
-// ===== TOCAR SEQUÊNCIA =====
+// ===== TOCAR =====
 async function playSequence(){
   playing = true;
+
   let bpm = document.getElementById("bpm").value;
   let tempo = 60000/bpm;
 
@@ -110,8 +106,7 @@ async function playSequence(){
     await new Promise(r=>setTimeout(r,tempo));
   }
 
-  // som de reinício
-  playNote(200);
+  playNote(200); // som de reinício
   playing = false;
 }
 
@@ -120,9 +115,12 @@ canvas.addEventListener("touchstart",e=>{
   if(playing) return;
 
   let y = e.touches[0].clientY;
+
   let noteIndex = Math.floor((y/H)*notes.length);
+  noteIndex = Math.max(0, Math.min(notes.length-1, noteIndex));
 
   playerInput.push(noteIndex);
+
   playNote(freq[notes[noteIndex]]);
 
   if(playerInput.length === sequence.length){
@@ -154,8 +152,10 @@ function checkResult(){
 // ===== DESENHO =====
 function drawStaff(){
   let mid = H/2;
-  let space = 15;
 
+  let space = 35; // 🔥 aumentamos bastante
+
+  ctx.lineWidth = 2;
   ctx.strokeStyle="black";
 
   for(let i=-2;i<=2;i++){
@@ -166,39 +166,28 @@ function drawStaff(){
   }
 
   // clave de sol
-  ctx.font="60px serif";
-  ctx.fillText("𝄞", 60, mid+20);
+  ctx.font="90px serif";
+  ctx.fillText("𝄞", 60, mid+30);
 }
 
-function drawNotes(){
+function drawPlayerNotes(){
   let mid = H/2;
-  let space = 15;
-
-  sequence.forEach((n,i)=>{
-    let x = 150 + i*80;
-    let y = mid - (n-5)*space;
-
-    ctx.beginPath();
-    ctx.ellipse(x,y,10,7,0,0,Math.PI*2);
-    ctx.fill();
-  });
+  let space = 35;
 
   playerInput.forEach((n,i)=>{
-    let x = 150 + i*80;
+    let x = 150 + i*100;
     let y = mid - (n-5)*space;
 
-    ctx.fillStyle="blue";
     ctx.beginPath();
-    ctx.ellipse(x,y,10,7,0,0,Math.PI*2);
+    ctx.ellipse(x,y,14,10,0,0,Math.PI*2);
     ctx.fill();
-    ctx.fillStyle="black";
   });
 }
 
 function draw(){
   ctx.clearRect(0,0,W,H);
   drawStaff();
-  drawNotes();
+  drawPlayerNotes();
 }
 
 // ===== START =====
@@ -206,6 +195,7 @@ function startGame(){
   score=0;
   document.getElementById("score").innerText = score;
 
+  playerInput=[];
   newSequence();
   playSequence();
   draw();
