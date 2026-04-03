@@ -71,11 +71,9 @@ let playerNotes = [];
 
 let difficulty = 3;
 
-let mode = "idle"; 
-// idle | playing | input | correcting | playbackUser
+let mode = "idle";
 
 let cursorX = 180;
-let playIndex = 0;
 
 // ===== ÁUDIO =====
 const audioCtx = new (window.AudioContext||window.webkitAudioContext)();
@@ -154,7 +152,7 @@ function newSequence(){
   document.getElementById("difficulty").innerText = difficulty;
 }
 
-// ===== PLAYBACK ORIGINAL =====
+// ===== PLAYBACK =====
 function startPlayback(){
   cursorX = 180;
   mode = "playing";
@@ -181,7 +179,7 @@ canvas.addEventListener("touchstart",e=>{
     note:noteName
   });
 
-  playNote(freq[noteName]); // 🔊 som do usuário
+  playNote(freq[noteName]);
 });
 
 // ===== BOTÕES =====
@@ -199,10 +197,10 @@ function playUser(){
   if(mode !== "input") return;
   mode = "playbackUser";
   cursorX = 180;
-  playIndex = 0;
+  playerNotes.forEach(n=>n.played=false);
 }
 
-// ===== AVALIAÇÃO =====
+// ===== AVALIAÇÃO + DIFICULDADE =====
 function evaluate(){
   let total = 0;
 
@@ -216,6 +214,14 @@ function evaluate(){
 
   let avg = Math.round(total / difficulty);
   document.getElementById("accuracy").innerText = avg + "%";
+
+  // 🎯 AJUSTE DE DIFICULDADE
+  if(avg >= 66 && difficulty < 10){
+    difficulty++;
+  }
+  else if(avg < 33 && difficulty > 3){
+    difficulty--;
+  }
 
   mode = "correcting";
 
@@ -241,7 +247,7 @@ function update(){
     });
 
     if(cursorX > W){
-      mode = "input"; // libera jogador
+      mode = "input";
     }
   }
 
@@ -324,6 +330,7 @@ loop();
 function startGame(){
   document.getElementById("accuracy").innerText="0%";
   playerNotes=[];
+  difficulty = 3;
   newSequence();
   startPlayback();
 }
