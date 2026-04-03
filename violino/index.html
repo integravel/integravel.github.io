@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ditado Musical - Violino</title>
+<title>Ditado Musical</title>
 
 <style>
-body {
+body{
   margin:0;
   background:#fff;
   overflow:hidden;
@@ -50,22 +50,27 @@ resize();
 window.addEventListener("resize",resize);
 
 // ===== CONFIG =====
-// 7 posições (1 acima + pauta + 1 abaixo)
 const notes = [
-"D4","E4","F4","G4","A4","B4","C5"
+"C4","D4","E4","F4","G4","A4","B4","C5","D5","E5","F5"
 ];
 
 const freq = {
-"D4":294,"E4":329,"F4":349,"G4":392,
-"A4":440,"B4":494,"C5":523
+"C4":261,"D4":294,"E4":329,"F4":349,"G4":392,
+"A4":440,"B4":494,"C5":523,"D5":587,"E5":659,"F5":698
 };
 
 let sequence = [];
 let playerNotes = [];
 let correctNotes = [];
+
 let playing = false;
 let score = 0;
 let showCorrection = false;
+
+// linha vertical
+let cursorX = 150;
+let cursorSpeed = 0;
+let noteIndexPlaying = 0;
 
 // ===== ÁUDIO =====
 const audioCtx = new (window.AudioContext||window.webkitAudioContext)();
@@ -75,15 +80,32 @@ function playNote(f){
   const gain = audioCtx.createGain();
 
   osc.frequency.value = f;
-  osc.type = "sine";
+  osc.type = "triangle";
 
   osc.connect(gain);
   gain.connect(audioCtx.destination);
 
   osc.start();
   gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
-  gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.6);
-  osc.stop(audioCtx.currentTime+0.6);
+  gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.5);
+  osc.stop(audioCtx.currentTime+0.5);
+}
+
+// ===== POSIÇÕES =====
+function getYFromNote(n){
+  let mid = H/2;
+  let step = 35/2;
+  return mid - (n-5)*step;
+}
+
+function getNoteFromY(y){
+  let mid = H/2;
+  let step = 35/2;
+
+  let raw = (mid - y)/step + 5;
+  let index = Math.round(raw);
+
+  return Math.max(0, Math.min(10, index));
 }
 
 // ===== SEQUÊNCIA =====
@@ -92,41 +114,50 @@ function newSequence(){
   for(let i=0;i<5;i++){
     sequence.push(Math.floor(Math.random()*notes.length));
   }
+
+  correctNotes = sequence.map((n,i)=>({
+    x:150 + i*120,
+    y:getYFromNote(n),
+    note:n,
+    played:false
+  }));
 }
 
-// ===== TOCAR =====
-async function playSequence(){
-  playing = true;
+// ===== TOCAR COM CURSOR =====
+function startPlayback(){
 
   let bpm = document.getElementById("bpm").value;
   let tempo = 60000/bpm;
 
-  for(let n of sequence){
-    playNote(freq[notes[n]]);
-    await new Promise(r=>setTimeout(r,tempo));
+  cursorX = 150;
+  cursorSpeed = 120 / (tempo/16); // controla velocidade
+
+  noteIndexPlaying = 0;
+  playing = true;
+
+  correctNotes.forEach(n=>n.played=false);
+}
+
+// ===== LOOP =====
+function update(){
+
+  if(playing){
+
+    cursorX += cursorSpeed;
+
+    // tocar notas quando cruzar
+    correctNotes.forEach((n,i)=>{
+      if(!n.played && cursorX >= n.x){
+        playNote(freq[notes[n.note]]);
+        n.played = true;
+      }
+    });
+
+    // fim
+    if(cursorX > 150 + 5*120){
+      playing = false;
+    }
   }
-
-  playNote(200);
-  playing = false;
-}
-
-// ===== MAPA CORRETO =====
-function getYFromNote(n){
-  let mid = H/2;
-  let space = 35;
-  return mid - (n-3)*space; // centraliza nas 7 posições
-}
-
-function getNoteFromY(y){
-  let mid = H/2;
-  let space = 35;
-
-  let raw = (mid - y)/space + 3;
-
-  // 🔥 agora arredonda corretamente incluindo espaços
-  let index = Math.round(raw);
-
-  return Math.max(0, Math.min(notes.length-1, index));
 }
 
 // ===== INPUT =====
@@ -135,17 +166,17 @@ canvas.addEventListener("touchstart",e=>{
   if(playerNotes.length >= 5) return;
   if(showCorrection) return;
 
-  let touch = e.touches[0];
+  let t = e.touches[0];
 
-  let x = touch.clientX;
-  let y = touch.clientY;
+  let x = t.clientX;
+  let y = t.clientY;
 
   let noteIndex = getNoteFromY(y);
 
   playerNotes.push({
-    x: x,
-    y: getYFromNote(noteIndex),
-    note: noteIndex
+    x:x,
+    y:getYFromNote(noteIndex),
+    note:noteIndex
   });
 
   playNote(freq[notes[noteIndex]]);
@@ -153,18 +184,10 @@ canvas.addEventListener("touchstart",e=>{
   if(playerNotes.length === 5){
     evaluate();
   }
-
-  draw();
 });
 
 // ===== AVALIAÇÃO =====
 function evaluate(){
-
-  correctNotes = sequence.map((n,i)=>({
-    x:150 + i*120,
-    y:getYFromNote(n),
-    note:n
-  }));
 
   let total = 0;
 
@@ -174,7 +197,7 @@ function evaluate(){
 
     let dist = Math.sqrt(dx*dx + dy*dy);
 
-    let points = Math.max(0, 100 - dist * 1.5);
+    let points = Math.max(0, 100 - dist * 2);
     total += points;
   }
 
@@ -182,21 +205,19 @@ function evaluate(){
   document.getElementById("score").innerText = score;
 
   showCorrection = true;
-  draw();
 
   setTimeout(()=>{
     showCorrection = false;
     playerNotes = [];
-    correctNotes = [];
 
     newSequence();
-    playSequence();
-    draw();
-  },1800);
+    startPlayback();
+  },2000);
 }
 
 // ===== DESENHO =====
 function drawStaff(){
+
   let mid = H/2;
   let space = 35;
 
@@ -215,6 +236,7 @@ function drawStaff(){
 
 function drawNotes(){
 
+  // jogador
   playerNotes.forEach(n=>{
     ctx.fillStyle="blue";
     ctx.beginPath();
@@ -222,6 +244,7 @@ function drawNotes(){
     ctx.fill();
   });
 
+  // correção
   if(showCorrection){
     correctNotes.forEach(n=>{
       ctx.fillStyle="red";
@@ -230,15 +253,35 @@ function drawNotes(){
       ctx.fill();
     });
   }
+}
 
-  ctx.fillStyle="black";
+function drawCursor(){
+  if(playing){
+    ctx.strokeStyle="green";
+    ctx.lineWidth=3;
+
+    ctx.beginPath();
+    ctx.moveTo(cursorX, 0);
+    ctx.lineTo(cursorX, H);
+    ctx.stroke();
+  }
 }
 
 function draw(){
   ctx.clearRect(0,0,W,H);
+
   drawStaff();
   drawNotes();
+  drawCursor();
 }
+
+// ===== LOOP =====
+function loop(){
+  update();
+  draw();
+  requestAnimationFrame(loop);
+}
+loop();
 
 // ===== START =====
 function startGame(){
@@ -246,14 +289,11 @@ function startGame(){
   document.getElementById("score").innerText = score;
 
   playerNotes=[];
-  correctNotes=[];
   showCorrection=false;
 
   newSequence();
-  playSequence();
-  draw();
+  startPlayback();
 }
-
 </script>
 
 </body>
