@@ -1,6 +1,6 @@
 body {
   font-family: sans-serif;
-  background: #f4f1ea;
+  background: #f6f3ed;
   text-align: center;
 }
 
@@ -11,67 +11,86 @@ body {
 
 #board {
   display: grid;
-  gap: 6px;
+  gap: 8px;
   margin: 20px;
-  transition: 0.3s;
 }
 
 .cell {
-  background: #e6e1d6;
-  border: 1px solid #b9b2a3;
-  height: 50px;
+  background: #f0eadf;
+  border: 2px solid #cfc6b8;
+  height: 52px;
+  border-radius: 10px;
+
   display: flex;
   align-items: center;
   justify-content: center;
+
   font-size: 20px;
   transition: 0.2s;
 }
 
+/* área dos jarros */
 #jarArea {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 12px;
+  gap: 14px;
   padding: 10px;
 }
 
+/* jarro fofo */
 .jar {
-  width: 70px;
+  width: 72px;
   cursor: grab;
   transition: 0.2s;
+}
+
+.jar:hover {
+  transform: translateY(-4px) scale(1.03);
 }
 
 .jar:active {
   transform: scale(0.95);
 }
 
-/* topo */
+/* tampinha */
 .jar-top {
-  background: #a89f8d;
-  color: white;
+  background: #a8c7b8;
+  color: #2f4f4f;
   font-size: 12px;
-  border-radius: 6px 6px 0 0;
-  padding: 2px;
+  border-radius: 10px 10px 0 0;
+  padding: 3px;
+  font-weight: bold;
 }
 
-/* corpo estilo vidro */
+/* corpo do jarro */
 .jar-body {
-  height: 90px;
-  border-radius: 0 0 14px 14px;
-  background: linear-gradient(#d8d2c2, #c4bda8);
-  border: 2px solid #8c8370;
+  height: 92px;
+  border-radius: 0 0 18px 18px;
+
+  background: linear-gradient(#e8f2ee, #d7e6df);
+  border: 2px solid #aabfb6;
 
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
   align-content: flex-start;
-  gap: 2px;
+  gap: 3px;
   padding: 6px;
   overflow: hidden;
 
-  box-shadow: inset 0 0 6px rgba(0,0,0,0.15);
+  box-shadow: 
+    inset 0 0 6px rgba(0,0,0,0.1),
+    0 3px 6px rgba(0,0,0,0.08);
 }
 
+/* brilho fofo */
+.jar-body::after {
+  content: "";
+  position: absolute;
+}
+
+/* besouros */
 .jar-body span {
   font-size: 13px;
 }
