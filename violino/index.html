@@ -18,11 +18,18 @@ body{
   top:10px;
   left:10px;
   z-index:10;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  flex-wrap:wrap;
 }
 
 button,input{
   font-size:16px;
-  margin:5px;
+}
+
+#accuracyBox{
+  font-size:16px;
 }
 </style>
 </head>
@@ -30,10 +37,10 @@ button,input{
 <body>
 
 <div id="ui">
-BPM <input type="number" id="bpm" value="80">
-<button onclick="startGame()">Iniciar</button>
-<button onclick="repeatSequence()">Repetir</button>
-<p>Precisão: <span id="accuracy">0%</span></p>
+  BPM <input type="number" id="bpm" value="80">
+  <button onclick="startGame()">Iniciar</button>
+  <button onclick="repeatSequence()">Repetir</button>
+  <span id="accuracyBox">Precisão: <span id="accuracy">0%</span></span>
 </div>
 
 <canvas id="canvas"></canvas>
@@ -235,7 +242,7 @@ function evaluate(){
   },2000);
 }
 
-// ===== CLAVE PADRÃO (CORRIGIDA) =====
+// ===== CLAVE =====
 function drawStaff(){
 
   let mid = H/2;
@@ -250,19 +257,17 @@ function drawStaff(){
     ctx.stroke();
   }
 
-  // linha do SOL (segunda de baixo)
   let solLineY = mid + space;
 
   ctx.font = "120px serif";
   ctx.textBaseline = "middle";
 
-  // ajuste fino calibrado 🔥
   let clefYOffset = -8;
 
   ctx.fillText("𝄞", 70, solLineY + clefYOffset);
 }
 
-// ===== NOTAS =====
+// ===== DESENHO =====
 function drawNotes(){
   playerNotes.forEach(n=>{
     ctx.fillStyle="blue";
