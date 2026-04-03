@@ -20,39 +20,55 @@ body {
   padding: 10px;
 }
 
-/* container 3D */
+/* ===== CONTAINER ===== */
 #boardContainer {
   height: 340px;
   display: flex;
-  flex-direction: column;
   justify-content: center;
-  gap: 10px;
+  align-items: center;
 }
 
-/* cada camada */
+/* ===== BLOCO 3D ===== */
+#board3D {
+  position: relative;
+  transform: rotateX(55deg) rotateZ(45deg);
+  transform-style: preserve-3d;
+}
+
+/* ===== CAMADAS ===== */
 .layer {
+  position: absolute;
   display: grid;
   gap: 4px;
-  justify-content: center;
 }
 
-/* leve efeito de profundidade */
-.layer.back {
-  opacity: 0.6;
-  transform: scale(0.9);
+.layer[data-depth="0"] {
+  transform: translateZ(0px);
 }
 
+.layer[data-depth="1"] {
+  transform: translateZ(-45px) translateX(12px) translateY(12px);
+  opacity: 0.85;
+}
+
+/* ===== CÉLULAS ===== */
 .cell {
-  width: 28px;
-  height: 28px;
+  width: 26px;
+  height: 26px;
+
   background: #f0eadf;
   border: 2px solid #cfc6b8;
-  border-radius: 8px;
+  border-radius: 6px;
+
   display: flex;
   align-items: center;
   justify-content: center;
+
+  /* corrige perspectiva */
+  transform: rotateZ(-45deg) rotateX(-55deg);
 }
 
+/* ===== JARROS ===== */
 #jarArea {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(60px,1fr));
@@ -63,6 +79,7 @@ body {
   width: 60px;
   margin: auto;
   cursor: grab;
+  transition: 0.2s;
 }
 
 .jar-top {
@@ -80,8 +97,10 @@ body {
   justify-content: center;
 }
 
+/* ===== FEEDBACK ===== */
 #feedback {
   height: 24px;
+  font-size: 16px;
 }
 
 </style>
@@ -110,7 +129,7 @@ let currentPhase = save.phase;
 let totalCells = 0;
 let filledCells = 0;
 let overflowErrors = 0;
-let layers = [];
+let totalJars = 0;
 
 // ===== UTIL =====
 function shuffle(a){ return a.sort(()=>Math.random()-0.5); }
@@ -122,7 +141,6 @@ function generatePhase() {
 
   let rows = Math.floor(Math.random() * 10) + 1;
   let cols = Math.floor(Math.random() * 10) + 1;
-
   let depth = Math.random() < 0.4 ? 2 : 1;
 
   const total = rows * cols * depth;
@@ -161,30 +179,31 @@ function loadPhase(){
   totalCells = data.rows * data.cols * data.depth;
   filledCells = 0;
   overflowErrors = 0;
+  totalJars = data.jars.length;
 
-  boardContainer.innerHTML = "";
+  boardContainer.innerHTML = "<div id='board3D'></div>";
   jarArea.innerHTML = "";
   feedback.textContent = "";
 
-  layers = [];
+  const board3D = document.getElementById("board3D");
 
+  // cria camadas 3D
   for (let d = 0; d < data.depth; d++) {
 
     let layer = document.createElement("div");
     layer.className = "layer";
-    if (d === 0 && data.depth > 1) layer.classList.add("back");
+    layer.dataset.depth = d;
 
-    layer.style.gridTemplateColumns = `repeat(${data.cols},28px)`;
+    layer.style.gridTemplateColumns = `repeat(${data.cols},26px)`;
 
-    for (let i=0;i<data.rows*data.cols;i++){
+    for (let i=0;i<data.rows * data.cols;i++){
       let c = document.createElement("div");
       c.className="cell";
       c.dataset.filled="false";
       layer.appendChild(c);
     }
 
-    boardContainer.appendChild(layer);
-    layers.push(layer);
+    board3D.appendChild(layer);
   }
 
   createJars(data.jars);
@@ -251,7 +270,9 @@ function enableDrop(){
 
       filledCells += place;
 
-      jar.remove();
+      jar.style.transform="scale(0)";
+      jar.style.opacity="0";
+      setTimeout(()=>jar.remove(),200);
 
       checkEnd();
     };
@@ -265,7 +286,7 @@ function checkEnd(){
   if(filledCells === totalCells){
 
     if(overflowErrors === 0){
-      feedback.textContent = "Perfeito! ✨";
+      feedback.textContent = `Perfeito! Usou ${totalJars - document.querySelectorAll('.jar').length} de ${totalJars} ✨`;
       save.wins++;
     } else {
       feedback.textContent = `Quase! Sobraram ${overflowErrors}`;
