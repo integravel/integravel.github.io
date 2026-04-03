@@ -19,8 +19,7 @@ body{
   left:10px;
   z-index:10;
   display:flex;
-  gap:10px;
-  align-items:center;
+  gap:8px;
   flex-wrap:wrap;
 }
 </style>
@@ -29,9 +28,12 @@ body{
 <body>
 
 <div id="ui">
-  BPM <input type="number" id="bpm" value="80">
   <button onclick="startGame()">Iniciar</button>
   <button onclick="repeatSequence()">Repetir</button>
+  <button onclick="undoNote()">Desfazer</button>
+  <button onclick="finish()">Finalizar</button>
+  <button onclick="playUser()">Tocar</button>
+
   <span>Precisão: <span id="accuracy">0%</span></span>
   <span>Notas: <span id="difficulty">3</span></span>
 </div>
@@ -63,18 +65,17 @@ const noteSteps = {
 "A4":3,"B4":4,"C5":5,"D5":6,"E5":7,"F5":8
 };
 
+// ===== ESTADO =====
 let correctNotes = [];
 let playerNotes = [];
 
 let difficulty = 3;
 
-let playing = false;
-let showCorrection = false;
-
-let totalAccuracy = 0;
-let totalNotes = 0;
+let mode = "idle"; 
+// idle | playing | input | correcting | playbackUser
 
 let cursorX = 180;
+let playIndex = 0;
 
 // ===== ÁUDIO =====
 const audioCtx = new (window.AudioContext||window.webkitAudioContext)();
@@ -131,62 +132,105 @@ function getNoteFromY(y){
 
 // ===== SEQUÊNCIA =====
 function newSequence(){
-
   correctNotes = [];
 
   let startX = 180;
   let endX = W - 80;
   let usableWidth = endX - startX;
 
-  let irregularity = Math.max(0, (difficulty-3)/7);
-
-  let weights = [];
-  let totalWeight = 0;
+  let spacing = usableWidth / difficulty;
 
   for(let i=0;i<difficulty;i++){
-    let variation = (Math.random()*2 - 1) * irregularity;
-    let w = Math.max(0.5, 1 + variation);
-
-    weights.push(w);
-    totalWeight += w;
-  }
-
-  let unitWidth = usableWidth / totalWeight;
-  let x = startX;
-
-  for(let i=0;i<difficulty;i++){
-
     let note = notes[Math.floor(Math.random()*notes.length)];
 
     correctNotes.push({
-      x:x,
+      x:startX + i*spacing,
       y:getYFromNote(note),
       note:note,
       played:false
     });
-
-    x += weights[i] * unitWidth;
   }
 
   document.getElementById("difficulty").innerText = difficulty;
 }
 
-// ===== PLAYBACK =====
+// ===== PLAYBACK ORIGINAL =====
 function startPlayback(){
   cursorX = 180;
-  playing = true;
+  mode = "playing";
   correctNotes.forEach(n=>n.played=false);
 }
 
 function repeatSequence(){
-  if(playing || showCorrection) return;
+  if(mode === "playing") return;
   playerNotes = [];
   startPlayback();
 }
 
+// ===== INPUT =====
+canvas.addEventListener("touchstart",e=>{
+  if(mode !== "input") return;
+  if(playerNotes.length >= difficulty) return;
+
+  let t = e.touches[0];
+  let noteName = getNoteFromY(t.clientY);
+
+  playerNotes.push({
+    x:t.clientX,
+    y:getYFromNote(noteName),
+    note:noteName
+  });
+
+  playNote(freq[noteName]); // 🔊 som do usuário
+});
+
+// ===== BOTÕES =====
+function undoNote(){
+  if(mode !== "input") return;
+  playerNotes.pop();
+}
+
+function finish(){
+  if(mode !== "input") return;
+  evaluate();
+}
+
+function playUser(){
+  if(mode !== "input") return;
+  mode = "playbackUser";
+  cursorX = 180;
+  playIndex = 0;
+}
+
+// ===== AVALIAÇÃO =====
+function evaluate(){
+  let total = 0;
+
+  for(let i=0;i<difficulty;i++){
+    let dx = playerNotes[i]?.x - correctNotes[i].x;
+    let dy = playerNotes[i]?.y - correctNotes[i].y;
+
+    let dist = Math.sqrt(dx*dx + dy*dy);
+    total += Math.max(0, 100 - dist);
+  }
+
+  let avg = Math.round(total / difficulty);
+  document.getElementById("accuracy").innerText = avg + "%";
+
+  mode = "correcting";
+
+  setTimeout(()=>{
+    mode = "idle";
+    playerNotes = [];
+    newSequence();
+    startPlayback();
+  },2000);
+}
+
 // ===== LOOP =====
 function update(){
-  if(playing){
+
+  if(mode === "playing"){
     cursorX += 2;
 
     correctNotes.forEach(n=>{
@@ -197,70 +241,29 @@ function update(){
     });
 
     if(cursorX > W){
-      playing = false;
+      mode = "input"; // libera jogador
+    }
+  }
+
+  if(mode === "playbackUser"){
+    cursorX += 2;
+
+    playerNotes.forEach(n=>{
+      if(!n.played && cursorX >= n.x){
+        playNote(freq[n.note]);
+        n.played = true;
+      }
+    });
+
+    if(cursorX > W){
+      playerNotes.forEach(n=>n.played=false);
+      mode = "input";
     }
   }
 }
 
-// ===== INPUT (SEM SOM DO USUÁRIO) =====
-canvas.addEventListener("touchstart",e=>{
-  if(!playing) return;
-  if(playerNotes.length >= difficulty) return;
-
-  let t = e.touches[0];
-
-  let noteName = getNoteFromY(t.clientY);
-
-  playerNotes.push({
-    x: t.clientX,
-    y: getYFromNote(noteName),
-    note: noteName
-  });
-
-  // ❌ REMOVIDO: playNote(...)
-});
-
-// ===== AVALIAÇÃO =====
-function evaluate(){
-
-  let total = 0;
-  let count = Math.min(playerNotes.length, correctNotes.length);
-
-  for(let i=0;i<count;i++){
-
-    let dx = playerNotes[i].x - correctNotes[i].x;
-    let dy = playerNotes[i].y - correctNotes[i].y;
-
-    let dist = Math.sqrt(dx*dx + dy*dy);
-
-    let acc = Math.max(0, 100 - dist);
-
-    total += acc;
-    totalAccuracy += acc;
-    totalNotes++;
-  }
-
-  let avg = totalNotes ? Math.round(totalAccuracy / totalNotes) : 0;
-  document.getElementById("accuracy").innerText = avg + "%";
-
-  let roundAvg = count ? total / count : 0;
-
-  if(roundAvg > 85 && difficulty < 10) difficulty++;
-  else if(roundAvg < 50 && difficulty > 3) difficulty--;
-
-  showCorrection = true;
-
-  setTimeout(()=>{
-    showCorrection = false;
-    playerNotes = [];
-    newSequence();
-    startPlayback();
-  },2000);
-}
-
 // ===== DESENHO =====
 function drawStaff(){
-
   let mid = H/2;
   let space = 32;
 
@@ -271,32 +274,38 @@ function drawStaff(){
     ctx.stroke();
   }
 
-  let solLineY = mid + space;
-
   ctx.font = "120px serif";
-  ctx.textBaseline = "middle";
-
-  ctx.fillText("𝄞", 70, solLineY - 8);
+  ctx.fillText("𝄞", 70, mid + space - 8);
 }
 
-function drawSingleNote(n, color){
-  ctx.fillStyle = color;
+function drawNote(n,color){
+  ctx.fillStyle=color;
   ctx.beginPath();
   ctx.ellipse(n.x,n.y,12,9,0,0,Math.PI*2);
   ctx.fill();
 }
 
-function drawNotes(){
-  playerNotes.forEach(n=>drawSingleNote(n,"blue"));
+function draw(){
+  ctx.clearRect(0,0,W,H);
 
-  if(showCorrection){
-    correctNotes.forEach(n=>drawSingleNote(n,"red"));
+  drawStaff();
+
+  playerNotes.forEach(n=>drawNote(n,"blue"));
+
+  if(mode==="correcting"){
+    correctNotes.forEach(n=>drawNote(n,"red"));
   }
-}
 
-function drawCursor(){
-  if(playing){
+  if(mode==="playing"){
     ctx.strokeStyle="green";
+    ctx.beginPath();
+    ctx.moveTo(cursorX,0);
+    ctx.lineTo(cursorX,H);
+    ctx.stroke();
+  }
+
+  if(mode==="playbackUser"){
+    ctx.strokeStyle="purple";
     ctx.beginPath();
     ctx.moveTo(cursorX,0);
     ctx.lineTo(cursorX,H);
@@ -304,37 +313,17 @@ function drawCursor(){
   }
 }
 
-function draw(){
-  ctx.clearRect(0,0,W,H);
-  drawStaff();
-  drawNotes();
-  drawCursor();
-}
-
 function loop(){
   update();
   draw();
-
-  if(!playing && !showCorrection && correctNotes.length){
-    evaluate();
-  }
-
   requestAnimationFrame(loop);
 }
 loop();
 
 // ===== START =====
 function startGame(){
-  totalAccuracy = 0;
-  totalNotes = 0;
-
-  document.getElementById("accuracy").innerText = "0%";
-
+  document.getElementById("accuracy").innerText="0%";
   playerNotes=[];
-  showCorrection=false;
-
-  difficulty = 3;
-
   newSequence();
   startPlayback();
 }
