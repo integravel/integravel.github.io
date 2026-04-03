@@ -6,7 +6,6 @@
 <title>Besouros</title>
 
 <style>
-
 body {
   font-family: sans-serif;
   background: #f6f3ed;
@@ -20,7 +19,6 @@ body {
   padding: 10px;
 }
 
-/* área fixa da grid */
 #boardContainer {
   height: 340px;
   display: flex;
@@ -33,37 +31,20 @@ body {
   gap: 4px;
 }
 
-/* células fixas */
 .cell {
   width: 30px;
   height: 30px;
-
   background: #f0eadf;
   border: 2px solid #cfc6b8;
   border-radius: 8px;
-
   display: flex;
   align-items: center;
   justify-content: center;
-
-  font-size: 16px;
-  transition: 0.2s;
 }
 
-.cell.filled {
-  animation: pop 0.2s ease;
-}
-
-@keyframes pop {
-  0% { transform: scale(0.7); }
-  100% { transform: scale(1); }
-}
-
-/* jarros */
 #jarArea {
-  margin-top: 10px;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(60px,1fr));
   gap: 10px;
 }
 
@@ -71,49 +52,26 @@ body {
   width: 60px;
   margin: auto;
   cursor: grab;
-  transition: 0.2s;
 }
 
 .jar-top {
   background: #a8c7b8;
-  color: #2f4f4f;
   font-size: 12px;
   border-radius: 8px 8px 0 0;
-  padding: 2px;
-  font-weight: bold;
 }
 
 .jar-body {
   min-height: 60px;
   border-radius: 0 0 14px 14px;
-
-  background: linear-gradient(#e8f2ee, #d7e6df);
-  border: 2px solid #aabfb6;
-
+  background: #e8f2ee;
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  align-content: flex-start;
-  gap: 2px;
-  padding: 4px;
 }
 
-.jar-body span {
-  font-size: 12px;
-  animation: wiggle 2s infinite ease-in-out;
-}
-
-@keyframes wiggle {
-  0%,100% { transform: rotate(-5deg); }
-  50% { transform: rotate(5deg); }
-}
-
-/* feedback */
 #feedback {
   height: 24px;
-  font-size: 16px;
 }
-
 </style>
 </head>
 
@@ -121,83 +79,74 @@ body {
 
 <div class="app">
   <div id="feedback"></div>
-
-  <div id="boardContainer">
-    <div id="board"></div>
-  </div>
-
+  <div id="boardContainer"><div id="board"></div></div>
   <div id="jarArea"></div>
 </div>
 
 <script>
 
-// ===== ESTADO =====
-let totalCells = 0;
-let filledCells = 0;
-let overflowErrors = 0;
-let currentPhase = 0;
+// ===== STORAGE =====
+let save = JSON.parse(localStorage.getItem("besourosSave")) || {
+  phase: 0,
+  wins: 0,
+  fails: 0
+};
 
-const basePhases = [
-  { rows: 3, cols: 3, jars: [4,1,2,1,2,3] },
-  { rows: 4, cols: 4, jars: [5,3,4,2,1,6,3] },
-  { rows: 5, cols: 5, jars: [8,6,5,4,3,2,1,7] }
-];
-
-let currentData = null;
+let currentPhase = save.phase;
 
 // ===== UTIL =====
-function shuffle(arr) {
-  return arr.sort(() => Math.random() - 0.5);
-}
+function shuffle(a){ return a.sort(()=>Math.random()-0.5); }
 
-// ===== GERADOR RETANGULAR =====
-function generateDynamicPhase() {
+// ===== GERADOR COM SOLUÇÃO GARANTIDA =====
+function generatePhase() {
 
-  const base = 3 + Math.floor(currentPhase * 0.5);
+  const skill = save.wins / (save.wins + save.fails + 1);
 
-  let rows = base + Math.floor(Math.random() * 3) - 1;
-  let cols = base + Math.floor(Math.random() * 3) - 1;
+  let rows = 3 + Math.floor(currentPhase * 0.4);
+  let cols = 3 + Math.floor(currentPhase * 0.4);
 
-  rows = Math.max(3, Math.min(10, rows));
-  cols = Math.max(3, Math.min(10, cols));
+  rows = Math.min(rows, 10);
+  cols = Math.min(cols, 10);
 
-  // evita quadrado repetido
-  if (rows === cols) {
-    if (Math.random() > 0.5) {
-      rows = Math.min(10, rows + 1);
-    } else {
-      cols = Math.min(10, cols + 1);
-    }
-  }
+  if (Math.random() > 0.5) cols++;
 
   const total = rows * cols;
 
   let jars = [];
   let sum = 0;
 
+  // cria números maiores primeiro (gera estratégia)
   while (sum < total) {
-    let val = Math.floor(Math.random() * 6) + 1;
-    jars.push(val);
-    sum += val;
+
+    let max = Math.min(6 + Math.floor(skill * 4), total - sum);
+    let min = Math.max(1, max - 3);
+
+    let value = Math.floor(Math.random() * (max - min + 1)) + min;
+
+    jars.push(value);
+    sum += value;
   }
 
-  return {
-    rows: rows,
-    cols: cols,
-    jars: shuffle(jars)
-  };
+  // ordena: grandes primeiro aumenta dificuldade real
+  jars.sort((a,b)=>b-a);
+
+  // embaralha levemente (não totalmente aleatório)
+  for (let i = jars.length - 1; i > 0; i--) {
+    if (Math.random() < 0.4) {
+      let j = Math.floor(Math.random() * (i+1));
+      [jars[i], jars[j]] = [jars[j], jars[i]];
+    }
+  }
+
+  return { rows, cols, jars };
 }
 
 // ===== LOAD =====
 function loadPhase() {
 
-  if (currentPhase < basePhases.length) {
-    currentData = basePhases[currentPhase];
-  } else {
-    currentData = generateDynamicPhase();
-  }
+  const data = generatePhase();
 
-  totalCells = currentData.rows * currentData.cols;
+  totalCells = data.rows * data.cols;
   filledCells = 0;
   overflowErrors = 0;
 
@@ -205,47 +154,44 @@ function loadPhase() {
   jarArea.innerHTML = "";
   feedback.textContent = "";
 
-  createBoard(currentData.rows, currentData.cols);
-  createJars(currentData.jars);
+  createBoard(data.rows, data.cols);
+  createJars(data.jars);
 }
 
 // ===== BOARD =====
-function createBoard(r,c) {
+function createBoard(r,c){
+  board.style.gridTemplateColumns = `repeat(${c},30px)`;
 
-  board.style.gridTemplateColumns = `repeat(${c}, 30px)`;
-
-  for (let i=0;i<r*c;i++) {
-    let cell = document.createElement("div");
-    cell.className = "cell";
-    cell.dataset.filled = "false";
-    board.appendChild(cell);
+  for(let i=0;i<r*c;i++){
+    let d = document.createElement("div");
+    d.className="cell";
+    d.dataset.filled="false";
+    board.appendChild(d);
   }
 
   enableDrop();
 }
 
-// ===== JAR =====
-function createJars(jars) {
+// ===== JARS =====
+function createJars(jars){
 
   jars.forEach((amount,i)=>{
 
     let jar = document.createElement("div");
-    jar.className = "jar";
-    jar.id = "jar-"+i;
-    jar.draggable = true;
-    jar.dataset.amount = amount;
+    jar.className="jar";
+    jar.id="jar"+i;
+    jar.draggable=true;
+    jar.dataset.amount=amount;
 
     let bugs="";
-    for (let j=0;j<amount;j++){
-      bugs += "<span>🐞</span>";
-    }
+    for(let j=0;j<amount;j++) bugs+="🐞";
 
     jar.innerHTML = `
       <div class="jar-top">${amount}</div>
       <div class="jar-body">${bugs}</div>
     `;
 
-    jar.ondragstart = e=>{
+    jar.ondragstart=e=>{
       e.dataTransfer.setData("text", jar.id);
     };
 
@@ -254,62 +200,63 @@ function createJars(jars) {
 }
 
 // ===== DROP =====
-function enableDrop() {
+function enableDrop(){
 
-  board.ondragover = e => e.preventDefault();
+  board.ondragover=e=>e.preventDefault();
 
-  board.ondrop = e => {
-
+  board.ondrop=e=>{
     e.preventDefault();
 
     const jar = document.getElementById(
       e.dataTransfer.getData("text")
     );
 
-    if (!jar) return;
+    if(!jar)return;
 
     let amount = Number(jar.dataset.amount);
 
     let empty = [...document.querySelectorAll(".cell")]
-      .filter(c => c.dataset.filled === "false");
+      .filter(c=>c.dataset.filled==="false");
 
     empty = shuffle(empty);
 
     let place = Math.min(amount, empty.length);
     let extra = amount - place;
 
-    for (let i=0;i<place;i++){
-      empty[i].textContent = "🐞";
-      empty[i].dataset.filled = "true";
-      empty[i].classList.add("filled");
+    for(let i=0;i<place;i++){
+      empty[i].textContent="🐞";
+      empty[i].dataset.filled="true";
     }
 
-    if (extra > 0) overflowErrors += extra;
+    if(extra>0) overflowErrors += extra;
 
     filledCells += place;
 
-    jar.style.transform = "scale(0)";
-    jar.style.opacity = "0";
-    setTimeout(()=> jar.remove(), 200);
+    jar.remove();
 
     checkEnd();
   };
 }
 
-// ===== FIM =====
-function checkEnd() {
-  if (filledCells === totalCells) {
+// ===== END =====
+function checkEnd(){
 
-    if (overflowErrors === 0) {
+  if(filledCells === totalCells){
+
+    if(overflowErrors === 0){
       feedback.textContent = "Perfeito! ✨";
+      save.wins++;
     } else {
-      feedback.textContent = `Quase! Sobraram ${overflowErrors} 🐞`;
+      feedback.textContent = `Quase! Sobraram ${overflowErrors}`;
+      save.fails++;
     }
 
-    setTimeout(()=>{
-      currentPhase++;
-      loadPhase();
-    }, 700);
+    currentPhase++;
+    save.phase = currentPhase;
+
+    localStorage.setItem("besourosSave", JSON.stringify(save));
+
+    setTimeout(loadPhase, 800);
   }
 }
 
@@ -317,6 +264,10 @@ function checkEnd() {
 const board = document.getElementById("board");
 const jarArea = document.getElementById("jarArea");
 const feedback = document.getElementById("feedback");
+
+let totalCells=0;
+let filledCells=0;
+let overflowErrors=0;
 
 loadPhase();
 
