@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Ditado Musical</title>
+
 <style>
 body{
   margin:0;
@@ -11,12 +12,14 @@ body{
   overflow:hidden;
   font-family:serif;
 }
+
 #ui{
   position:fixed;
   top:10px;
   left:10px;
   z-index:10;
 }
+
 button,input{
   font-size:16px;
   margin:5px;
@@ -47,6 +50,7 @@ function resize(){
 resize();
 window.addEventListener("resize",resize);
 
+// ===== CONFIG =====
 const notes = [
 "C4","D4","E4","F4","G4","A4","B4","C5","D5","E5","F5"
 ];
@@ -62,12 +66,16 @@ let correctNotes = [];
 
 let playing = false;
 let showCorrection = false;
+
+// precisão acumulada
 let totalAccuracy = 0;
 let totalNotes = 0;
 
+// cursor
 let cursorX = 150;
 let cursorSpeed = 0;
 
+// ===== ÁUDIO =====
 const audioCtx = new (window.AudioContext||window.webkitAudioContext)();
 
 function playNote(f){
@@ -81,11 +89,14 @@ function playNote(f){
   gain.connect(audioCtx.destination);
 
   osc.start();
+
   gain.gain.setValueAtTime(0.8, audioCtx.currentTime);
   gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.6);
+
   osc.stop(audioCtx.currentTime+0.6);
 }
 
+// ===== POSIÇÕES =====
 function getYFromNote(n){
   let mid = H/2;
   let step = 35/2;
@@ -95,16 +106,20 @@ function getYFromNote(n){
 function getNoteFromY(y){
   let mid = H/2;
   let step = 35/2;
+
   let raw = (mid - y)/step + 5;
   let index = Math.round(raw);
+
   return Math.max(0, Math.min(10, index));
 }
 
+// ===== SEQUÊNCIA =====
 function newSequence(){
   sequence = [];
   for(let i=0;i<5;i++){
     sequence.push(Math.floor(Math.random()*notes.length));
   }
+
   correctNotes = sequence.map((n,i)=>({
     x:150 + i*120,
     y:getYFromNote(n),
@@ -113,42 +128,55 @@ function newSequence(){
   }));
 }
 
+// ===== PLAYBACK =====
 function startPlayback(){
+
   let bpm = document.getElementById("bpm").value;
   let tempo = 60000/bpm;
+
   cursorX = 150;
   cursorSpeed = 120 / (tempo/16);
+
   playing = true;
+
   correctNotes.forEach(n=>n.played=false);
 }
 
+// 🔁 repetir sequência
 function repeatSequence(){
   if(playing || showCorrection) return;
+
   playerNotes = [];
   startPlayback();
 }
 
+// ===== LOOP =====
 function update(){
+
   if(playing){
     cursorX += cursorSpeed;
+
     correctNotes.forEach(n=>{
       if(!n.played && cursorX >= n.x){
         playNote(freq[notes[n.note]]);
         n.played = true;
       }
     });
+
     if(cursorX > 150 + 5*120){
       playing = false;
     }
   }
 }
 
+// ===== INPUT =====
 canvas.addEventListener("touchstart",e=>{
   if(playing) return;
   if(playerNotes.length >= 5) return;
   if(showCorrection) return;
 
   let t = e.touches[0];
+
   let x = t.clientX;
   let y = t.clientY;
 
@@ -167,21 +195,31 @@ canvas.addEventListener("touchstart",e=>{
   }
 });
 
+// ===== AVALIAÇÃO =====
 function evaluate(){
+
   let maxDist = 200;
   let tolerance = maxDist * 0.1;
+
   for(let i=0;i<5;i++){
+
     let dx = playerNotes[i].x - correctNotes[i].x;
     let dy = playerNotes[i].y - correctNotes[i].y;
+
     let dist = Math.sqrt(dx*dx + dy*dy);
 
     let acc;
-    if(dist <= tolerance) acc = 100;
-    else acc = Math.max(0, 100 - (dist/maxDist)*100);
+
+    if(dist <= tolerance){
+      acc = 100;
+    }else{
+      acc = Math.max(0, 100 - (dist/maxDist)*100);
+    }
 
     totalAccuracy += acc;
     totalNotes++;
   }
+
   let avg = Math.round(totalAccuracy / totalNotes);
   document.getElementById("accuracy").innerText = avg + "%";
 
@@ -190,15 +228,22 @@ function evaluate(){
   setTimeout(()=>{
     showCorrection = false;
     playerNotes = [];
+
     newSequence();
     startPlayback();
   },2000);
 }
 
+// ===== DESENHO =====
 function drawStaff(){
+
   let mid = H/2;
   let space = 35;
 
+  ctx.strokeStyle = "black";
+  ctx.lineWidth = 2;
+
+  // linhas do pentagrama
   for(let i=-2;i<=2;i++){
     ctx.beginPath();
     ctx.moveTo(50, mid + i*space);
@@ -206,12 +251,22 @@ function drawStaff(){
     ctx.stroke();
   }
 
-  // Desenho correto da Clave de Sol posicionada na segunda linha
-  ctx.font = `${4*space}px serif`;
-  ctx.fillText("𝄞", 50, mid + space); /* A segunda linha de baixo está a `mid + space` */ 4
+  // === CLAVE DE SOL CORRETA ===
+
+  // segunda linha = linha do SOL
+  let solLineY = mid - space;
+
+  ctx.font = "110px serif";
+  ctx.textBaseline = "middle";
+
+  // ajuste fino visual
+  let clefY = solLineY + 5;
+
+  ctx.fillText("𝄞", 60, clefY);
 }
 
 function drawNotes(){
+
   playerNotes.forEach(n=>{
     ctx.fillStyle="blue";
     ctx.beginPath();
@@ -232,6 +287,7 @@ function drawNotes(){
 function drawCursor(){
   if(playing){
     ctx.strokeStyle="green";
+    ctx.lineWidth=3;
     ctx.beginPath();
     ctx.moveTo(cursorX,0);
     ctx.lineTo(cursorX,H);
@@ -246,6 +302,7 @@ function draw(){
   drawCursor();
 }
 
+// ===== LOOP =====
 function loop(){
   update();
   draw();
@@ -253,12 +310,16 @@ function loop(){
 }
 loop();
 
+// ===== START =====
 function startGame(){
   totalAccuracy = 0;
   totalNotes = 0;
+
   document.getElementById("accuracy").innerText = "0%";
+
   playerNotes=[];
   showCorrection=false;
+
   newSequence();
   startPlayback();
 }
