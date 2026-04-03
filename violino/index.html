@@ -23,6 +23,7 @@ button,input{
 }
 </style>
 </head>
+
 <body>
 
 <div id="ui">
@@ -46,8 +47,14 @@ function resize(){
 resize();
 window.addEventListener("resize",resize);
 
-const notes = ["C4","D4","E4","F4","G4","A4","B4","C5","D5","E5","F5"];
-const freq = {"C4":261,"D4":294,"E4":329,"F4":349,"G4":392,"A4":440,"B4":494,"C5":523,"D5":587,"E5":659,"F5":698};
+const notes = [
+"C4","D4","E4","F4","G4","A4","B4","C5","D5","E5","F5"
+];
+
+const freq = {
+"C4":261,"D4":294,"E4":329,"F4":349,"G4":392,
+"A4":440,"B4":494,"C5":523,"D5":587,"E5":659,"F5":698
+};
 
 let sequence = [];
 let playerNotes = [];
@@ -66,10 +73,13 @@ const audioCtx = new (window.AudioContext||window.webkitAudioContext)();
 function playNote(f){
   const osc = audioCtx.createOscillator();
   const gain = audioCtx.createGain();
+
   osc.frequency.value = f;
   osc.type = "triangle";
+
   osc.connect(gain);
   gain.connect(audioCtx.destination);
+
   osc.start();
   gain.gain.setValueAtTime(0.8, audioCtx.currentTime);
   gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.6);
@@ -144,7 +154,12 @@ canvas.addEventListener("touchstart",e=>{
 
   let noteIndex = getNoteFromY(y);
 
-  playerNotes.push({x:x, y:getYFromNote(noteIndex), note:noteIndex});
+  playerNotes.push({
+    x:x,
+    y:getYFromNote(noteIndex),
+    note:noteIndex
+  });
+
   playNote(freq[notes[noteIndex]]);
 
   if(playerNotes.length === 5){
@@ -159,15 +174,19 @@ function evaluate(){
     let dx = playerNotes[i].x - correctNotes[i].x;
     let dy = playerNotes[i].y - correctNotes[i].y;
     let dist = Math.sqrt(dx*dx + dy*dy);
+
     let acc;
     if(dist <= tolerance) acc = 100;
     else acc = Math.max(0, 100 - (dist/maxDist)*100);
+
     totalAccuracy += acc;
     totalNotes++;
   }
   let avg = Math.round(totalAccuracy / totalNotes);
   document.getElementById("accuracy").innerText = avg + "%";
+
   showCorrection = true;
+
   setTimeout(()=>{
     showCorrection = false;
     playerNotes = [];
@@ -179,6 +198,7 @@ function evaluate(){
 function drawStaff(){
   let mid = H/2;
   let space = 35;
+
   for(let i=-2;i<=2;i++){
     ctx.beginPath();
     ctx.moveTo(50, mid + i*space);
@@ -186,15 +206,9 @@ function drawStaff(){
     ctx.stroke();
   }
 
-  // Clave de Sol ajustada: ocupa a segunda linha de baixo pra cima
-  ctx.strokeStyle = "black";
-  ctx.lineWidth = 2;
-  ctx.beginPath();
-  const clefTop = mid - 2*space - 30;
-  const clefBottom = mid + 2*space + 30;
+  // Desenho correto da Clave de Sol posicionada na segunda linha
   ctx.font = `${4*space}px serif`;
-  ctx.fillText("𝄞", 50, mid+space);
-  ctx.strokeStyle = "black";
+  ctx.fillText("𝄞", 50, mid + space); /* A segunda linha de baixo está a `mid + space` */ 4
 }
 
 function drawNotes(){
@@ -204,6 +218,7 @@ function drawNotes(){
     ctx.ellipse(n.x,n.y,14,10,0,0,Math.PI*2);
     ctx.fill();
   });
+
   if(showCorrection){
     correctNotes.forEach(n=>{
       ctx.fillStyle="red";
@@ -217,7 +232,6 @@ function drawNotes(){
 function drawCursor(){
   if(playing){
     ctx.strokeStyle="green";
-    ctx.lineWidth=3;
     ctx.beginPath();
     ctx.moveTo(cursorX,0);
     ctx.lineTo(cursorX,H);
