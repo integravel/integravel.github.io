@@ -20,21 +20,31 @@ body {
   padding: 10px;
 }
 
+/* container 3D */
 #boardContainer {
   height: 340px;
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  justify-content: center;
+  gap: 10px;
+}
+
+/* cada camada */
+.layer {
+  display: grid;
+  gap: 4px;
   justify-content: center;
 }
 
-#board {
-  display: grid;
-  gap: 4px;
+/* leve efeito de profundidade */
+.layer.back {
+  opacity: 0.6;
+  transform: scale(0.9);
 }
 
 .cell {
-  width: 30px;
-  height: 30px;
+  width: 28px;
+  height: 28px;
   background: #f0eadf;
   border: 2px solid #cfc6b8;
   border-radius: 8px;
@@ -53,14 +63,12 @@ body {
   width: 60px;
   margin: auto;
   cursor: grab;
-  transition: 0.2s;
 }
 
 .jar-top {
   background: #a8c7b8;
   font-size: 12px;
   border-radius: 8px 8px 0 0;
-  padding: 2px;
 }
 
 .jar-body {
@@ -74,7 +82,6 @@ body {
 
 #feedback {
   height: 24px;
-  font-size: 16px;
 }
 
 </style>
@@ -84,9 +91,7 @@ body {
 
 <div class="app">
   <div id="feedback"></div>
-  <div id="boardContainer">
-    <div id="board"></div>
-  </div>
+  <div id="boardContainer"></div>
   <div id="jarArea"></div>
 </div>
 
@@ -105,7 +110,7 @@ let currentPhase = save.phase;
 let totalCells = 0;
 let filledCells = 0;
 let overflowErrors = 0;
-let totalJars = 0;
+let layers = [];
 
 // ===== UTIL =====
 function shuffle(a){ return a.sort(()=>Math.random()-0.5); }
@@ -115,86 +120,74 @@ function generatePhase() {
 
   const skill = save.wins / (save.wins + save.fails + 1);
 
-  let rows = 3 + Math.floor(currentPhase * 0.4);
-  let cols = 3 + Math.floor(currentPhase * 0.4);
+  let rows = Math.floor(Math.random() * 10) + 1;
+  let cols = Math.floor(Math.random() * 10) + 1;
 
-  rows = Math.min(rows, 10);
-  cols = Math.min(cols, 10);
+  let depth = Math.random() < 0.4 ? 2 : 1;
 
-  if (Math.random() > 0.5) cols++;
+  const total = rows * cols * depth;
 
-  const total = rows * cols;
-
-  // ===== SOLUÇÃO BASE =====
+  // solução base
   let solution = [];
   let sum = 0;
 
   while (sum < total) {
-
     let max = Math.min(6 + Math.floor(skill * 4), total - sum);
     let min = Math.max(1, max - 3);
+    let v = Math.floor(Math.random() * (max - min + 1)) + min;
 
-    let value = Math.floor(Math.random() * (max - min + 1)) + min;
-
-    solution.push(value);
-    sum += value;
+    solution.push(v);
+    sum += v;
   }
 
-  // ===== EXTRAS =====
+  // extras
   let extras = [];
   let extraCount = 3 + Math.floor(Math.random() * 3);
 
-  for (let i = 0; i < extraCount; i++) {
-    let val = Math.floor(Math.random() * (6 + Math.floor(skill * 4))) + 1;
-    extras.push(val);
+  for (let i=0;i<extraCount;i++){
+    extras.push(Math.floor(Math.random()*8)+1);
   }
 
-  let jars = solution.concat(extras);
+  let jars = shuffle(solution.concat(extras));
 
-  // ordena parcialmente
-  jars.sort((a,b)=>b-a);
-
-  for (let i = jars.length - 1; i > 0; i--) {
-    if (Math.random() < 0.5) {
-      let j = Math.floor(Math.random() * (i+1));
-      [jars[i], jars[j]] = [jars[j], jars[i]];
-    }
-  }
-
-  return { rows, cols, jars };
+  return { rows, cols, depth, jars };
 }
 
 // ===== LOAD =====
-function loadPhase() {
+function loadPhase(){
 
   const data = generatePhase();
 
-  totalCells = data.rows * data.cols;
+  totalCells = data.rows * data.cols * data.depth;
   filledCells = 0;
   overflowErrors = 0;
-  totalJars = data.jars.length;
 
-  board.innerHTML = "";
+  boardContainer.innerHTML = "";
   jarArea.innerHTML = "";
   feedback.textContent = "";
 
-  createBoard(data.rows, data.cols);
-  createJars(data.jars);
-}
+  layers = [];
 
-// ===== BOARD =====
-function createBoard(r,c){
+  for (let d = 0; d < data.depth; d++) {
 
-  board.style.gridTemplateColumns = `repeat(${c},30px)`;
+    let layer = document.createElement("div");
+    layer.className = "layer";
+    if (d === 0 && data.depth > 1) layer.classList.add("back");
 
-  for(let i=0;i<r*c;i++){
-    let d = document.createElement("div");
-    d.className="cell";
-    d.dataset.filled="false";
-    board.appendChild(d);
+    layer.style.gridTemplateColumns = `repeat(${data.cols},28px)`;
+
+    for (let i=0;i<data.rows*data.cols;i++){
+      let c = document.createElement("div");
+      c.className="cell";
+      c.dataset.filled="false";
+      layer.appendChild(c);
+    }
+
+    boardContainer.appendChild(layer);
+    layers.push(layer);
   }
 
-  enableDrop();
+  createJars(data.jars);
 }
 
 // ===== JARS =====
@@ -208,12 +201,9 @@ function createJars(jars){
     jar.draggable=true;
     jar.dataset.amount=amount;
 
-    let bugs="";
-    for(let j=0;j<amount;j++) bugs+="🐞";
-
     jar.innerHTML = `
       <div class="jar-top">${amount}</div>
-      <div class="jar-body">${bugs}</div>
+      <div class="jar-body">${"🐞".repeat(amount)}</div>
     `;
 
     jar.ondragstart=e=>{
@@ -222,47 +212,51 @@ function createJars(jars){
 
     jarArea.appendChild(jar);
   });
+
+  enableDrop();
 }
 
 // ===== DROP =====
 function enableDrop(){
 
-  board.ondragover=e=>e.preventDefault();
+  document.querySelectorAll(".layer").forEach(layer => {
 
-  board.ondrop=e=>{
-    e.preventDefault();
+    layer.ondragover=e=>e.preventDefault();
 
-    const jar = document.getElementById(
-      e.dataTransfer.getData("text")
-    );
+    layer.ondrop=e=>{
+      e.preventDefault();
 
-    if(!jar)return;
+      const jar = document.getElementById(
+        e.dataTransfer.getData("text")
+      );
 
-    let amount = Number(jar.dataset.amount);
+      if(!jar)return;
 
-    let empty = [...document.querySelectorAll(".cell")]
-      .filter(c=>c.dataset.filled==="false");
+      let amount = Number(jar.dataset.amount);
 
-    empty = shuffle(empty);
+      let empty = [...document.querySelectorAll(".cell")]
+        .filter(c=>c.dataset.filled==="false");
 
-    let place = Math.min(amount, empty.length);
-    let extra = amount - place;
+      empty = shuffle(empty);
 
-    for(let i=0;i<place;i++){
-      empty[i].textContent="🐞";
-      empty[i].dataset.filled="true";
-    }
+      let place = Math.min(amount, empty.length);
+      let extra = amount - place;
 
-    if(extra>0) overflowErrors += extra;
+      for(let i=0;i<place;i++){
+        empty[i].textContent="🐞";
+        empty[i].dataset.filled="true";
+      }
 
-    filledCells += place;
+      if(extra>0) overflowErrors += extra;
 
-    jar.style.transform = "scale(0)";
-    jar.style.opacity = "0";
-    setTimeout(()=> jar.remove(), 200);
+      filledCells += place;
 
-    checkEnd();
-  };
+      jar.remove();
+
+      checkEnd();
+    };
+
+  });
 }
 
 // ===== END =====
@@ -271,10 +265,10 @@ function checkEnd(){
   if(filledCells === totalCells){
 
     if(overflowErrors === 0){
-      feedback.textContent = `Perfeito! Usou ${totalJars - document.querySelectorAll('.jar').length} de ${totalJars} jarros ✨`;
+      feedback.textContent = "Perfeito! ✨";
       save.wins++;
     } else {
-      feedback.textContent = `Quase! Sobraram ${overflowErrors} 🐞`;
+      feedback.textContent = `Quase! Sobraram ${overflowErrors}`;
       save.fails++;
     }
 
@@ -288,7 +282,7 @@ function checkEnd(){
 }
 
 // ===== INIT =====
-const board = document.getElementById("board");
+const boardContainer = document.getElementById("boardContainer");
 const jarArea = document.getElementById("jarArea");
 const feedback = document.getElementById("feedback");
 
