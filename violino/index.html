@@ -50,16 +50,14 @@ resize();
 window.addEventListener("resize",resize);
 
 // ===== CONFIG =====
+// 7 posições (1 acima + pauta + 1 abaixo)
 const notes = [
-"E4","F4","G4","A4","B4",
-"C5","D5","E5","F5","G5",
-"A5"
+"D4","E4","F4","G4","A4","B4","C5"
 ];
 
 const freq = {
-"E4":329,"F4":349,"G4":392,"A4":440,"B4":494,
-"C5":523,"D5":587,"E5":659,"F5":698,"G5":784,
-"A5":880
+"D4":294,"E4":329,"F4":349,"G4":392,
+"A4":440,"B4":494,"C5":523
 };
 
 let sequence = [];
@@ -112,17 +110,23 @@ async function playSequence(){
   playing = false;
 }
 
-// ===== MAPA =====
+// ===== MAPA CORRETO =====
 function getYFromNote(n){
   let mid = H/2;
   let space = 35;
-  return mid - (n-5)*space;
+  return mid - (n-3)*space; // centraliza nas 7 posições
 }
 
 function getNoteFromY(y){
   let mid = H/2;
   let space = 35;
-  return Math.round(5 - (y-mid)/space);
+
+  let raw = (mid - y)/space + 3;
+
+  // 🔥 agora arredonda corretamente incluindo espaços
+  let index = Math.round(raw);
+
+  return Math.max(0, Math.min(notes.length-1, index));
 }
 
 // ===== INPUT =====
@@ -137,7 +141,6 @@ canvas.addEventListener("touchstart",e=>{
   let y = touch.clientY;
 
   let noteIndex = getNoteFromY(y);
-  noteIndex = Math.max(0, Math.min(notes.length-1, noteIndex));
 
   playerNotes.push({
     x: x,
@@ -171,14 +174,13 @@ function evaluate(){
 
     let dist = Math.sqrt(dx*dx + dy*dy);
 
-    let points = Math.max(0, 100 - dist * 1.2);
+    let points = Math.max(0, 100 - dist * 1.5);
     total += points;
   }
 
   score += Math.round(total);
   document.getElementById("score").innerText = score;
 
-  // 🔴 ativa modo correção
   showCorrection = true;
   draw();
 
@@ -213,7 +215,6 @@ function drawStaff(){
 
 function drawNotes(){
 
-  // jogador
   playerNotes.forEach(n=>{
     ctx.fillStyle="blue";
     ctx.beginPath();
@@ -221,7 +222,6 @@ function drawNotes(){
     ctx.fill();
   });
 
-  // corretas (AGORA FUNCIONA)
   if(showCorrection){
     correctNotes.forEach(n=>{
       ctx.fillStyle="red";
