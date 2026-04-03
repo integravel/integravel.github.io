@@ -33,7 +33,7 @@ body{
   <button onclick="startGame()">Iniciar</button>
   <button onclick="repeatSequence()">Repetir</button>
   <span>Precisão: <span id="accuracy">0%</span></span>
-  <span>Notas: <span id="difficulty">5</span></span>
+  <span>Notas: <span id="difficulty">1</span></span>
 </div>
 
 <canvas id="canvas"></canvas>
@@ -66,7 +66,7 @@ const noteSteps = {
 let correctNotes = [];
 let playerNotes = [];
 
-let difficulty = 5;
+let difficulty = 1;
 
 let playing = false;
 let showCorrection = false;
@@ -129,21 +129,33 @@ function getNoteFromY(y){
   return best;
 }
 
-// ===== SEQUÊNCIA =====
+// ===== SEQUÊNCIA COM DIFICULDADE =====
 function newSequence(){
 
   correctNotes = [];
 
   let startX = 180;
   let endX = W - 80;
-
   let usableWidth = endX - startX;
+
+  // intensidade da irregularidade cresce com dificuldade
+  let irregularity = difficulty / 10; // 0 → 1
 
   let weights = [];
   let totalWeight = 0;
 
   for(let i=0;i<difficulty;i++){
-    let w = Math.random()*1 + 0.5;
+
+    let base = 1;
+
+    // irregularidade progressiva
+    let variation = (Math.random()*2 - 1) * irregularity;
+
+    let w = base + variation;
+
+    // evita valores negativos ou muito pequenos
+    w = Math.max(0.3, w);
+
     weights.push(w);
     totalWeight += w;
   }
@@ -246,8 +258,9 @@ function evaluate(){
 
   let roundAvg = total / difficulty;
 
-  if(roundAvg > 80 && difficulty < 10) difficulty++;
-  else if(roundAvg < 50 && difficulty > 3) difficulty--;
+  // ajuste adaptativo (mais estável)
+  if(roundAvg > 85 && difficulty < 10) difficulty++;
+  else if(roundAvg < 50 && difficulty > 1) difficulty--;
 
   showCorrection = true;
 
@@ -280,18 +293,14 @@ function drawStaff(){
   ctx.fillText("𝄞", 70, solLineY - 8);
 }
 
-// ===== NOTAS =====
+// ===== NOTAS (APENAS CABEÇA) =====
 function drawSingleNote(n, color){
 
   ctx.fillStyle = color;
 
-  // cabeça
   ctx.beginPath();
   ctx.ellipse(n.x,n.y,12,9,0,0,Math.PI*2);
   ctx.fill();
-
-  // haste simples
-  ctx.fillRect(n.x+10, n.y-40, 2, 40);
 }
 
 function drawNotes(){
@@ -336,6 +345,8 @@ function startGame(){
 
   playerNotes=[];
   showCorrection=false;
+
+  difficulty = 1;
 
   newSequence();
   startPlayback();
