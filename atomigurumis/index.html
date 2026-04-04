@@ -62,7 +62,11 @@ body {
     align-items: center;
     justify-content: center;
     font-weight: bold;
-    transition: transform 0.1s, box-shadow 0.1s;
+    transition: transform 0.15s, box-shadow 0.1s;
+}
+
+.atom.holding {
+    transform: scale(1.2);
 }
 
 .atom.highlight {
@@ -166,10 +170,11 @@ function setPos(a){
     a.el.style.top = a.y + "px";
 }
 
-/* DRAG MELHORADO */
+/* DRAG + HOLD */
 function drag(atom){
     let dragging=false;
-    let offsetX=0, offsetY=0;
+    let holdTimer=null;
+    let startX=0, startY=0;
 
     function getP(e){return e.touches?e.touches[0]:e;}
 
@@ -192,13 +197,20 @@ function drag(atom){
         atom.inWorkspace=true;
         atom.el.style.position="absolute";
 
-        offsetX = radius[atom.type];
-        offsetY = radius[atom.type];
+        atom.x = p.clientX - rect.left - radius[atom.type];
+        atom.y = p.clientY - rect.top - radius[atom.type];
 
-        atom.x = p.clientX - rect.left - offsetX;
-        atom.y = p.clientY - rect.top - offsetY;
+        startX = p.clientX;
+        startY = p.clientY;
 
         setPos(atom);
+
+        // HOLD para desconectar
+        holdTimer = setTimeout(()=>{
+            disconnect(atom);
+            atom.el.classList.add("holding");
+        },300);
+
         dragging=true;
     }
 
@@ -209,8 +221,14 @@ function drag(atom){
         let p=getP(e);
         const rect = workspace.getBoundingClientRect();
 
-        atom.x = p.clientX - rect.left - offsetX;
-        atom.y = p.clientY - rect.top - offsetY;
+        // se mexeu muito → cancela hold
+        if(Math.hypot(p.clientX-startX,p.clientY-startY)>10){
+            clearTimeout(holdTimer);
+            atom.el.classList.remove("holding");
+        }
+
+        atom.x = p.clientX - rect.left - radius[atom.type];
+        atom.y = p.clientY - rect.top - radius[atom.type];
 
         setPos(atom);
         previewBond(atom);
@@ -218,7 +236,10 @@ function drag(atom){
 
     function end(){
         if(!dragging) return;
+
         dragging=false;
+        clearTimeout(holdTimer);
+        atom.el.classList.remove("holding");
 
         if(preview){
             connect(preview.a,preview.b);
@@ -230,7 +251,7 @@ function drag(atom){
     }
 }
 
-/* SNAP SUAVE */
+/* SNAP */
 function snap(a,b){
     let dx=b.x-a.x;
     let dy=b.y-a.y;
@@ -284,9 +305,20 @@ function connect(a,b){
     bonds.push({a,b});
 }
 
-/* FÍSICA MELHORADA */
+/* DESCONEXÃO */
+function disconnect(atom){
+    bonds=bonds.filter(b=>{
+        if(b.a===atom||b.b===atom){
+            b.a.bonds=b.a.bonds.filter(x=>x!==b.b);
+            b.b.bonds=b.b.bonds.filter(x=>x!==b.a);
+            return false;
+        }
+        return true;
+    });
+}
+
+/* FÍSICA */
 function relax(){
-    // ligações (tipo mola)
     bonds.forEach(b=>{
         let dx=b.b.x-b.a.x;
         let dy=b.b.y-b.a.y;
@@ -305,7 +337,7 @@ function relax(){
         }
     });
 
-    // REPULSÃO (evita sobreposição)
+    // repulsão
     atoms.forEach(a=>{
         atoms.forEach(b=>{
             if(a===b) return;
