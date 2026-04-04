@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Jogo das Moléculas</title>
+<title>Moléculas Interativas</title>
 
 <style>
 body {
@@ -25,7 +25,13 @@ body {
     top: 80px;
     bottom: 120px;
     width: 100%;
-    background: #fff;
+}
+
+#svgLayer {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
 }
 
 #shelf {
@@ -40,15 +46,6 @@ body {
     gap: 10px;
 }
 
-#feedback {
-    position: absolute;
-    top: 90px;
-    right: 10px;
-    background: white;
-    padding: 10px;
-    border: 1px solid #ccc;
-}
-
 .atom {
     position: absolute;
     border-radius: 50%;
@@ -57,6 +54,11 @@ body {
     justify-content: center;
     font-weight: bold;
     touch-action: none;
+    transition: transform 0.2s;
+}
+
+.atom.holding {
+    transform: scale(1.2);
 }
 
 .H {
@@ -78,60 +80,46 @@ body {
 <body>
 
 <div id="topbar">
-    <div id="challenge"></div>
-    <button onclick="newGame()">Novo Desafio</button>
+    Segure o átomo para quebrar ligações
 </div>
 
-<div id="workspace"></div>
-<div id="feedback">Monte a molécula</div>
+<div id="workspace">
+    <svg id="svgLayer"></svg>
+</div>
+
 <div id="shelf"></div>
 
 <script>
 let atoms = [];
+let bonds = [];
 
 const workspace = document.getElementById("workspace");
 const shelf = document.getElementById("shelf");
-const feedback = document.getElementById("feedback");
-const challengeText = document.getElementById("challenge");
+const svg = document.getElementById("svgLayer");
 
-const valence = { H: 1, C: 4 };
-const radius = { H: 14, C: 25 };
-
-const challenges = [
-    {name:"metano", c:1, h:4, type:"chain"},
-    {name:"etano", c:2, h:6, type:"chain"},
-    {name:"propano", c:3, h:8, type:"chain"},
-    {name:"butano", c:4, h:10, type:"chain"},
-    {name:"isobutano", c:4, h:10, type:"branched"}
-];
-
-let current;
+const valence = { H:1, C:4 };
+const radius = { H:14, C:25 };
 
 function newGame(){
     atoms=[];
-    workspace.innerHTML="";
+    bonds=[];
     shelf.innerHTML="";
+    svg.innerHTML="";
 
-    current = challenges[Math.floor(Math.random()*challenges.length)];
-    challengeText.innerText = "Monte: " + current.name;
-    feedback.innerText="Monte a molécula";
-
-    createShelfAtoms("H", current.h);
-    createShelfAtoms("C", current.c);
+    createAtoms("C",3);
+    createAtoms("H",8);
 }
 
-function createShelfAtoms(type, count){
+function createAtoms(type,count){
     for(let i=0;i<count;i++){
         let el=document.createElement("div");
         el.className="atom "+type;
         el.innerText=type;
 
         let atom={
-            type,
-            el,
+            type, el,
             bonds:[],
-            x:0,
-            y:0,
+            x:0,y:0,
             inWorkspace:false
         };
 
@@ -143,40 +131,43 @@ function createShelfAtoms(type, count){
     }
 }
 
+/* DRAG + HOLD */
 function drag(atom){
     let dragging=false;
+    let holdTimer=null;
     let offsetX=0, offsetY=0;
 
-    function getPointer(e){
-        return e.touches ? e.touches[0] : e;
-    }
+    function getP(e){ return e.touches?e.touches[0]:e; }
 
     function start(e){
-        let p=getPointer(e);
+        let p=getP(e);
         let rect=atom.el.getBoundingClientRect();
 
-        offsetX = p.clientX - rect.left;
-        offsetY = p.clientY - rect.top;
+        offsetX=p.clientX-rect.left;
+        offsetY=p.clientY-rect.top;
+
+        holdTimer=setTimeout(()=>{
+            disconnect(atom);
+            atom.el.classList.add("holding");
+        },300);
 
         dragging=true;
 
         workspace.appendChild(atom.el);
-
-        atom.x = rect.left;
-        atom.y = rect.top;
-        atom.inWorkspace = true;
+        atom.x=rect.left;
+        atom.y=rect.top;
+        atom.inWorkspace=true;
 
         atom.el.style.position="absolute";
-        setPos(atom);
     }
 
     function move(e){
         if(!dragging) return;
+        clearTimeout(holdTimer);
 
-        let p=getPointer(e);
-
-        atom.x = p.clientX - offsetX;
-        atom.y = p.clientY - offsetY;
+        let p=getP(e);
+        atom.x=p.clientX-offsetX;
+        atom.y=p.clientY-offsetY;
 
         setPos(atom);
         connect(atom);
@@ -184,141 +175,146 @@ function drag(atom){
 
     function end(){
         dragging=false;
-        checkWin();
+        clearTimeout(holdTimer);
+        atom.el.classList.remove("holding");
     }
 
-    atom.el.addEventListener("mousedown", start);
-    document.addEventListener("mousemove", move);
-    document.addEventListener("mouseup", end);
+    atom.el.addEventListener("mousedown",start);
+    document.addEventListener("mousemove",move);
+    document.addEventListener("mouseup",end);
 
-    atom.el.addEventListener("touchstart", start);
-    document.addEventListener("touchmove", move, {passive:false});
-    document.addEventListener("touchend", end);
+    atom.el.addEventListener("touchstart",start);
+    document.addEventListener("touchmove",move,{passive:false});
+    document.addEventListener("touchend",end);
 }
 
 function setPos(a){
-    a.el.style.left = a.x + "px";
-    a.el.style.top = a.y + "px";
+    a.el.style.left=a.x+"px";
+    a.el.style.top=a.y+"px";
 }
 
-function dist(a,b){
-    return Math.hypot(a.x-b.x,a.y-b.y);
-}
-
+/* LIGAÇÃO */
 function canBond(a,b){
     return a.bonds.length<valence[a.type] &&
            b.bonds.length<valence[b.type];
 }
 
+let bondStyleIndex=0;
+const bondStyles=["line","wedge","dash"];
+
 function connect(a){
     atoms.forEach(b=>{
         if(a===b || !b.inWorkspace) return;
 
-        let d=dist(a,b);
+        let dx=a.x-b.x;
+        let dy=a.y-b.y;
+        let d=Math.hypot(dx,dy);
         let target=radius[a.type]+radius[b.type];
 
         if(d<target+10 && canBond(a,b)){
             if(!a.bonds.includes(b)){
                 a.bonds.push(b);
                 b.bonds.push(a);
+
+                let style=bondStyles[bondStyleIndex++%3];
+
+                bonds.push({a,b,style});
             }
         }
     });
 }
 
-/* física corrigida */
-function relax(){
-    atoms.forEach(a=>{
-        a.bonds.forEach(b=>{
-            let dx=b.x-a.x;
-            let dy=b.y-a.y;
-            let d=Math.hypot(dx,dy);
-            let target=radius[a.type]+radius[b.type];
+/* DESFAZER */
+function disconnect(atom){
+    bonds = bonds.filter(b=>{
+        if(b.a===atom || b.b===atom){
+            b.a.bonds=b.a.bonds.filter(x=>x!==b.b);
+            b.b.bonds=b.b.bonds.filter(x=>x!==b.a);
+            return false;
+        }
+        return true;
+    });
+}
 
-            let diff=d-target;
-            let force=0.15*diff;
+/* DESENHO SVG */
+function draw(){
+    svg.innerHTML="";
 
-            if(d>0){
-                let fx=(dx/d)*force;
-                let fy=(dy/d)*force;
-                a.x+=fx;
-                a.y+=fy;
-                b.x-=fx;
-                b.y-=fy;
+    bonds.forEach(b=>{
+        let x1=b.a.x+radius[b.a.type];
+        let y1=b.a.y+radius[b.a.type];
+        let x2=b.b.x+radius[b.b.type];
+        let y2=b.b.y+radius[b.b.type];
+
+        if(b.style==="line"){
+            let line=document.createElementNS("http://www.w3.org/2000/svg","line");
+            line.setAttribute("x1",x1);
+            line.setAttribute("y1",y1);
+            line.setAttribute("x2",x2);
+            line.setAttribute("y2",y2);
+            line.setAttribute("stroke","black");
+            line.setAttribute("stroke-width","3");
+            svg.appendChild(line);
+        }
+
+        if(b.style==="wedge"){
+            let poly=document.createElementNS("http://www.w3.org/2000/svg","polygon");
+            let dx=x2-x1, dy=y2-y1;
+            let len=Math.hypot(dx,dy);
+            let nx=-dy/len*6;
+            let ny=dx/len*6;
+
+            poly.setAttribute("points",
+                `${x1},${y1} ${x2+nx},${y2+ny} ${x2-nx},${y2-ny}`);
+            poly.setAttribute("fill","black");
+            svg.appendChild(poly);
+        }
+
+        if(b.style==="dash"){
+            for(let i=0;i<6;i++){
+                let t=i/6;
+                let cx=x1+(x2-x1)*t;
+                let cy=y1+(y2-y1)*t;
+
+                let dot=document.createElementNS("http://www.w3.org/2000/svg","circle");
+                dot.setAttribute("cx",cx);
+                dot.setAttribute("cy",cy);
+                dot.setAttribute("r",1.5+i*0.3);
+                dot.setAttribute("fill","black");
+                svg.appendChild(dot);
             }
-        });
+        }
     });
 
-    atoms.forEach(a=>{
-        atoms.forEach(b=>{
-            if(a===b) return;
+    requestAnimationFrame(draw);
+}
+draw();
 
-            let dx=a.x-b.x;
-            let dy=a.y-b.y;
-            let d=Math.hypot(dx,dy);
-            let min=radius[a.type]+radius[b.type];
+/* FÍSICA SUAVE */
+function relax(){
+    bonds.forEach(b=>{
+        let dx=b.b.x-b.a.x;
+        let dy=b.b.y-b.a.y;
+        let d=Math.hypot(dx,dy);
+        let target=radius[b.a.type]+radius[b.b.type];
 
-            // só repele se NÃO puder ligar
-            if(d<min && !canBond(a,b)){
-                let push=(min-d)/2;
-                if(d>0){
-                    a.x+=(dx/d)*push;
-                    a.y+=(dy/d)*push;
-                }
-            }
-        });
+        let diff=d-target;
+        let force=0.1*diff;
+
+        if(d>0){
+            let fx=(dx/d)*force;
+            let fy=(dy/d)*force;
+            b.a.x+=fx;
+            b.a.y+=fy;
+            b.b.x-=fx;
+            b.b.y-=fy;
+        }
     });
 
     atoms.forEach(setPos);
+    requestAnimationFrame(relax);
 }
-
-function loop(){
-    relax();
-    requestAnimationFrame(loop);
-}
-loop();
-
-/* validação robusta */
-function allAtomsPlaced(){
-    return atoms.every(a=>a.inWorkspace);
-}
-
-function allValencesSatisfied(){
-    return atoms.every(a=>a.bonds.length === valence[a.type]);
-}
-
-function getCarbonGraph(){
-    return atoms
-        .filter(a=>a.type==="C")
-        .map(c=>c.bonds.filter(b=>b.type==="C").length)
-        .sort()
-        .join(",");
-}
-
-function checkWin(){
-
-    if(!allAtomsPlaced()) return;
-    if(!allValencesSatisfied()) {
-        feedback.innerText="Complete todas as ligações!";
-        return;
-    }
-
-    let graph=getCarbonGraph();
-    let win=false;
-
-    if(current.type==="chain"){
-        if(current.c===1) win=true;
-        if(current.c===2) win=graph==="1,1";
-        if(current.c===3) win=graph==="1,2,1";
-        if(current.c===4) win=graph==="1,2,2,1";
-    }
-
-    if(current.type==="branched"){
-        win = graph==="1,1,1,3";
-    }
-
-    feedback.innerText = win ? "✅ Correto!" : "❌ Estrutura incorreta!";
-}
+relax();
 
 newGame();
 </script>
