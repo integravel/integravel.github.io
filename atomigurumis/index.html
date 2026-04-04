@@ -62,7 +62,6 @@ body {margin:0;font-family:sans-serif;background:#f7f7f7;overflow:hidden;}
 <script>
 let atoms=[], bonds=[], preview=null;
 let level=0;
-let anchor=null;
 
 const workspace=document.getElementById("workspace");
 const svg=document.getElementById("svgLayer");
@@ -81,7 +80,7 @@ const challenges=[
 ];
 
 function newGame(){
-    atoms=[]; bonds=[]; preview=null; anchor=null;
+    atoms=[]; bonds=[]; preview=null;
     svg.innerHTML="";
     workspace.querySelectorAll(".atom").forEach(e=>e.remove());
 
@@ -90,9 +89,8 @@ function newGame(){
     feedback.innerText="";
 }
 
-/* CRIAR + JÁ ARRASTAR */
+/* CRIAR ÁTOMO E JÁ COMEÇAR DRAG */
 function createAndDrag(type,e){
-
     let p=e.touches?e.touches[0]:e;
     let rect=workspace.getBoundingClientRect();
 
@@ -102,8 +100,7 @@ function createAndDrag(type,e){
         bonds:[],
         x:p.clientX-rect.left-radius[type],
         y:p.clientY-rect.top-radius[type],
-        vx:0,vy:0,
-        isAnchor:false
+        dragging:true
     };
 
     atom.el.className="atom "+type;
@@ -112,18 +109,11 @@ function createAndDrag(type,e){
     atoms.push(atom);
     workspace.appendChild(atom.el);
 
-    if(!anchor){
-        anchor=atom;
-        atom.isAnchor=true;
-    }
-
     drag(atom);
-
-    // já inicia movimento
-    atom.el.dispatchEvent(new MouseEvent("mousedown", {clientX:p.clientX, clientY:p.clientY}));
+    setPos(atom);
 }
 
-/* TEMPLATE DRAG */
+/* TEMPLATE */
 document.querySelectorAll(".template").forEach(t=>{
     t.addEventListener("mousedown",e=>{
         createAndDrag(t.classList.contains("C")?"C":"H",e);
@@ -134,26 +124,21 @@ document.querySelectorAll(".template").forEach(t=>{
     });
 });
 
-/* DRAG NORMAL */
+/* DRAG */
 function drag(atom){
-    let dragging=false;
 
     function getP(e){return e.touches?e.touches[0]:e;}
 
-    atom.el.addEventListener("mousedown",start);
-    atom.el.addEventListener("touchstart",start);
+    atom.el.addEventListener("mousedown",()=>atom.dragging=true);
+    atom.el.addEventListener("touchstart",()=>atom.dragging=true);
 
     document.addEventListener("mousemove",move);
     document.addEventListener("touchmove",move,{passive:false});
     document.addEventListener("mouseup",end);
     document.addEventListener("touchend",end);
 
-    function start(e){
-        dragging=true;
-    }
-
     function move(e){
-        if(!dragging) return;
+        if(!atom.dragging) return;
         e.preventDefault();
 
         let p=getP(e);
@@ -162,15 +147,13 @@ function drag(atom){
         atom.x=p.clientX-rect.left-radius[atom.type];
         atom.y=p.clientY-rect.top-radius[atom.type];
 
-        atom.vx=0; atom.vy=0;
-
         setPos(atom);
         previewBond(atom);
     }
 
     function end(e){
-        if(!dragging) return;
-        dragging=false;
+        if(!atom.dragging) return;
+        atom.dragging=false;
 
         let p=getP(e);
 
@@ -179,6 +162,9 @@ function drag(atom){
             removeAtom(atom);
             return;
         }
+
+        // 🔥 ESSENCIAL: recalcular antes de conectar
+        previewBond(atom);
 
         if(preview){
             connect(preview.a,preview.b);
@@ -199,13 +185,15 @@ function removeAtom(atom){
 /* LIGAÇÃO */
 function previewBond(a){
     preview=null;
+
     atoms.forEach(b=>{
         if(a===b) return;
 
         let d=Math.hypot(a.x-b.x,a.y-b.y);
         let target=radius[a.type]+radius[b.type];
 
-        if(d<target+30 && canBond(a,b)){
+        // 🔥 tolerância maior
+        if(d < target + 50 && canBond(a,b)){
             preview={a,b};
         }
     });
@@ -288,19 +276,6 @@ function checkWin(){
         feedback.innerText="❌ Estrutura incorreta";
     }
 }
-
-/* FÍSICA SIMPLES */
-function relax(){
-    atoms.forEach(a=>{
-        a.vx*=0.85;
-        a.vy*=0.85;
-        a.x+=a.vx;
-        a.y+=a.vy;
-        setPos(a);
-    });
-    requestAnimationFrame(relax);
-}
-relax();
 
 /* DESENHO */
 function draw(){
