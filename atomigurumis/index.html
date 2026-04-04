@@ -224,8 +224,10 @@ function connect(a,b){
     b.bonds.push(a);
 }
 
-/* ORGANIZAÇÃO AUTOMÁTICA */
+/* FÍSICA ESTÁVEL */
 function relax(){
+
+    // mola das ligações
     bonds.forEach(b=>{
         let dx=b.b.x-b.a.x;
         let dy=b.b.y-b.a.y;
@@ -233,39 +235,53 @@ function relax(){
 
         let target=radius[b.a.type]+radius[b.b.type]+10;
 
+        if(d===0) return;
+
         let force=(d-target)*0.1;
 
-        if(d>0){
-            let fx=(dx/d)*force;
-            let fy=(dy/d)*force;
+        let fx=(dx/d)*force;
+        let fy=(dy/d)*force;
 
-            b.a.x+=fx;
-            b.a.y+=fy;
-            b.b.x-=fx;
-            b.b.y-=fy;
-        }
+        b.a.x+=fx;
+        b.a.y+=fy;
+        b.b.x-=fx;
+        b.b.y-=fy;
     });
 
-    // distribuir ligações em círculo
+    // repulsão leve
     atoms.forEach(a=>{
-        let n=a.bonds.length;
-        a.bonds.forEach((b,i)=>{
-            let angle=(i/n)*Math.PI*2;
+        atoms.forEach(b=>{
+            if(a===b) return;
 
-            let targetX=a.x+Math.cos(angle)*60;
-            let targetY=a.y+Math.sin(angle)*60;
+            let dx=b.x-a.x;
+            let dy=b.y-a.y;
+            let d=Math.hypot(dx,dy);
 
-            b.x += (targetX-b.x)*0.02;
-            b.y += (targetY-b.y)*0.02;
+            let min=radius[a.type]+radius[b.type];
+
+            if(d<min && d>0){
+                let push=(min-d)*0.05;
+
+                a.x-=dx/d*push;
+                a.y-=dy/d*push;
+                b.x+=dx/d*push;
+                b.y+=dy/d*push;
+            }
         });
     });
 
-    atoms.forEach(setPos);
+    // amortecimento leve
+    atoms.forEach(a=>{
+        a.x*=0.999;
+        a.y*=0.999;
+        setPos(a);
+    });
+
     requestAnimationFrame(relax);
 }
 relax();
 
-/* DESENHO (BASTÃO) */
+/* DESENHO */
 function draw(){
     svg.innerHTML="";
 
@@ -279,13 +295,10 @@ function draw(){
         let dy=y2-y1;
         let len=Math.hypot(dx,dy);
 
-        let offsetA=radius[b.a.type];
-        let offsetB=radius[b.b.type];
-
-        let sx=x1+dx/len*offsetA;
-        let sy=y1+dy/len*offsetA;
-        let ex=x2-dx/len*offsetB;
-        let ey=y2-dy/len*offsetB;
+        let sx=x1+dx/len*radius[b.a.type];
+        let sy=y1+dy/len*radius[b.a.type];
+        let ex=x2-dx/len*radius[b.b.type];
+        let ey=y2-dy/len*radius[b.b.type];
 
         let line=document.createElementNS("http://www.w3.org/2000/svg","line");
         line.setAttribute("x1",sx);
