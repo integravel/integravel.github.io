@@ -262,54 +262,78 @@ function removeBond(atom){
     }
 }
 
-/* CONECTIVIDADE */
-function isConnected(){
-    if(atoms.length===0) return false;
-
-    let visited=new Set();
-    let stack=[atoms[0]];
-
-    while(stack.length){
-        let a=stack.pop();
-        if(visited.has(a)) continue;
-        visited.add(a);
-
-        neighbors(a).forEach(n=>{
-            if(!visited.has(n)) stack.push(n);
-        });
-    }
-
-    return visited.size===atoms.length;
-}
-
-/* VALIDAÇÃO */
+/* VALIDAÇÃO POR GRUPOS */
 function checkWin(){
     let c=challenges[level];
 
-    for(let k in c.req){
-        let count=atoms.filter(a=>a.type===k).length;
-        if(count!==c.req[k]) return;
+    let visited=new Set();
+    let components=[];
+
+    atoms.forEach(a=>{
+        if(visited.has(a)) return;
+
+        let stack=[a];
+        let group=[];
+
+        while(stack.length){
+            let current=stack.pop();
+            if(visited.has(current)) continue;
+
+            visited.add(current);
+            group.push(current);
+
+            neighbors(current).forEach(n=>{
+                if(!visited.has(n)) stack.push(n);
+            });
+        }
+
+        components.push(group);
+    });
+
+    for(let group of components){
+
+        let counts={};
+        group.forEach(a=>{
+            counts[a.type]=(counts[a.type]||0)+1;
+        });
+
+        let match=true;
+
+        for(let k in c.req){
+            if(counts[k]!==c.req[k]){
+                match=false;
+                break;
+            }
+        }
+
+        for(let k in counts){
+            if(!c.req[k]){
+                match=false;
+                break;
+            }
+        }
+
+        if(!match) continue;
+
+        if(c.name==="Dióxido de carbono"){
+            let carbon=group.find(a=>a.type==="C");
+            let neigh=neighbors(carbon).filter(n=>group.includes(n));
+
+            if(neigh.length!==2) continue;
+            if(!neigh.every(n=>n.type==="O")) continue;
+        }
+
+        feedback.innerText="🎉 Correto!";
+        level++;
+
+        if(level>=challenges.length){
+            feedback.innerText="🏆 Você completou todas!";
+            level=0;
+        }
+
+        setTimeout(newGame,1500);
+        return;
     }
-
-    if(!isConnected()) return;
-
-    if(c.name==="Dióxido de carbono"){
-        let carbon=atoms.find(a=>a.type==="C");
-        let neigh=neighbors(carbon);
-
-        if(neigh.length!==2) return;
-        if(!neigh.every(n=>n.type==="O")) return;
-    }
-
-    feedback.innerText="🎉 Correto!";
-    level++;
-
-    if(level>=challenges.length){
-        feedback.innerText="🏆 Você completou todas!";
-        level=0;
-    }
-
-    setTimeout(newGame,1500);
 }
 
 /* DESENHO */
