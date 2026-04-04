@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Montador de Moléculas</title>
+
+<style>
+body {
+    margin: 0;
+    font-family: sans-serif;
+    background: #f0f0f0;
+    overflow: hidden;
+}
+
+#topbar {
+    padding: 10px;
+    background: #222;
+    color: white;
+}
+
+#workspace {
+    position: absolute;
+    top: 60px;
+    bottom: 120px;
+    width: 100%;
+    background: #ffffff;
+}
+
+#shelf {
+    position: absolute;
+    bottom: 0;
+    height: 120px;
+    width: 100%;
+    background: #ddd;
+    border-top: 2px solid #aaa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+}
+
+.atom {
+    position: absolute;
+    border-radius: 50%;
+    cursor: grab;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+}
+
+.H {
+    width: 30px;
+    height: 30px;
+    background: white;
+    border: 2px solid black;
+}
+
+.C {
+    width: 50px;
+    height: 50px;
+    background: gray;
+    color: white;
+}
+
+#info {
+    position: absolute;
+    top: 60px;
+    right: 10px;
+    background: #fff;
+    padding: 10px;
+    border: 1px solid #ccc;
+}
+
+.bond {
+    position: absolute;
+    height: 4px;
+    background: black;
+    transform-origin: left center;
+}
+</style>
+</head>
+
+<body>
+
+<div id="topbar">
+    H: <input type="number" id="hCount" value="4" min="0">
+    C: <input type="number" id="cCount" value="1" min="0">
+    <button onclick="start()">Criar Átomos</button>
+</div>
+
+<div id="workspace"></div>
+<div id="info">Molécula: -<br>Total possíveis: -</div>
+<div id="shelf"></div>
+
+<script>
+let atoms = [];
+let bonds = [];
+
+const valence = {
+    H: 1,
+    C: 4
+};
+
+function start() {
+    atoms = [];
+    bonds = [];
+    document.getElementById("workspace").innerHTML = "";
+    document.getElementById("shelf").innerHTML = "";
+
+    let h = parseInt(hCount.value);
+    let c = parseInt(cCount.value);
+
+    for (let i = 0; i < h; i++) createAtom("H");
+    for (let i = 0; i < c; i++) createAtom("C");
+}
+
+function createAtom(type) {
+    let el = document.createElement("div");
+    el.className = "atom " + type;
+    el.innerText = type;
+
+    let atom = {
+        type,
+        el,
+        bonds: [],
+        x: Math.random() * 300,
+        y: 20
