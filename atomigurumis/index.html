@@ -11,7 +11,7 @@ body {
     font-family:sans-serif;
     background:#f7f7f7;
     overflow:hidden;
-    transition:background 0.3s;
+    transition:0.3s;
 }
 
 body.win { background:#c8f7c5; }
@@ -64,7 +64,6 @@ body.win { background:#c8f7c5; }
     position:absolute;
     border-radius:50%;
     aspect-ratio:1/1;
-    box-shadow:0 2px 6px rgba(0,0,0,0.2);
 }
 
 .atom.H { width:28px; background:white; border:2px solid black; }
@@ -94,18 +93,17 @@ body.win { background:#c8f7c5; }
 
 <script>
 let atoms=[], bonds=[];
-let draggingAtom=null;
-let holdTimer=null;
+let dragging=null, holdTimer=null;
 let level=0;
 
 const valence={H:1,C:4,O:2,N:3};
 const radius={H:14,C:25,O:20,N:22};
 
 const challenges=[
-    {name:"Hidrogênio",req:{H:2}},
+    {name:"Gás hidrogênio",req:{H:2}, type:"H2"},
     {name:"Água",req:{H:2,O:1}},
     {name:"Amônia",req:{N:1,H:3}},
-    {name:"Dióxido de carbono",req:{C:1,O:2}},
+    {name:"Dióxido de carbono",req:{C:1,O:2}, type:"CO2"},
     {name:"Peróxido de hidrogênio",req:{H:2,O:2}},
     {name:"Metano",req:{C:1,H:4}},
     {name:"Etano",req:{C:2,H:6}}
@@ -126,26 +124,14 @@ function newGame(){
     document.body.classList.remove("win");
 }
 
-/* DESCONEXÃO */
-function disconnect(atom){
-    bonds = bonds.filter(b=>{
-        if(b.a===atom || b.b===atom){
-            b.a.bonds--;
-            b.b.bonds--;
-            return false;
-        }
-        return true;
-    });
-}
-
 /* CRIAR */
 function createAtom(type,x,y){
     let rect=workspace.getBoundingClientRect();
 
     let atom={
         type,
+        bonds:[],
         el:document.createElement("div"),
-        bonds:0,
         x:x-rect.left-radius[type],
         y:y-rect.top-radius[type]
     };
@@ -155,19 +141,19 @@ function createAtom(type,x,y){
     atoms.push(atom);
     workspace.appendChild(atom.el);
 
-    atom.el.addEventListener("mousedown",startHold);
-    atom.el.addEventListener("touchstart",startHold);
+    atom.el.addEventListener("mousedown",e=>startDrag(e,atom));
+    atom.el.addEventListener("touchstart",e=>startDrag(e,atom));
 
     setPos(atom);
-    draggingAtom=atom;
 }
 
-function startHold(e){
+function startDrag(e,atom){
     e.stopPropagation();
-    let atom=atoms.find(a=>a.el===e.currentTarget);
+    dragging=atom;
 
-    holdTimer=setTimeout(()=>disconnect(atom),300);
-    draggingAtom=atom;
+    holdTimer=setTimeout(()=>{
+        disconnect(atom);
+    },300);
 }
 
 /* TEMPLATE */
@@ -185,30 +171,30 @@ document.querySelectorAll(".template").forEach(t=>{
 function getP(e){return e.touches?e.touches[0]:e;}
 
 document.addEventListener("mousemove",e=>{
-    if(!draggingAtom) return;
+    if(!dragging) return;
     clearTimeout(holdTimer);
 
     let p=getP(e);
     let rect=workspace.getBoundingClientRect();
 
-    draggingAtom.x=p.clientX-rect.left-radius[draggingAtom.type];
-    draggingAtom.y=p.clientY-rect.top-radius[draggingAtom.type];
+    dragging.x=p.clientX-rect.left-radius[dragging.type];
+    dragging.y=p.clientY-rect.top-radius[dragging.type];
 
-    setPos(draggingAtom);
+    setPos(dragging);
 });
 
 document.addEventListener("touchmove",e=>{
-    if(!draggingAtom) return;
+    if(!dragging) return;
     e.preventDefault();
     clearTimeout(holdTimer);
 
     let p=getP(e);
     let rect=workspace.getBoundingClientRect();
 
-    draggingAtom.x=p.clientX-rect.left-radius[draggingAtom.type];
-    draggingAtom.y=p.clientY-rect.top-radius[draggingAtom.type];
+    dragging.x=p.clientX-rect.left-radius[dragging.type];
+    dragging.y=p.clientY-rect.top-radius[dragging.type];
 
-    setPos(draggingAtom);
+    setPos(dragging);
 },{passive:false});
 
 document.addEventListener("mouseup",endDrag);
@@ -216,16 +202,14 @@ document.addEventListener("touchend",endDrag);
 
 function endDrag(){
     clearTimeout(holdTimer);
-    if(!draggingAtom) return;
+    if(!dragging) return;
 
-    let atom=draggingAtom;
-    draggingAtom=null;
-
-    tryConnect(atom);
+    tryConnect(dragging);
+    dragging=null;
     checkWin();
 }
 
-/* CONEXÃO COM MULTIPLAS LIGAÇÕES */
+/* CONEXÃO */
 function tryConnect(a){
     atoms.forEach(b=>{
         if(a===b) return;
@@ -240,27 +224,54 @@ function tryConnect(a){
 
         if(d<=limit && canBond(a,b)){
             bonds.push({a,b});
-            a.bonds++;
-            b.bonds++;
+            a.bonds.push(b);
+            b.bonds.push(a);
         }
     });
 }
 
 function canBond(a,b){
-    return a.bonds<valence[a.type] &&
-           b.bonds<valence[b.type];
+    return a.bonds.length<valence[a.type] &&
+           b.bonds.length<valence[b.type];
+}
+
+/* DESCONEXÃO */
+function disconnect(atom){
+    bonds = bonds.filter(b=>{
+        if(b.a===atom || b.b===atom){
+            b.a.bonds=b.a.bonds.filter(x=>x!==b.b);
+            b.b.bonds=b.b.bonds.filter(x=>x!==b.a);
+            return false;
+        }
+        return true;
+    });
 }
 
 /* VALIDAÇÃO */
 function checkWin(){
-    let req=challenges[level].req;
+    let c=challenges[level];
 
-    for(let k in req){
+    // quantidade
+    for(let k in c.req){
         let count=atoms.filter(a=>a.type===k).length;
-        if(count!==req[k]) return;
+        if(count!==c.req[k]) return;
     }
 
-    if(!atoms.every(a=>a.bonds===valence[a.type])) return;
+    // valência
+    if(!atoms.every(a=>a.bonds.length===valence[a.type])) return;
+
+    // CO2 ESPECIAL
+    if(c.type==="CO2"){
+        let carbon=atoms.find(a=>a.type==="C");
+        let oxy=atoms.filter(a=>a.type==="O");
+
+        let ok = oxy.every(o=>{
+            let bondsToC = o.bonds.filter(x=>x===carbon).length;
+            return bondsToC===2;
+        });
+
+        if(!ok) return;
+    }
 
     feedback.innerText="🎉 Correto!";
     document.body.classList.add("win");
@@ -274,49 +285,28 @@ function checkWin(){
     setTimeout(newGame,1500);
 }
 
-/* DESENHO (LINHAS DUPLAS AUTOMÁTICAS) */
+/* DESENHO */
 function draw(){
     svg.innerHTML="";
 
-    let map=new Map();
-
     bonds.forEach(b=>{
-        let key=[b.a,b.b].sort().join("-");
-        map.set(key,(map.get(key)||0)+1);
-    });
-
-    map.forEach((count,key)=>{
-        let [a,b]=bonds.find(x=>{
-            let k=[x.a,x.b].sort().join("-");
-            return k===key;
-        });
-
-        for(let i=0;i<count;i++){
-            drawLine(a,b,i,count);
-        }
+        drawLine(b.a,b.b);
     });
 
     requestAnimationFrame(draw);
 }
 
-function drawLine(a,b,i,total){
+function drawLine(a,b){
     let x1=a.x+radius[a.type];
     let y1=a.y+radius[a.type];
     let x2=b.x+radius[b.type];
     let y2=b.y+radius[b.type];
 
-    let offset=(i-(total-1)/2)*6;
-
-    let dx=x2-x1, dy=y2-y1;
-    let len=Math.hypot(dx,dy);
-    let nx=-dy/len*offset;
-    let ny=dx/len*offset;
-
     let line=document.createElementNS("http://www.w3.org/2000/svg","line");
-    line.setAttribute("x1",x1+nx);
-    line.setAttribute("y1",y1+ny);
-    line.setAttribute("x2",x2+nx);
-    line.setAttribute("y2",y2+ny);
+    line.setAttribute("x1",x1);
+    line.setAttribute("y1",y1);
+    line.setAttribute("x2",x2);
+    line.setAttribute("y2",y2);
     line.setAttribute("stroke","black");
     line.setAttribute("stroke-width","4");
 
