@@ -138,8 +138,7 @@ function createAtom(type,x,y){
     atom.el.addEventListener("touchstart",e=>startDrag(e,atom));
 
     setPos(atom);
-
-    return atom; // ⭐ IMPORTANTE
+    return atom;
 }
 
 function startDrag(e,atom){
@@ -149,17 +148,17 @@ function startDrag(e,atom){
     holdTimer=setTimeout(()=>disconnect(atom),300);
 }
 
-/* TEMPLATE (CORRIGIDO) */
+/* TEMPLATE */
 document.querySelectorAll(".template").forEach(t=>{
     t.addEventListener("mousedown",e=>{
         let atom=createAtom(t.innerText,e.clientX,e.clientY);
-        dragging=atom; // ⭐ inicia drag
+        dragging=atom;
     });
 
     t.addEventListener("touchstart",e=>{
         let p=e.touches[0];
         let atom=createAtom(t.innerText,p.clientX,p.clientY);
-        dragging=atom; // ⭐ inicia drag
+        dragging=atom;
     });
 });
 
@@ -247,11 +246,35 @@ function disconnect(atom){
 function checkWin(){
     let c=challenges[level];
 
+    // quantidade
     for(let k in c.req){
         let count=atoms.filter(a=>a.type===k).length;
         if(count!==c.req[k]) return;
     }
 
+    // função para contar ligações entre dois átomos
+    function bondCount(a,b){
+        return bonds.filter(x =>
+            (x.a===a && x.b===b) ||
+            (x.a===b && x.b===a)
+        ).length;
+    }
+
+    // CO2 específico
+    if(c.type==="CO2"){
+        let carbon=atoms.find(a=>a.type==="C");
+        let oxy=atoms.filter(a=>a.type==="O");
+
+        if(!carbon || oxy.length!==2) return;
+
+        let valid = oxy.every(o => bondCount(carbon,o) === 2);
+        if(!valid) return;
+
+        let total = oxy.reduce((s,o)=>s+bondCount(carbon,o),0);
+        if(total!==4) return;
+    }
+
+    // valência geral
     if(!atoms.every(a=>a.bonds.length===valence[a.type])) return;
 
     feedback.innerText="🎉 Correto!";
@@ -262,7 +285,11 @@ function checkWin(){
 /* DESENHO */
 function draw(){
     svg.innerHTML="";
-    bonds.forEach(b=>drawLine(b.a,b.b));
+
+    bonds.forEach(b=>{
+        drawLine(b.a,b.b);
+    });
+
     requestAnimationFrame(draw);
 }
 
