@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Moléculas</title>
+
+<style>
+body { margin:0; font-family:sans-serif; background:#f7f7f7; overflow:hidden; }
+
+#topbar {
+    background:#222; color:white; padding:10px; text-align:center;
+}
+
+#workspace {
+    position:absolute; top:80px; bottom:120px; width:100%;
+}
+
+#svgLayer {
+    position:absolute; width:100%; height:100%; pointer-events:none;
+}
+
+#shelf {
+    position:absolute; bottom:0; height:120px; width:100%;
+    background:#e0e0e0;
+    display:flex; justify-content:center; align-items:center; gap:30px;
+}
+
+.template {
+    width:60px;height:60px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    font-weight:bold;cursor:pointer;
+}
+
+.template.H { background:white; border:2px solid black; }
+.template.C { background:#666; color:white; }
+.template.O { background:red; color:white; }
+.template.N { background:blue; color:white; }
+
+.atom {
+    position:absolute;
+    border-radius:50%;
+    aspect-ratio:1/1;
+}
+
+.atom.H { width:28px; background:white; border:2px solid black; }
+.atom.C { width:50px; background:#666; }
+.atom.O { width:40px; background:red; }
+.atom.N { width:44px; background:blue; }
+</style>
+</head>
+
+<body>
+
+<div id="topbar">
+<div id="challenge"></div>
+<div id="feedback"></div>
+</div>
+
+<div id="workspace">
+<svg id="svgLayer"></svg>
+</div>
+
+<div id="shelf">
+<div class="template H">H</div>
+<div class="template C">C</div>
+<div class="template O">O</div>
+<div class="template N">N</div>
+</div>
+
+<script>
+let atoms=[], bonds=[];
+let dragging=null, holdTimer=null;
+let level=0;
+
+let startX=0, startY=0;
+let moved=false;
+let settled=false;
+
+const INITIAL_TOLERANCE=15;
+const MOVE_TOLERANCE=6;
+
+const radius={H:14,C:25,O:20,N:22};
+
+const challenges=[
+    {name:"Gás hidrogênio",req:{H:2}},
+    {name:"Água",req:{H:2,O:1}},
+    {name:"Amônia",req:{N:1,H:3}},
+    {name:"Dióxido de carbono",req:{C:1,O:2}}
+];
+
+const workspace=document.getElementById("workspace");
+const svg=document.getElementById("svgLayer");
+const challengeText=document.getElementById("challenge");
+const feedback=document.getElementById("feedback");
+
+function newGame(){
+    atoms=[]; bonds=[];
+    svg.innerHTML="";
+    workspace.querySelectorAll(".atom").forEach(e=>e.remove());
+
+    challengeText.innerText="Fase "+(level+1)+": "+challenges[level].name;
+    feedback.innerText="";
+}
+
+/* CRIAR */
+function createAtom(type,x,y){
+    let rect=workspace.getBoundingClientRect();
+
+    let atom={
+        type,
+        x:x-rect.left-radius[type],
+        y:y-rect.top-radius[type],
+        el:document.createElement("div")
+    };
+
+    atom.el.className="atom "+type;
+
+    atoms.push(atom);
+    workspace.appendChild(atom.el);
+
+    atom.el.addEventListener("mousedown",e=>startDrag(e,atom));
+    atom.el.addEventListener("touchstart",e=>startDrag(e,atom));
+
+    setPos(atom);
+    return atom;
+}
+
+/* DRAG */
+function startDrag(e,atom){
+    e.preventDefault();
+    dragging=atom;
+
+    let p=getP(e);
+    startX=p.clientX;
+    startY=p.clientY;
+
+    moved=false;
+    settled=false;
+
+    holdTimer=setTimeout(()=>{
+        if(!moved){
+            removeBond(atom);
+        }
+    },300);
+}
+
+function getP(e){return e.touches?e.touches[0]:e;}
+
+document.addEventListener("mousemove",move);
+document.addEventListener("touchmove",move,{passive:false});
+
+function move(e){
+    if(!dragging) return;
+
+    let p=getP(e);
+
+    let dx=p.clientX-startX;
+    let dy=p.clientY-startY;
+    let dist=Math.hypot(dx,dy);
+
+    if(!settled){
+        if(dist>INITIAL_TOLERANCE){
+            settled=true;
+            startX=p.clientX;
+            startY=p.clientY;
+        }
+    }else{
+        if(dist>MOVE_TOLERANCE){
+            moved=true;
+            clearTimeout(holdTimer);
+        }
+    }
+
+    let rect=workspace.getBoundingClientRect();
+
+    dragging.x=p.clientX-rect.left-radius[dragging.type];
+    dragging.y=p.clientY-rect.top-radius[dragging.type];
+
+    setPos(dragging);
+}
+
+document.addEventListener("mouseup",endDrag);
+document.addEventListener("touchend",endDrag);
+
+function endDrag(){
+    if(!dragging) return;
+
+    clearTimeout(holdTimer);
+
+    tryConnect(dragging);
+    dragging=null;
+    checkWin();
+}
+
+/* MENU */
+document.querySelectorAll(".template").forEach(t=>{
+    function spawn(e){
+        e.preventDefault();
+        let p=getP(e);
+        dragging=createAtom(t.innerText,p.clientX,p.clientY);
+    }
+
+    t.addEventListener("mousedown",spawn);
+    t.addEventListener("touchstart",spawn,{passive:false});
+});
+
+/* CONTAGEM */
+function bondExists(a,b){
+    return bonds.some(x =>
+        (x.a===a && x.b===b) ||
+        (x.a===b && x.b===a)
+    );
+}
+
+function neighbors(atom){
+    let list=[];
+    bonds.forEach(b=>{
+        if(b.a===atom) list.push(b.b);
+        if(b.b===atom) list.push(b.a);
+    });
+    return list;
+}
+
+/* CONEXÃO */
+function tryConnect(a){
+    atoms.forEach(b=>{
+        if(a===b) return;
+
+        let d=Math.hypot(
+            (a.x+radius[a.type])-(b.x+radius[b.type]),
+            (a.y+radius[a.type])-(b.y+radius[b.type])
+        );
+
+        let limit=radius[a.type]+radius[b.type];
+
+        if(d<=limit && !bondExists(a,b)){
+            bonds.push({a,b});
+        }
+    });
+}
+
+/* REMOVER */
+function removeBond(atom){
+    for(let i=bonds.length-1;i>=0;i--){
+        let b=bonds[i];
+        if(b.a===atom || b.b===atom){
+            bonds.splice(i,1);
+            return;
+        }
+    }
+}
+
+/* CONECTIVIDADE */
+function isConnected(){
+    if(atoms.length===0) return false;
+
+    let visited=new Set();
+    let stack=[atoms[0]];
+
+    while(stack.length){
+        let a=stack.pop();
+        if(visited.has(a)) continue;
+        visited.add(a);
+
+        neighbors(a).forEach(n=>{
+            if(!visited.has(n)) stack.push(n);
+        });
+    }
+
+    return visited.size===atoms.length;
+}
+
+/* VALIDAÇÃO */
+function checkWin(){
+    let c=challenges[level];
+
+    for(let k in c.req){
+        let count=atoms.filter(a=>a.type===k).length;
+        if(count!==c.req[k]) return;
+    }
+
+    if(!isConnected()) return;
+
+    // 🔥 REGRA ESPECÍFICA CO2
+    if(c.name==="Dióxido de carbono"){
+        let carbon=atoms.find(a=>a.type==="C");
+        let neigh=neighbors(carbon);
+
+        if(neigh.length!==2) return;
+        if(!neigh.every(n=>n.type==="O")) return;
+    }
+
+    feedback.innerText="🎉 Correto!";
+    level++;
+    setTimeout(newGame,1500);
+}
+
+/* DESENHO */
+function draw(){
+    svg.innerHTML="";
+
+    bonds.forEach(b=>{
+        let x1=b.a.x+radius[b.a.type];
+        let y1=b.a.y+radius[b.a.type];
+        let x2=b.b.x+radius[b.b.type];
+        let y2=b.b.y+radius[b.b.type];
+
+        let line=document.createElementNS("http://www.w3.org/2000/svg","line");
+        line.setAttribute("x1",x1);
+        line.setAttribute("y1",y1);
+        line.setAttribute("x2",x2);
+        line.setAttribute("y2",y2);
+        line.setAttribute("stroke","black");
+        line.setAttribute("stroke-width","4");
+
+        svg.appendChild(line);
+    });
+
+    requestAnimationFrame(draw);
+}
+
+draw();
+
+function setPos(a){
+    a.el.style.left=a.x+"px";
+    a.el.style.top=a.y+"px";
+}
+
+newGame();
+</script>
+
+</body>
+</html>
