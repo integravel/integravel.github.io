@@ -13,7 +13,6 @@ body {
     overflow: hidden;
 }
 
-/* topo */
 #topbar {
     background: #222;
     color: white;
@@ -21,31 +20,30 @@ body {
     text-align: center;
 }
 
-/* desafio */
 #challenge {
     font-size: 18px;
-    margin-top: 5px;
 }
 
-/* área */
 #workspace {
     position: absolute;
     top: 80px;
     bottom: 120px;
     width: 100%;
-    background: #ffffff;
+    background: #fff;
 }
 
-/* prateleira */
 #shelf {
     position: absolute;
     bottom: 0;
     height: 120px;
     width: 100%;
     background: #e0e0e0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
 }
 
-/* info */
 #feedback {
     position: absolute;
     top: 90px;
@@ -55,7 +53,6 @@ body {
     border: 1px solid #ccc;
 }
 
-/* átomos */
 .atom {
     position: absolute;
     border-radius: 50%;
@@ -104,7 +101,6 @@ const challengeText = document.getElementById("challenge");
 const valence = { H: 1, C: 4 };
 const radius = { H: 14, C: 25 };
 
-/* desafios */
 const challenges = [
     {name:"metano", c:1, h:4, type:"chain"},
     {name:"etano", c:2, h:6, type:"chain"},
@@ -115,7 +111,6 @@ const challenges = [
 
 let current;
 
-/* iniciar jogo */
 function newGame(){
     atoms=[];
     workspace.innerHTML="";
@@ -123,80 +118,97 @@ function newGame(){
 
     current = challenges[Math.floor(Math.random()*challenges.length)];
     challengeText.innerText = "Monte: " + current.name;
-
-    for(let i=0;i<current.h;i++) createAtom("H",i);
-    for(let i=0;i<current.c;i++) createAtom("C",i);
-
     feedback.innerText="Monte a molécula";
+
+    createShelfAtoms("H", current.h);
+    createShelfAtoms("C", current.c);
 }
 
-/* criar átomo */
-function createAtom(type,i){
-    let el=document.createElement("div");
-    el.className="atom "+type;
-    el.innerText=type;
+/* cria átomos CENTRALIZADOS */
+function createShelfAtoms(type, count){
+    for(let i=0;i<count;i++){
+        let el=document.createElement("div");
+        el.className="atom "+type;
+        el.innerText=type;
 
-    let atom={
-        type,
-        el,
-        bonds:[],
-        x:40+i*40,
-        y:40
-    };
+        let atom={
+            type,
+            el,
+            bonds:[],
+            x:0,
+            y:0
+        };
 
-    atoms.push(atom);
-    shelf.appendChild(el);
-    setPos(atom);
-    drag(atom);
+        atoms.push(atom);
+        shelf.appendChild(el);
+
+        // posição inicial visual (flex cuida)
+        el.style.position="relative";
+
+        drag(atom);
+    }
 }
 
-function setPos(a){
-    a.el.style.left=a.x+"px";
-    a.el.style.top=a.y+"px";
-}
-
-/* drag */
+/* drag CORRIGIDO */
 function drag(atom){
-    let offX,offY,drag=false;
+    let dragging=false;
+    let offsetX=0, offsetY=0;
 
-    function start(x,y){
-        drag=true;
-        offX=x-atom.x;
-        offY=y-atom.y;
-        workspace.appendChild(atom.el);
+    function getPointer(e){
+        return e.touches ? e.touches[0] : e;
     }
 
-    function move(x,y){
-        if(!drag) return;
-        atom.x=x-offX;
-        atom.y=y-offY;
+    function start(e){
+        let p=getPointer(e);
+
+        let rect=atom.el.getBoundingClientRect();
+
+        offsetX = p.clientX - rect.left;
+        offsetY = p.clientY - rect.top;
+
+        dragging=true;
+
+        // mover pro workspace mantendo posição visual
+        workspace.appendChild(atom.el);
+
+        atom.x = rect.left;
+        atom.y = rect.top;
+
+        atom.el.style.position="absolute";
+        setPos(atom);
+    }
+
+    function move(e){
+        if(!dragging) return;
+
+        let p=getPointer(e);
+
+        atom.x = p.clientX - offsetX;
+        atom.y = p.clientY - offsetY;
+
         setPos(atom);
         connect(atom);
     }
 
     function end(){
-        drag=false;
+        dragging=false;
         checkWin();
     }
 
-    atom.el.onmousedown=e=>start(e.pageX,e.pageY);
-    document.onmousemove=e=>move(e.pageX,e.pageY);
-    document.onmouseup=end;
+    atom.el.addEventListener("mousedown", start);
+    document.addEventListener("mousemove", move);
+    document.addEventListener("mouseup", end);
 
-    atom.el.ontouchstart=e=>{
-        let t=e.touches[0];
-        start(t.pageX,t.pageY);
-    };
-
-    document.ontouchmove=e=>{
-        let t=e.touches[0];
-        move(t.pageX,t.pageY);
-    };
-
-    document.ontouchend=end;
+    atom.el.addEventListener("touchstart", start);
+    document.addEventListener("touchmove", move, {passive:false});
+    document.addEventListener("touchend", end);
 }
 
-/* ligação */
+function setPos(a){
+    a.el.style.left = a.x + "px";
+    a.el.style.top = a.y + "px";
+}
+
 function dist(a,b){
     return Math.hypot(a.x-b.x,a.y-b.y);
 }
@@ -209,6 +221,7 @@ function canBond(a,b){
 function connect(a){
     atoms.forEach(b=>{
         if(a===b) return;
+
         let d=dist(a,b);
         let target=radius[a.type]+radius[b.type];
 
@@ -265,7 +278,6 @@ function relax(){
     atoms.forEach(setPos);
 }
 
-/* loop */
 function loop(){
     relax();
     requestAnimationFrame(loop);
@@ -274,37 +286,32 @@ loop();
 
 /* validação */
 function getCarbonGraph(){
-    let carbons=atoms.filter(a=>a.type==="C");
-    return carbons.map(c=>c.bonds.filter(b=>b.type==="C").length);
+    return atoms
+        .filter(a=>a.type==="C")
+        .map(c=>c.bonds.filter(b=>b.type==="C").length)
+        .sort()
+        .join(",");
 }
 
 function checkWin(){
-    let carbons=getCarbonGraph();
-
-    if(carbons.length!==current.c) return;
-
-    let sorted=carbons.sort().join(",");
+    let graph=getCarbonGraph();
 
     let win=false;
 
     if(current.type==="chain"){
-        // cadeia linear
-        win = sorted === "1,2,2,1".slice(0,sorted.length);
+        if(current.c===1) win=true;
+        if(current.c===2) win=graph==="1,1";
+        if(current.c===3) win=graph==="1,2,1";
+        if(current.c===4) win=graph==="1,2,2,1";
     }
 
     if(current.type==="branched"){
-        // isobutano: 3,1,1,1
-        win = sorted==="1,1,1,3";
+        win = graph==="1,1,1,3";
     }
 
-    if(win){
-        feedback.innerText="✅ Correto!";
-    } else {
-        feedback.innerText="❌ Tente novamente";
-    }
+    feedback.innerText = win ? "✅ Correto!" : "❌ Tente novamente";
 }
 
-/* iniciar */
 newGame();
 </script>
 
