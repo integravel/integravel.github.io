@@ -251,59 +251,74 @@ function removeBond(atom){
     }
 }
 
-/* CONECTIVIDADE */
-function isConnected(){
-    if(atoms.length===0) return false;
-
-    let visited=new Set();
-    let stack=[atoms[0]];
-
-    while(stack.length){
-        let a=stack.pop();
-        if(visited.has(a)) continue;
-        visited.add(a);
-
-        neighbors(a).forEach(n=>{
-            if(!visited.has(n)) stack.push(n);
-        });
-    }
-
-    return visited.size===atoms.length;
-}
-
-/* ✅ VALIDAÇÃO CORRIGIDA */
+/* ✅ NOVA VALIDAÇÃO INTELIGENTE */
 function checkWin(){
     let c=challenges[level];
 
-    let counts={};
-    atoms.forEach(a=>{
-        counts[a.type]=(counts[a.type]||0)+1;
+    let visited=new Set();
+    let groups=[];
+
+    atoms.forEach(atom=>{
+        if(visited.has(atom)) return;
+
+        let stack=[atom];
+        let group=[];
+
+        while(stack.length){
+            let a=stack.pop();
+            if(visited.has(a)) continue;
+
+            visited.add(a);
+            group.push(a);
+
+            neighbors(a).forEach(n=>{
+                if(!visited.has(n)) stack.push(n);
+            });
+        }
+
+        groups.push(group);
     });
 
-    // verifica quantidades corretas
-    for(let k in c.req){
-        if(counts[k]!==c.req[k]) return;
+    for(let group of groups){
+
+        let counts={};
+        group.forEach(a=>{
+            counts[a.type]=(counts[a.type]||0)+1;
+        });
+
+        let valid=true;
+
+        for(let k in c.req){
+            if(counts[k]!==c.req[k]){
+                valid=false;
+                break;
+            }
+        }
+
+        if(!valid) continue;
+
+        for(let k in counts){
+            if(!c.req[k]){
+                valid=false;
+                break;
+            }
+        }
+
+        if(!valid) continue;
+
+        if(c.name==="Dióxido de carbono"){
+            let carbon=group.find(a=>a.type==="C");
+            let neigh=neighbors(carbon);
+
+            if(neigh.length!==2) continue;
+            if(!neigh.every(n=>n.type==="O")) continue;
+        }
+
+        feedback.innerText="🎉 Correto!";
+        level++;
+        setTimeout(newGame,1500);
+        return;
     }
-
-    // 🔥 impede átomos extras
-    for(let k in counts){
-        if(!c.req[k]) return;
-    }
-
-    if(!isConnected()) return;
-
-    // regra específica CO2
-    if(c.name==="Dióxido de carbono"){
-        let carbon=atoms.find(a=>a.type==="C");
-        let neigh=neighbors(carbon);
-
-        if(neigh.length!==2) return;
-        if(!neigh.every(n=>n.type==="O")) return;
-    }
-
-    feedback.innerText="🎉 Correto!";
-    level++;
-    setTimeout(newGame,1500);
 }
 
 /* DESENHO */
