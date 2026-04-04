@@ -124,7 +124,13 @@ function createAtoms(type,count){
         el.className="atom "+type;
         el.innerText=type;
 
-        let atom={type,el,bonds:[],x:0,y:0,inWorkspace:false};
+        let atom={
+            type,el,bonds:[],
+            x:0,y:0,
+            vx:0,vy:0,
+            inWorkspace:false
+        };
+
         atoms.push(atom);
         shelf.appendChild(el);
         el.style.position="relative";
@@ -162,8 +168,10 @@ function drag(atom){
 
         atom.x=p.clientX-rect.left-radius[atom.type];
         atom.y=p.clientY-rect.top-radius[atom.type];
-        setPos(atom);
+        atom.vx=0;
+        atom.vy=0;
 
+        setPos(atom);
         dragging=true;
     }
 
@@ -176,6 +184,8 @@ function drag(atom){
 
         atom.x=p.clientX-rect.left-radius[atom.type];
         atom.y=p.clientY-rect.top-radius[atom.type];
+        atom.vx=0;
+        atom.vy=0;
 
         setPos(atom);
         previewBond(atom);
@@ -224,10 +234,10 @@ function connect(a,b){
     b.bonds.push(a);
 }
 
-/* FÍSICA ESTÁVEL */
+/* FÍSICA REAL */
 function relax(){
 
-    // mola das ligações
+    // forças das ligações
     bonds.forEach(b=>{
         let dx=b.b.x-b.a.x;
         let dy=b.b.y-b.a.y;
@@ -237,18 +247,18 @@ function relax(){
 
         if(d===0) return;
 
-        let force=(d-target)*0.1;
+        let force=(d-target)*0.05;
 
         let fx=(dx/d)*force;
         let fy=(dy/d)*force;
 
-        b.a.x+=fx;
-        b.a.y+=fy;
-        b.b.x-=fx;
-        b.b.y-=fy;
+        b.a.vx += fx;
+        b.a.vy += fy;
+        b.b.vx -= fx;
+        b.b.vy -= fy;
     });
 
-    // repulsão leve
+    // repulsão
     atoms.forEach(a=>{
         atoms.forEach(b=>{
             if(a===b) return;
@@ -260,20 +270,27 @@ function relax(){
             let min=radius[a.type]+radius[b.type];
 
             if(d<min && d>0){
-                let push=(min-d)*0.05;
+                let push=(min-d)*0.02;
 
-                a.x-=dx/d*push;
-                a.y-=dy/d*push;
-                b.x+=dx/d*push;
-                b.y+=dy/d*push;
+                a.vx -= dx/d*push;
+                a.vy -= dy/d*push;
+                b.vx += dx/d*push;
+                b.vy += dy/d*push;
             }
         });
     });
 
-    // amortecimento leve
+    // aplicar movimento + atrito real
     atoms.forEach(a=>{
-        a.x*=0.999;
-        a.y*=0.999;
+        a.vx *= 0.9;
+        a.vy *= 0.9;
+
+        if(Math.abs(a.vx)<0.001) a.vx=0;
+        if(Math.abs(a.vy)<0.001) a.vy=0;
+
+        a.x += a.vx;
+        a.y += a.vy;
+
         setPos(a);
     });
 
