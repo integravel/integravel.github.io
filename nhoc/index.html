@@ -95,6 +95,14 @@ const challengeText=document.getElementById("challenge");
 const feedback=document.getElementById("feedback");
 
 function newGame(){
+
+    // 🔥 NOVO: fim do jogo
+    if(level >= challenges.length){
+        challengeText.innerText="🏆 Fim do jogo!";
+        feedback.innerText="🎉 Você completou todos os desafios!";
+        return;
+    }
+
     atoms=[]; bonds=[];
     svg.innerHTML="";
     workspace.querySelectorAll(".atom").forEach(e=>e.remove());
@@ -251,7 +259,7 @@ function removeBond(atom){
     }
 }
 
-/* ✅ NOVA VALIDAÇÃO INTELIGENTE */
+/* VALIDAÇÃO */
 function checkWin(){
     let c=challenges[level];
 
