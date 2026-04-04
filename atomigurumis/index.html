@@ -75,7 +75,10 @@ let level=0;
 
 let startX=0, startY=0;
 let moved=false;
-const MOVE_TOLERANCE=8; // 👈 ajuste fino aqui
+let settled=false;
+
+const INITIAL_TOLERANCE=15; // 👈 aceita tremida inicial
+const MOVE_TOLERANCE=6;     // 👈 depois fica mais sensível
 
 const valence={H:1,C:4,O:2,N:3};
 const radius={H:14,C:25,O:20,N:22};
@@ -132,7 +135,9 @@ function startDrag(e,atom){
     let p=getP(e);
     startX=p.clientX;
     startY=p.clientY;
+
     moved=false;
+    settled=false;
 
     holdTimer=setTimeout(()=>{
         if(!moved){
@@ -155,9 +160,17 @@ function move(e){
     let dy=p.clientY-startY;
     let dist=Math.hypot(dx,dy);
 
-    if(dist>MOVE_TOLERANCE){
-        moved=true;
-        clearTimeout(holdTimer);
+    if(!settled){
+        if(dist>INITIAL_TOLERANCE){
+            settled=true;
+            startX=p.clientX;
+            startY=p.clientY;
+        }
+    }else{
+        if(dist>MOVE_TOLERANCE){
+            moved=true;
+            clearTimeout(holdTimer);
+        }
     }
 
     let rect=workspace.getBoundingClientRect();
