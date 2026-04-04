@@ -62,6 +62,7 @@ body {margin:0;font-family:sans-serif;background:#f7f7f7;overflow:hidden;}
 <script>
 let atoms=[], bonds=[];
 let draggingAtom=null;
+let holdTimer=null;
 
 const workspace=document.getElementById("workspace");
 const svg=document.getElementById("svgLayer");
@@ -90,7 +91,19 @@ function newGame(){
     feedback.innerText="";
 }
 
-/* CRIAR ÁTOMO */
+/* DESFAZER LIGAÇÕES */
+function disconnect(atom){
+    bonds = bonds.filter(b=>{
+        if(b.a===atom || b.b===atom){
+            b.a.bonds = b.a.bonds.filter(x=>x!==b.b);
+            b.b.bonds = b.b.bonds.filter(x=>x!==b.a);
+            return false;
+        }
+        return true;
+    });
+}
+
+/* CRIAR */
 function createAtom(type,x,y){
     let rect=workspace.getBoundingClientRect();
 
@@ -108,17 +121,23 @@ function createAtom(type,x,y){
     atoms.push(atom);
     workspace.appendChild(atom.el);
 
-    atom.el.addEventListener("mousedown",()=>{
-        draggingAtom=atom;
-    });
-
-    atom.el.addEventListener("touchstart",()=>{
-        draggingAtom=atom;
-    });
+    atom.el.addEventListener("mousedown",startHold);
+    atom.el.addEventListener("touchstart",startHold);
 
     setPos(atom);
+    draggingAtom = atom;
+}
 
-    // 🔥 CORREÇÃO AQUI
+/* HOLD */
+function startHold(e){
+    e.stopPropagation();
+
+    let atom = atoms.find(a=>a.el===e.currentTarget);
+
+    holdTimer = setTimeout(()=>{
+        disconnect(atom);
+    },300);
+
     draggingAtom = atom;
 }
 
@@ -134,11 +153,12 @@ document.querySelectorAll(".template").forEach(t=>{
     });
 });
 
-/* DRAG GLOBAL */
+/* DRAG */
 function getP(e){return e.touches?e.touches[0]:e;}
 
 document.addEventListener("mousemove",e=>{
     if(!draggingAtom) return;
+    clearTimeout(holdTimer);
 
     let p=getP(e);
     let rect=workspace.getBoundingClientRect();
@@ -152,6 +172,7 @@ document.addEventListener("mousemove",e=>{
 document.addEventListener("touchmove",e=>{
     if(!draggingAtom) return;
     e.preventDefault();
+    clearTimeout(holdTimer);
 
     let p=getP(e);
     let rect=workspace.getBoundingClientRect();
@@ -166,6 +187,8 @@ document.addEventListener("mouseup",endDrag);
 document.addEventListener("touchend",endDrag);
 
 function endDrag(){
+    clearTimeout(holdTimer);
+
     if(!draggingAtom) return;
 
     let atom=draggingAtom;
@@ -209,56 +232,7 @@ function connect(a,b){
     b.bonds.push(a);
 }
 
-/* VALIDAÇÃO */
-function isLinearChain(carbons){
-    if(carbons.length===1) return true;
-
-    let ends=carbons.filter(c=>c.bonds.filter(b=>b.type==="C").length===1);
-    if(ends.length!==2) return false;
-
-    let visited=new Set();
-    function walk(c){
-        visited.add(c);
-        c.bonds.forEach(b=>{
-            if(b.type==="C"&&!visited.has(b)) walk(b);
-        });
-    }
-
-    walk(ends[0]);
-    return visited.size===carbons.length;
-}
-
-function isBranched(carbons){
-    return carbons.some(c=>c.bonds.filter(b=>b.type==="C").length===3);
-}
-
-function checkWin(){
-    let carbons=atoms.filter(a=>a.type==="C");
-    let c=challenges[level];
-
-    if(atoms.filter(a=>a.type==="C").length!==c.c) return;
-    if(atoms.filter(a=>a.type==="H").length!==c.h) return;
-
-    if(!atoms.every(a=>a.bonds.length===valence[a.type])) return;
-
-    let win=false;
-    if(c.type==="chain") win=isLinearChain(carbons);
-    if(c.type==="branched") win=isBranched(carbons);
-
-    if(win){
-        feedback.innerText="🎉 Correto!";
-        level++;
-        if(level>=challenges.length){
-            feedback.innerText="🏆 Finalizado!";
-            level=0;
-        }
-        setTimeout(newGame,2000);
-    }else{
-        feedback.innerText="❌ Estrutura incorreta";
-    }
-}
-
-/* DESENHO */
+/* VALIDAÇÃO + DESENHO IGUAL */
 function draw(){
     svg.innerHTML="";
     bonds.forEach(b=>{
