@@ -77,10 +77,9 @@ let startX=0, startY=0;
 let moved=false;
 let settled=false;
 
-const INITIAL_TOLERANCE=15; // 👈 aceita tremida inicial
-const MOVE_TOLERANCE=6;     // 👈 depois fica mais sensível
+const INITIAL_TOLERANCE=15;
+const MOVE_TOLERANCE=6;
 
-const valence={H:1,C:4,O:2,N:3};
 const radius={H:14,C:25,O:20,N:22};
 
 const challenges=[
@@ -214,10 +213,6 @@ function bondExists(a,b){
     );
 }
 
-function bondCount(atom){
-    return bonds.filter(b=>b.a===atom||b.b===atom).length;
-}
-
 /* CONEXÃO */
 function tryConnect(a){
     atoms.forEach(b=>{
@@ -230,13 +225,8 @@ function tryConnect(a){
 
         let limit=radius[a.type]+radius[b.type];
 
-        if(d<=limit){
-            let freeA=valence[a.type]-bondCount(a);
-            let freeB=valence[b.type]-bondCount(b);
-
-            if(freeA>0 && freeB>0 && !bondExists(a,b)){
-                bonds.push({a,b});
-            }
+        if(d<=limit && !bondExists(a,b)){
+            bonds.push({a,b});
         }
     });
 }
@@ -252,7 +242,28 @@ function removeBond(atom){
     }
 }
 
-/* VALIDAÇÃO */
+/* VERIFICAR CONECTIVIDADE */
+function isConnected(){
+    if(atoms.length===0) return false;
+
+    let visited=new Set();
+    let stack=[atoms[0]];
+
+    while(stack.length){
+        let a=stack.pop();
+        if(visited.has(a)) continue;
+        visited.add(a);
+
+        bonds.forEach(b=>{
+            if(b.a===a && !visited.has(b.b)) stack.push(b.b);
+            if(b.b===a && !visited.has(b.a)) stack.push(b.a);
+        });
+    }
+
+    return visited.size===atoms.length;
+}
+
+/* VALIDAÇÃO NOVA */
 function checkWin(){
     let c=challenges[level];
 
@@ -261,7 +272,7 @@ function checkWin(){
         if(count!==c.req[k]) return;
     }
 
-    if(!atoms.every(a=>bondCount(a)===valence[a.type])) return;
+    if(!isConnected()) return;
 
     feedback.innerText="🎉 Correto!";
     level++;
