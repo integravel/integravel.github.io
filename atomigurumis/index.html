@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Moléculas Interativas</title>
+<title>Moléculas</title>
 
 <style>
 body {
@@ -20,9 +20,18 @@ body {
     text-align: center;
 }
 
+#challenge {
+    font-size: 18px;
+}
+
+#feedback {
+    font-size: 15px;
+    color: #4caf50;
+}
+
 #workspace {
     position: absolute;
-    top: 90px;
+    top: 80px;
     bottom: 120px;
     width: 100%;
 }
@@ -75,7 +84,7 @@ body {
 
 <div id="topbar">
     <div id="challenge"></div>
-    <div id="feedback">Monte a molécula</div>
+    <div id="feedback">Arraste e conecte os átomos</div>
 </div>
 
 <div id="workspace">
@@ -87,6 +96,8 @@ body {
 <script>
 let atoms=[];
 let bonds=[];
+
+let isInteracting = false;
 
 const workspace=document.getElementById("workspace");
 const shelf=document.getElementById("shelf");
@@ -107,7 +118,7 @@ const challenges=[
 
 let current;
 
-/* RESET TOTAL */
+/* RESET */
 function newGame(){
     atoms=[];
     bonds=[];
@@ -116,8 +127,8 @@ function newGame(){
     workspace.querySelectorAll(".atom").forEach(e=>e.remove());
 
     current=challenges[Math.floor(Math.random()*challenges.length)];
-    challengeText.innerText="Monte: "+current.name;
-    feedback.innerText="Monte a molécula";
+    challengeText.innerText=current.name;
+    feedback.innerText="Arraste e conecte os átomos";
 
     createAtoms("C",current.c);
     createAtoms("H",current.h);
@@ -145,9 +156,10 @@ function createAtoms(type,count){
     }
 }
 
-/* DRAG */
+/* DRAG + SEGURAR */
 function drag(atom){
     let dragging=false;
+    let holdTimer=null;
     let offsetX=0,offsetY=0;
 
     function getP(e){return e.touches?e.touches[0]:e;}
@@ -161,11 +173,17 @@ function drag(atom){
     document.addEventListener("touchend",end);
 
     function start(e){
+        isInteracting = true;
+
         let p=getP(e);
         let rect=atom.el.getBoundingClientRect();
 
         offsetX=p.clientX-rect.left;
         offsetY=p.clientY-rect.top;
+
+        holdTimer=setTimeout(()=>{
+            disconnect(atom);
+        },300);
 
         workspace.appendChild(atom.el);
 
@@ -177,10 +195,8 @@ function drag(atom){
     }
 
     function move(e){
-        if(!dragging && atom.inWorkspace){
-            dragging=true;
-        }
-        if(!dragging) return;
+        if(!dragging) dragging=true;
+        clearTimeout(holdTimer);
 
         let p=getP(e);
 
@@ -193,6 +209,8 @@ function drag(atom){
 
     function end(){
         dragging=false;
+        clearTimeout(holdTimer);
+        isInteracting = false;
         checkWin();
     }
 }
@@ -227,8 +245,22 @@ function connect(a){
     });
 }
 
-/* DISTRIBUIÇÃO ANGULAR */
+/* DESFAZER */
+function disconnect(atom){
+    bonds = bonds.filter(b=>{
+        if(b.a===atom || b.b===atom){
+            b.a.bonds=b.a.bonds.filter(x=>x!==b.b);
+            b.b.bonds=b.b.bonds.filter(x=>x!==b.a);
+            return false;
+        }
+        return true;
+    });
+}
+
+/* DISTRIBUIÇÃO SUAVE */
 function spread(){
+    if(isInteracting) return;
+
     atoms.forEach(c=>{
         if(c.type!=="C") return;
 
@@ -237,10 +269,14 @@ function spread(){
 
         neighbors.forEach((b,i)=>{
             let angle=(i/n)*Math.PI*2;
-            let dist=radius[c.type]+radius[b.type]+10;
+            let targetDist=radius[c.type]+radius[b.type]+20;
 
-            b.x=c.x+Math.cos(angle)*dist;
-            b.y=c.y+Math.sin(angle)*dist;
+            let tx=c.x+Math.cos(angle)*targetDist;
+            let ty=c.y+Math.sin(angle)*targetDist;
+
+            // movimento suave
+            b.x += (tx - b.x) * 0.05;
+            b.y += (ty - b.y) * 0.05;
         });
     });
 }
