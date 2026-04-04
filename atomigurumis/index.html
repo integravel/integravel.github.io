@@ -6,10 +6,41 @@
 <title>Moléculas</title>
 
 <style>
-body {margin:0;font-family:sans-serif;background:#f7f7f7;overflow:hidden;}
-#topbar {background:#222;color:white;padding:10px;text-align:center;}
-#workspace {position:absolute;top:80px;bottom:120px;width:100%;}
-#svgLayer {position:absolute;width:100%;height:100%;pointer-events:none;}
+body {
+    margin:0;
+    font-family:sans-serif;
+    background:#f7f7f7;
+    overflow:hidden;
+    transition:background 0.3s;
+}
+
+body.win {
+    background:#c8f7c5;
+}
+
+#topbar {
+    background:#222;
+    color:white;
+    padding:10px;
+    text-align:center;
+}
+
+#challenge {font-size:18px;}
+#feedback {font-size:16px;}
+
+#workspace {
+    position:absolute;
+    top:80px;
+    bottom:120px;
+    width:100%;
+}
+
+#svgLayer {
+    position:absolute;
+    width:100%;
+    height:100%;
+    pointer-events:none;
+}
 
 #shelf {
     position:absolute;
@@ -63,6 +94,7 @@ body {margin:0;font-family:sans-serif;background:#f7f7f7;overflow:hidden;}
 let atoms=[], bonds=[];
 let draggingAtom=null;
 let holdTimer=null;
+let level=0;
 
 const workspace=document.getElementById("workspace");
 const svg=document.getElementById("svgLayer");
@@ -80,23 +112,23 @@ const challenges=[
     {name:"isobutano",c:4,h:10,type:"branched"}
 ];
 
-let level=0;
-
 function newGame(){
     atoms=[]; bonds=[];
     svg.innerHTML="";
     workspace.querySelectorAll(".atom").forEach(e=>e.remove());
 
-    challengeText.innerText="Fase "+(level+1)+": "+challenges[level].name;
+    let c=challenges[level];
+    challengeText.innerText="Fase "+(level+1)+": "+c.name;
     feedback.innerText="";
+    document.body.classList.remove("win");
 }
 
-/* DESFAZER LIGAÇÕES */
+/* DESCONEXÃO */
 function disconnect(atom){
     bonds = bonds.filter(b=>{
         if(b.a===atom || b.b===atom){
-            b.a.bonds = b.a.bonds.filter(x=>x!==b.b);
-            b.b.bonds = b.b.bonds.filter(x=>x!==b.a);
+            b.a.bonds=b.a.bonds.filter(x=>x!==b.b);
+            b.b.bonds=b.b.bonds.filter(x=>x!==b.a);
             return false;
         }
         return true;
@@ -125,20 +157,20 @@ function createAtom(type,x,y){
     atom.el.addEventListener("touchstart",startHold);
 
     setPos(atom);
-    draggingAtom = atom;
+    draggingAtom=atom;
 }
 
 /* HOLD */
 function startHold(e){
     e.stopPropagation();
 
-    let atom = atoms.find(a=>a.el===e.currentTarget);
+    let atom=atoms.find(a=>a.el===e.currentTarget);
 
-    holdTimer = setTimeout(()=>{
+    holdTimer=setTimeout(()=>{
         disconnect(atom);
     },300);
 
-    draggingAtom = atom;
+    draggingAtom=atom;
 }
 
 /* TEMPLATE */
@@ -232,7 +264,59 @@ function connect(a,b){
     b.bonds.push(a);
 }
 
-/* VALIDAÇÃO + DESENHO IGUAL */
+/* VALIDAÇÃO */
+function isLinearChain(carbons){
+    if(carbons.length===1) return true;
+
+    let ends=carbons.filter(c=>c.bonds.filter(b=>b.type==="C").length===1);
+    if(ends.length!==2) return false;
+
+    let visited=new Set();
+    function walk(c){
+        visited.add(c);
+        c.bonds.forEach(b=>{
+            if(b.type==="C"&&!visited.has(b)) walk(b);
+        });
+    }
+
+    walk(ends[0]);
+    return visited.size===carbons.length;
+}
+
+function isBranched(carbons){
+    return carbons.some(c=>c.bonds.filter(b=>b.type==="C").length===3);
+}
+
+function checkWin(){
+    let carbons=atoms.filter(a=>a.type==="C");
+    let c=challenges[level];
+
+    if(atoms.filter(a=>a.type==="C").length!==c.c) return;
+    if(atoms.filter(a=>a.type==="H").length!==c.h) return;
+
+    if(!atoms.every(a=>a.bonds.length===valence[a.type])) return;
+
+    let win=false;
+    if(c.type==="chain") win=isLinearChain(carbons);
+    if(c.type==="branched") win=isBranched(carbons);
+
+    if(win){
+        feedback.innerText="🎉 Correto!";
+        document.body.classList.add("win");
+
+        if(navigator.vibrate) navigator.vibrate(200);
+
+        level++;
+        if(level>=challenges.length){
+            feedback.innerText="🏆 Finalizado!";
+            level=0;
+        }
+
+        setTimeout(newGame,1500);
+    }
+}
+
+/* DESENHO */
 function draw(){
     svg.innerHTML="";
     bonds.forEach(b=>{
