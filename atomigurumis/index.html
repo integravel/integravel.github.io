@@ -6,80 +6,32 @@
 <title>Moléculas</title>
 
 <style>
-body {
-    margin: 0;
-    font-family: sans-serif;
-    background: #f7f7f7;
-    overflow: hidden;
-}
-
-#topbar {
-    background: #222;
-    color: white;
-    padding: 10px;
-    text-align: center;
-}
-
-#workspace {
-    position: absolute;
-    top: 80px;
-    bottom: 120px;
-    width: 100%;
-}
-
-#svgLayer {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-}
-
-#shelf {
-    position: absolute;
-    bottom: 0;
-    height: 120px;
-    width: 100%;
-    background: #e0e0e0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 10px;
-}
+body {margin:0;font-family:sans-serif;background:#f7f7f7;overflow:hidden;}
+#topbar {background:#222;color:white;padding:10px;text-align:center;}
+#workspace {position:absolute;top:80px;bottom:120px;width:100%;}
+#svgLayer {position:absolute;width:100%;height:100%;pointer-events:none;}
+#shelf {position:absolute;bottom:0;height:120px;width:100%;background:#e0e0e0;display:flex;justify-content:center;align-items:center;gap:10px;}
 
 .atom {
-    position: absolute;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold;
+    position:absolute;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    font-weight:bold;
 }
 
-.H {
-    width: 28px;
-    height: 28px;
-    background: white;
-    border: 2px solid black;
-}
-
-.C {
-    width: 50px;
-    height: 50px;
-    background: #666;
-    color: white;
-}
+.H {width:28px;height:28px;background:white;border:2px solid black;}
+.C {width:50px;height:50px;background:#666;color:white;}
 </style>
 </head>
 
 <body>
 
 <div id="topbar">
-    <div id="challenge"></div>
-    <div id="feedback"></div>
+<div id="challenge"></div>
+<div id="feedback"></div>
 </div>
 
 <div id="workspace">
-    <svg id="svgLayer"></svg>
+<svg id="svgLayer"></svg>
 </div>
 
 <div id="shelf"></div>
@@ -143,9 +95,10 @@ function setPos(a){
     a.el.style.top=a.y+"px";
 }
 
-/* DRAG */
+/* DRAG + SEGURAR PRA DESCONECTAR */
 function drag(atom){
     let dragging=false;
+    let holdTimer=null;
 
     function getP(e){return e.touches?e.touches[0]:e;}
 
@@ -159,6 +112,7 @@ function drag(atom){
 
     function start(e){
         e.preventDefault();
+
         let p=getP(e);
         let rect=workspace.getBoundingClientRect();
 
@@ -168,10 +122,14 @@ function drag(atom){
 
         atom.x=p.clientX-rect.left-radius[atom.type];
         atom.y=p.clientY-rect.top-radius[atom.type];
-        atom.vx=0;
-        atom.vy=0;
 
+        atom.vx=0; atom.vy=0;
         setPos(atom);
+
+        holdTimer=setTimeout(()=>{
+            disconnect(atom);
+        },300);
+
         dragging=true;
     }
 
@@ -179,13 +137,15 @@ function drag(atom){
         if(!dragging) return;
         e.preventDefault();
 
+        clearTimeout(holdTimer);
+
         let p=getP(e);
         let rect=workspace.getBoundingClientRect();
 
         atom.x=p.clientX-rect.left-radius[atom.type];
         atom.y=p.clientY-rect.top-radius[atom.type];
-        atom.vx=0;
-        atom.vy=0;
+
+        atom.vx=0; atom.vy=0;
 
         setPos(atom);
         previewBond(atom);
@@ -194,6 +154,8 @@ function drag(atom){
     function end(){
         if(!dragging) return;
         dragging=false;
+
+        clearTimeout(holdTimer);
 
         if(preview){
             connect(preview.a,preview.b);
@@ -219,7 +181,7 @@ function previewBond(a){
     });
 }
 
-/* CONECTAR */
+/* CONEXÃO */
 function canBond(a,b){
     return a.bonds.length<valence[a.type] &&
            b.bonds.length<valence[b.type];
@@ -234,16 +196,27 @@ function connect(a,b){
     b.bonds.push(a);
 }
 
-/* FÍSICA REAL */
+function disconnect(atom){
+    bonds=bonds.filter(b=>{
+        if(b.a===atom||b.b===atom){
+            b.a.bonds=b.a.bonds.filter(x=>x!==b.b);
+            b.b.bonds=b.b.bonds.filter(x=>x!==b.a);
+            return false;
+        }
+        return true;
+    });
+}
+
+/* FÍSICA + GEOMETRIA */
 function relax(){
 
-    // forças das ligações
+    // mola
     bonds.forEach(b=>{
         let dx=b.b.x-b.a.x;
         let dy=b.b.y-b.a.y;
         let d=Math.hypot(dx,dy);
 
-        let target=radius[b.a.type]+radius[b.b.type]+10;
+        let target=radius[b.a.type]+radius[b.b.type]+20;
 
         if(d===0) return;
 
@@ -252,10 +225,26 @@ function relax(){
         let fx=(dx/d)*force;
         let fy=(dy/d)*force;
 
-        b.a.vx += fx;
-        b.a.vy += fy;
-        b.b.vx -= fx;
-        b.b.vy -= fy;
+        b.a.vx+=fx;
+        b.a.vy+=fy;
+        b.b.vx-=fx;
+        b.b.vy-=fy;
+    });
+
+    // GEOMETRIA ANGULAR (🔥 novo)
+    atoms.forEach(a=>{
+        let n=a.bonds.length;
+        if(n<2) return;
+
+        a.bonds.forEach((b,i)=>{
+            let angle=(i/n)*Math.PI*2;
+
+            let targetX=a.x+Math.cos(angle)*80;
+            let targetY=a.y+Math.sin(angle)*80;
+
+            b.vx += (targetX - b.x)*0.002;
+            b.vy += (targetY - b.y)*0.002;
+        });
     });
 
     // repulsão
@@ -280,16 +269,16 @@ function relax(){
         });
     });
 
-    // aplicar movimento + atrito real
+    // movimento
     atoms.forEach(a=>{
-        a.vx *= 0.9;
-        a.vy *= 0.9;
+        a.vx*=0.9;
+        a.vy*=0.9;
 
         if(Math.abs(a.vx)<0.001) a.vx=0;
         if(Math.abs(a.vy)<0.001) a.vy=0;
 
-        a.x += a.vx;
-        a.y += a.vy;
+        a.x+=a.vx;
+        a.y+=a.vy;
 
         setPos(a);
     });
