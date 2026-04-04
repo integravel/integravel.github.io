@@ -107,6 +107,8 @@ let atoms=[];
 let bonds=[];
 let preview=null;
 
+let level=0;
+
 const workspace=document.getElementById("workspace");
 const shelf=document.getElementById("shelf");
 const svg=document.getElementById("svgLayer");
@@ -135,8 +137,9 @@ function newGame(){
     shelf.innerHTML="";
     workspace.querySelectorAll(".atom").forEach(e=>e.remove());
 
-    current=challenges[Math.random()*challenges.length|0];
-    challengeText.innerText=current.name;
+    current=challenges[level];
+    challengeText.innerText="Fase "+(level+1)+": "+current.name;
+    feedback.innerText="Arraste e conecte";
 
     createAtoms("C",current.c);
     createAtoms("H",current.h);
@@ -170,7 +173,7 @@ function setPos(a){
     a.el.style.top = a.y + "px";
 }
 
-/* DRAG + HOLD */
+/* DRAG */
 function drag(atom){
     let dragging=false;
     let holdTimer=null;
@@ -205,7 +208,6 @@ function drag(atom){
 
         setPos(atom);
 
-        // HOLD para desconectar
         holdTimer = setTimeout(()=>{
             disconnect(atom);
             atom.el.classList.add("holding");
@@ -221,7 +223,6 @@ function drag(atom){
         let p=getP(e);
         const rect = workspace.getBoundingClientRect();
 
-        // se mexeu muito → cancela hold
         if(Math.hypot(p.clientX-startX,p.clientY-startY)>10){
             clearTimeout(holdTimer);
             atom.el.classList.remove("holding");
@@ -273,10 +274,13 @@ function snap(a,b){
     b.y=midY+ny*target/2;
 }
 
-/* PREVIEW */
+/* PREVIEW CORRIGIDO */
 function previewBond(a){
     preview=null;
+
     atoms.forEach(b=>{
+        b.el.classList.remove("highlight");
+
         if(a===b||!b.inWorkspace) return;
 
         let d=Math.hypot(a.x-b.x,a.y-b.y);
@@ -285,13 +289,11 @@ function previewBond(a){
         if(d<target+30 && canBond(a,b)){
             preview={a,b};
             b.el.classList.add("highlight");
-        }else{
-            b.el.classList.remove("highlight");
         }
     });
 }
 
-/* CONECTAR */
+/* CONECTAR CORRIGIDO */
 function canBond(a,b){
     return a.bonds.length<valence[a.type] &&
            b.bonds.length<valence[b.type];
@@ -299,6 +301,7 @@ function canBond(a,b){
 
 function connect(a,b){
     if(a.bonds.includes(b)) return;
+    if(!canBond(a,b)) return;
 
     a.bonds.push(b);
     b.bonds.push(a);
@@ -337,7 +340,6 @@ function relax(){
         }
     });
 
-    // repulsão
     atoms.forEach(a=>{
         atoms.forEach(b=>{
             if(a===b) return;
@@ -430,8 +432,15 @@ function checkWin(){
     }
 
     if(win){
-        feedback.innerText="🎉 Parabéns!";
-        setTimeout(newGame,3000);
+        feedback.innerText="🎉 Correto!";
+        level++;
+
+        if(level>=challenges.length){
+            feedback.innerText="🏆 Você venceu tudo!";
+            level=0;
+        }
+
+        setTimeout(newGame,2000);
     }else{
         feedback.innerText="❌ Estrutura incorreta";
     }
