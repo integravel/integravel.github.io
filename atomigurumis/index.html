@@ -103,8 +103,6 @@ let atoms=[];
 let bonds=[];
 let preview=null;
 
-let isInteracting=false;
-
 const workspace=document.getElementById("workspace");
 const shelf=document.getElementById("shelf");
 const svg=document.getElementById("svgLayer");
@@ -162,10 +160,16 @@ function createAtoms(type,count){
     }
 }
 
-/* DRAG */
+/* POSIÇÃO */
+function setPos(a){
+    a.el.style.left = a.x + "px";
+    a.el.style.top = a.y + "px";
+}
+
+/* DRAG MELHORADO */
 function drag(atom){
     let dragging=false;
-    let holdTimer=null;
+    let offsetX=0, offsetY=0;
 
     function getP(e){return e.touches?e.touches[0]:e;}
 
@@ -180,20 +184,21 @@ function drag(atom){
 
     function start(e){
         e.preventDefault();
-        isInteracting=true;
 
         let p=getP(e);
+        const rect = workspace.getBoundingClientRect();
 
         workspace.appendChild(atom.el);
         atom.inWorkspace=true;
         atom.el.style.position="absolute";
 
-        atom.x=p.clientX-radius[atom.type];
-        atom.y=p.clientY-radius[atom.type];
+        offsetX = radius[atom.type];
+        offsetY = radius[atom.type];
+
+        atom.x = p.clientX - rect.left - offsetX;
+        atom.y = p.clientY - rect.top - offsetY;
+
         setPos(atom);
-
-        holdTimer=setTimeout(()=>disconnect(atom),300);
-
         dragging=true;
     }
 
@@ -201,11 +206,11 @@ function drag(atom){
         if(!dragging) return;
         e.preventDefault();
 
-        clearTimeout(holdTimer);
-
         let p=getP(e);
-        atom.x=p.clientX-radius[atom.type];
-        atom.y=p.clientY-radius[atom.type];
+        const rect = workspace.getBoundingClientRect();
+
+        atom.x = p.clientX - rect.left - offsetX;
+        atom.y = p.clientY - rect.top - offsetY;
 
         setPos(atom);
         previewBond(atom);
@@ -217,12 +222,34 @@ function drag(atom){
 
         if(preview){
             connect(preview.a,preview.b);
+            snap(preview.a,preview.b);
             preview=null;
         }
 
-        isInteracting=false;
         checkWin();
     }
+}
+
+/* SNAP SUAVE */
+function snap(a,b){
+    let dx=b.x-a.x;
+    let dy=b.y-a.y;
+    let d=Math.hypot(dx,dy);
+    let target=radius[a.type]+radius[b.type];
+
+    if(d===0) return;
+
+    let nx=dx/d;
+    let ny=dy/d;
+
+    let midX=(a.x+b.x)/2;
+    let midY=(a.y+b.y)/2;
+
+    a.x=midX-nx*target/2;
+    a.y=midY-ny*target/2;
+
+    b.x=midX+nx*target/2;
+    b.y=midY+ny*target/2;
 }
 
 /* PREVIEW */
@@ -257,17 +284,49 @@ function connect(a,b){
     bonds.push({a,b});
 }
 
-/* DESFAZER */
-function disconnect(atom){
-    bonds=bonds.filter(b=>{
-        if(b.a===atom||b.b===atom){
-            b.a.bonds=b.a.bonds.filter(x=>x!==b.b);
-            b.b.bonds=b.b.bonds.filter(x=>x!==b.a);
-            return false;
+/* FÍSICA MELHORADA */
+function relax(){
+    // ligações (tipo mola)
+    bonds.forEach(b=>{
+        let dx=b.b.x-b.a.x;
+        let dy=b.b.y-b.a.y;
+        let d=Math.hypot(dx,dy);
+        let target=radius[b.a.type]+radius[b.b.type];
+
+        let force=(d-target)*0.1;
+
+        if(d>0){
+            let fx=(dx/d)*force;
+            let fy=(dy/d)*force;
+            b.a.x+=fx;
+            b.a.y+=fy;
+            b.b.x-=fx;
+            b.b.y-=fy;
         }
-        return true;
     });
+
+    // REPULSÃO (evita sobreposição)
+    atoms.forEach(a=>{
+        atoms.forEach(b=>{
+            if(a===b) return;
+
+            let dx=b.x-a.x;
+            let dy=b.y-a.y;
+            let d=Math.hypot(dx,dy);
+            let min=radius[a.type]+radius[b.type];
+
+            if(d<min && d>0){
+                let push=(min-d)*0.2;
+                a.x-=dx/d*push;
+                a.y-=dy/d*push;
+            }
+        });
+    });
+
+    atoms.forEach(setPos);
+    requestAnimationFrame(relax);
 }
+relax();
 
 /* DESENHO */
 function draw(){
@@ -303,36 +362,6 @@ function drawLine(a,b,color,dashed=false){
     svg.appendChild(line);
 }
 draw();
-
-/* FÍSICA */
-function relax(){
-    bonds.forEach(b=>{
-        let dx=b.b.x-b.a.x;
-        let dy=b.b.y-b.a.y;
-        let d=Math.hypot(dx,dy);
-        let target=radius[b.a.type]+radius[b.b.type];
-
-        let diff=d-target;
-        let force=0.1*diff;
-
-        if(d>0){
-            let fx=(dx/d)*force;
-            let fy=(dy/d)*force;
-            b.a.x+=fx;
-            b.a.y+=fy;
-            b.b.x-=fx;
-            b.b.y-=fy;
-        }
-    });
-
-    atoms.forEach(a=>{
-        a.el.style.left=a.x+"px";
-        a.el.style.top=a.y+"px";
-    });
-
-    requestAnimationFrame(relax);
-}
-relax();
 
 /* VALIDAÇÃO */
 function allPlaced(){
