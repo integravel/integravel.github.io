@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Montador de Moléculas</title>
+<title>Moléculas (Espaço Preenchido)</title>
 
 <style>
 body {
@@ -44,6 +44,7 @@ body {
     justify-content: center;
     font-weight: bold;
     touch-action: none;
+    transition: transform 0.15s;
 }
 
 .H {
@@ -68,21 +69,14 @@ body {
     padding: 10px;
     border: 1px solid #ccc;
 }
-
-.bond {
-    position: absolute;
-    height: 4px;
-    background: black;
-    transform-origin: left center;
-}
 </style>
 </head>
 
 <body>
 
 <div id="topbar">
-    H: <input type="number" id="hCount" value="4" min="0">
-    C: <input type="number" id="cCount" value="1" min="0">
+    H: <input type="number" id="hCount" value="4">
+    C: <input type="number" id="cCount" value="1">
     <button onclick="start()">Criar Átomos</button>
 </div>
 
@@ -92,7 +86,6 @@ body {
 
 <script>
 let atoms = [];
-let bonds = [];
 
 const workspace = document.getElementById("workspace");
 const shelf = document.getElementById("shelf");
@@ -100,10 +93,10 @@ const hCount = document.getElementById("hCount");
 const cCount = document.getElementById("cCount");
 
 const valence = { H: 1, C: 4 };
+const radius = { H: 15, C: 25 };
 
 function start() {
     atoms = [];
-    bonds = [];
     workspace.innerHTML = "";
     shelf.innerHTML = "";
 
@@ -156,7 +149,6 @@ function makeDraggable(atom) {
         atom.y = y - offsetY;
         setPosition(atom);
         checkConnections(atom);
-        updateBonds();
     }
 
     function endDrag() {
@@ -164,24 +156,16 @@ function makeDraggable(atom) {
         updateMolecule();
     }
 
-    // Mouse
-    atom.el.addEventListener("mousedown", (e) => {
-        startDrag(e.pageX, e.pageY);
-    });
-
-    document.addEventListener("mousemove", (e) => {
-        moveDrag(e.pageX, e.pageY);
-    });
-
+    atom.el.addEventListener("mousedown", e => startDrag(e.pageX, e.pageY));
+    document.addEventListener("mousemove", e => moveDrag(e.pageX, e.pageY));
     document.addEventListener("mouseup", endDrag);
 
-    // Touch (ESSENCIAL pro celular)
-    atom.el.addEventListener("touchstart", (e) => {
+    atom.el.addEventListener("touchstart", e => {
         let t = e.touches[0];
         startDrag(t.pageX, t.pageY);
     });
 
-    document.addEventListener("touchmove", (e) => {
+    document.addEventListener("touchmove", e => {
         let t = e.touches[0];
         moveDrag(t.pageX, t.pageY);
     }, { passive: false });
@@ -202,42 +186,45 @@ function checkConnections(atom) {
     atoms.forEach(other => {
         if (other === atom) return;
 
+        let targetDist = radius[atom.type] + radius[other.type];
         let d = distance(atom, other);
 
-        if (d < 70 && canBond(atom, other)) {
-            createBond(atom, other);
-        } else if (d < 70 && !canBond(atom, other)) {
-            atom.x += (atom.x - other.x) * 0.05;
-            atom.y += (atom.y - other.y) * 0.05;
+        if (d < targetDist + 10 && canBond(atom, other)) {
+            bondAtoms(atom, other, targetDist);
+        } else if (d < targetDist && !canBond(atom, other)) {
+            repel(atom, other);
         }
     });
 }
 
-function createBond(a, b) {
-    if (a.bonds.includes(b)) return;
+function bondAtoms(a, b, targetDist) {
+    if (!a.bonds.includes(b)) {
+        a.bonds.push(b);
+        b.bonds.push(a);
+    }
 
-    a.bonds.push(b);
-    b.bonds.push(a);
+    let dx = b.x - a.x;
+    let dy = b.y - a.y;
+    let angle = Math.atan2(dy, dx);
 
-    let bond = document.createElement("div");
-    bond.className = "bond";
-    workspace.appendChild(bond);
+    b.x = a.x + Math.cos(angle) * targetDist;
+    b.y = a.y + Math.sin(angle) * targetDist;
 
-    bonds.push({a, b, el: bond});
+    setPosition(b);
 }
 
-function updateBonds() {
-    bonds.forEach(b => {
-        let dx = b.b.x - b.a.x;
-        let dy = b.b.y - b.a.y;
-        let length = Math.hypot(dx, dy);
-        let angle = Math.atan2(dy, dx);
+function repel(a, b) {
+    let dx = a.x - b.x;
+    let dy = a.y - b.y;
+    let dist = Math.hypot(dx, dy);
 
-        b.el.style.left = b.a.x + "px";
-        b.el.style.top = b.a.y + "px";
-        b.el.style.width = length + "px";
-        b.el.style.transform = `rotate(${angle}rad)`;
-    });
+    if (dist === 0) return;
+
+    let force = 2;
+    a.x += (dx / dist) * force;
+    a.y += (dy / dist) * force;
+
+    setPosition(a);
 }
 
 function updateMolecule() {
