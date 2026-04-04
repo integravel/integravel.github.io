@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Moléculas (Espaço Preenchido)</title>
+<title>Moléculas Dinâmicas</title>
 
 <style>
 body {
@@ -24,7 +24,7 @@ body {
     top: 60px;
     bottom: 120px;
     width: 100%;
-    background: #ffffff;
+    background: #fff;
 }
 
 #shelf {
@@ -44,7 +44,6 @@ body {
     justify-content: center;
     font-weight: bold;
     touch-action: none;
-    transition: transform 0.15s;
 }
 
 .H {
@@ -81,7 +80,7 @@ body {
 </div>
 
 <div id="workspace"></div>
-<div id="info">Molécula: -<br>Total possíveis: -</div>
+<div id="info">Molécula: -</div>
 <div id="shelf"></div>
 
 <script>
@@ -89,8 +88,6 @@ let atoms = [];
 
 const workspace = document.getElementById("workspace");
 const shelf = document.getElementById("shelf");
-const hCount = document.getElementById("hCount");
-const cCount = document.getElementById("cCount");
 
 const valence = { H: 1, C: 4 };
 const radius = { H: 15, C: 25 };
@@ -107,7 +104,7 @@ function start() {
     for (let i = 0; i < c; i++) createAtom("C", i);
 }
 
-function createAtom(type, index) {
+function createAtom(type, i) {
     let el = document.createElement("div");
     el.className = "atom " + type;
     el.innerText = type;
@@ -116,139 +113,134 @@ function createAtom(type, index) {
         type,
         el,
         bonds: [],
-        x: 40 + index * 40,
-        y: 40
+        x: 50 + i * 40,
+        y: 50
     };
 
     atoms.push(atom);
     shelf.appendChild(el);
-    setPosition(atom);
-    makeDraggable(atom);
+    setPos(atom);
+    drag(atom);
 }
 
-function setPosition(atom) {
-    atom.el.style.left = atom.x + "px";
-    atom.el.style.top = atom.y + "px";
+function setPos(a) {
+    a.el.style.left = a.x + "px";
+    a.el.style.top = a.y + "px";
 }
 
-function makeDraggable(atom) {
-    let offsetX = 0;
-    let offsetY = 0;
-    let dragging = false;
+function drag(atom) {
+    let offX, offY, dragging=false;
 
-    function startDrag(x, y) {
-        dragging = true;
-        offsetX = x - atom.x;
-        offsetY = y - atom.y;
+    function start(x,y){
+        dragging=true;
+        offX=x-atom.x;
+        offY=y-atom.y;
         workspace.appendChild(atom.el);
     }
 
-    function moveDrag(x, y) {
-        if (!dragging) return;
-        atom.x = x - offsetX;
-        atom.y = y - offsetY;
-        setPosition(atom);
-        checkConnections(atom);
+    function move(x,y){
+        if(!dragging) return;
+        atom.x=x-offX;
+        atom.y=y-offY;
+        setPos(atom);
+        check(atom);
     }
 
-    function endDrag() {
-        dragging = false;
-        updateMolecule();
+    function end(){
+        dragging=false;
     }
 
-    atom.el.addEventListener("mousedown", e => startDrag(e.pageX, e.pageY));
-    document.addEventListener("mousemove", e => moveDrag(e.pageX, e.pageY));
-    document.addEventListener("mouseup", endDrag);
+    atom.el.onmousedown=e=>start(e.pageX,e.pageY);
+    document.onmousemove=e=>move(e.pageX,e.pageY);
+    document.onmouseup=end;
 
-    atom.el.addEventListener("touchstart", e => {
-        let t = e.touches[0];
-        startDrag(t.pageX, t.pageY);
-    });
-
-    document.addEventListener("touchmove", e => {
-        let t = e.touches[0];
-        moveDrag(t.pageX, t.pageY);
-    }, { passive: false });
-
-    document.addEventListener("touchend", endDrag);
+    atom.el.ontouchstart=e=>{
+        let t=e.touches[0];
+        start(t.pageX,t.pageY);
+    };
+    document.ontouchmove=e=>{
+        let t=e.touches[0];
+        move(t.pageX,t.pageY);
+    };
+    document.ontouchend=end;
 }
 
-function distance(a, b) {
-    return Math.hypot(a.x - b.x, a.y - b.y);
+function dist(a,b){
+    return Math.hypot(a.x-b.x,a.y-b.y);
 }
 
-function canBond(a, b) {
-    return a.bonds.length < valence[a.type] &&
-           b.bonds.length < valence[b.type];
+function canBond(a,b){
+    return a.bonds.length<valence[a.type] &&
+           b.bonds.length<valence[b.type];
 }
 
-function checkConnections(atom) {
-    atoms.forEach(other => {
-        if (other === atom) return;
+function check(a){
+    atoms.forEach(b=>{
+        if(a===b) return;
+        let d=dist(a,b);
+        let target=radius[a.type]+radius[b.type];
 
-        let targetDist = radius[atom.type] + radius[other.type];
-        let d = distance(atom, other);
-
-        if (d < targetDist + 10 && canBond(atom, other)) {
-            bondAtoms(atom, other, targetDist);
-        } else if (d < targetDist && !canBond(atom, other)) {
-            repel(atom, other);
+        if(d<target+10 && canBond(a,b)){
+            if(!a.bonds.includes(b)){
+                a.bonds.push(b);
+                b.bonds.push(a);
+            }
         }
     });
 }
 
-function bondAtoms(a, b, targetDist) {
-    if (!a.bonds.includes(b)) {
-        a.bonds.push(b);
-        b.bonds.push(a);
-    }
+function relax(){
+    // força tipo mola
+    atoms.forEach(a=>{
+        a.bonds.forEach(b=>{
+            let dx=b.x-a.x;
+            let dy=b.y-a.y;
+            let d=Math.hypot(dx,dy);
+            let target=radius[a.type]+radius[b.type];
 
-    let dx = b.x - a.x;
-    let dy = b.y - a.y;
-    let angle = Math.atan2(dy, dx);
+            let diff=d-target;
+            let force=0.1*diff;
 
-    b.x = a.x + Math.cos(angle) * targetDist;
-    b.y = a.y + Math.sin(angle) * targetDist;
+            if(d>0){
+                let fx=(dx/d)*force;
+                let fy=(dy/d)*force;
 
-    setPosition(b);
+                a.x+=fx;
+                a.y+=fy;
+                b.x-=fx;
+                b.y-=fy;
+            }
+        });
+    });
+
+    // repulsão global
+    atoms.forEach(a=>{
+        atoms.forEach(b=>{
+            if(a===b) return;
+            let dx=a.x-b.x;
+            let dy=a.y-b.y;
+            let d=Math.hypot(dx,dy);
+            let min=radius[a.type]+radius[b.type];
+
+            if(d<min){
+                let push=(min-d)/2;
+                if(d>0){
+                    a.x+=(dx/d)*push;
+                    a.y+=(dy/d)*push;
+                }
+            }
+        });
+    });
+
+    atoms.forEach(setPos);
 }
 
-function repel(a, b) {
-    let dx = a.x - b.x;
-    let dy = a.y - b.y;
-    let dist = Math.hypot(dx, dy);
-
-    if (dist === 0) return;
-
-    let force = 2;
-    a.x += (dx / dist) * force;
-    a.y += (dy / dist) * force;
-
-    setPosition(a);
+function loop(){
+    relax();
+    requestAnimationFrame(loop);
 }
+loop();
 
-function updateMolecule() {
-    let countH = atoms.filter(a => a.type === "H").length;
-    let countC = atoms.filter(a => a.type === "C").length;
-
-    let formula = "";
-    if (countC > 0) formula += "C" + (countC > 1 ? countC : "");
-    if (countH > 0) formula += "H" + (countH > 1 ? countH : "");
-
-    let possible = estimateIsomers(countC, countH);
-
-    document.getElementById("info").innerHTML =
-        "Molécula: " + formula + "<br>Total possíveis: " + possible;
-}
-
-function estimateIsomers(c, h) {
-    if (c === 1 && h === 4) return 1;
-    if (c === 2 && h === 6) return 1;
-    if (c === 3 && h === 8) return 1;
-    if (c === 4 && h === 10) return 2;
-
-    return "?";
-}
 </script>
 
 </body>
