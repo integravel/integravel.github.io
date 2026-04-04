@@ -20,9 +20,19 @@ body {
     text-align: center;
 }
 
+#challenge {
+    font-size: 18px;
+    margin-bottom: 5px;
+}
+
+#feedback {
+    font-size: 16px;
+    color: #4caf50;
+}
+
 #workspace {
     position: absolute;
-    top: 80px;
+    top: 90px;
     bottom: 120px;
     width: 100%;
 }
@@ -61,6 +71,10 @@ body {
     transform: scale(1.2);
 }
 
+.atom.win {
+    transform: scale(1.3);
+}
+
 .H {
     width: 28px;
     height: 28px;
@@ -80,7 +94,8 @@ body {
 <body>
 
 <div id="topbar">
-    Segure o átomo para quebrar ligações
+    <div id="challenge"></div>
+    <div id="feedback">Monte a molécula</div>
 </div>
 
 <div id="workspace">
@@ -96,20 +111,38 @@ let bonds = [];
 const workspace = document.getElementById("workspace");
 const shelf = document.getElementById("shelf");
 const svg = document.getElementById("svgLayer");
+const challengeText = document.getElementById("challenge");
+const feedback = document.getElementById("feedback");
 
 const valence = { H:1, C:4 };
 const radius = { H:14, C:25 };
 
+const challenges = [
+    {name:"metano", c:1, h:4, type:"chain"},
+    {name:"etano", c:2, h:6, type:"chain"},
+    {name:"propano", c:3, h:8, type:"chain"},
+    {name:"butano", c:4, h:10, type:"chain"},
+    {name:"isobutano", c:4, h:10, type:"branched"}
+];
+
+let current;
+
+/* NOVO JOGO */
 function newGame(){
     atoms=[];
     bonds=[];
     shelf.innerHTML="";
     svg.innerHTML="";
 
-    createAtoms("C",3);
-    createAtoms("H",8);
+    current = challenges[Math.floor(Math.random()*challenges.length)];
+    challengeText.innerText = "Monte: " + current.name;
+    feedback.innerText = "Monte a molécula";
+
+    createAtoms("C", current.c);
+    createAtoms("H", current.h);
 }
 
+/* CRIAR ÁTOMOS */
 function createAtoms(type,count){
     for(let i=0;i<count;i++){
         let el=document.createElement("div");
@@ -131,7 +164,7 @@ function createAtoms(type,count){
     }
 }
 
-/* DRAG + HOLD */
+/* DRAG + SEGURAR */
 function drag(atom){
     let dragging=false;
     let holdTimer=null;
@@ -177,6 +210,7 @@ function drag(atom){
         dragging=false;
         clearTimeout(holdTimer);
         atom.el.classList.remove("holding");
+        checkWin();
     }
 
     atom.el.addEventListener("mousedown",start);
@@ -199,8 +233,8 @@ function canBond(a,b){
            b.bonds.length<valence[b.type];
 }
 
-let bondStyleIndex=0;
-const bondStyles=["line","wedge","dash"];
+let bondStyles=["line","wedge","dash"];
+let styleIndex=0;
 
 function connect(a){
     atoms.forEach(b=>{
@@ -216,9 +250,10 @@ function connect(a){
                 a.bonds.push(b);
                 b.bonds.push(a);
 
-                let style=bondStyles[bondStyleIndex++%3];
-
-                bonds.push({a,b,style});
+                bonds.push({
+                    a,b,
+                    style:bondStyles[styleIndex++%3]
+                });
             }
         }
     });
@@ -236,7 +271,7 @@ function disconnect(atom){
     });
 }
 
-/* DESENHO SVG */
+/* DESENHO */
 function draw(){
     svg.innerHTML="";
 
@@ -290,7 +325,7 @@ function draw(){
 }
 draw();
 
-/* FÍSICA SUAVE */
+/* FÍSICA */
 function relax(){
     bonds.forEach(b=>{
         let dx=b.b.x-b.a.x;
@@ -315,6 +350,52 @@ function relax(){
     requestAnimationFrame(relax);
 }
 relax();
+
+/* VALIDAÇÃO */
+function allPlaced(){
+    return atoms.every(a=>a.inWorkspace);
+}
+
+function fullValence(){
+    return atoms.every(a=>a.bonds.length===valence[a.type]);
+}
+
+function carbonShape(){
+    return atoms
+        .filter(a=>a.type==="C")
+        .map(c=>c.bonds.filter(b=>b.type==="C").length)
+        .sort()
+        .join(",");
+}
+
+function checkWin(){
+    if(!allPlaced() || !fullValence()) return;
+
+    let g=carbonShape();
+    let win=false;
+
+    if(current.type==="chain"){
+        if(current.c===1) win=true;
+        if(current.c===2) win=g==="1,1";
+        if(current.c===3) win=g==="1,2,1";
+        if(current.c===4) win=g==="1,2,2,1";
+    }
+
+    if(current.type==="branched"){
+        win = g==="1,1,1,3";
+    }
+
+    if(win){
+        feedback.innerText="🎉 Parabéns! Molécula correta!";
+        atoms.forEach(a=>a.el.classList.add("win"));
+
+        setTimeout(()=>{
+            newGame();
+        },3000);
+    } else {
+        feedback.innerText="❌ Estrutura incorreta!";
+    }
+}
 
 newGame();
 </script>
