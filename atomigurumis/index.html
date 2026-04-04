@@ -60,7 +60,7 @@ body {margin:0;font-family:sans-serif;background:#f7f7f7;overflow:hidden;}
 </div>
 
 <script>
-let atoms=[], bonds=[], preview=null;
+let atoms=[], bonds=[];
 let level=0;
 
 const workspace=document.getElementById("workspace");
@@ -80,7 +80,7 @@ const challenges=[
 ];
 
 function newGame(){
-    atoms=[]; bonds=[]; preview=null;
+    atoms=[]; bonds=[];
     svg.innerHTML="";
     workspace.querySelectorAll(".atom").forEach(e=>e.remove());
 
@@ -89,7 +89,7 @@ function newGame(){
     feedback.innerText="";
 }
 
-/* CRIAR ÁTOMO */
+/* CRIAR */
 function createAndDrag(type,e){
     let p=e.touches?e.touches[0]:e;
     let rect=workspace.getBoundingClientRect();
@@ -148,7 +148,6 @@ function drag(atom){
         atom.y=p.clientY-rect.top-radius[atom.type];
 
         setPos(atom);
-        previewBond(atom);
     }
 
     function end(e){
@@ -163,54 +162,42 @@ function drag(atom){
             return;
         }
 
-        // recalcular conexão no momento final
-        previewBond(atom);
-
-        if(preview){
-            connect(preview.a,preview.b);
-            preview=null;
-        }
-
+        tryConnect(atom);
         checkWin();
     }
 }
 
-/* REMOVER */
-function removeAtom(atom){
-    disconnect(atom);
-    atoms=atoms.filter(a=>a!==atom);
-    atom.el.remove();
-}
+/* DETECÇÃO REAL DE COLISÃO */
+function tryConnect(a){
 
-/* PREVIEW CORRIGIDO (MAIS PRÓXIMO) */
-function previewBond(a){
-    let best = null;
-    let bestDist = Infinity;
+    let best=null;
+    let bestDist=Infinity;
 
     atoms.forEach(b=>{
         if(a===b) return;
 
         let d=Math.hypot(a.x-b.x,a.y-b.y);
-        let target=radius[a.type]+radius[b.type];
+        let limit=radius[a.type]+radius[b.type];
 
-        if(d < target + 50 && canBond(a,b)){
-            if(d < bestDist){
-                bestDist = d;
-                best = b;
+        // contato real (colisão)
+        if(d <= limit){
+
+            if(canBond(a,b) && d<bestDist){
+                bestDist=d;
+                best=b;
             }
         }
     });
 
     if(best){
-        preview = {a, b: best};
-    } else {
-        preview = null;
+        connect(a,best);
     }
 }
 
 /* REGRAS */
 function canBond(a,b){
     if(a.type==="H" && b.type==="H") return false;
+
     return a.bonds.length<valence[a.type] &&
            b.bonds.length<valence[b.type];
 }
@@ -220,14 +207,12 @@ function connect(a,b){
         (x.a===a && x.b===b)||(x.a===b && x.b===a)
     )) return;
 
-    if(!canBond(a,b)) return;
-
     bonds.push({a,b});
     a.bonds.push(b);
     b.bonds.push(a);
 }
 
-function disconnect(atom){
+function removeAtom(atom){
     bonds=bonds.filter(b=>{
         if(b.a===atom||b.b===atom){
             b.a.bonds=b.a.bonds.filter(x=>x!==b.b);
@@ -236,9 +221,12 @@ function disconnect(atom){
         }
         return true;
     });
+
+    atoms=atoms.filter(a=>a!==atom);
+    atom.el.remove();
 }
 
-/* VALIDAÇÃO */
+/* VALIDAÇÃO (igual antes) */
 function isLinearChain(carbons){
     if(carbons.length===1) return true;
 
