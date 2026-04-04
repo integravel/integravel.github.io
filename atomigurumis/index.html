@@ -144,7 +144,6 @@ function createAtom(type,x,y){
 function startDrag(e,atom){
     e.preventDefault();
     dragging=atom;
-
     holdTimer=setTimeout(()=>removeBond(atom),300);
 }
 
@@ -190,6 +189,34 @@ document.querySelectorAll(".template").forEach(t=>{
     t.addEventListener("touchstart",spawn,{passive:false});
 });
 
+/* REGRAS QUÍMICAS */
+function maxBondBetween(a,b){
+    let t=[a.type,b.type].sort().join("");
+
+    if(t.includes("H")) return 1;
+
+    if(t==="OO") return 2;
+    if(t==="CC") return 3;
+    if(t==="NN") return 3;
+
+    if(t==="CO") return 2;
+    if(t==="CN") return 3;
+    if(t==="NO") return 2;
+
+    return 1;
+}
+
+function bondCount(atom){
+    return bonds.filter(b=>b.a===atom||b.b===atom).length;
+}
+
+function countBondBetween(a,b){
+    return bonds.filter(x =>
+        (x.a===a && x.b===b) ||
+        (x.a===b && x.b===a)
+    ).length;
+}
+
 /* CONEXÃO INTELIGENTE */
 function tryConnect(a){
     atoms.forEach(b=>{
@@ -205,21 +232,19 @@ function tryConnect(a){
         if(d<=limit){
             let freeA=valence[a.type]-bondCount(a);
             let freeB=valence[b.type]-bondCount(b);
+            let already=countBondBetween(a,b);
+            let maxPair=maxBondBetween(a,b);
 
-            let n=Math.min(freeA,freeB);
+            let possible=Math.min(freeA,freeB,maxPair-already);
 
-            for(let i=0;i<n;i++){
+            for(let i=0;i<possible;i++){
                 bonds.push({a,b});
             }
         }
     });
 }
 
-function bondCount(atom){
-    return bonds.filter(b=>b.a===atom||b.b===atom).length;
-}
-
-/* REMOVER LIGAÇÃO (UMA POR VEZ) */
+/* REMOVER LIGAÇÃO */
 function removeBond(atom){
     for(let i=bonds.length-1;i>=0;i--){
         let b=bonds[i];
@@ -246,7 +271,7 @@ function checkWin(){
     setTimeout(newGame,1500);
 }
 
-/* DESENHO MULTIPLO */
+/* DESENHO */
 function draw(){
     svg.innerHTML="";
 
