@@ -3,39 +3,59 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Moléculas Dinâmicas</title>
+<title>Jogo das Moléculas</title>
 
 <style>
 body {
     margin: 0;
     font-family: sans-serif;
-    background: #f0f0f0;
+    background: #f7f7f7;
     overflow: hidden;
 }
 
+/* topo */
 #topbar {
-    padding: 10px;
     background: #222;
     color: white;
+    padding: 10px;
+    text-align: center;
 }
 
+/* desafio */
+#challenge {
+    font-size: 18px;
+    margin-top: 5px;
+}
+
+/* área */
 #workspace {
     position: absolute;
-    top: 60px;
+    top: 80px;
     bottom: 120px;
     width: 100%;
-    background: #fff;
+    background: #ffffff;
 }
 
+/* prateleira */
 #shelf {
     position: absolute;
     bottom: 0;
     height: 120px;
     width: 100%;
-    background: #ddd;
-    border-top: 2px solid #aaa;
+    background: #e0e0e0;
 }
 
+/* info */
+#feedback {
+    position: absolute;
+    top: 90px;
+    right: 10px;
+    background: white;
+    padding: 10px;
+    border: 1px solid #ccc;
+}
+
+/* átomos */
 .atom {
     position: absolute;
     border-radius: 50%;
@@ -47,8 +67,8 @@ body {
 }
 
 .H {
-    width: 30px;
-    height: 30px;
+    width: 28px;
+    height: 28px;
     background: white;
     border: 2px solid black;
 }
@@ -56,17 +76,8 @@ body {
 .C {
     width: 50px;
     height: 50px;
-    background: gray;
+    background: #666;
     color: white;
-}
-
-#info {
-    position: absolute;
-    top: 70px;
-    right: 10px;
-    background: #fff;
-    padding: 10px;
-    border: 1px solid #ccc;
 }
 </style>
 </head>
@@ -74,13 +85,12 @@ body {
 <body>
 
 <div id="topbar">
-    H: <input type="number" id="hCount" value="4">
-    C: <input type="number" id="cCount" value="1">
-    <button onclick="start()">Criar Átomos</button>
+    <div id="challenge"></div>
+    <button onclick="newGame()">Novo Desafio</button>
 </div>
 
 <div id="workspace"></div>
-<div id="info">Molécula: -</div>
+<div id="feedback">Monte a molécula</div>
 <div id="shelf"></div>
 
 <script>
@@ -88,33 +98,50 @@ let atoms = [];
 
 const workspace = document.getElementById("workspace");
 const shelf = document.getElementById("shelf");
+const feedback = document.getElementById("feedback");
+const challengeText = document.getElementById("challenge");
 
 const valence = { H: 1, C: 4 };
-const radius = { H: 15, C: 25 };
+const radius = { H: 14, C: 25 };
 
-function start() {
-    atoms = [];
-    workspace.innerHTML = "";
-    shelf.innerHTML = "";
+/* desafios */
+const challenges = [
+    {name:"metano", c:1, h:4, type:"chain"},
+    {name:"etano", c:2, h:6, type:"chain"},
+    {name:"propano", c:3, h:8, type:"chain"},
+    {name:"butano", c:4, h:10, type:"chain"},
+    {name:"isobutano", c:4, h:10, type:"branched"}
+];
 
-    let h = parseInt(hCount.value);
-    let c = parseInt(cCount.value);
+let current;
 
-    for (let i = 0; i < h; i++) createAtom("H", i);
-    for (let i = 0; i < c; i++) createAtom("C", i);
+/* iniciar jogo */
+function newGame(){
+    atoms=[];
+    workspace.innerHTML="";
+    shelf.innerHTML="";
+
+    current = challenges[Math.floor(Math.random()*challenges.length)];
+    challengeText.innerText = "Monte: " + current.name;
+
+    for(let i=0;i<current.h;i++) createAtom("H",i);
+    for(let i=0;i<current.c;i++) createAtom("C",i);
+
+    feedback.innerText="Monte a molécula";
 }
 
-function createAtom(type, i) {
-    let el = document.createElement("div");
-    el.className = "atom " + type;
-    el.innerText = type;
+/* criar átomo */
+function createAtom(type,i){
+    let el=document.createElement("div");
+    el.className="atom "+type;
+    el.innerText=type;
 
-    let atom = {
+    let atom={
         type,
         el,
-        bonds: [],
-        x: 50 + i * 40,
-        y: 50
+        bonds:[],
+        x:40+i*40,
+        y:40
     };
 
     atoms.push(atom);
@@ -123,31 +150,33 @@ function createAtom(type, i) {
     drag(atom);
 }
 
-function setPos(a) {
-    a.el.style.left = a.x + "px";
-    a.el.style.top = a.y + "px";
+function setPos(a){
+    a.el.style.left=a.x+"px";
+    a.el.style.top=a.y+"px";
 }
 
-function drag(atom) {
-    let offX, offY, dragging=false;
+/* drag */
+function drag(atom){
+    let offX,offY,drag=false;
 
     function start(x,y){
-        dragging=true;
+        drag=true;
         offX=x-atom.x;
         offY=y-atom.y;
         workspace.appendChild(atom.el);
     }
 
     function move(x,y){
-        if(!dragging) return;
+        if(!drag) return;
         atom.x=x-offX;
         atom.y=y-offY;
         setPos(atom);
-        check(atom);
+        connect(atom);
     }
 
     function end(){
-        dragging=false;
+        drag=false;
+        checkWin();
     }
 
     atom.el.onmousedown=e=>start(e.pageX,e.pageY);
@@ -158,13 +187,16 @@ function drag(atom) {
         let t=e.touches[0];
         start(t.pageX,t.pageY);
     };
+
     document.ontouchmove=e=>{
         let t=e.touches[0];
         move(t.pageX,t.pageY);
     };
+
     document.ontouchend=end;
 }
 
+/* ligação */
 function dist(a,b){
     return Math.hypot(a.x-b.x,a.y-b.y);
 }
@@ -174,7 +206,7 @@ function canBond(a,b){
            b.bonds.length<valence[b.type];
 }
 
-function check(a){
+function connect(a){
     atoms.forEach(b=>{
         if(a===b) return;
         let d=dist(a,b);
@@ -189,8 +221,8 @@ function check(a){
     });
 }
 
+/* relaxamento */
 function relax(){
-    // força tipo mola
     atoms.forEach(a=>{
         a.bonds.forEach(b=>{
             let dx=b.x-a.x;
@@ -204,7 +236,6 @@ function relax(){
             if(d>0){
                 let fx=(dx/d)*force;
                 let fy=(dy/d)*force;
-
                 a.x+=fx;
                 a.y+=fy;
                 b.x-=fx;
@@ -213,7 +244,6 @@ function relax(){
         });
     });
 
-    // repulsão global
     atoms.forEach(a=>{
         atoms.forEach(b=>{
             if(a===b) return;
@@ -235,12 +265,47 @@ function relax(){
     atoms.forEach(setPos);
 }
 
+/* loop */
 function loop(){
     relax();
     requestAnimationFrame(loop);
 }
 loop();
 
+/* validação */
+function getCarbonGraph(){
+    let carbons=atoms.filter(a=>a.type==="C");
+    return carbons.map(c=>c.bonds.filter(b=>b.type==="C").length);
+}
+
+function checkWin(){
+    let carbons=getCarbonGraph();
+
+    if(carbons.length!==current.c) return;
+
+    let sorted=carbons.sort().join(",");
+
+    let win=false;
+
+    if(current.type==="chain"){
+        // cadeia linear
+        win = sorted === "1,2,2,1".slice(0,sorted.length);
+    }
+
+    if(current.type==="branched"){
+        // isobutano: 3,1,1,1
+        win = sorted==="1,1,1,3";
+    }
+
+    if(win){
+        feedback.innerText="✅ Correto!";
+    } else {
+        feedback.innerText="❌ Tente novamente";
+    }
+}
+
+/* iniciar */
+newGame();
 </script>
 
 </body>
