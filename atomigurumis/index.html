@@ -36,6 +36,7 @@ body { margin:0; font-family:sans-serif; background:#f7f7f7; overflow:hidden; }
 .template.C { background:#666; color:white; }
 .template.O { background:red; color:white; }
 .template.N { background:blue; color:white; }
+.template.Cl { background:green; color:white; }
 
 .atom {
     position:absolute;
@@ -47,6 +48,7 @@ body { margin:0; font-family:sans-serif; background:#f7f7f7; overflow:hidden; }
 .atom.C { width:50px; background:#666; }
 .atom.O { width:40px; background:red; }
 .atom.N { width:44px; background:blue; }
+.atom.Cl { width:42px; background:green; color:white; }
 </style>
 </head>
 
@@ -66,6 +68,7 @@ body { margin:0; font-family:sans-serif; background:#f7f7f7; overflow:hidden; }
 <div class="template C">C</div>
 <div class="template O">O</div>
 <div class="template N">N</div>
+<div class="template Cl">Cl</div>
 </div>
 
 <script>
@@ -80,13 +83,21 @@ let settled=false;
 const INITIAL_TOLERANCE=15;
 const MOVE_TOLERANCE=6;
 
-const radius={H:14,C:25,O:20,N:22};
+const radius={H:14,C:25,O:20,N:22,Cl:21};
 
 const challenges=[
     {name:"Gás hidrogênio",req:{H:2}},
     {name:"Água",req:{H:2,O:1}},
     {name:"Amônia",req:{N:1,H:3}},
-    {name:"Dióxido de carbono",req:{C:1,O:2}}
+    {name:"Metano",req:{C:1,H:4}},
+    {name:"Oxigênio molecular",req:{O:2}},
+    {name:"Nitrogênio molecular",req:{N:2}},
+    {name:"Dióxido de carbono",req:{C:1,O:2}},
+    {name:"Monóxido de carbono",req:{C:1,O:1}},
+    {name:"Óxido nitroso",req:{N:2,O:1}},
+    {name:"Dióxido de nitrogênio",req:{N:1,O:2}},
+    {name:"Ácido clorídrico",req:{H:1,Cl:1}},
+    {name:"Cloro molecular",req:{Cl:2}}
 ];
 
 const workspace=document.getElementById("workspace");
@@ -282,7 +293,6 @@ function checkWin(){
 
     if(!isConnected()) return;
 
-    // 🔥 REGRA ESPECÍFICA CO2
     if(c.name==="Dióxido de carbono"){
         let carbon=atoms.find(a=>a.type==="C");
         let neigh=neighbors(carbon);
@@ -293,6 +303,12 @@ function checkWin(){
 
     feedback.innerText="🎉 Correto!";
     level++;
+
+    if(level>=challenges.length){
+        feedback.innerText="🏆 Você completou todas!";
+        level=0;
+    }
+
     setTimeout(newGame,1500);
 }
 
