@@ -62,15 +62,6 @@ body {
     align-items: center;
     justify-content: center;
     font-weight: bold;
-    transition: transform 0.15s, box-shadow 0.1s;
-}
-
-.atom.holding {
-    transform: scale(1.2);
-}
-
-.atom.highlight {
-    box-shadow: 0 0 10px #2196f3;
 }
 
 .H {
@@ -93,7 +84,7 @@ body {
 
 <div id="topbar">
     <div id="challenge"></div>
-    <div id="feedback">Arraste e conecte</div>
+    <div id="feedback"></div>
 </div>
 
 <div id="workspace">
@@ -103,10 +94,7 @@ body {
 <div id="shelf"></div>
 
 <script>
-let atoms=[];
-let bonds=[];
-let preview=null;
-
+let atoms=[], bonds=[], preview=null;
 let level=0;
 
 const workspace=document.getElementById("workspace");
@@ -126,59 +114,40 @@ const challenges=[
     {name:"isobutano",c:4,h:10,type:"branched"}
 ];
 
-let current;
-
-/* RESET */
 function newGame(){
-    atoms=[];
-    bonds=[];
-    preview=null;
-    svg.innerHTML="";
-    shelf.innerHTML="";
+    atoms=[]; bonds=[]; preview=null;
+    svg.innerHTML=""; shelf.innerHTML="";
     workspace.querySelectorAll(".atom").forEach(e=>e.remove());
 
-    current=challenges[level];
-    challengeText.innerText="Fase "+(level+1)+": "+current.name;
+    let c=challenges[level];
+    challengeText.innerText="Fase "+(level+1)+": "+c.name;
     feedback.innerText="Arraste e conecte";
 
-    createAtoms("C",current.c);
-    createAtoms("H",current.h);
+    createAtoms("C",c.c);
+    createAtoms("H",c.h);
 }
 
-/* CRIAR */
 function createAtoms(type,count){
     for(let i=0;i<count;i++){
         let el=document.createElement("div");
         el.className="atom "+type;
         el.innerText=type;
 
-        let atom={
-            type,el,
-            bonds:[],
-            x:0,y:0,
-            inWorkspace:false
-        };
-
+        let atom={type,el,bonds:[],x:0,y:0,inWorkspace:false};
         atoms.push(atom);
         shelf.appendChild(el);
         el.style.position="relative";
-
         drag(atom);
     }
 }
 
-/* POSIÇÃO */
 function setPos(a){
-    a.el.style.left = a.x + "px";
-    a.el.style.top = a.y + "px";
+    a.el.style.left=a.x+"px";
+    a.el.style.top=a.y+"px";
 }
 
-/* DRAG */
 function drag(atom){
     let dragging=false;
-    let holdTimer=null;
-    let startX=0, startY=0;
-
     function getP(e){return e.touches?e.touches[0]:e;}
 
     atom.el.addEventListener("mousedown",start);
@@ -186,32 +155,21 @@ function drag(atom){
 
     document.addEventListener("mousemove",move);
     document.addEventListener("touchmove",move,{passive:false});
-
     document.addEventListener("mouseup",end);
     document.addEventListener("touchend",end);
 
     function start(e){
         e.preventDefault();
-
         let p=getP(e);
-        const rect = workspace.getBoundingClientRect();
+        let rect=workspace.getBoundingClientRect();
 
         workspace.appendChild(atom.el);
         atom.inWorkspace=true;
         atom.el.style.position="absolute";
 
-        atom.x = p.clientX - rect.left - radius[atom.type];
-        atom.y = p.clientY - rect.top - radius[atom.type];
-
-        startX = p.clientX;
-        startY = p.clientY;
-
+        atom.x=p.clientX-rect.left-radius[atom.type];
+        atom.y=p.clientY-rect.top-radius[atom.type];
         setPos(atom);
-
-        holdTimer = setTimeout(()=>{
-            disconnect(atom);
-            atom.el.classList.add("holding");
-        },300);
 
         dragging=true;
     }
@@ -221,15 +179,10 @@ function drag(atom){
         e.preventDefault();
 
         let p=getP(e);
-        const rect = workspace.getBoundingClientRect();
+        let rect=workspace.getBoundingClientRect();
 
-        if(Math.hypot(p.clientX-startX,p.clientY-startY)>10){
-            clearTimeout(holdTimer);
-            atom.el.classList.remove("holding");
-        }
-
-        atom.x = p.clientX - rect.left - radius[atom.type];
-        atom.y = p.clientY - rect.top - radius[atom.type];
+        atom.x=p.clientX-rect.left-radius[atom.type];
+        atom.y=p.clientY-rect.top-radius[atom.type];
 
         setPos(atom);
         previewBond(atom);
@@ -237,14 +190,10 @@ function drag(atom){
 
     function end(){
         if(!dragging) return;
-
         dragging=false;
-        clearTimeout(holdTimer);
-        atom.el.classList.remove("holding");
 
         if(preview){
             connect(preview.a,preview.b);
-            snap(preview.a,preview.b);
             preview=null;
         }
 
@@ -252,35 +201,10 @@ function drag(atom){
     }
 }
 
-/* SNAP */
-function snap(a,b){
-    let dx=b.x-a.x;
-    let dy=b.y-a.y;
-    let d=Math.hypot(dx,dy);
-    let target=radius[a.type]+radius[b.type];
-
-    if(d===0) return;
-
-    let nx=dx/d;
-    let ny=dy/d;
-
-    let midX=(a.x+b.x)/2;
-    let midY=(a.y+b.y)/2;
-
-    a.x=midX-nx*target/2;
-    a.y=midY-ny*target/2;
-
-    b.x=midX+nx*target/2;
-    b.y=midY+ny*target/2;
-}
-
-/* PREVIEW CORRIGIDO */
+/* PREVIEW */
 function previewBond(a){
     preview=null;
-
     atoms.forEach(b=>{
-        b.el.classList.remove("highlight");
-
         if(a===b||!b.inWorkspace) return;
 
         let d=Math.hypot(a.x-b.x,a.y-b.y);
@@ -288,12 +212,11 @@ function previewBond(a){
 
         if(d<target+30 && canBond(a,b)){
             preview={a,b};
-            b.el.classList.add("highlight");
         }
     });
 }
 
-/* CONECTAR CORRIGIDO */
+/* CONEXÃO */
 function canBond(a,b){
     return a.bonds.length<valence[a.type] &&
            b.bonds.length<valence[b.type];
@@ -303,143 +226,118 @@ function connect(a,b){
     if(a.bonds.includes(b)) return;
     if(!canBond(a,b)) return;
 
+    let style=["line","wedge","dash"][Math.random()*3|0];
+    bonds.push({a,b,style});
+
     a.bonds.push(b);
     b.bonds.push(a);
-    bonds.push({a,b});
 }
-
-/* DESCONEXÃO */
-function disconnect(atom){
-    bonds=bonds.filter(b=>{
-        if(b.a===atom||b.b===atom){
-            b.a.bonds=b.a.bonds.filter(x=>x!==b.b);
-            b.b.bonds=b.b.bonds.filter(x=>x!==b.a);
-            return false;
-        }
-        return true;
-    });
-}
-
-/* FÍSICA */
-function relax(){
-    bonds.forEach(b=>{
-        let dx=b.b.x-b.a.x;
-        let dy=b.b.y-b.a.y;
-        let d=Math.hypot(dx,dy);
-        let target=radius[b.a.type]+radius[b.b.type];
-
-        let force=(d-target)*0.1;
-
-        if(d>0){
-            let fx=(dx/d)*force;
-            let fy=(dy/d)*force;
-            b.a.x+=fx;
-            b.a.y+=fy;
-            b.b.x-=fx;
-            b.b.y-=fy;
-        }
-    });
-
-    atoms.forEach(a=>{
-        atoms.forEach(b=>{
-            if(a===b) return;
-
-            let dx=b.x-a.x;
-            let dy=b.y-a.y;
-            let d=Math.hypot(dx,dy);
-            let min=radius[a.type]+radius[b.type];
-
-            if(d<min && d>0){
-                let push=(min-d)*0.2;
-                a.x-=dx/d*push;
-                a.y-=dy/d*push;
-            }
-        });
-    });
-
-    atoms.forEach(setPos);
-    requestAnimationFrame(relax);
-}
-relax();
 
 /* DESENHO */
 function draw(){
     svg.innerHTML="";
 
     bonds.forEach(b=>{
-        drawLine(b.a,b.b,"black");
+        drawBond(b);
     });
-
-    if(preview){
-        drawLine(preview.a,preview.b,"#2196f3",true);
-    }
 
     requestAnimationFrame(draw);
 }
 
-function drawLine(a,b,color,dashed=false){
-    let x1=a.x+radius[a.type];
-    let y1=a.y+radius[a.type];
-    let x2=b.x+radius[b.type];
-    let y2=b.y+radius[b.type];
+function drawBond(b){
+    let x1=b.a.x+radius[b.a.type];
+    let y1=b.a.y+radius[b.a.type];
+    let x2=b.b.x+radius[b.b.type];
+    let y2=b.b.y+radius[b.b.type];
 
-    let line=document.createElementNS("http://www.w3.org/2000/svg","line");
-    line.setAttribute("x1",x1);
-    line.setAttribute("y1",y1);
-    line.setAttribute("x2",x2);
-    line.setAttribute("y2",y2);
-    line.setAttribute("stroke",color);
-    line.setAttribute("stroke-width","3");
-
-    if(dashed) line.setAttribute("stroke-dasharray","5,5");
-
-    svg.appendChild(line);
-}
-draw();
-
-/* VALIDAÇÃO */
-function allPlaced(){
-    return atoms.every(a=>a.inWorkspace);
-}
-
-function fullValence(){
-    return atoms.every(a=>a.bonds.length===valence[a.type]);
-}
-
-function carbonShape(){
-    return atoms
-        .filter(a=>a.type==="C")
-        .map(c=>c.bonds.filter(b=>b.type==="C").length)
-        .sort()
-        .join(",");
-}
-
-function checkWin(){
-    if(!allPlaced()||!fullValence()) return;
-
-    let g=carbonShape();
-    let win=false;
-
-    if(current.type==="chain"){
-        if(current.c===1) win=true;
-        if(current.c===2) win=g==="1,1";
-        if(current.c===3) win=g==="1,2,1";
-        if(current.c===4) win=g==="1,2,2,1";
+    if(b.style==="line"){
+        let l=document.createElementNS("http://www.w3.org/2000/svg","line");
+        l.setAttribute("x1",x1);
+        l.setAttribute("y1",y1);
+        l.setAttribute("x2",x2);
+        l.setAttribute("y2",y2);
+        l.setAttribute("stroke","black");
+        l.setAttribute("stroke-width","3");
+        svg.appendChild(l);
     }
 
-    if(current.type==="branched"){
-        win=g==="1,1,1,3";
+    if(b.style==="wedge"){
+        let poly=document.createElementNS("http://www.w3.org/2000/svg","polygon");
+        let dx=x2-x1, dy=y2-y1;
+        let len=Math.hypot(dx,dy);
+        let nx=-dy/len*6, ny=dx/len*6;
+
+        let points=`
+            ${x1},${y1}
+            ${x2+nx},${y2+ny}
+            ${x2-nx},${y2-ny}
+        `;
+        poly.setAttribute("points",points);
+        poly.setAttribute("fill","black");
+        svg.appendChild(poly);
+    }
+
+    if(b.style==="dash"){
+        for(let i=0;i<5;i++){
+            let t=i/5;
+            let px=x1+(x2-x1)*t;
+            let py=y1+(y2-y1)*t;
+
+            let c=document.createElementNS("http://www.w3.org/2000/svg","circle");
+            c.setAttribute("cx",px);
+            c.setAttribute("cy",py);
+            c.setAttribute("r","1.5");
+            c.setAttribute("fill","black");
+            svg.appendChild(c);
+        }
+    }
+}
+
+draw();
+
+/* VALIDAÇÃO CORRIGIDA */
+function checkWin(){
+    let carbons=atoms.filter(a=>a.type==="C");
+
+    // todos conectados?
+    let visited=new Set();
+    function dfs(a){
+        visited.add(a);
+        a.bonds.forEach(b=>{
+            if(b.type==="C" && !visited.has(b)) dfs(b);
+        });
+    }
+    dfs(carbons[0]);
+
+    if(visited.size!==carbons.length) return;
+
+    // valência ok?
+    if(!atoms.every(a=>a.bonds.length===valence[a.type])) return;
+
+    // cadeia ou ramificação
+    let degrees=carbons.map(c=>c.bonds.filter(b=>b.type==="C").length).sort().join(",");
+
+    let c=challenges[level];
+    let win=false;
+
+    if(c.type==="chain"){
+        if(c.c===1) win=true;
+        if(c.c===2) win=degrees==="1,1";
+        if(c.c===3) win=degrees==="1,2,1";
+        if(c.c===4) win=degrees==="1,2,2,1";
+    }
+
+    if(c.type==="branched"){
+        win=degrees==="1,1,1,3";
     }
 
     if(win){
         feedback.innerText="🎉 Correto!";
         level++;
-
         if(level>=challenges.length){
-            feedback.innerText="🏆 Você venceu tudo!";
+            feedback.innerText="🏆 Finalizado!";
             level=0;
         }
-
         setTimeout(newGame,2000);
     }else{
         feedback.innerText="❌ Estrutura incorreta";
