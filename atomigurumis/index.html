@@ -89,7 +89,7 @@ function newGame(){
     feedback.innerText="";
 }
 
-/* CRIAR ÁTOMO E JÁ COMEÇAR DRAG */
+/* CRIAR ÁTOMO */
 function createAndDrag(type,e){
     let p=e.touches?e.touches[0]:e;
     let rect=workspace.getBoundingClientRect();
@@ -163,7 +163,7 @@ function drag(atom){
             return;
         }
 
-        // 🔥 ESSENCIAL: recalcular antes de conectar
+        // recalcular conexão no momento final
         previewBond(atom);
 
         if(preview){
@@ -182,9 +182,10 @@ function removeAtom(atom){
     atom.el.remove();
 }
 
-/* LIGAÇÃO */
+/* PREVIEW CORRIGIDO (MAIS PRÓXIMO) */
 function previewBond(a){
-    preview=null;
+    let best = null;
+    let bestDist = Infinity;
 
     atoms.forEach(b=>{
         if(a===b) return;
@@ -192,13 +193,22 @@ function previewBond(a){
         let d=Math.hypot(a.x-b.x,a.y-b.y);
         let target=radius[a.type]+radius[b.type];
 
-        // 🔥 tolerância maior
         if(d < target + 50 && canBond(a,b)){
-            preview={a,b};
+            if(d < bestDist){
+                bestDist = d;
+                best = b;
+            }
         }
     });
+
+    if(best){
+        preview = {a, b: best};
+    } else {
+        preview = null;
+    }
 }
 
+/* REGRAS */
 function canBond(a,b){
     if(a.type==="H" && b.type==="H") return false;
     return a.bonds.length<valence[a.type] &&
