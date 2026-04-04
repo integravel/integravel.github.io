@@ -24,25 +24,17 @@ body {margin:0;font-family:sans-serif;background:#f7f7f7;overflow:hidden;}
 }
 
 .template {
-    width:60px;
-    height:60px;
-    border-radius:50%;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-weight:bold;
-    cursor:pointer;
+    width:60px;height:60px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    font-weight:bold;cursor:pointer;
 }
 
 .template.H {background:white;border:2px solid black;}
 .template.C {background:#666;color:white;}
 
 .atom {
-    position:absolute;
-    border-radius:50%;
-    display:flex;
-    align-items:center;
-    justify-content:center;
+    position:absolute;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
     font-weight:bold;
 }
 
@@ -74,7 +66,6 @@ let anchor=null;
 
 const workspace=document.getElementById("workspace");
 const svg=document.getElementById("svgLayer");
-const shelf=document.getElementById("shelf");
 const challengeText=document.getElementById("challenge");
 const feedback=document.getElementById("feedback");
 
@@ -95,25 +86,31 @@ function newGame(){
     workspace.querySelectorAll(".atom").forEach(e=>e.remove());
 
     let c=challenges[level];
-    challengeText.innerText="Fase "+(level+1)+": "+c.name+" (C"+c.c+" H"+c.h+")";
-    feedback.innerText="Crie e conecte os átomos";
+    challengeText.innerText="Fase "+(level+1)+": "+c.name;
+    feedback.innerText="";
 }
 
-/* CRIAR NOVO ÁTOMO */
-function spawnAtom(type,x,y){
-    let el=document.createElement("div");
-    el.className="atom "+type;
-    el.innerText=type;
+/* CRIAR + JÁ ARRASTAR */
+function createAndDrag(type,e){
+
+    let p=e.touches?e.touches[0]:e;
+    let rect=workspace.getBoundingClientRect();
 
     let atom={
-        type,el,bonds:[],
-        x,y,vx:0,vy:0,
-        inWorkspace:true,
+        type,
+        el:document.createElement("div"),
+        bonds:[],
+        x:p.clientX-rect.left-radius[type],
+        y:p.clientY-rect.top-radius[type],
+        vx:0,vy:0,
         isAnchor:false
     };
 
+    atom.el.className="atom "+type;
+    atom.el.innerText=type;
+
     atoms.push(atom);
-    workspace.appendChild(el);
+    workspace.appendChild(atom.el);
 
     if(!anchor){
         anchor=atom;
@@ -121,31 +118,25 @@ function spawnAtom(type,x,y){
     }
 
     drag(atom);
-    setPos(atom);
+
+    // já inicia movimento
+    atom.el.dispatchEvent(new MouseEvent("mousedown", {clientX:p.clientX, clientY:p.clientY}));
 }
 
-/* PEGAR DO SHELF */
+/* TEMPLATE DRAG */
 document.querySelectorAll(".template").forEach(t=>{
-    t.addEventListener("mousedown",startCreate);
-    t.addEventListener("touchstart",startCreate);
+    t.addEventListener("mousedown",e=>{
+        createAndDrag(t.classList.contains("C")?"C":"H",e);
+    });
 
-    function startCreate(e){
-        let type=t.classList.contains("C")?"C":"H";
-        let p=e.touches?e.touches[0]:e;
-        let rect=workspace.getBoundingClientRect();
-
-        spawnAtom(type,
-            p.clientX-rect.left-radius[type],
-            p.clientY-rect.top-radius[type]
-        );
-    }
+    t.addEventListener("touchstart",e=>{
+        createAndDrag(t.classList.contains("C")?"C":"H",e);
+    });
 });
 
-/* DRAG */
+/* DRAG NORMAL */
 function drag(atom){
     let dragging=false;
-    let holdTimer=null;
-    let startX=0,startY=0;
 
     function getP(e){return e.touches?e.touches[0]:e;}
 
@@ -158,13 +149,6 @@ function drag(atom){
     document.addEventListener("touchend",end);
 
     function start(e){
-        e.preventDefault();
-
-        let p=getP(e);
-        startX=p.clientX;
-        startY=p.clientY;
-
-        holdTimer=setTimeout(()=>disconnect(atom),300);
         dragging=true;
     }
 
@@ -174,9 +158,6 @@ function drag(atom){
 
         let p=getP(e);
         let rect=workspace.getBoundingClientRect();
-
-        let dist=Math.hypot(p.clientX-startX,p.clientY-startY);
-        if(dist>10) clearTimeout(holdTimer);
 
         atom.x=p.clientX-rect.left-radius[atom.type];
         atom.y=p.clientY-rect.top-radius[atom.type];
@@ -191,10 +172,9 @@ function drag(atom){
         if(!dragging) return;
         dragging=false;
 
-        clearTimeout(holdTimer);
-
-        // apagar se for pro shelf
         let p=getP(e);
+
+        // apagar
         if(p.clientY > window.innerHeight-120){
             removeAtom(atom);
             return;
@@ -212,21 +192,11 @@ function drag(atom){
 /* REMOVER */
 function removeAtom(atom){
     disconnect(atom);
-
     atoms=atoms.filter(a=>a!==atom);
     atom.el.remove();
-
-    if(atom.isAnchor){
-        anchor=null;
-        if(atoms.length){
-            anchor=atoms[0];
-            anchor.isAnchor=true;
-        }
-    }
 }
 
-/* RESTO IGUAL (preview, connect, física, validação...) */
-
+/* LIGAÇÃO */
 function previewBond(a){
     preview=null;
     atoms.forEach(b=>{
@@ -270,6 +240,7 @@ function disconnect(atom){
     });
 }
 
+/* VALIDAÇÃO */
 function isLinearChain(carbons){
     if(carbons.length===1) return true;
 
@@ -292,64 +263,8 @@ function isBranched(carbons){
     return carbons.some(c=>c.bonds.filter(b=>b.type==="C").length===3);
 }
 
-/* física simplificada (mantida) */
-function relax(){
-    bonds.forEach(b=>{
-        let dx=b.b.x-b.a.x;
-        let dy=b.b.y-b.a.y;
-        let d=Math.hypot(dx,dy);
-
-        let target=radius[b.a.type]+radius[b.b.type]+20;
-        if(d===0) return;
-
-        let force=(d-target)*0.05;
-        let fx=(dx/d)*force;
-        let fy=(dy/d)*force;
-
-        if(!b.a.isAnchor){b.a.vx+=fx; b.a.vy+=fy;}
-        if(!b.b.isAnchor){b.b.vx-=fx; b.b.vy-=fy;}
-    });
-
-    atoms.forEach(a=>{
-        if(a.isAnchor){a.vx=0;a.vy=0;return;}
-
-        a.vx*=0.85; a.vy*=0.85;
-        a.x+=a.vx; a.y+=a.vy;
-        setPos(a);
-    });
-
-    requestAnimationFrame(relax);
-}
-relax();
-
-/* desenho */
-function draw(){
-    svg.innerHTML="";
-
-    bonds.forEach(b=>{
-        let x1=b.a.x+radius[b.a.type];
-        let y1=b.a.y+radius[b.a.type];
-        let x2=b.b.x+radius[b.b.type];
-        let y2=b.b.y+radius[b.b.type];
-
-        let line=document.createElementNS("http://www.w3.org/2000/svg","line");
-        line.setAttribute("x1",x1);
-        line.setAttribute("y1",y1);
-        line.setAttribute("x2",x2);
-        line.setAttribute("y2",y2);
-        line.setAttribute("stroke","black");
-        line.setAttribute("stroke-width","5");
-        svg.appendChild(line);
-    });
-
-    requestAnimationFrame(draw);
-}
-draw();
-
-/* validação */
 function checkWin(){
     let carbons=atoms.filter(a=>a.type==="C");
-
     let c=challenges[level];
 
     if(atoms.filter(a=>a.type==="C").length!==c.c) return;
@@ -358,7 +273,6 @@ function checkWin(){
     if(!atoms.every(a=>a.bonds.length===valence[a.type])) return;
 
     let win=false;
-
     if(c.type==="chain") win=isLinearChain(carbons);
     if(c.type==="branched") win=isBranched(carbons);
 
@@ -374,6 +288,41 @@ function checkWin(){
         feedback.innerText="❌ Estrutura incorreta";
     }
 }
+
+/* FÍSICA SIMPLES */
+function relax(){
+    atoms.forEach(a=>{
+        a.vx*=0.85;
+        a.vy*=0.85;
+        a.x+=a.vx;
+        a.y+=a.vy;
+        setPos(a);
+    });
+    requestAnimationFrame(relax);
+}
+relax();
+
+/* DESENHO */
+function draw(){
+    svg.innerHTML="";
+    bonds.forEach(b=>{
+        let x1=b.a.x+radius[b.a.type];
+        let y1=b.a.y+radius[b.a.type];
+        let x2=b.b.x+radius[b.b.type];
+        let y2=b.b.y+radius[b.b.type];
+
+        let line=document.createElementNS("http://www.w3.org/2000/svg","line");
+        line.setAttribute("x1",x1);
+        line.setAttribute("y1",y1);
+        line.setAttribute("x2",x2);
+        line.setAttribute("y2",y2);
+        line.setAttribute("stroke","black");
+        line.setAttribute("stroke-width","5");
+        svg.appendChild(line);
+    });
+    requestAnimationFrame(draw);
+}
+draw();
 
 function setPos(a){
     a.el.style.left=a.x+"px";
