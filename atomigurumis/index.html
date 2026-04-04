@@ -213,6 +213,15 @@ function bondExists(a,b){
     );
 }
 
+function neighbors(atom){
+    let list=[];
+    bonds.forEach(b=>{
+        if(b.a===atom) list.push(b.b);
+        if(b.b===atom) list.push(b.a);
+    });
+    return list;
+}
+
 /* CONEXÃO */
 function tryConnect(a){
     atoms.forEach(b=>{
@@ -242,7 +251,7 @@ function removeBond(atom){
     }
 }
 
-/* VERIFICAR CONECTIVIDADE */
+/* CONECTIVIDADE */
 function isConnected(){
     if(atoms.length===0) return false;
 
@@ -254,16 +263,15 @@ function isConnected(){
         if(visited.has(a)) continue;
         visited.add(a);
 
-        bonds.forEach(b=>{
-            if(b.a===a && !visited.has(b.b)) stack.push(b.b);
-            if(b.b===a && !visited.has(b.a)) stack.push(b.a);
+        neighbors(a).forEach(n=>{
+            if(!visited.has(n)) stack.push(n);
         });
     }
 
     return visited.size===atoms.length;
 }
 
-/* VALIDAÇÃO NOVA */
+/* VALIDAÇÃO */
 function checkWin(){
     let c=challenges[level];
 
@@ -273,6 +281,15 @@ function checkWin(){
     }
 
     if(!isConnected()) return;
+
+    // 🔥 REGRA ESPECÍFICA CO2
+    if(c.name==="Dióxido de carbono"){
+        let carbon=atoms.find(a=>a.type==="C");
+        let neigh=neighbors(carbon);
+
+        if(neigh.length!==2) return;
+        if(!neigh.every(n=>n.type==="O")) return;
+    }
 
     feedback.innerText="🎉 Correto!";
     level++;
