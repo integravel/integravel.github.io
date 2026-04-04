@@ -95,10 +95,11 @@ function setPos(a){
     a.el.style.top=a.y+"px";
 }
 
-/* DRAG + SEGURAR PRA DESCONECTAR */
+/* DRAG + DESCONEXÃO FIXA */
 function drag(atom){
     let dragging=false;
     let holdTimer=null;
+    let startX=0, startY=0;
 
     function getP(e){return e.touches?e.touches[0]:e;}
 
@@ -115,6 +116,9 @@ function drag(atom){
 
         let p=getP(e);
         let rect=workspace.getBoundingClientRect();
+
+        startX=p.clientX;
+        startY=p.clientY;
 
         workspace.appendChild(atom.el);
         atom.inWorkspace=true;
@@ -137,9 +141,14 @@ function drag(atom){
         if(!dragging) return;
         e.preventDefault();
 
-        clearTimeout(holdTimer);
-
         let p=getP(e);
+
+        // só cancela se realmente arrastar
+        let dist=Math.hypot(p.clientX-startX,p.clientY-startY);
+        if(dist>10){
+            clearTimeout(holdTimer);
+        }
+
         let rect=workspace.getBoundingClientRect();
 
         atom.x=p.clientX-rect.left-radius[atom.type];
@@ -207,7 +216,7 @@ function disconnect(atom){
     });
 }
 
-/* FÍSICA + GEOMETRIA */
+/* FÍSICA + GEOMETRIA CORRIGIDA */
 function relax(){
 
     // mola
@@ -231,19 +240,27 @@ function relax(){
         b.b.vy-=fy;
     });
 
-    // GEOMETRIA ANGULAR (🔥 novo)
+    // GEOMETRIA ESTÁVEL 🔥
     atoms.forEach(a=>{
-        let n=a.bonds.length;
+        let neighbors=a.bonds;
+        let n=neighbors.length;
         if(n<2) return;
 
-        a.bonds.forEach((b,i)=>{
+        // ordenar por ângulo atual
+        neighbors.sort((b1,b2)=>{
+            let a1=Math.atan2(b1.y-a.y,b1.x-a.x);
+            let a2=Math.atan2(b2.y-a.y,b2.x-a.x);
+            return a1-a2;
+        });
+
+        neighbors.forEach((b,i)=>{
             let angle=(i/n)*Math.PI*2;
 
-            let targetX=a.x+Math.cos(angle)*80;
-            let targetY=a.y+Math.sin(angle)*80;
+            let tx=a.x+Math.cos(angle)*80;
+            let ty=a.y+Math.sin(angle)*80;
 
-            b.vx += (targetX - b.x)*0.002;
-            b.vy += (targetY - b.y)*0.002;
+            b.vx += (tx-b.x)*0.01;
+            b.vy += (ty-b.y)*0.01;
         });
     });
 
@@ -259,7 +276,7 @@ function relax(){
             let min=radius[a.type]+radius[b.type];
 
             if(d<min && d>0){
-                let push=(min-d)*0.02;
+                let push=(min-d)*0.05;
 
                 a.vx -= dx/d*push;
                 a.vy -= dy/d*push;
@@ -271,8 +288,8 @@ function relax(){
 
     // movimento
     atoms.forEach(a=>{
-        a.vx*=0.9;
-        a.vy*=0.9;
+        a.vx*=0.85;
+        a.vy*=0.85;
 
         if(Math.abs(a.vx)<0.001) a.vx=0;
         if(Math.abs(a.vy)<0.001) a.vy=0;
