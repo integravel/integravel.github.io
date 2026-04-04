@@ -14,9 +14,7 @@ body {
     transition:background 0.3s;
 }
 
-body.win {
-    background:#c8f7c5;
-}
+body.win {background:#c8f7c5;}
 
 #topbar {
     background:#222;
@@ -24,9 +22,6 @@ body.win {
     padding:10px;
     text-align:center;
 }
-
-#challenge {font-size:18px;}
-#feedback {font-size:16px;}
 
 #workspace {
     position:absolute;
@@ -51,7 +46,7 @@ body.win {
     display:flex;
     justify-content:center;
     align-items:center;
-    gap:40px;
+    gap:30px;
 }
 
 .template {
@@ -60,17 +55,16 @@ body.win {
     font-weight:bold;cursor:pointer;
 }
 
-.template.H {background:white;border:2px solid black;}
-.template.C {background:#666;color:white;}
+.H {background:white;border:2px solid black;}
+.C {background:#666;color:white;}
+.O {background:red;color:white;}
+.N {background:blue;color:white;}
 
 .atom {
     position:absolute;border-radius:50%;
     display:flex;align-items:center;justify-content:center;
     font-weight:bold;
 }
-
-.H {width:28px;height:28px;background:white;border:2px solid black;}
-.C {width:50px;height:50px;background:#666;color:white;}
 </style>
 </head>
 
@@ -86,8 +80,10 @@ body.win {
 </div>
 
 <div id="shelf">
-<div class="template C">C</div>
 <div class="template H">H</div>
+<div class="template C">C</div>
+<div class="template O">O</div>
+<div class="template N">N</div>
 </div>
 
 <script>
@@ -96,29 +92,30 @@ let draggingAtom=null;
 let holdTimer=null;
 let level=0;
 
+const valence={H:1,C:4,O:2,N:3};
+const radius={H:14,C:25,O:20,N:22};
+
+const challenges=[
+    {name:"H₂",req:{H:2}},
+    {name:"H₂O",req:{H:2,O:1}},
+    {name:"NH₃",req:{N:1,H:3}},
+    {name:"CO₂",req:{C:1,O:2}},
+    {name:"H₂O₂",req:{H:2,O:2}},
+    {name:"metano",req:{C:1,H:4}},
+    {name:"etano",req:{C:2,H:6}}
+];
+
 const workspace=document.getElementById("workspace");
 const svg=document.getElementById("svgLayer");
 const challengeText=document.getElementById("challenge");
 const feedback=document.getElementById("feedback");
-
-const valence={H:1,C:4};
-const radius={H:14,C:25};
-
-const challenges=[
-    {name:"metano",c:1,h:4,type:"chain"},
-    {name:"etano",c:2,h:6,type:"chain"},
-    {name:"propano",c:3,h:8,type:"chain"},
-    {name:"butano",c:4,h:10,type:"chain"},
-    {name:"isobutano",c:4,h:10,type:"branched"}
-];
 
 function newGame(){
     atoms=[]; bonds=[];
     svg.innerHTML="";
     workspace.querySelectorAll(".atom").forEach(e=>e.remove());
 
-    let c=challenges[level];
-    challengeText.innerText="Fase "+(level+1)+": "+c.name;
+    challengeText.innerText="Fase "+(level+1)+": "+challenges[level].name;
     feedback.innerText="";
     document.body.classList.remove("win");
 }
@@ -160,28 +157,24 @@ function createAtom(type,x,y){
     draggingAtom=atom;
 }
 
-/* HOLD */
 function startHold(e){
     e.stopPropagation();
 
     let atom=atoms.find(a=>a.el===e.currentTarget);
 
-    holdTimer=setTimeout(()=>{
-        disconnect(atom);
-    },300);
-
+    holdTimer=setTimeout(()=>disconnect(atom),300);
     draggingAtom=atom;
 }
 
 /* TEMPLATE */
 document.querySelectorAll(".template").forEach(t=>{
     t.addEventListener("mousedown",e=>{
-        createAtom(t.classList.contains("C")?"C":"H",e.clientX,e.clientY);
+        createAtom(t.innerText,e.clientX,e.clientY);
     });
 
     t.addEventListener("touchstart",e=>{
         let p=e.touches[0];
-        createAtom(t.classList.contains("C")?"C":"H",p.clientX,p.clientY);
+        createAtom(t.innerText,p.clientX,p.clientY);
     });
 });
 
@@ -264,56 +257,44 @@ function connect(a,b){
     b.bonds.push(a);
 }
 
-/* VALIDAÇÃO */
-function isLinearChain(carbons){
-    if(carbons.length===1) return true;
+/* VALIDAÇÃO GENÉRICA */
+function checkWin(){
+    let req=challenges[level].req;
 
-    let ends=carbons.filter(c=>c.bonds.filter(b=>b.type==="C").length===1);
-    if(ends.length!==2) return false;
-
-    let visited=new Set();
-    function walk(c){
-        visited.add(c);
-        c.bonds.forEach(b=>{
-            if(b.type==="C"&&!visited.has(b)) walk(b);
-        });
+    // contar átomos
+    for(let k in req){
+        let count=atoms.filter(a=>a.type===k).length;
+        if(count!==req[k]) return;
     }
 
-    walk(ends[0]);
-    return visited.size===carbons.length;
-}
-
-function isBranched(carbons){
-    return carbons.some(c=>c.bonds.filter(b=>b.type==="C").length===3);
-}
-
-function checkWin(){
-    let carbons=atoms.filter(a=>a.type==="C");
-    let c=challenges[level];
-
-    if(atoms.filter(a=>a.type==="C").length!==c.c) return;
-    if(atoms.filter(a=>a.type==="H").length!==c.h) return;
-
+    // valência correta
     if(!atoms.every(a=>a.bonds.length===valence[a.type])) return;
 
-    let win=false;
-    if(c.type==="chain") win=isLinearChain(carbons);
-    if(c.type==="branched") win=isBranched(carbons);
-
-    if(win){
-        feedback.innerText="🎉 Correto!";
-        document.body.classList.add("win");
-
-        if(navigator.vibrate) navigator.vibrate(200);
-
-        level++;
-        if(level>=challenges.length){
-            feedback.innerText="🏆 Finalizado!";
-            level=0;
-        }
-
-        setTimeout(newGame,1500);
+    // tudo conectado
+    let visited=new Set();
+    function dfs(a){
+        visited.add(a);
+        a.bonds.forEach(b=>{
+            if(!visited.has(b)) dfs(b);
+        });
     }
+    dfs(atoms[0]);
+
+    if(visited.size!==atoms.length) return;
+
+    // vitória
+    feedback.innerText="🎉 Correto!";
+    document.body.classList.add("win");
+
+    if(navigator.vibrate) navigator.vibrate(200);
+
+    level++;
+    if(level>=challenges.length){
+        feedback.innerText="🏆 Finalizado!";
+        level=0;
+    }
+
+    setTimeout(newGame,1500);
 }
 
 /* DESENHO */
