@@ -132,7 +132,6 @@ function drag(atom){
         atom.vx=0; atom.vy=0;
         setPos(atom);
 
-        // define âncora (primeiro átomo)
         if(!anchor){
             anchor=atom;
             atom.isAnchor=true;
@@ -174,7 +173,6 @@ function drag(atom){
             preview=null;
         }
 
-        // se moveu âncora, atualiza posição fixa
         if(atom.isAnchor){
             atom.vx=0;
             atom.vy=0;
@@ -199,21 +197,31 @@ function previewBond(a){
     });
 }
 
-/* CONEXÃO */
+/* REGRAS DE LIGAÇÃO */
 function canBond(a,b){
+    if(a.type==="H" && b.type==="H") return false;
+
     return a.bonds.length<valence[a.type] &&
            b.bonds.length<valence[b.type];
 }
 
 function connect(a,b){
-    if(a.bonds.includes(b)) return;
+
+    // impedir duplicatas reais
+    if(bonds.some(x =>
+        (x.a===a && x.b===b) ||
+        (x.a===b && x.b===a)
+    )) return;
+
     if(!canBond(a,b)) return;
 
     bonds.push({a,b});
-    a.bonds.push(b);
-    b.bonds.push(a);
+
+    if(!a.bonds.includes(b)) a.bonds.push(b);
+    if(!b.bonds.includes(a)) b.bonds.push(a);
 }
 
+/* DESFAZER */
 function disconnect(atom){
     bonds=bonds.filter(b=>{
         if(b.a===atom||b.b===atom){
@@ -225,7 +233,22 @@ function disconnect(atom){
     });
 }
 
-/* FÍSICA COM ÂNCORA */
+/* VERIFICAR CADEIA */
+function isSingleCarbonChain(carbons){
+    let visited=new Set();
+
+    function dfs(a){
+        visited.add(a);
+        a.bonds.forEach(b=>{
+            if(b.type==="C" && !visited.has(b)) dfs(b);
+        });
+    }
+
+    dfs(carbons[0]);
+    return visited.size===carbons.length;
+}
+
+/* FÍSICA */
 function relax(){
 
     bonds.forEach(b=>{
@@ -234,7 +257,6 @@ function relax(){
         let d=Math.hypot(dx,dy);
 
         let target=radius[b.a.type]+radius[b.b.type]+20;
-
         if(d===0) return;
 
         let force=(d-target)*0.05;
@@ -253,7 +275,6 @@ function relax(){
         }
     });
 
-    // ângulo fixo
     atoms.forEach(a=>{
         let n=a.bonds.length;
         if(n<2) return;
@@ -271,7 +292,6 @@ function relax(){
         });
     });
 
-    // movimento
     atoms.forEach(a=>{
         if(a.isAnchor){
             a.vx=0;
@@ -328,23 +348,17 @@ function draw(){
 }
 draw();
 
-/* VALIDAÇÃO */
+/* VALIDAÇÃO FINAL */
 function checkWin(){
     let carbons=atoms.filter(a=>a.type==="C");
 
-    let visited=new Set();
-    function dfs(a){
-        visited.add(a);
-        a.bonds.forEach(b=>{
-            if(b.type==="C" && !visited.has(b)) dfs(b);
-        });
-    }
-    dfs(carbons[0]);
+    if(!isSingleCarbonChain(carbons)) return;
 
-    if(visited.size!==carbons.length) return;
     if(!atoms.every(a=>a.bonds.length===valence[a.type])) return;
 
-    let degrees=carbons.map(c=>c.bonds.filter(b=>b.type==="C").length).sort().join(",");
+    let degrees=carbons
+        .map(c=>c.bonds.filter(b=>b.type==="C").length)
+        .sort().join(",");
 
     let c=challenges[level];
     let win=false;
