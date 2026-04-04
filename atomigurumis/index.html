@@ -25,7 +25,7 @@ body {
 }
 
 #feedback {
-    font-size: 15px;
+    font-size: 14px;
     color: #4caf50;
 }
 
@@ -62,6 +62,11 @@ body {
     align-items: center;
     justify-content: center;
     font-weight: bold;
+    transition: transform 0.1s, box-shadow 0.1s;
+}
+
+.atom.highlight {
+    box-shadow: 0 0 10px #2196f3;
 }
 
 .H {
@@ -84,7 +89,7 @@ body {
 
 <div id="topbar">
     <div id="challenge"></div>
-    <div id="feedback">Arraste e conecte os átomos</div>
+    <div id="feedback">Arraste e conecte</div>
 </div>
 
 <div id="workspace">
@@ -96,8 +101,9 @@ body {
 <script>
 let atoms=[];
 let bonds=[];
+let preview=null;
 
-let isInteracting = false;
+let isInteracting=false;
 
 const workspace=document.getElementById("workspace");
 const shelf=document.getElementById("shelf");
@@ -122,19 +128,19 @@ let current;
 function newGame(){
     atoms=[];
     bonds=[];
+    preview=null;
     svg.innerHTML="";
     shelf.innerHTML="";
     workspace.querySelectorAll(".atom").forEach(e=>e.remove());
 
-    current=challenges[Math.floor(Math.random()*challenges.length)];
+    current=challenges[Math.random()*challenges.length|0];
     challengeText.innerText=current.name;
-    feedback.innerText="Arraste e conecte os átomos";
 
     createAtoms("C",current.c);
     createAtoms("H",current.h);
 }
 
-/* CRIAÇÃO */
+/* CRIAR */
 function createAtoms(type,count){
     for(let i=0;i<count;i++){
         let el=document.createElement("div");
@@ -156,99 +162,105 @@ function createAtoms(type,count){
     }
 }
 
-/* DRAG + SEGURAR */
+/* DRAG */
 function drag(atom){
     let dragging=false;
     let holdTimer=null;
-    let offsetX=0,offsetY=0;
 
     function getP(e){return e.touches?e.touches[0]:e;}
 
     atom.el.addEventListener("mousedown",start);
-    document.addEventListener("mousemove",move);
-    document.addEventListener("mouseup",end);
-
     atom.el.addEventListener("touchstart",start);
-    document.addEventListener("touchmove",move);
+
+    document.addEventListener("mousemove",move);
+    document.addEventListener("touchmove",move,{passive:false});
+
+    document.addEventListener("mouseup",end);
     document.addEventListener("touchend",end);
 
     function start(e){
-        isInteracting = true;
+        e.preventDefault();
+        isInteracting=true;
 
         let p=getP(e);
-        let rect=atom.el.getBoundingClientRect();
-
-        offsetX=p.clientX-rect.left;
-        offsetY=p.clientY-rect.top;
-
-        holdTimer=setTimeout(()=>{
-            disconnect(atom);
-        },300);
 
         workspace.appendChild(atom.el);
-
-        atom.x=rect.left;
-        atom.y=rect.top;
         atom.inWorkspace=true;
-
         atom.el.style.position="absolute";
+
+        atom.x=p.clientX-radius[atom.type];
+        atom.y=p.clientY-radius[atom.type];
+        setPos(atom);
+
+        holdTimer=setTimeout(()=>disconnect(atom),300);
+
+        dragging=true;
     }
 
     function move(e){
-        if(!dragging) dragging=true;
+        if(!dragging) return;
+        e.preventDefault();
+
         clearTimeout(holdTimer);
 
         let p=getP(e);
-
-        atom.x=p.clientX-offsetX;
-        atom.y=p.clientY-offsetY;
+        atom.x=p.clientX-radius[atom.type];
+        atom.y=p.clientY-radius[atom.type];
 
         setPos(atom);
-        connect(atom);
+        previewBond(atom);
     }
 
     function end(){
+        if(!dragging) return;
         dragging=false;
-        clearTimeout(holdTimer);
-        isInteracting = false;
+
+        if(preview){
+            connect(preview.a,preview.b);
+            preview=null;
+        }
+
+        isInteracting=false;
         checkWin();
     }
 }
 
-function setPos(a){
-    a.el.style.left=a.x+"px";
-    a.el.style.top=a.y+"px";
+/* PREVIEW */
+function previewBond(a){
+    preview=null;
+    atoms.forEach(b=>{
+        if(a===b||!b.inWorkspace) return;
+
+        let d=Math.hypot(a.x-b.x,a.y-b.y);
+        let target=radius[a.type]+radius[b.type];
+
+        if(d<target+30 && canBond(a,b)){
+            preview={a,b};
+            b.el.classList.add("highlight");
+        }else{
+            b.el.classList.remove("highlight");
+        }
+    });
 }
 
-/* CONEXÃO */
+/* CONECTAR */
 function canBond(a,b){
     return a.bonds.length<valence[a.type] &&
            b.bonds.length<valence[b.type];
 }
 
-function connect(a){
-    atoms.forEach(b=>{
-        if(a===b||!b.inWorkspace) return;
+function connect(a,b){
+    if(a.bonds.includes(b)) return;
 
-        let dx=a.x-b.x;
-        let dy=a.y-b.y;
-        let d=Math.hypot(dx,dy);
-        let target=radius[a.type]+radius[b.type];
-
-        if(d<target+10 && canBond(a,b)){
-            if(!a.bonds.includes(b)){
-                a.bonds.push(b);
-                b.bonds.push(a);
-                bonds.push({a,b});
-            }
-        }
-    });
+    a.bonds.push(b);
+    b.bonds.push(a);
+    bonds.push({a,b});
 }
 
 /* DESFAZER */
 function disconnect(atom){
-    bonds = bonds.filter(b=>{
-        if(b.a===atom || b.b===atom){
+    bonds=bonds.filter(b=>{
+        if(b.a===atom||b.b===atom){
             b.a.bonds=b.a.bonds.filter(x=>x!==b.b);
             b.b.bonds=b.b.bonds.filter(x=>x!==b.a);
             return false;
@@ -257,52 +269,38 @@ function disconnect(atom){
     });
 }
 
-/* DISTRIBUIÇÃO SUAVE */
-function spread(){
-    if(isInteracting) return;
-
-    atoms.forEach(c=>{
-        if(c.type!=="C") return;
-
-        let neighbors=c.bonds;
-        let n=neighbors.length;
-
-        neighbors.forEach((b,i)=>{
-            let angle=(i/n)*Math.PI*2;
-            let targetDist=radius[c.type]+radius[b.type]+20;
-
-            let tx=c.x+Math.cos(angle)*targetDist;
-            let ty=c.y+Math.sin(angle)*targetDist;
-
-            // movimento suave
-            b.x += (tx - b.x) * 0.05;
-            b.y += (ty - b.y) * 0.05;
-        });
-    });
-}
-
 /* DESENHO */
 function draw(){
     svg.innerHTML="";
 
     bonds.forEach(b=>{
-        let x1=b.a.x+radius[b.a.type];
-        let y1=b.a.y+radius[b.a.type];
-        let x2=b.b.x+radius[b.b.type];
-        let y2=b.b.y+radius[b.b.type];
-
-        let line=document.createElementNS("http://www.w3.org/2000/svg","line");
-        line.setAttribute("x1",x1);
-        line.setAttribute("y1",y1);
-        line.setAttribute("x2",x2);
-        line.setAttribute("y2",y2);
-        line.setAttribute("stroke","black");
-        line.setAttribute("stroke-width","3");
-
-        svg.appendChild(line);
+        drawLine(b.a,b.b,"black");
     });
 
+    if(preview){
+        drawLine(preview.a,preview.b,"#2196f3",true);
+    }
+
     requestAnimationFrame(draw);
+}
+
+function drawLine(a,b,color,dashed=false){
+    let x1=a.x+radius[a.type];
+    let y1=a.y+radius[a.type];
+    let x2=b.x+radius[b.type];
+    let y2=b.y+radius[b.type];
+
+    let line=document.createElementNS("http://www.w3.org/2000/svg","line");
+    line.setAttribute("x1",x1);
+    line.setAttribute("y1",y1);
+    line.setAttribute("x2",x2);
+    line.setAttribute("y2",y2);
+    line.setAttribute("stroke",color);
+    line.setAttribute("stroke-width","3");
+
+    if(dashed) line.setAttribute("stroke-dasharray","5,5");
+
+    svg.appendChild(line);
 }
 draw();
 
@@ -327,9 +325,11 @@ function relax(){
         }
     });
 
-    spread();
+    atoms.forEach(a=>{
+        a.el.style.left=a.x+"px";
+        a.el.style.top=a.y+"px";
+    });
 
-    atoms.forEach(setPos);
     requestAnimationFrame(relax);
 }
 relax();
@@ -371,8 +371,8 @@ function checkWin(){
     if(win){
         feedback.innerText="🎉 Parabéns!";
         setTimeout(newGame,3000);
-    } else {
-        feedback.innerText="❌ Estrutura incorreta!";
+    }else{
+        feedback.innerText="❌ Estrutura incorreta";
     }
 }
 
