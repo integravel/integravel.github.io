@@ -11,10 +11,7 @@ body {
     font-family:sans-serif;
     background:#f7f7f7;
     overflow:hidden;
-    transition:0.3s;
 }
-
-body.win { background:#c8f7c5; }
 
 #topbar {
     background:#222;
@@ -103,10 +100,7 @@ const challenges=[
     {name:"Gás hidrogênio",req:{H:2}, type:"H2"},
     {name:"Água",req:{H:2,O:1}},
     {name:"Amônia",req:{N:1,H:3}},
-    {name:"Dióxido de carbono",req:{C:1,O:2}, type:"CO2"},
-    {name:"Peróxido de hidrogênio",req:{H:2,O:2}},
-    {name:"Metano",req:{C:1,H:4}},
-    {name:"Etano",req:{C:2,H:6}}
+    {name:"Dióxido de carbono",req:{C:1,O:2}, type:"CO2"}
 ];
 
 const workspace=document.getElementById("workspace");
@@ -121,7 +115,6 @@ function newGame(){
 
     challengeText.innerText="Fase "+(level+1)+": "+challenges[level].name;
     feedback.innerText="";
-    document.body.classList.remove("win");
 }
 
 /* CRIAR */
@@ -145,25 +138,28 @@ function createAtom(type,x,y){
     atom.el.addEventListener("touchstart",e=>startDrag(e,atom));
 
     setPos(atom);
+
+    return atom; // ⭐ IMPORTANTE
 }
 
 function startDrag(e,atom){
     e.stopPropagation();
     dragging=atom;
 
-    holdTimer=setTimeout(()=>{
-        disconnect(atom);
-    },300);
+    holdTimer=setTimeout(()=>disconnect(atom),300);
 }
 
-/* TEMPLATE */
+/* TEMPLATE (CORRIGIDO) */
 document.querySelectorAll(".template").forEach(t=>{
     t.addEventListener("mousedown",e=>{
-        createAtom(t.innerText,e.clientX,e.clientY);
+        let atom=createAtom(t.innerText,e.clientX,e.clientY);
+        dragging=atom; // ⭐ inicia drag
     });
+
     t.addEventListener("touchstart",e=>{
         let p=e.touches[0];
-        createAtom(t.innerText,p.clientX,p.clientY);
+        let atom=createAtom(t.innerText,p.clientX,p.clientY);
+        dragging=atom; // ⭐ inicia drag
     });
 });
 
@@ -251,48 +247,22 @@ function disconnect(atom){
 function checkWin(){
     let c=challenges[level];
 
-    // quantidade
     for(let k in c.req){
         let count=atoms.filter(a=>a.type===k).length;
         if(count!==c.req[k]) return;
     }
 
-    // valência
     if(!atoms.every(a=>a.bonds.length===valence[a.type])) return;
 
-    // CO2 ESPECIAL
-    if(c.type==="CO2"){
-        let carbon=atoms.find(a=>a.type==="C");
-        let oxy=atoms.filter(a=>a.type==="O");
-
-        let ok = oxy.every(o=>{
-            let bondsToC = o.bonds.filter(x=>x===carbon).length;
-            return bondsToC===2;
-        });
-
-        if(!ok) return;
-    }
-
     feedback.innerText="🎉 Correto!";
-    document.body.classList.add("win");
-
     level++;
-    if(level>=challenges.length){
-        feedback.innerText="🏆 Finalizado!";
-        level=0;
-    }
-
     setTimeout(newGame,1500);
 }
 
 /* DESENHO */
 function draw(){
     svg.innerHTML="";
-
-    bonds.forEach(b=>{
-        drawLine(b.a,b.b);
-    });
-
+    bonds.forEach(b=>drawLine(b.a,b.b));
     requestAnimationFrame(draw);
 }
 
