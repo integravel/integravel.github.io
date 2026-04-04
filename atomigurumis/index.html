@@ -50,14 +50,9 @@ body.win { background:#c8f7c5; }
 }
 
 .template {
-    width:60px;
-    height:60px;
-    border-radius:50%;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-weight:bold;
-    cursor:pointer;
+    width:60px;height:60px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    font-weight:bold;cursor:pointer;
 }
 
 .template.H { background:white; border:2px solid black; }
@@ -65,12 +60,10 @@ body.win { background:#c8f7c5; }
 .template.O { background:red; color:white; }
 .template.N { background:blue; color:white; }
 
-/* 🔥 ÁTOMOS REAIS */
 .atom {
     position:absolute;
     border-radius:50%;
     aspect-ratio:1/1;
-    display:block;
     box-shadow:0 2px 6px rgba(0,0,0,0.2);
 }
 
@@ -109,13 +102,13 @@ const valence={H:1,C:4,O:2,N:3};
 const radius={H:14,C:25,O:20,N:22};
 
 const challenges=[
-    {name:"H₂",req:{H:2}},
-    {name:"H₂O",req:{H:2,O:1}},
-    {name:"NH₃",req:{N:1,H:3}},
-    {name:"CO₂",req:{C:1,O:2}},
-    {name:"H₂O₂",req:{H:2,O:2}},
-    {name:"metano",req:{C:1,H:4}},
-    {name:"etano",req:{C:2,H:6}}
+    {name:"Hidrogênio",req:{H:2}},
+    {name:"Água",req:{H:2,O:1}},
+    {name:"Amônia",req:{N:1,H:3}},
+    {name:"Dióxido de carbono",req:{C:1,O:2}},
+    {name:"Peróxido de hidrogênio",req:{H:2,O:2}},
+    {name:"Metano",req:{C:1,H:4}},
+    {name:"Etano",req:{C:2,H:6}}
 ];
 
 const workspace=document.getElementById("workspace");
@@ -137,22 +130,22 @@ function newGame(){
 function disconnect(atom){
     bonds = bonds.filter(b=>{
         if(b.a===atom || b.b===atom){
-            b.a.bonds=b.a.bonds.filter(x=>x!==b.b);
-            b.b.bonds=b.b.bonds.filter(x=>x!==b.a);
+            b.a.bonds--;
+            b.b.bonds--;
             return false;
         }
         return true;
     });
 }
 
-/* CRIAR ÁTOMO */
+/* CRIAR */
 function createAtom(type,x,y){
     let rect=workspace.getBoundingClientRect();
 
     let atom={
         type,
         el:document.createElement("div"),
-        bonds:[],
+        bonds:0,
         x:x-rect.left-radius[type],
         y:y-rect.top-radius[type]
     };
@@ -169,7 +162,6 @@ function createAtom(type,x,y){
     draggingAtom=atom;
 }
 
-/* HOLD */
 function startHold(e){
     e.stopPropagation();
     let atom=atoms.find(a=>a.el===e.currentTarget);
@@ -183,7 +175,6 @@ document.querySelectorAll(".template").forEach(t=>{
     t.addEventListener("mousedown",e=>{
         createAtom(t.innerText,e.clientX,e.clientY);
     });
-
     t.addEventListener("touchstart",e=>{
         let p=e.touches[0];
         createAtom(t.innerText,p.clientX,p.clientY);
@@ -234,7 +225,7 @@ function endDrag(){
     checkWin();
 }
 
-/* CONEXÃO */
+/* CONEXÃO COM MULTIPLAS LIGAÇÕES */
 function tryConnect(a){
     atoms.forEach(b=>{
         if(a===b) return;
@@ -248,24 +239,16 @@ function tryConnect(a){
         let limit=radius[a.type]+radius[b.type];
 
         if(d<=limit && canBond(a,b)){
-            connect(a,b);
+            bonds.push({a,b});
+            a.bonds++;
+            b.bonds++;
         }
     });
 }
 
 function canBond(a,b){
-    return a.bonds.length<valence[a.type] &&
-           b.bonds.length<valence[b.type];
-}
-
-function connect(a,b){
-    if(bonds.some(x =>
-        (x.a===a && x.b===b)||(x.a===b && x.b===a)
-    )) return;
-
-    bonds.push({a,b});
-    a.bonds.push(b);
-    b.bonds.push(a);
+    return a.bonds<valence[a.type] &&
+           b.bonds<valence[b.type];
 }
 
 /* VALIDAÇÃO */
@@ -277,23 +260,10 @@ function checkWin(){
         if(count!==req[k]) return;
     }
 
-    if(!atoms.every(a=>a.bonds.length===valence[a.type])) return;
-
-    let visited=new Set();
-    function dfs(a){
-        visited.add(a);
-        a.bonds.forEach(b=>{
-            if(!visited.has(b)) dfs(b);
-        });
-    }
-    dfs(atoms[0]);
-
-    if(visited.size!==atoms.length) return;
+    if(!atoms.every(a=>a.bonds===valence[a.type])) return;
 
     feedback.innerText="🎉 Correto!";
     document.body.classList.add("win");
-
-    if(navigator.vibrate) navigator.vibrate(200);
 
     level++;
     if(level>=challenges.length){
@@ -304,26 +274,55 @@ function checkWin(){
     setTimeout(newGame,1500);
 }
 
-/* DESENHO */
+/* DESENHO (LINHAS DUPLAS AUTOMÁTICAS) */
 function draw(){
     svg.innerHTML="";
-    bonds.forEach(b=>{
-        let x1=b.a.x+radius[b.a.type];
-        let y1=b.a.y+radius[b.a.type];
-        let x2=b.b.x+radius[b.b.type];
-        let y2=b.b.y+radius[b.b.type];
 
-        let line=document.createElementNS("http://www.w3.org/2000/svg","line");
-        line.setAttribute("x1",x1);
-        line.setAttribute("y1",y1);
-        line.setAttribute("x2",x2);
-        line.setAttribute("y2",y2);
-        line.setAttribute("stroke","black");
-        line.setAttribute("stroke-width","5");
-        svg.appendChild(line);
+    let map=new Map();
+
+    bonds.forEach(b=>{
+        let key=[b.a,b.b].sort().join("-");
+        map.set(key,(map.get(key)||0)+1);
     });
+
+    map.forEach((count,key)=>{
+        let [a,b]=bonds.find(x=>{
+            let k=[x.a,x.b].sort().join("-");
+            return k===key;
+        });
+
+        for(let i=0;i<count;i++){
+            drawLine(a,b,i,count);
+        }
+    });
+
     requestAnimationFrame(draw);
 }
+
+function drawLine(a,b,i,total){
+    let x1=a.x+radius[a.type];
+    let y1=a.y+radius[a.type];
+    let x2=b.x+radius[b.type];
+    let y2=b.y+radius[b.type];
+
+    let offset=(i-(total-1)/2)*6;
+
+    let dx=x2-x1, dy=y2-y1;
+    let len=Math.hypot(dx,dy);
+    let nx=-dy/len*offset;
+    let ny=dx/len*offset;
+
+    let line=document.createElementNS("http://www.w3.org/2000/svg","line");
+    line.setAttribute("x1",x1+nx);
+    line.setAttribute("y1",y1+ny);
+    line.setAttribute("x2",x2+nx);
+    line.setAttribute("y2",y2+ny);
+    line.setAttribute("stroke","black");
+    line.setAttribute("stroke-width","4");
+
+    svg.appendChild(line);
+}
+
 draw();
 
 function setPos(a){
