@@ -20,16 +20,6 @@ body {
     text-align: center;
 }
 
-#challenge {
-    font-size: 18px;
-    margin-bottom: 5px;
-}
-
-#feedback {
-    font-size: 16px;
-    color: #4caf50;
-}
-
 #workspace {
     position: absolute;
     top: 90px;
@@ -63,16 +53,6 @@ body {
     align-items: center;
     justify-content: center;
     font-weight: bold;
-    touch-action: none;
-    transition: transform 0.2s;
-}
-
-.atom.holding {
-    transform: scale(1.2);
-}
-
-.atom.win {
-    transform: scale(1.3);
 }
 
 .H {
@@ -105,44 +85,45 @@ body {
 <div id="shelf"></div>
 
 <script>
-let atoms = [];
-let bonds = [];
+let atoms=[];
+let bonds=[];
 
-const workspace = document.getElementById("workspace");
-const shelf = document.getElementById("shelf");
-const svg = document.getElementById("svgLayer");
-const challengeText = document.getElementById("challenge");
-const feedback = document.getElementById("feedback");
+const workspace=document.getElementById("workspace");
+const shelf=document.getElementById("shelf");
+const svg=document.getElementById("svgLayer");
+const challengeText=document.getElementById("challenge");
+const feedback=document.getElementById("feedback");
 
-const valence = { H:1, C:4 };
-const radius = { H:14, C:25 };
+const valence={H:1,C:4};
+const radius={H:14,C:25};
 
-const challenges = [
-    {name:"metano", c:1, h:4, type:"chain"},
-    {name:"etano", c:2, h:6, type:"chain"},
-    {name:"propano", c:3, h:8, type:"chain"},
-    {name:"butano", c:4, h:10, type:"chain"},
-    {name:"isobutano", c:4, h:10, type:"branched"}
+const challenges=[
+    {name:"metano",c:1,h:4,type:"chain"},
+    {name:"etano",c:2,h:6,type:"chain"},
+    {name:"propano",c:3,h:8,type:"chain"},
+    {name:"butano",c:4,h:10,type:"chain"},
+    {name:"isobutano",c:4,h:10,type:"branched"}
 ];
 
 let current;
 
-/* NOVO JOGO */
+/* RESET TOTAL */
 function newGame(){
     atoms=[];
     bonds=[];
-    shelf.innerHTML="";
     svg.innerHTML="";
+    shelf.innerHTML="";
+    workspace.querySelectorAll(".atom").forEach(e=>e.remove());
 
-    current = challenges[Math.floor(Math.random()*challenges.length)];
-    challengeText.innerText = "Monte: " + current.name;
-    feedback.innerText = "Monte a molécula";
+    current=challenges[Math.floor(Math.random()*challenges.length)];
+    challengeText.innerText="Monte: "+current.name;
+    feedback.innerText="Monte a molécula";
 
-    createAtoms("C", current.c);
-    createAtoms("H", current.h);
+    createAtoms("C",current.c);
+    createAtoms("H",current.h);
 }
 
-/* CRIAR ÁTOMOS */
+/* CRIAÇÃO */
 function createAtoms(type,count){
     for(let i=0;i<count;i++){
         let el=document.createElement("div");
@@ -150,7 +131,7 @@ function createAtoms(type,count){
         el.innerText=type;
 
         let atom={
-            type, el,
+            type,el,
             bonds:[],
             x:0,y:0,
             inWorkspace:false
@@ -164,13 +145,20 @@ function createAtoms(type,count){
     }
 }
 
-/* DRAG + SEGURAR */
+/* DRAG */
 function drag(atom){
     let dragging=false;
-    let holdTimer=null;
-    let offsetX=0, offsetY=0;
+    let offsetX=0,offsetY=0;
 
-    function getP(e){ return e.touches?e.touches[0]:e; }
+    function getP(e){return e.touches?e.touches[0]:e;}
+
+    atom.el.addEventListener("mousedown",start);
+    document.addEventListener("mousemove",move);
+    document.addEventListener("mouseup",end);
+
+    atom.el.addEventListener("touchstart",start);
+    document.addEventListener("touchmove",move);
+    document.addEventListener("touchend",end);
 
     function start(e){
         let p=getP(e);
@@ -179,14 +167,8 @@ function drag(atom){
         offsetX=p.clientX-rect.left;
         offsetY=p.clientY-rect.top;
 
-        holdTimer=setTimeout(()=>{
-            disconnect(atom);
-            atom.el.classList.add("holding");
-        },300);
-
-        dragging=true;
-
         workspace.appendChild(atom.el);
+
         atom.x=rect.left;
         atom.y=rect.top;
         atom.inWorkspace=true;
@@ -195,10 +177,13 @@ function drag(atom){
     }
 
     function move(e){
+        if(!dragging && atom.inWorkspace){
+            dragging=true;
+        }
         if(!dragging) return;
-        clearTimeout(holdTimer);
 
         let p=getP(e);
+
         atom.x=p.clientX-offsetX;
         atom.y=p.clientY-offsetY;
 
@@ -208,18 +193,8 @@ function drag(atom){
 
     function end(){
         dragging=false;
-        clearTimeout(holdTimer);
-        atom.el.classList.remove("holding");
         checkWin();
     }
-
-    atom.el.addEventListener("mousedown",start);
-    document.addEventListener("mousemove",move);
-    document.addEventListener("mouseup",end);
-
-    atom.el.addEventListener("touchstart",start);
-    document.addEventListener("touchmove",move,{passive:false});
-    document.addEventListener("touchend",end);
 }
 
 function setPos(a){
@@ -227,18 +202,15 @@ function setPos(a){
     a.el.style.top=a.y+"px";
 }
 
-/* LIGAÇÃO */
+/* CONEXÃO */
 function canBond(a,b){
     return a.bonds.length<valence[a.type] &&
            b.bonds.length<valence[b.type];
 }
 
-let bondStyles=["line","wedge","dash"];
-let styleIndex=0;
-
 function connect(a){
     atoms.forEach(b=>{
-        if(a===b || !b.inWorkspace) return;
+        if(a===b||!b.inWorkspace) return;
 
         let dx=a.x-b.x;
         let dy=a.y-b.y;
@@ -249,25 +221,27 @@ function connect(a){
             if(!a.bonds.includes(b)){
                 a.bonds.push(b);
                 b.bonds.push(a);
-
-                bonds.push({
-                    a,b,
-                    style:bondStyles[styleIndex++%3]
-                });
+                bonds.push({a,b});
             }
         }
     });
 }
 
-/* DESFAZER */
-function disconnect(atom){
-    bonds = bonds.filter(b=>{
-        if(b.a===atom || b.b===atom){
-            b.a.bonds=b.a.bonds.filter(x=>x!==b.b);
-            b.b.bonds=b.b.bonds.filter(x=>x!==b.a);
-            return false;
-        }
-        return true;
+/* DISTRIBUIÇÃO ANGULAR */
+function spread(){
+    atoms.forEach(c=>{
+        if(c.type!=="C") return;
+
+        let neighbors=c.bonds;
+        let n=neighbors.length;
+
+        neighbors.forEach((b,i)=>{
+            let angle=(i/n)*Math.PI*2;
+            let dist=radius[c.type]+radius[b.type]+10;
+
+            b.x=c.x+Math.cos(angle)*dist;
+            b.y=c.y+Math.sin(angle)*dist;
+        });
     });
 }
 
@@ -281,44 +255,15 @@ function draw(){
         let x2=b.b.x+radius[b.b.type];
         let y2=b.b.y+radius[b.b.type];
 
-        if(b.style==="line"){
-            let line=document.createElementNS("http://www.w3.org/2000/svg","line");
-            line.setAttribute("x1",x1);
-            line.setAttribute("y1",y1);
-            line.setAttribute("x2",x2);
-            line.setAttribute("y2",y2);
-            line.setAttribute("stroke","black");
-            line.setAttribute("stroke-width","3");
-            svg.appendChild(line);
-        }
+        let line=document.createElementNS("http://www.w3.org/2000/svg","line");
+        line.setAttribute("x1",x1);
+        line.setAttribute("y1",y1);
+        line.setAttribute("x2",x2);
+        line.setAttribute("y2",y2);
+        line.setAttribute("stroke","black");
+        line.setAttribute("stroke-width","3");
 
-        if(b.style==="wedge"){
-            let poly=document.createElementNS("http://www.w3.org/2000/svg","polygon");
-            let dx=x2-x1, dy=y2-y1;
-            let len=Math.hypot(dx,dy);
-            let nx=-dy/len*6;
-            let ny=dx/len*6;
-
-            poly.setAttribute("points",
-                `${x1},${y1} ${x2+nx},${y2+ny} ${x2-nx},${y2-ny}`);
-            poly.setAttribute("fill","black");
-            svg.appendChild(poly);
-        }
-
-        if(b.style==="dash"){
-            for(let i=0;i<6;i++){
-                let t=i/6;
-                let cx=x1+(x2-x1)*t;
-                let cy=y1+(y2-y1)*t;
-
-                let dot=document.createElementNS("http://www.w3.org/2000/svg","circle");
-                dot.setAttribute("cx",cx);
-                dot.setAttribute("cy",cy);
-                dot.setAttribute("r",1.5+i*0.3);
-                dot.setAttribute("fill","black");
-                svg.appendChild(dot);
-            }
-        }
+        svg.appendChild(line);
     });
 
     requestAnimationFrame(draw);
@@ -346,6 +291,8 @@ function relax(){
         }
     });
 
+    spread();
+
     atoms.forEach(setPos);
     requestAnimationFrame(relax);
 }
@@ -369,7 +316,7 @@ function carbonShape(){
 }
 
 function checkWin(){
-    if(!allPlaced() || !fullValence()) return;
+    if(!allPlaced()||!fullValence()) return;
 
     let g=carbonShape();
     let win=false;
@@ -382,16 +329,12 @@ function checkWin(){
     }
 
     if(current.type==="branched"){
-        win = g==="1,1,1,3";
+        win=g==="1,1,1,3";
     }
 
     if(win){
-        feedback.innerText="🎉 Parabéns! Molécula correta!";
-        atoms.forEach(a=>a.el.classList.add("win"));
-
-        setTimeout(()=>{
-            newGame();
-        },3000);
+        feedback.innerText="🎉 Parabéns!";
+        setTimeout(newGame,3000);
     } else {
         feedback.innerText="❌ Estrutura incorreta!";
     }
