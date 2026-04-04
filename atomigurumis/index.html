@@ -167,7 +167,7 @@ function drag(atom){
     }
 }
 
-/* DETECÇÃO REAL DE COLISÃO */
+/* CONEXÃO POR COLISÃO REAL (CENTRO) */
 function tryConnect(a){
 
     let best=null;
@@ -176,15 +176,19 @@ function tryConnect(a){
     atoms.forEach(b=>{
         if(a===b) return;
 
-        let d=Math.hypot(a.x-b.x,a.y-b.y);
-        let limit=radius[a.type]+radius[b.type];
+        let ax = a.x + radius[a.type];
+        let ay = a.y + radius[a.type];
+        let bx = b.x + radius[b.type];
+        let by = b.y + radius[b.type];
 
-        // contato real (colisão)
+        let d = Math.hypot(ax - bx, ay - by);
+        let limit = radius[a.type] + radius[b.type];
+
         if(d <= limit){
 
-            if(canBond(a,b) && d<bestDist){
-                bestDist=d;
-                best=b;
+            if(canBond(a,b) && d < bestDist){
+                bestDist = d;
+                best = b;
             }
         }
     });
@@ -194,10 +198,8 @@ function tryConnect(a){
     }
 }
 
-/* REGRAS */
+/* REGRAS (SEM BLOQUEAR H-H) */
 function canBond(a,b){
-    if(a.type==="H" && b.type==="H") return false;
-
     return a.bonds.length<valence[a.type] &&
            b.bonds.length<valence[b.type];
 }
@@ -226,7 +228,7 @@ function removeAtom(atom){
     atom.el.remove();
 }
 
-/* VALIDAÇÃO (igual antes) */
+/* VALIDAÇÃO */
 function isLinearChain(carbons){
     if(carbons.length===1) return true;
 
