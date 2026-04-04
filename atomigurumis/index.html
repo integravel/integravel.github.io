@@ -6,24 +6,44 @@
 <title>Moléculas</title>
 
 <style>
-body { margin:0; font-family:sans-serif; background:#f7f7f7; overflow:hidden; }
+body {
+    margin:0;
+    font-family:sans-serif;
+    background:#f7f7f7;
+    overflow:hidden;
+}
 
 #topbar {
-    background:#222; color:white; padding:10px; text-align:center;
+    background:#222;
+    color:white;
+    padding:10px;
+    text-align:center;
 }
 
 #workspace {
-    position:absolute; top:80px; bottom:120px; width:100%;
+    position:absolute;
+    top:80px;
+    bottom:120px;
+    width:100%;
 }
 
 #svgLayer {
-    position:absolute; width:100%; height:100%; pointer-events:none;
+    position:absolute;
+    width:100%;
+    height:100%;
+    pointer-events:none;
 }
 
 #shelf {
-    position:absolute; bottom:0; height:120px; width:100%;
+    position:absolute;
+    bottom:0;
+    height:120px;
+    width:100%;
     background:#e0e0e0;
-    display:flex; justify-content:center; align-items:center; gap:30px;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    gap:30px;
 }
 
 .template {
@@ -103,9 +123,9 @@ function createAtom(type,x,y){
 
     let atom={
         type,
-        el:document.createElement("div"),
         x:x-rect.left-radius[type],
-        y:y-rect.top-radius[type]
+        y:y-rect.top-radius[type],
+        el:document.createElement("div")
     };
 
     atom.el.className="atom "+type;
@@ -114,7 +134,7 @@ function createAtom(type,x,y){
     workspace.appendChild(atom.el);
 
     atom.el.addEventListener("mousedown",e=>startDrag(e,atom));
-    atom.el.addEventListener("touchstart",e=>startDrag(e,atom));
+    atom.el.addEventListener("touchstart",e=>startDrag(e,atom,{passive:false}));
 
     setPos(atom);
     return atom;
@@ -122,21 +142,22 @@ function createAtom(type,x,y){
 
 /* DRAG */
 function startDrag(e,atom){
+    e.preventDefault();
     e.stopPropagation();
     dragging=atom;
+
     holdTimer=setTimeout(()=>disconnect(atom),300);
 }
 
-document.querySelectorAll(".template").forEach(t=>{
-    t.addEventListener("mousedown",e=>{
-        dragging=createAtom(t.innerText,e.clientX,e.clientY);
-    });
-});
-
 function getP(e){return e.touches?e.touches[0]:e;}
 
-document.addEventListener("mousemove",e=>{
+document.addEventListener("mousemove",move);
+document.addEventListener("touchmove",move,{passive:false});
+
+function move(e){
     if(!dragging) return;
+
+    e.preventDefault();
     clearTimeout(holdTimer);
 
     let p=getP(e);
@@ -146,9 +167,10 @@ document.addEventListener("mousemove",e=>{
     dragging.y=p.clientY-rect.top-radius[dragging.type];
 
     setPos(dragging);
-});
+}
 
 document.addEventListener("mouseup",endDrag);
+document.addEventListener("touchend",endDrag);
 
 function endDrag(){
     clearTimeout(holdTimer);
@@ -158,6 +180,19 @@ function endDrag(){
     dragging=null;
     checkWin();
 }
+
+/* MENU → DRAG (CORRETO) */
+document.querySelectorAll(".template").forEach(t=>{
+    function spawn(e){
+        e.preventDefault();
+        let p=getP(e);
+        let atom=createAtom(t.innerText,p.clientX,p.clientY);
+        dragging=atom; // ⭐ começa arrastando imediatamente
+    }
+
+    t.addEventListener("mousedown",spawn);
+    t.addEventListener("touchstart",spawn,{passive:false});
+});
 
 /* CONEXÃO */
 function tryConnect(a){
@@ -173,13 +208,13 @@ function tryConnect(a){
         let limit=radius[a.type]+radius[b.type];
 
         if(d<=limit && canBond(a,b)){
-            bonds.push({a,b}); // AGORA PERMITE DUPLAS
+            bonds.push({a,b});
         }
     });
 }
 
 function bondCount(atom){
-    return bonds.filter(b=>b.a===atom || b.b===atom).length;
+    return bonds.filter(b=>b.a===atom||b.b===atom).length;
 }
 
 function canBond(a,b){
@@ -192,7 +227,7 @@ function disconnect(atom){
     bonds=bonds.filter(b=>b.a!==atom && b.b!==atom);
 }
 
-/* VALIDAÇÃO */
+/* VALIDAÇÃO (CO2 CORRIGIDO) */
 function checkWin(){
     let c=challenges[level];
 
@@ -208,7 +243,6 @@ function checkWin(){
         ).length;
     }
 
-    // CO2
     if(c.type==="CO2"){
         let carbon=atoms.find(a=>a.type==="C");
         let oxy=atoms.filter(a=>a.type==="O");
