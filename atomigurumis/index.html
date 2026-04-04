@@ -14,7 +14,7 @@ body {
     transition:background 0.3s;
 }
 
-body.win {background:#c8f7c5;}
+body.win { background:#c8f7c5; }
 
 #topbar {
     background:#222;
@@ -50,21 +50,34 @@ body.win {background:#c8f7c5;}
 }
 
 .template {
-    width:60px;height:60px;border-radius:50%;
-    display:flex;align-items:center;justify-content:center;
-    font-weight:bold;cursor:pointer;
-}
-
-.H {background:white;border:2px solid black;}
-.C {background:#666;color:white;}
-.O {background:red;color:white;}
-.N {background:blue;color:white;}
-
-.atom {
-    position:absolute;border-radius:50%;
-    display:flex;align-items:center;justify-content:center;
+    width:60px;
+    height:60px;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
     font-weight:bold;
+    cursor:pointer;
 }
+
+.template.H { background:white; border:2px solid black; }
+.template.C { background:#666; color:white; }
+.template.O { background:red; color:white; }
+.template.N { background:blue; color:white; }
+
+/* 🔥 ÁTOMOS REAIS */
+.atom {
+    position:absolute;
+    border-radius:50%;
+    aspect-ratio:1/1;
+    display:block;
+    box-shadow:0 2px 6px rgba(0,0,0,0.2);
+}
+
+.atom.H { width:28px; background:white; border:2px solid black; }
+.atom.C { width:50px; background:#666; }
+.atom.O { width:40px; background:red; }
+.atom.N { width:44px; background:blue; }
 </style>
 </head>
 
@@ -132,7 +145,7 @@ function disconnect(atom){
     });
 }
 
-/* CRIAR */
+/* CRIAR ÁTOMO */
 function createAtom(type,x,y){
     let rect=workspace.getBoundingClientRect();
 
@@ -145,7 +158,6 @@ function createAtom(type,x,y){
     };
 
     atom.el.className="atom "+type;
-    atom.el.innerText=type;
 
     atoms.push(atom);
     workspace.appendChild(atom.el);
@@ -157,9 +169,9 @@ function createAtom(type,x,y){
     draggingAtom=atom;
 }
 
+/* HOLD */
 function startHold(e){
     e.stopPropagation();
-
     let atom=atoms.find(a=>a.el===e.currentTarget);
 
     holdTimer=setTimeout(()=>disconnect(atom),300);
@@ -213,7 +225,6 @@ document.addEventListener("touchend",endDrag);
 
 function endDrag(){
     clearTimeout(holdTimer);
-
     if(!draggingAtom) return;
 
     let atom=draggingAtom;
@@ -257,20 +268,17 @@ function connect(a,b){
     b.bonds.push(a);
 }
 
-/* VALIDAÇÃO GENÉRICA */
+/* VALIDAÇÃO */
 function checkWin(){
     let req=challenges[level].req;
 
-    // contar átomos
     for(let k in req){
         let count=atoms.filter(a=>a.type===k).length;
         if(count!==req[k]) return;
     }
 
-    // valência correta
     if(!atoms.every(a=>a.bonds.length===valence[a.type])) return;
 
-    // tudo conectado
     let visited=new Set();
     function dfs(a){
         visited.add(a);
@@ -282,7 +290,6 @@ function checkWin(){
 
     if(visited.size!==atoms.length) return;
 
-    // vitória
     feedback.innerText="🎉 Correto!";
     document.body.classList.add("win");
 
