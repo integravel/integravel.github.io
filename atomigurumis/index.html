@@ -100,7 +100,7 @@ const challenges=[
     {name:"Gás hidrogênio",req:{H:2}},
     {name:"Água",req:{H:2,O:1}},
     {name:"Amônia",req:{N:1,H:3}},
-    {name:"Dióxido de carbono",req:{C:1,O:2}, type:"CO2"}
+    {name:"Dióxido de carbono",req:{C:1,O:2}}
 ];
 
 const workspace=document.getElementById("workspace");
@@ -134,7 +134,7 @@ function createAtom(type,x,y){
     workspace.appendChild(atom.el);
 
     atom.el.addEventListener("mousedown",e=>startDrag(e,atom));
-    atom.el.addEventListener("touchstart",e=>startDrag(e,atom,{passive:false}));
+    atom.el.addEventListener("touchstart",e=>startDrag(e,atom));
 
     setPos(atom);
     return atom;
@@ -143,10 +143,9 @@ function createAtom(type,x,y){
 /* DRAG */
 function startDrag(e,atom){
     e.preventDefault();
-    e.stopPropagation();
     dragging=atom;
 
-    holdTimer=setTimeout(()=>disconnect(atom),300);
+    holdTimer=setTimeout(()=>removeBond(atom),300);
 }
 
 function getP(e){return e.touches?e.touches[0]:e;}
@@ -157,7 +156,6 @@ document.addEventListener("touchmove",move,{passive:false});
 function move(e){
     if(!dragging) return;
 
-    e.preventDefault();
     clearTimeout(holdTimer);
 
     let p=getP(e);
@@ -173,7 +171,6 @@ document.addEventListener("mouseup",endDrag);
 document.addEventListener("touchend",endDrag);
 
 function endDrag(){
-    clearTimeout(holdTimer);
     if(!dragging) return;
 
     tryConnect(dragging);
@@ -181,34 +178,39 @@ function endDrag(){
     checkWin();
 }
 
-/* MENU → DRAG (CORRETO) */
+/* MENU */
 document.querySelectorAll(".template").forEach(t=>{
     function spawn(e){
         e.preventDefault();
         let p=getP(e);
-        let atom=createAtom(t.innerText,p.clientX,p.clientY);
-        dragging=atom; // ⭐ começa arrastando imediatamente
+        dragging=createAtom(t.innerText,p.clientX,p.clientY);
     }
 
     t.addEventListener("mousedown",spawn);
     t.addEventListener("touchstart",spawn,{passive:false});
 });
 
-/* CONEXÃO */
+/* CONEXÃO INTELIGENTE */
 function tryConnect(a){
     atoms.forEach(b=>{
         if(a===b) return;
 
-        let ax=a.x+radius[a.type];
-        let ay=a.y+radius[a.type];
-        let bx=b.x+radius[b.type];
-        let by=b.y+radius[b.type];
+        let d=Math.hypot(
+            (a.x+radius[a.type])-(b.x+radius[b.type]),
+            (a.y+radius[a.type])-(b.y+radius[b.type])
+        );
 
-        let d=Math.hypot(ax-bx,ay-by);
         let limit=radius[a.type]+radius[b.type];
 
-        if(d<=limit && canBond(a,b)){
-            bonds.push({a,b});
+        if(d<=limit){
+            let freeA=valence[a.type]-bondCount(a);
+            let freeB=valence[b.type]-bondCount(b);
+
+            let n=Math.min(freeA,freeB);
+
+            for(let i=0;i<n;i++){
+                bonds.push({a,b});
+            }
         }
     });
 }
@@ -217,40 +219,24 @@ function bondCount(atom){
     return bonds.filter(b=>b.a===atom||b.b===atom).length;
 }
 
-function canBond(a,b){
-    return bondCount(a)<valence[a.type] &&
-           bondCount(b)<valence[b.type];
+/* REMOVER LIGAÇÃO (UMA POR VEZ) */
+function removeBond(atom){
+    for(let i=bonds.length-1;i>=0;i--){
+        let b=bonds[i];
+        if(b.a===atom || b.b===atom){
+            bonds.splice(i,1);
+            return;
+        }
+    }
 }
 
-/* DESCONEXÃO */
-function disconnect(atom){
-    bonds=bonds.filter(b=>b.a!==atom && b.b!==atom);
-}
-
-/* VALIDAÇÃO (CO2 CORRIGIDO) */
+/* VALIDAÇÃO */
 function checkWin(){
     let c=challenges[level];
 
     for(let k in c.req){
         let count=atoms.filter(a=>a.type===k).length;
         if(count!==c.req[k]) return;
-    }
-
-    function countBondBetween(a,b){
-        return bonds.filter(x =>
-            (x.a===a && x.b===b) ||
-            (x.a===b && x.b===a)
-        ).length;
-    }
-
-    if(c.type==="CO2"){
-        let carbon=atoms.find(a=>a.type==="C");
-        let oxy=atoms.filter(a=>a.type==="O");
-
-        if(!carbon || oxy.length!==2) return;
-
-        let valid = oxy.every(o => countBondBetween(carbon,o)===2);
-        if(!valid) return;
     }
 
     if(!atoms.every(a=>bondCount(a)===valence[a.type])) return;
@@ -260,24 +246,46 @@ function checkWin(){
     setTimeout(newGame,1500);
 }
 
-/* DESENHO */
+/* DESENHO MULTIPLO */
 function draw(){
     svg.innerHTML="";
-    bonds.forEach(b=>drawLine(b.a,b.b));
+
+    let map=new Map();
+
+    bonds.forEach(b=>{
+        let key=[b.a,b.b].sort().join("-");
+        map.set(key,(map.get(key)||0)+1);
+    });
+
+    map.forEach((count,key)=>{
+        let pair=bonds.find(b=>[b.a,b.b].sort().join("-")===key);
+
+        for(let i=0;i<count;i++){
+            drawLine(pair.a,pair.b,i,count);
+        }
+    });
+
     requestAnimationFrame(draw);
 }
 
-function drawLine(a,b){
+function drawLine(a,b,i,total){
     let x1=a.x+radius[a.type];
     let y1=a.y+radius[a.type];
     let x2=b.x+radius[b.type];
     let y2=b.y+radius[b.type];
 
+    let offset=(i-(total-1)/2)*6;
+
+    let dx=x2-x1, dy=y2-y1;
+    let len=Math.hypot(dx,dy);
+    let nx=-dy/len*offset;
+    let ny=dx/len*offset;
+
     let line=document.createElementNS("http://www.w3.org/2000/svg","line");
-    line.setAttribute("x1",x1);
-    line.setAttribute("y1",y1);
-    line.setAttribute("x2",x2);
-    line.setAttribute("y2",y2);
+    line.setAttribute("x1",x1+nx);
+    line.setAttribute("y1",y1+ny);
+    line.setAttribute("x2",x2+nx);
+    line.setAttribute("y2",y2+ny);
     line.setAttribute("stroke","black");
     line.setAttribute("stroke-width","4");
 
