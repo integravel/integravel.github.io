@@ -95,7 +95,7 @@ function setPos(a){
     a.el.style.top=a.y+"px";
 }
 
-/* DRAG + DESCONEXÃO FIXA */
+/* DRAG + HOLD */
 function drag(atom){
     let dragging=false;
     let holdTimer=null;
@@ -130,9 +130,7 @@ function drag(atom){
         atom.vx=0; atom.vy=0;
         setPos(atom);
 
-        holdTimer=setTimeout(()=>{
-            disconnect(atom);
-        },300);
+        holdTimer=setTimeout(()=>disconnect(atom),300);
 
         dragging=true;
     }
@@ -143,11 +141,8 @@ function drag(atom){
 
         let p=getP(e);
 
-        // só cancela se realmente arrastar
         let dist=Math.hypot(p.clientX-startX,p.clientY-startY);
-        if(dist>10){
-            clearTimeout(holdTimer);
-        }
+        if(dist>10) clearTimeout(holdTimer);
 
         let rect=workspace.getBoundingClientRect();
 
@@ -190,7 +185,7 @@ function previewBond(a){
     });
 }
 
-/* CONEXÃO */
+/* CONECTAR */
 function canBond(a,b){
     return a.bonds.length<valence[a.type] &&
            b.bonds.length<valence[b.type];
@@ -201,7 +196,7 @@ function connect(a,b){
     if(!canBond(a,b)) return;
 
     bonds.push({a,b});
-    a.bonds.push(b);
+    a.bonds.push(b); // ordem fixa 🔥
     b.bonds.push(a);
 }
 
@@ -216,7 +211,7 @@ function disconnect(atom){
     });
 }
 
-/* FÍSICA + GEOMETRIA CORRIGIDA */
+/* FÍSICA + ÂNGULO FIXO */
 function relax(){
 
     // mola
@@ -240,20 +235,12 @@ function relax(){
         b.b.vy-=fy;
     });
 
-    // GEOMETRIA ESTÁVEL 🔥
+    // ANGULAR FIXO 🔥🔥🔥
     atoms.forEach(a=>{
-        let neighbors=a.bonds;
-        let n=neighbors.length;
+        let n=a.bonds.length;
         if(n<2) return;
 
-        // ordenar por ângulo atual
-        neighbors.sort((b1,b2)=>{
-            let a1=Math.atan2(b1.y-a.y,b1.x-a.x);
-            let a2=Math.atan2(b2.y-a.y,b2.x-a.x);
-            return a1-a2;
-        });
-
-        neighbors.forEach((b,i)=>{
+        a.bonds.forEach((b,i)=>{
             let angle=(i/n)*Math.PI*2;
 
             let tx=a.x+Math.cos(angle)*80;
