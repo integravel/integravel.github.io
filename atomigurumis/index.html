@@ -39,6 +39,7 @@ body {margin:0;font-family:sans-serif;background:#f7f7f7;overflow:hidden;}
 <script>
 let atoms=[], bonds=[], preview=null;
 let level=0;
+let anchor=null;
 
 const workspace=document.getElementById("workspace");
 const shelf=document.getElementById("shelf");
@@ -58,7 +59,7 @@ const challenges=[
 ];
 
 function newGame(){
-    atoms=[]; bonds=[]; preview=null;
+    atoms=[]; bonds=[]; preview=null; anchor=null;
     svg.innerHTML=""; shelf.innerHTML="";
     workspace.querySelectorAll(".atom").forEach(e=>e.remove());
 
@@ -80,7 +81,8 @@ function createAtoms(type,count){
             type,el,bonds:[],
             x:0,y:0,
             vx:0,vy:0,
-            inWorkspace:false
+            inWorkspace:false,
+            isAnchor:false
         };
 
         atoms.push(atom);
@@ -95,7 +97,7 @@ function setPos(a){
     a.el.style.top=a.y+"px";
 }
 
-/* DRAG + HOLD */
+/* DRAG */
 function drag(atom){
     let dragging=false;
     let holdTimer=null;
@@ -129,6 +131,12 @@ function drag(atom){
 
         atom.vx=0; atom.vy=0;
         setPos(atom);
+
+        // define âncora (primeiro átomo)
+        if(!anchor){
+            anchor=atom;
+            atom.isAnchor=true;
+        }
 
         holdTimer=setTimeout(()=>disconnect(atom),300);
 
@@ -166,6 +174,12 @@ function drag(atom){
             preview=null;
         }
 
+        // se moveu âncora, atualiza posição fixa
+        if(atom.isAnchor){
+            atom.vx=0;
+            atom.vy=0;
+        }
+
         checkWin();
     }
 }
@@ -185,7 +199,7 @@ function previewBond(a){
     });
 }
 
-/* CONECTAR */
+/* CONEXÃO */
 function canBond(a,b){
     return a.bonds.length<valence[a.type] &&
            b.bonds.length<valence[b.type];
@@ -196,7 +210,7 @@ function connect(a,b){
     if(!canBond(a,b)) return;
 
     bonds.push({a,b});
-    a.bonds.push(b); // ordem fixa 🔥
+    a.bonds.push(b);
     b.bonds.push(a);
 }
 
@@ -211,10 +225,9 @@ function disconnect(atom){
     });
 }
 
-/* FÍSICA + ÂNGULO FIXO */
+/* FÍSICA COM ÂNCORA */
 function relax(){
 
-    // mola
     bonds.forEach(b=>{
         let dx=b.b.x-b.a.x;
         let dy=b.b.y-b.a.y;
@@ -229,13 +242,18 @@ function relax(){
         let fx=(dx/d)*force;
         let fy=(dy/d)*force;
 
-        b.a.vx+=fx;
-        b.a.vy+=fy;
-        b.b.vx-=fx;
-        b.b.vy-=fy;
+        if(!b.a.isAnchor){
+            b.a.vx+=fx;
+            b.a.vy+=fy;
+        }
+
+        if(!b.b.isAnchor){
+            b.b.vx-=fx;
+            b.b.vy-=fy;
+        }
     });
 
-    // ANGULAR FIXO 🔥🔥🔥
+    // ângulo fixo
     atoms.forEach(a=>{
         let n=a.bonds.length;
         if(n<2) return;
@@ -246,35 +264,21 @@ function relax(){
             let tx=a.x+Math.cos(angle)*80;
             let ty=a.y+Math.sin(angle)*80;
 
-            b.vx += (tx-b.x)*0.01;
-            b.vy += (ty-b.y)*0.01;
-        });
-    });
-
-    // repulsão
-    atoms.forEach(a=>{
-        atoms.forEach(b=>{
-            if(a===b) return;
-
-            let dx=b.x-a.x;
-            let dy=b.y-a.y;
-            let d=Math.hypot(dx,dy);
-
-            let min=radius[a.type]+radius[b.type];
-
-            if(d<min && d>0){
-                let push=(min-d)*0.05;
-
-                a.vx -= dx/d*push;
-                a.vy -= dy/d*push;
-                b.vx += dx/d*push;
-                b.vy += dy/d*push;
+            if(!b.isAnchor){
+                b.vx += (tx-b.x)*0.01;
+                b.vy += (ty-b.y)*0.01;
             }
         });
     });
 
     // movimento
     atoms.forEach(a=>{
+        if(a.isAnchor){
+            a.vx=0;
+            a.vy=0;
+            return;
+        }
+
         a.vx*=0.85;
         a.vy*=0.85;
 
