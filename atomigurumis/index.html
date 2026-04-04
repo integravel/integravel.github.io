@@ -71,6 +71,7 @@ body { margin:0; font-family:sans-serif; background:#f7f7f7; overflow:hidden; }
 <script>
 let atoms=[], bonds=[];
 let dragging=null, holdTimer=null;
+let moved=false;
 let level=0;
 
 const valence={H:1,C:4,O:2,N:3};
@@ -124,7 +125,13 @@ function createAtom(type,x,y){
 function startDrag(e,atom){
     e.preventDefault();
     dragging=atom;
-    holdTimer=setTimeout(()=>removeBond(atom),300);
+    moved=false;
+
+    holdTimer=setTimeout(()=>{
+        if(!moved){
+            removeBond(atom);
+        }
+    },300);
 }
 
 function getP(e){return e.touches?e.touches[0]:e;}
@@ -135,6 +142,7 @@ document.addEventListener("touchmove",move,{passive:false});
 function move(e){
     if(!dragging) return;
 
+    moved=true;
     clearTimeout(holdTimer);
 
     let p=getP(e);
@@ -151,6 +159,8 @@ document.addEventListener("touchend",endDrag);
 
 function endDrag(){
     if(!dragging) return;
+
+    clearTimeout(holdTimer);
 
     tryConnect(dragging);
     dragging=null;
@@ -181,7 +191,7 @@ function bondCount(atom){
     return bonds.filter(b=>b.a===atom||b.b===atom).length;
 }
 
-/* CONEXÃO SIMPLES */
+/* CONEXÃO */
 function tryConnect(a){
     atoms.forEach(b=>{
         if(a===b) return;
@@ -198,7 +208,7 @@ function tryConnect(a){
             let freeB=valence[b.type]-bondCount(b);
 
             if(freeA>0 && freeB>0 && !bondExists(a,b)){
-                bonds.push({a,b}); // sempre ligação simples
+                bonds.push({a,b});
             }
         }
     });
@@ -215,7 +225,7 @@ function removeBond(atom){
     }
 }
 
-/* VALIDAÇÃO (IGNORA DUPLA) */
+/* VALIDAÇÃO */
 function checkWin(){
     let c=challenges[level];
 
@@ -231,7 +241,7 @@ function checkWin(){
     setTimeout(newGame,1500);
 }
 
-/* DESENHO SIMPLES */
+/* DESENHO */
 function draw(){
     svg.innerHTML="";
 
