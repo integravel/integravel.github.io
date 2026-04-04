@@ -20,10 +20,6 @@ body {
     text-align: center;
 }
 
-#challenge {
-    font-size: 18px;
-}
-
 #workspace {
     position: absolute;
     top: 80px;
@@ -124,7 +120,6 @@ function newGame(){
     createShelfAtoms("C", current.c);
 }
 
-/* cria átomos CENTRALIZADOS */
 function createShelfAtoms(type, count){
     for(let i=0;i<count;i++){
         let el=document.createElement("div");
@@ -136,20 +131,18 @@ function createShelfAtoms(type, count){
             el,
             bonds:[],
             x:0,
-            y:0
+            y:0,
+            inWorkspace:false
         };
 
         atoms.push(atom);
         shelf.appendChild(el);
-
-        // posição inicial visual (flex cuida)
         el.style.position="relative";
 
         drag(atom);
     }
 }
 
-/* drag CORRIGIDO */
 function drag(atom){
     let dragging=false;
     let offsetX=0, offsetY=0;
@@ -160,7 +153,6 @@ function drag(atom){
 
     function start(e){
         let p=getPointer(e);
-
         let rect=atom.el.getBoundingClientRect();
 
         offsetX = p.clientX - rect.left;
@@ -168,11 +160,11 @@ function drag(atom){
 
         dragging=true;
 
-        // mover pro workspace mantendo posição visual
         workspace.appendChild(atom.el);
 
         atom.x = rect.left;
         atom.y = rect.top;
+        atom.inWorkspace = true;
 
         atom.el.style.position="absolute";
         setPos(atom);
@@ -220,7 +212,7 @@ function canBond(a,b){
 
 function connect(a){
     atoms.forEach(b=>{
-        if(a===b) return;
+        if(a===b || !b.inWorkspace) return;
 
         let d=dist(a,b);
         let target=radius[a.type]+radius[b.type];
@@ -234,7 +226,7 @@ function connect(a){
     });
 }
 
-/* relaxamento */
+/* física corrigida */
 function relax(){
     atoms.forEach(a=>{
         a.bonds.forEach(b=>{
@@ -244,7 +236,7 @@ function relax(){
             let target=radius[a.type]+radius[b.type];
 
             let diff=d-target;
-            let force=0.1*diff;
+            let force=0.15*diff;
 
             if(d>0){
                 let fx=(dx/d)*force;
@@ -260,12 +252,14 @@ function relax(){
     atoms.forEach(a=>{
         atoms.forEach(b=>{
             if(a===b) return;
+
             let dx=a.x-b.x;
             let dy=a.y-b.y;
             let d=Math.hypot(dx,dy);
             let min=radius[a.type]+radius[b.type];
 
-            if(d<min){
+            // só repele se NÃO puder ligar
+            if(d<min && !canBond(a,b)){
                 let push=(min-d)/2;
                 if(d>0){
                     a.x+=(dx/d)*push;
@@ -284,7 +278,15 @@ function loop(){
 }
 loop();
 
-/* validação */
+/* validação robusta */
+function allAtomsPlaced(){
+    return atoms.every(a=>a.inWorkspace);
+}
+
+function allValencesSatisfied(){
+    return atoms.every(a=>a.bonds.length === valence[a.type]);
+}
+
 function getCarbonGraph(){
     return atoms
         .filter(a=>a.type==="C")
@@ -294,8 +296,14 @@ function getCarbonGraph(){
 }
 
 function checkWin(){
-    let graph=getCarbonGraph();
 
+    if(!allAtomsPlaced()) return;
+    if(!allValencesSatisfied()) {
+        feedback.innerText="Complete todas as ligações!";
+        return;
+    }
+
+    let graph=getCarbonGraph();
     let win=false;
 
     if(current.type==="chain"){
@@ -309,7 +317,7 @@ function checkWin(){
         win = graph==="1,1,1,3";
     }
 
-    feedback.innerText = win ? "✅ Correto!" : "❌ Tente novamente";
+    feedback.innerText = win ? "✅ Correto!" : "❌ Estrutura incorreta!";
 }
 
 newGame();
