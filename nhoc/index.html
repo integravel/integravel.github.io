@@ -271,18 +271,28 @@ function isConnected(){
     return visited.size===atoms.length;
 }
 
-/* VALIDAÇÃO */
+/* ✅ VALIDAÇÃO CORRIGIDA */
 function checkWin(){
     let c=challenges[level];
 
+    let counts={};
+    atoms.forEach(a=>{
+        counts[a.type]=(counts[a.type]||0)+1;
+    });
+
+    // verifica quantidades corretas
     for(let k in c.req){
-        let count=atoms.filter(a=>a.type===k).length;
-        if(count!==c.req[k]) return;
+        if(counts[k]!==c.req[k]) return;
+    }
+
+    // 🔥 impede átomos extras
+    for(let k in counts){
+        if(!c.req[k]) return;
     }
 
     if(!isConnected()) return;
 
-    // 🔥 REGRA ESPECÍFICA CO2
+    // regra específica CO2
     if(c.name==="Dióxido de carbono"){
         let carbon=atoms.find(a=>a.type==="C");
         let neigh=neighbors(carbon);
