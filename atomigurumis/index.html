@@ -6,44 +6,24 @@
 <title>Moléculas</title>
 
 <style>
-body {
-    margin:0;
-    font-family:sans-serif;
-    background:#f7f7f7;
-    overflow:hidden;
-}
+body { margin:0; font-family:sans-serif; background:#f7f7f7; overflow:hidden; }
 
 #topbar {
-    background:#222;
-    color:white;
-    padding:10px;
-    text-align:center;
+    background:#222; color:white; padding:10px; text-align:center;
 }
 
 #workspace {
-    position:absolute;
-    top:80px;
-    bottom:120px;
-    width:100%;
+    position:absolute; top:80px; bottom:120px; width:100%;
 }
 
 #svgLayer {
-    position:absolute;
-    width:100%;
-    height:100%;
-    pointer-events:none;
+    position:absolute; width:100%; height:100%; pointer-events:none;
 }
 
 #shelf {
-    position:absolute;
-    bottom:0;
-    height:120px;
-    width:100%;
+    position:absolute; bottom:0; height:120px; width:100%;
     background:#e0e0e0;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    gap:30px;
+    display:flex; justify-content:center; align-items:center; gap:30px;
 }
 
 .template {
@@ -97,7 +77,7 @@ const valence={H:1,C:4,O:2,N:3};
 const radius={H:14,C:25,O:20,N:22};
 
 const challenges=[
-    {name:"Gás hidrogênio",req:{H:2}, type:"H2"},
+    {name:"Gás hidrogênio",req:{H:2}},
     {name:"Água",req:{H:2,O:1}},
     {name:"Amônia",req:{N:1,H:3}},
     {name:"Dióxido de carbono",req:{C:1,O:2}, type:"CO2"}
@@ -123,7 +103,6 @@ function createAtom(type,x,y){
 
     let atom={
         type,
-        bonds:[],
         el:document.createElement("div"),
         x:x-rect.left-radius[type],
         y:y-rect.top-radius[type]
@@ -141,28 +120,19 @@ function createAtom(type,x,y){
     return atom;
 }
 
+/* DRAG */
 function startDrag(e,atom){
     e.stopPropagation();
     dragging=atom;
-
     holdTimer=setTimeout(()=>disconnect(atom),300);
 }
 
-/* TEMPLATE */
 document.querySelectorAll(".template").forEach(t=>{
     t.addEventListener("mousedown",e=>{
-        let atom=createAtom(t.innerText,e.clientX,e.clientY);
-        dragging=atom;
-    });
-
-    t.addEventListener("touchstart",e=>{
-        let p=e.touches[0];
-        let atom=createAtom(t.innerText,p.clientX,p.clientY);
-        dragging=atom;
+        dragging=createAtom(t.innerText,e.clientX,e.clientY);
     });
 });
 
-/* DRAG */
 function getP(e){return e.touches?e.touches[0]:e;}
 
 document.addEventListener("mousemove",e=>{
@@ -178,22 +148,7 @@ document.addEventListener("mousemove",e=>{
     setPos(dragging);
 });
 
-document.addEventListener("touchmove",e=>{
-    if(!dragging) return;
-    e.preventDefault();
-    clearTimeout(holdTimer);
-
-    let p=getP(e);
-    let rect=workspace.getBoundingClientRect();
-
-    dragging.x=p.clientX-rect.left-radius[dragging.type];
-    dragging.y=p.clientY-rect.top-radius[dragging.type];
-
-    setPos(dragging);
-},{passive:false});
-
 document.addEventListener("mouseup",endDrag);
-document.addEventListener("touchend",endDrag);
 
 function endDrag(){
     clearTimeout(holdTimer);
@@ -218,64 +173,53 @@ function tryConnect(a){
         let limit=radius[a.type]+radius[b.type];
 
         if(d<=limit && canBond(a,b)){
-            bonds.push({a,b});
-            a.bonds.push(b);
-            b.bonds.push(a);
+            bonds.push({a,b}); // AGORA PERMITE DUPLAS
         }
     });
 }
 
+function bondCount(atom){
+    return bonds.filter(b=>b.a===atom || b.b===atom).length;
+}
+
 function canBond(a,b){
-    return a.bonds.length<valence[a.type] &&
-           b.bonds.length<valence[b.type];
+    return bondCount(a)<valence[a.type] &&
+           bondCount(b)<valence[b.type];
 }
 
 /* DESCONEXÃO */
 function disconnect(atom){
-    bonds = bonds.filter(b=>{
-        if(b.a===atom || b.b===atom){
-            b.a.bonds=b.a.bonds.filter(x=>x!==b.b);
-            b.b.bonds=b.b.bonds.filter(x=>x!==b.a);
-            return false;
-        }
-        return true;
-    });
+    bonds=bonds.filter(b=>b.a!==atom && b.b!==atom);
 }
 
 /* VALIDAÇÃO */
 function checkWin(){
     let c=challenges[level];
 
-    // quantidade
     for(let k in c.req){
         let count=atoms.filter(a=>a.type===k).length;
         if(count!==c.req[k]) return;
     }
 
-    // função para contar ligações entre dois átomos
-    function bondCount(a,b){
+    function countBondBetween(a,b){
         return bonds.filter(x =>
             (x.a===a && x.b===b) ||
             (x.a===b && x.b===a)
         ).length;
     }
 
-    // CO2 específico
+    // CO2
     if(c.type==="CO2"){
         let carbon=atoms.find(a=>a.type==="C");
         let oxy=atoms.filter(a=>a.type==="O");
 
         if(!carbon || oxy.length!==2) return;
 
-        let valid = oxy.every(o => bondCount(carbon,o) === 2);
+        let valid = oxy.every(o => countBondBetween(carbon,o)===2);
         if(!valid) return;
-
-        let total = oxy.reduce((s,o)=>s+bondCount(carbon,o),0);
-        if(total!==4) return;
     }
 
-    // valência geral
-    if(!atoms.every(a=>a.bonds.length===valence[a.type])) return;
+    if(!atoms.every(a=>bondCount(a)===valence[a.type])) return;
 
     feedback.innerText="🎉 Correto!";
     level++;
@@ -285,11 +229,7 @@ function checkWin(){
 /* DESENHO */
 function draw(){
     svg.innerHTML="";
-
-    bonds.forEach(b=>{
-        drawLine(b.a,b.b);
-    });
-
+    bonds.forEach(b=>drawLine(b.a,b.b));
     requestAnimationFrame(draw);
 }
 
