@@ -169,33 +169,19 @@ document.querySelectorAll(".template").forEach(t=>{
     t.addEventListener("touchstart",spawn,{passive:false});
 });
 
-/* REGRAS */
-function maxBondBetween(a,b){
-    let t=[a.type,b.type].sort().join("");
-
-    if(t.includes("H")) return 1;
-    if(t==="OO") return 2;
-    if(t==="CC") return 3;
-    if(t==="NN") return 3;
-    if(t==="CO") return 2;
-    if(t==="CN") return 3;
-    if(t==="NO") return 2;
-
-    return 1;
+/* CONTAGEM */
+function bondExists(a,b){
+    return bonds.some(x =>
+        (x.a===a && x.b===b) ||
+        (x.a===b && x.b===a)
+    );
 }
 
 function bondCount(atom){
     return bonds.filter(b=>b.a===atom||b.b===atom).length;
 }
 
-function countBondBetween(a,b){
-    return bonds.filter(x =>
-        (x.a===a && x.b===b) ||
-        (x.a===b && x.b===a)
-    ).length;
-}
-
-/* CONEXÃO CORRIGIDA */
+/* CONEXÃO SIMPLES */
 function tryConnect(a){
     atoms.forEach(b=>{
         if(a===b) return;
@@ -210,13 +196,9 @@ function tryConnect(a){
         if(d<=limit){
             let freeA=valence[a.type]-bondCount(a);
             let freeB=valence[b.type]-bondCount(b);
-            let already=countBondBetween(a,b);
-            let maxPair=maxBondBetween(a,b);
 
-            let possible=Math.min(freeA,freeB,maxPair-already);
-
-            if(possible>0){
-                bonds.push({a,b}); // ⭐ só UMA ligação por ação
+            if(freeA>0 && freeB>0 && !bondExists(a,b)){
+                bonds.push({a,b}); // sempre ligação simples
             }
         }
     });
@@ -233,7 +215,7 @@ function removeBond(atom){
     }
 }
 
-/* VALIDAÇÃO */
+/* VALIDAÇÃO (IGNORA DUPLA) */
 function checkWin(){
     let c=challenges[level];
 
@@ -249,50 +231,28 @@ function checkWin(){
     setTimeout(newGame,1500);
 }
 
-/* DESENHO */
+/* DESENHO SIMPLES */
 function draw(){
     svg.innerHTML="";
 
-    let map=new Map();
-
     bonds.forEach(b=>{
-        let key=[b.a,b.b].sort().join("-");
-        map.set(key,(map.get(key)||0)+1);
-    });
+        let x1=b.a.x+radius[b.a.type];
+        let y1=b.a.y+radius[b.a.type];
+        let x2=b.b.x+radius[b.b.type];
+        let y2=b.b.y+radius[b.b.type];
 
-    map.forEach((count,key)=>{
-        let pair=bonds.find(b=>[b.a,b.b].sort().join("-")===key);
+        let line=document.createElementNS("http://www.w3.org/2000/svg","line");
+        line.setAttribute("x1",x1);
+        line.setAttribute("y1",y1);
+        line.setAttribute("x2",x2);
+        line.setAttribute("y2",y2);
+        line.setAttribute("stroke","black");
+        line.setAttribute("stroke-width","4");
 
-        for(let i=0;i<count;i++){
-            drawLine(pair.a,pair.b,i,count);
-        }
+        svg.appendChild(line);
     });
 
     requestAnimationFrame(draw);
-}
-
-function drawLine(a,b,i,total){
-    let x1=a.x+radius[a.type];
-    let y1=a.y+radius[a.type];
-    let x2=b.x+radius[b.type];
-    let y2=b.y+radius[b.type];
-
-    let offset=(i-(total-1)/2)*6;
-
-    let dx=x2-x1, dy=y2-y1;
-    let len=Math.hypot(dx,dy);
-    let nx=-dy/len*offset;
-    let ny=dx/len*offset;
-
-    let line=document.createElementNS("http://www.w3.org/2000/svg","line");
-    line.setAttribute("x1",x1+nx);
-    line.setAttribute("y1",y1+ny);
-    line.setAttribute("x2",x2+nx);
-    line.setAttribute("y2",y2+ny);
-    line.setAttribute("stroke","black");
-    line.setAttribute("stroke-width","4");
-
-    svg.appendChild(line);
 }
 
 draw();
