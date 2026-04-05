@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Slide Grid Game</title>
+
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+    display:flex;
+    flex-direction:column;
+    height:100vh;
+    background:#111;
+    color:white;
+    font-family:sans-serif;
+}
+
+#topBar, #bottomBar {
+    padding:10px;
+    display:flex;
+    justify-content:space-around;
+    align-items:center;
+    background:#222;
+}
+
+#grid {
+    flex:1;
+    display:grid;
+    touch-action:none;
+}
+
+.cell {
+    border:1px solid #222;
+}
+
+.wall { background:#444; }
+.player { background:#4caf50; }
+.clone { background:#2196f3; }
+.goal { background:#e91e63; }
+
+button {
+    padding:10px;
+    font-size:18px;
+    background:#333;
+    color:white;
+    border:none;
+    border-radius:6px;
+}
+
+button:active {
+    background:#555;
+}
+</style>
+</head>
+
+<body>
+
+<div id="topBar">
+    <span id="level">Nível: 1</span>
+    <button onclick="newLevel()">Novo nível</button>
+    <button onclick="spawnClones()">Criar clones</button>
+    <button onclick="clearClones()">Limpar clones</button>
+</div>
+
+<div id="grid"></div>
+
+<div id="bottomBar">
+    <button onclick="move('up')">⬆️</button>
+    <button onclick="move('left')">⬅️</button>
+    <button onclick="move('down')">⬇️</button>
+    <button onclick="move('right')">➡️</button>
+</div>
+
+<script>
+const gridEl = document.getElementById("grid");
+
+let size = 12;
+let grid = [];
+let player = {};
+let goal = {};
+let clones = [];
+let level = 1;
+let solutionFound = false;
+
+function createGrid() {
+    grid = [];
+    gridEl.innerHTML = "";
+    gridEl.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
+    gridEl.style.gridTemplateRows = `repeat(${size}, 1fr)`;
+
+    for (let y=0;y<size;y++){
+        let row = [];
+        for (let x=0;x<size;x++){
+            let cell = document.createElement("div");
+            cell.classList.add("cell");
+
+            if (Math.random() < 0.2) {
+                cell.classList.add("wall");
+                row.push(1);
+            } else {
+                row.push(0);
+            }
+
+            gridEl.appendChild(cell);
+        }
+        grid.push(row);
+    }
+}
+
+function randomEmpty() {
+    let x,y;
+    do {
+        x = Math.floor(Math.random()*size);
+        y = Math.floor(Math.random()*size);
+    } while (grid[y][x] === 1);
+    return {x,y};
+}
+
+function placeEntities() {
+    player = randomEmpty();
+    goal = randomEmpty();
+}
+
+function draw() {
+    const cells = gridEl.children;
+
+    for (let i=0;i<cells.length;i++){
+        cells[i].className = "cell";
+    }
+
+    for (let y=0;y<size;y++){
+        for (let x=0;x<size;x++){
+            let index = y*size+x;
+            if (grid[y][x] === 1) {
+                cells[index].classList.add("wall");
+            }
+        }
+    }
+
+    cells[player.y*size+player.x].classList.add("player");
+    cells[goal.y*size+goal.x].classList.add("goal");
+
+    clones.forEach(c=>{
+        cells[c.y*size+c.x].classList.add("clone");
+    });
+}
+
+function slide(entity, dir) {
+    let dx=0, dy=0;
+
+    if (dir==="up") dy=-1;
+    if (dir==="down") dy=1;
+    if (dir==="left") dx=-1;
+    if (dir==="right") dx=1;
+
+    let x = entity.x;
+    let y = entity.y;
+
+    while (true) {
+        let nx = x + dx;
+        let ny = y + dy;
+
+        if (nx<0||ny<0||nx>=size||ny>=size) break;
+        if (grid[ny][nx] === 1) break;
+
+        x = nx;
+        y = ny;
+
+        if (x===goal.x && y===goal.y) break;
+    }
+
+    return {x,y};
+}
+
+function move(dir) {
+    if (solutionFound) return;
+
+    player = slide(player, dir);
+
+    if (player.x===goal.x && player.y===goal.y) {
+        alert("Você venceu!");
+        level++;
+        newLevel();
+    }
+
+    draw();
+}
+
+function cloneStep() {
+    if (solutionFound) return;
+
+    clones.forEach(c=>{
+        let dirs = ["up","down","left","right"];
+        let d = dirs[Math.floor(Math.random()*4)];
+        let newPos = slide(c, d);
+        c.x = newPos.x;
+        c.y = newPos.y;
+
+        if (c.x===goal.x && c.y===goal.y) {
+            solutionFound = true;
+            alert("Um clone encontrou solução! Existe caminho.");
+            clearClones();
+        }
+    });
+
+    draw();
+}
+
+setInterval(cloneStep, 300);
+
+function spawnClones() {
+    if (solutionFound) return;
+
+    for (let i=0;i<5;i++){
+        clones.push({...player});
+    }
+}
+
+function clearClones() {
+    clones = [];
+}
+
+function newLevel() {
+    solutionFound = false;
+    clearClones();
+    size = 10 + Math.min(level,10);
+    createGrid();
+    placeEntities();
+    document.getElementById("level").innerText = "Nível: "+level;
+    draw();
+}
+
+newLevel();
+</script>
+
+</body>
+  </html>
