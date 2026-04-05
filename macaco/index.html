@@ -9,9 +9,8 @@ body {
     display:flex;
     flex-direction:column;
     height:100vh;
-    background:#111;
-    color:white;
-    font-family:sans-serif;
+    background:#ffeef5;
+    font-family:"Comic Sans MS", cursive;
 }
 
 #topBar {
@@ -19,50 +18,50 @@ body {
     display:flex;
     justify-content:space-around;
     align-items:center;
-    background:#222;
+    background:#ffb6c1;
+    color:#fff;
 }
 
 #grid {
     flex:1;
+    position:relative;
     display:grid;
-    touch-action:none;
+    background:#fff0f6;
 }
 
 .cell {
-    border:1px solid #222;
-    position:relative;
+    border:1px dashed #ffc0cb;
 }
 
-.wall { background:#444; }
-.goal { background:#e91e63; }
+.wall { background:#ffccd5; }
+.goal { background:#ff69b4; }
 
-.player, .clone {
+.piece {
     position:absolute;
-    width:100%;
-    height:100%;
-    transition: transform 0.2s linear;
+    border-radius:8px;
+    transition: transform 0.25s ease;
 }
 
-.player { background:#4caf50; }
-.clone { background:#00bcd4; }
+.player { background:#8bc34a; }
+.clone { background:#03a9f4; }
 
 button {
-    padding:10px;
-    font-size:16px;
-    background:#333;
-    color:white;
+    padding:8px;
+    background:#ff8fab;
     border:none;
-    border-radius:6px;
+    color:white;
+    border-radius:8px;
 }
 </style></head><body><div id="topBar">
     <span id="level">Nível: 1</span>
     <button onclick="newLevel(true)">Novo nível</button>
-    <button onclick="spawnClones()">Criar clones</button>
-    <button onclick="clearClones()">Limpar clones</button>
+    <button onclick="spawnClones()">Clones</button>
+    <button onclick="clearClones()">Limpar</button>
 </div><div id="grid"></div><script>
 const gridEl = document.getElementById("grid");
 
 let size, grid, player, goal, clones, level, solutionFound;
+let cellSize = 0;
 let startTouch = null;
 
 function saveGame() {
@@ -85,28 +84,34 @@ function loadGame() {
     solutionFound = d.solutionFound;
 
     document.getElementById("level").innerText = "Nível: " + level;
+    setupGrid();
     draw();
     return true;
 }
 
-function createGrid() {
-    grid = [];
+function setupGrid() {
     gridEl.innerHTML = "";
     gridEl.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
     gridEl.style.gridTemplateRows = `repeat(${size}, 1fr)`;
 
     for (let y=0;y<size;y++){
-        let row = [];
         for (let x=0;x<size;x++){
             let cell = document.createElement("div");
-            cell.classList.add("cell");
-
-            if (Math.random() < 0.2) {
-                cell.classList.add("wall");
-                row.push(1);
-            } else row.push(0);
-
+            cell.className = "cell";
+            if (grid[y][x] === 1) cell.classList.add("wall");
             gridEl.appendChild(cell);
+        }
+    }
+
+    cellSize = gridEl.clientWidth / size;
+}
+
+function createGrid() {
+    grid = [];
+    for (let y=0;y<size;y++){
+        let row = [];
+        for (let x=0;x<size;x++){
+            row.push(Math.random()<0.2 ? 1 : 0);
         }
         grid.push(row);
     }
@@ -127,35 +132,23 @@ function placeEntities() {
     clones = [];
 }
 
+function createPiece(cls, x, y) {
+    let el = document.createElement("div");
+    el.className = "piece " + cls;
+    el.style.width = cellSize + "px";
+    el.style.height = cellSize + "px";
+    el.style.transform = `translate(${x*cellSize}px, ${y*cellSize}px)`;
+    gridEl.appendChild(el);
+    return el;
+}
+
 function draw() {
-    const cells = gridEl.children;
-
-    for (let i=0;i<cells.length;i++){
-        cells[i].innerHTML = "";
-        cells[i].className = "cell";
-    }
-
-    for (let y=0;y<size;y++){
-        for (let x=0;x<size;x++){
-            let i = y*size+x;
-            if (grid[y][x] === 1) cells[i].classList.add("wall");
-        }
-    }
-
-    function createPiece(cls, x, y) {
-        let el = document.createElement("div");
-        el.className = cls;
-        el.style.transform = `translate(${x*100}%, ${y*100}%)`;
-        gridEl.appendChild(el);
-        return el;
-    }
+    setupGrid();
 
     createPiece("player", player.x, player.y);
     createPiece("goal", goal.x, goal.y);
 
-    clones.forEach(c=>{
-        createPiece("clone", c.x, c.y);
-    });
+    clones.forEach(c=> createPiece("clone", c.x, c.y));
 }
 
 function slide(entity, dir) {
@@ -211,7 +204,7 @@ function cloneStep() {
 
         if (c.x===goal.x && c.y===goal.y) {
             solutionFound = true;
-            alert("Clone encontrou solução!");
+            alert("Existe solução!");
             clearClones();
         }
     });
@@ -220,7 +213,7 @@ function cloneStep() {
     draw();
 }
 
-setInterval(cloneStep, 300);
+setInterval(cloneStep, 400);
 
 function spawnClones() {
     if (solutionFound) return;
@@ -234,11 +227,11 @@ function clearClones() {
     draw();
 }
 
-function newLevel(resetLevel) {
+function newLevel(reset) {
     solutionFound = false;
-    if (!resetLevel) level = level;
+    if (!reset) level = level;
 
-    size = 10 + Math.min(level,10);
+    size = Math.floor(window.innerWidth / 32);
     createGrid();
     placeEntities();
 
@@ -248,7 +241,7 @@ function newLevel(resetLevel) {
     draw();
 }
 
-// Gestos
+// Swipe corrigido com limite mínimo
 
 gridEl.addEventListener("touchstart", e=>{
     startTouch = e.touches[0];
@@ -260,6 +253,8 @@ gridEl.addEventListener("touchend", e=>{
     let dx = e.changedTouches[0].clientX - startTouch.clientX;
     let dy = e.changedTouches[0].clientY - startTouch.clientY;
 
+    if (Math.abs(dx) < 20 && Math.abs(dy) < 20) return;
+
     if (Math.abs(dx) > Math.abs(dy)) {
         move(dx>0 ? "right" : "left");
     } else {
@@ -269,7 +264,7 @@ gridEl.addEventListener("touchend", e=>{
     startTouch = null;
 });
 
-// Inicialização
+// Init
 if (!loadGame()) {
     level = 1;
     newLevel(true);
