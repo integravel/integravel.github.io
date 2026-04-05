@@ -36,14 +36,18 @@ html, body {
 
 .wall { background:#333; }
 
-.goal, .player, .clone {
+.player, .goal {
     position:absolute;
     border-radius:6px;
 }
 
 .player { background:#2ecc71; }
-.clone { background:#3498db; }
 .goal { background:#ff3b3b; }
+
+.path {
+    position:absolute;
+    background:rgba(0,0,0,0.2);
+}
 
 button {
     padding:6px 10px;
@@ -54,19 +58,18 @@ button {
 }
 </style></head><body><div id="topBar">
     <span id="level">Nível: 1</span>
-    <button onclick="newLevel(true)">Novo</button>
-    <button onclick="spawnClones()">Clones</button>
-    <button onclick="clearClones()">Limpar</button>
+    <button onclick="newLevel()">Novo</button>
+    <button onclick="findSolution()">Procurar solução</button>
 </div><div id="grid"></div><script>
 const gridEl = document.getElementById("grid");
 
-let size, grid, player, goal, clones, level, solutionFound;
+let size, grid, player, goal, level;
 let cellSize;
 let startTouch = null;
 let animating = false;
 
 function saveGame(){
-    localStorage.setItem("slideGame", JSON.stringify({size,grid,player,goal,clones,level,solutionFound}));
+    localStorage.setItem("slideGame", JSON.stringify({size,grid,player,goal,level}));
 }
 
 function loadGame(){
@@ -74,8 +77,7 @@ function loadGame(){
     if(!data) return false;
 
     let d = JSON.parse(data);
-    size=d.size; grid=d.grid; player=d.player; goal=d.goal;
-    clones=d.clones; level=d.level; solutionFound=d.solutionFound;
+    size=d.size; grid=d.grid; player=d.player; goal=d.goal; level=d.level;
 
     document.getElementById("level").innerText="Nível: "+level;
     draw();
@@ -105,7 +107,6 @@ function randomEmpty(){
 function placeEntities(){
     player=randomEmpty();
     goal=randomEmpty();
-    clones=[];
 }
 
 function draw(){
@@ -128,26 +129,23 @@ function draw(){
         }
     }
 
-    function piece(cls,obj){
-        let el=document.createElement("div");
-        el.className=cls;
-        el.style.width=cellSize+"px";
-        el.style.height=cellSize+"px";
-        el.style.left=(obj.x*cellSize)+"px";
-        el.style.top=(obj.y*cellSize)+"px";
-        el.style.transition="left 0.1s linear, top 0.1s linear";
-        gridEl.appendChild(el);
-        return el;
-    }
-
-    playerEl = piece("player",player);
-    goalEl = piece("goal",goal);
-
-    cloneEls=[];
-    clones.forEach(c=> cloneEls.push(piece("clone",c)));
+    playerEl = createPiece("player",player);
+    goalEl = createPiece("goal",goal);
 }
 
-let playerEl, cloneEls=[], goalEl;
+function createPiece(cls,obj){
+    let el=document.createElement("div");
+    el.className=cls;
+    el.style.width=cellSize+"px";
+    el.style.height=cellSize+"px";
+    el.style.left=(obj.x*cellSize)+"px";
+    el.style.top=(obj.y*cellSize)+"px";
+    el.style.transition="left 0.1s linear, top 0.1s linear";
+    gridEl.appendChild(el);
+    return el;
+}
+
+let playerEl, goalEl;
 
 function slide(entity, dir){
     let dx=0,dy=0;
@@ -157,7 +155,6 @@ function slide(entity, dir){
     if(dir==="right") dx=1;
 
     let x=entity.x, y=entity.y;
-    let path=[];
 
     while(true){
         let nx=x+dx;
@@ -167,90 +164,80 @@ function slide(entity, dir){
         if(grid[ny][nx]===1) break;
 
         x=nx; y=ny;
-        path.push({x,y});
 
         if(x===goal.x && y===goal.y) break;
     }
 
-    return {pos:{x,y}, path};
-}
-
-function animate(el, path, onEnd, speed=80){
-    let i=0;
-    animating = true;
-
-    function step(){
-        if(i>=path.length){
-            animating = false;
-            if(onEnd) onEnd();
-            return;
-        }
-        el.style.left=(path[i].x*cellSize)+"px";
-        el.style.top=(path[i].y*cellSize)+"px";
-        i++;
-        setTimeout(step, speed);
-    }
-    step();
+    return {x,y};
 }
 
 function move(dir){
     if(animating) return;
 
     let res=slide(player,dir);
+    animating=true;
 
-    animate(playerEl,res.path,()=>{
-        player=res.pos;
+    playerEl.style.left=(res.x*cellSize)+"px";
+    playerEl.style.top=(res.y*cellSize)+"px";
+
+    setTimeout(()=>{
+        player=res;
+        animating=false;
 
         if(player.x===goal.x && player.y===goal.y){
-            
-            level++; newLevel(false);
+            level++; newLevel();
         }
 
         saveGame();
-    });
+    },120);
 }
 
-function cloneStep(){
-    if(solutionFound || animating) return;
+function findSolution(){
+    let dirs=["up","down","left","right"];
+    let visited=new Set();
+    let queue=[{x:player.x,y:player.y,path:[]}];
 
-    clones.forEach((c,i)=>{
-        let dirs=["up","down","left","right"];
-        let d=dirs[Math.floor(Math.random()*4)];
-        let res=slide(c,d);
+    function key(x,y){ return x+","+y; }
 
-        animate(cloneEls[i],res.path,null,60);
-        c.x=res.pos.x;
-        c.y=res.pos.y;
+    visited.add(key(player.x,player.y));
 
-        if(c.x===goal.x && c.y===goal.y){
-            solutionFound=true;
-            alert("Existe solução!");
-            clearClones();
+    while(queue.length){
+        let cur=queue.shift();
+
+        if(cur.x===goal.x && cur.y===goal.y){
+            drawPath(cur.path);
+            return;
         }
+
+        for(let d of dirs){
+            let res=slide(cur,d);
+            let k=key(res.x,res.y);
+
+            if(!visited.has(k)){
+                visited.add(k);
+                queue.push({x:res.x,y:res.y,path:[...cur.path,res]});
+            }
+        }
+    }
+
+    alert("Sem solução!");
+    setTimeout(()=> newLevel(),500);
+}
+
+function drawPath(path){
+    path.forEach(p=>{
+        let el=document.createElement("div");
+        el.className="path";
+        el.style.width=cellSize+"px";
+        el.style.height=cellSize+"px";
+        el.style.left=(p.x*cellSize)+"px";
+        el.style.top=(p.y*cellSize)+"px";
+        gridEl.appendChild(el);
     });
-
-    saveGame();
-}
-
-setInterval(cloneStep,500);
-
-function spawnClones(){
-    if(solutionFound) return;
-    for(let i=0;i<5;i++) clones.push({...player});
-    draw(); saveGame();
-}
-
-function clearClones(){
-    clones=[];
-    solutionFound = false; // libera jogador novamente
-    draw(); saveGame();
 }
 
 function newLevel(){
-    solutionFound=false;
-
     size=Math.floor(window.innerWidth/35);
-
     createGrid();
     placeEntities();
 
