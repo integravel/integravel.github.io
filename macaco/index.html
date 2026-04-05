@@ -34,9 +34,7 @@ html, body {
     border:1px solid rgba(0,0,0,0.2);
 }
 
-.wall {
-    background:#333;
-}
+.wall { background:#333; }
 
 .goal, .player, .clone {
     position:absolute;
@@ -65,6 +63,7 @@ const gridEl = document.getElementById("grid");
 let size, grid, player, goal, clones, level, solutionFound;
 let cellSize;
 let startTouch = null;
+let animating = false;
 
 function saveGame(){
     localStorage.setItem("slideGame", JSON.stringify({size,grid,player,goal,clones,level,solutionFound}));
@@ -114,7 +113,6 @@ function draw(){
 
     cellSize = Math.floor(Math.min(gridEl.clientWidth, gridEl.clientHeight) / size);
 
-    // desenhar grid fixa
     for(let y=0;y<size;y++){
         for(let x=0;x<size;x++){
             let c=document.createElement("div");
@@ -137,7 +135,7 @@ function draw(){
         el.style.height=cellSize+"px";
         el.style.left=(obj.x*cellSize)+"px";
         el.style.top=(obj.y*cellSize)+"px";
-        el.style.transition="left 0.15s linear, top 0.15s linear";
+        el.style.transition="left 0.1s linear, top 0.1s linear";
         gridEl.appendChild(el);
         return el;
     }
@@ -177,10 +175,16 @@ function slide(entity, dir){
     return {pos:{x,y}, path};
 }
 
-function animate(el, path, speed=80){
+function animate(el, path, onEnd, speed=80){
     let i=0;
+    animating = true;
+
     function step(){
-        if(i>=path.length) return;
+        if(i>=path.length){
+            animating = false;
+            if(onEnd) onEnd();
+            return;
+        }
         el.style.left=(path[i].x*cellSize)+"px";
         el.style.top=(path[i].y*cellSize)+"px";
         i++;
@@ -190,31 +194,31 @@ function animate(el, path, speed=80){
 }
 
 function move(dir){
-    if(solutionFound) return;
+    if(animating) return;
 
     let res=slide(player,dir);
-    animate(playerEl,res.path);
-    player=res.pos;
 
-    if(player.x===goal.x && player.y===goal.y){
-        setTimeout(()=>{
+    animate(playerEl,res.path,()=>{
+        player=res.pos;
+
+        if(player.x===goal.x && player.y===goal.y){
             alert("Você venceu!");
             level++; newLevel(false);
-        },200);
-    }
+        }
 
-    saveGame();
+        saveGame();
+    });
 }
 
 function cloneStep(){
-    if(solutionFound) return;
+    if(solutionFound || animating) return;
 
     clones.forEach((c,i)=>{
         let dirs=["up","down","left","right"];
         let d=dirs[Math.floor(Math.random()*4)];
         let res=slide(c,d);
 
-        animate(cloneEls[i],res.path,60);
+        animate(cloneEls[i],res.path,null,60);
         c.x=res.pos.x;
         c.y=res.pos.y;
 
@@ -238,6 +242,7 @@ function spawnClones(){
 
 function clearClones(){
     clones=[];
+    solutionFound = false; // libera jogador novamente
     draw(); saveGame();
 }
 
