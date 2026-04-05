@@ -1,11 +1,8 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
+<!DOCTYPE html><html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Slide Grid Game</title>
-
-<style>
+<title>Slide Grid Game</title><style>
 * { margin:0; padding:0; box-sizing:border-box; }
 
 body {
@@ -17,7 +14,7 @@ body {
     font-family:sans-serif;
 }
 
-#topBar, #bottomBar {
+#topBar {
     padding:10px;
     display:flex;
     justify-content:space-around;
@@ -33,56 +30,64 @@ body {
 
 .cell {
     border:1px solid #222;
+    position:relative;
 }
 
 .wall { background:#444; }
-.player { background:#4caf50; }
-.clone { background:#2196f3; }
 .goal { background:#e91e63; }
+
+.player, .clone {
+    position:absolute;
+    width:100%;
+    height:100%;
+    transition: transform 0.2s linear;
+}
+
+.player { background:#4caf50; }
+.clone { background:#00bcd4; }
 
 button {
     padding:10px;
-    font-size:18px;
+    font-size:16px;
     background:#333;
     color:white;
     border:none;
     border-radius:6px;
 }
-
-button:active {
-    background:#555;
-}
-</style>
-</head>
-
-<body>
-
-<div id="topBar">
+</style></head><body><div id="topBar">
     <span id="level">Nível: 1</span>
-    <button onclick="newLevel()">Novo nível</button>
+    <button onclick="newLevel(true)">Novo nível</button>
     <button onclick="spawnClones()">Criar clones</button>
     <button onclick="clearClones()">Limpar clones</button>
-</div>
-
-<div id="grid"></div>
-
-<div id="bottomBar">
-    <button onclick="move('up')">⬆️</button>
-    <button onclick="move('left')">⬅️</button>
-    <button onclick="move('down')">⬇️</button>
-    <button onclick="move('right')">➡️</button>
-</div>
-
-<script>
+</div><div id="grid"></div><script>
 const gridEl = document.getElementById("grid");
 
-let size = 12;
-let grid = [];
-let player = {};
-let goal = {};
-let clones = [];
-let level = 1;
-let solutionFound = false;
+let size, grid, player, goal, clones, level, solutionFound;
+let startTouch = null;
+
+function saveGame() {
+    localStorage.setItem("slideGame", JSON.stringify({
+        size, grid, player, goal, clones, level, solutionFound
+    }));
+}
+
+function loadGame() {
+    let data = localStorage.getItem("slideGame");
+    if (!data) return false;
+
+    let d = JSON.parse(data);
+    size = d.size;
+    grid = d.grid;
+    player = d.player;
+    goal = d.goal;
+    clones = d.clones;
+    level = d.level;
+    solutionFound = d.solutionFound;
+
+    document.getElementById("level").innerText = "Nível: " + level;
+    draw();
+    return true;
+}
 
 function createGrid() {
     grid = [];
@@ -99,9 +104,7 @@ function createGrid() {
             if (Math.random() < 0.2) {
                 cell.classList.add("wall");
                 row.push(1);
-            } else {
-                row.push(0);
-            }
+            } else row.push(0);
 
             gridEl.appendChild(cell);
         }
@@ -121,35 +124,42 @@ function randomEmpty() {
 function placeEntities() {
     player = randomEmpty();
     goal = randomEmpty();
+    clones = [];
 }
 
 function draw() {
     const cells = gridEl.children;
 
     for (let i=0;i<cells.length;i++){
+        cells[i].innerHTML = "";
         cells[i].className = "cell";
     }
 
     for (let y=0;y<size;y++){
         for (let x=0;x<size;x++){
-            let index = y*size+x;
-            if (grid[y][x] === 1) {
-                cells[index].classList.add("wall");
-            }
+            let i = y*size+x;
+            if (grid[y][x] === 1) cells[i].classList.add("wall");
         }
     }
 
-    cells[player.y*size+player.x].classList.add("player");
-    cells[goal.y*size+goal.x].classList.add("goal");
+    function createPiece(cls, x, y) {
+        let el = document.createElement("div");
+        el.className = cls;
+        el.style.transform = `translate(${x*100}%, ${y*100}%)`;
+        gridEl.appendChild(el);
+        return el;
+    }
+
+    createPiece("player", player.x, player.y);
+    createPiece("goal", goal.x, goal.y);
 
     clones.forEach(c=>{
-        cells[c.y*size+c.x].classList.add("clone");
+        createPiece("clone", c.x, c.y);
     });
 }
 
 function slide(entity, dir) {
     let dx=0, dy=0;
-
     if (dir==="up") dy=-1;
     if (dir==="down") dy=1;
     if (dir==="left") dx=-1;
@@ -182,9 +192,10 @@ function move(dir) {
     if (player.x===goal.x && player.y===goal.y) {
         alert("Você venceu!");
         level++;
-        newLevel();
+        newLevel(false);
     }
 
+    saveGame();
     draw();
 }
 
@@ -194,17 +205,18 @@ function cloneStep() {
     clones.forEach(c=>{
         let dirs = ["up","down","left","right"];
         let d = dirs[Math.floor(Math.random()*4)];
-        let newPos = slide(c, d);
-        c.x = newPos.x;
-        c.y = newPos.y;
+        let pos = slide(c, d);
+        c.x = pos.x;
+        c.y = pos.y;
 
         if (c.x===goal.x && c.y===goal.y) {
             solutionFound = true;
-            alert("Um clone encontrou solução! Existe caminho.");
+            alert("Clone encontrou solução!");
             clearClones();
         }
     });
 
+    saveGame();
     draw();
 }
 
@@ -212,28 +224,55 @@ setInterval(cloneStep, 300);
 
 function spawnClones() {
     if (solutionFound) return;
-
-    for (let i=0;i<5;i++){
-        clones.push({...player});
-    }
+    for (let i=0;i<5;i++) clones.push({...player});
+    saveGame();
 }
 
 function clearClones() {
     clones = [];
-}
-
-function newLevel() {
-    solutionFound = false;
-    clearClones();
-    size = 10 + Math.min(level,10);
-    createGrid();
-    placeEntities();
-    document.getElementById("level").innerText = "Nível: "+level;
+    saveGame();
     draw();
 }
 
-newLevel();
-</script>
+function newLevel(resetLevel) {
+    solutionFound = false;
+    if (!resetLevel) level = level;
 
-</body>
-  </html>
+    size = 10 + Math.min(level,10);
+    createGrid();
+    placeEntities();
+
+    document.getElementById("level").innerText = "Nível: " + level;
+
+    saveGame();
+    draw();
+}
+
+// Gestos
+
+gridEl.addEventListener("touchstart", e=>{
+    startTouch = e.touches[0];
+});
+
+gridEl.addEventListener("touchend", e=>{
+    if (!startTouch) return;
+
+    let dx = e.changedTouches[0].clientX - startTouch.clientX;
+    let dy = e.changedTouches[0].clientY - startTouch.clientY;
+
+    if (Math.abs(dx) > Math.abs(dy)) {
+        move(dx>0 ? "right" : "left");
+    } else {
+        move(dy>0 ? "down" : "up");
+    }
+
+    startTouch = null;
+});
+
+// Inicialização
+if (!loadGame()) {
+    level = 1;
+    newLevel(true);
+}
+</script></body>
+</html>
