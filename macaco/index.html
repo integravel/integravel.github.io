@@ -25,12 +25,12 @@ html, body {
     position:relative;
     width:100vw;
     height:calc(100vh - 60px);
-    display:grid;
     background:#fafafa;
     touch-action:none;
 }
 
 .cell {
+    position:absolute;
     border:1px solid rgba(0,0,0,0.2);
 }
 
@@ -38,20 +38,14 @@ html, body {
     background:#333;
 }
 
-.goal {
-    position:absolute;
-    background:#ff3b3b;
-    border-radius:6px;
-}
-
-.piece {
+.goal, .player, .clone {
     position:absolute;
     border-radius:6px;
-    transition: transform linear;
 }
 
 .player { background:#2ecc71; }
 .clone { background:#3498db; }
+.goal { background:#ff3b3b; }
 
 button {
     padding:6px 10px;
@@ -85,26 +79,8 @@ function loadGame(){
     clones=d.clones; level=d.level; solutionFound=d.solutionFound;
 
     document.getElementById("level").innerText="Nível: "+level;
-    setupGrid(); draw();
+    draw();
     return true;
-}
-
-function setupGrid(){
-    gridEl.innerHTML="";
-
-    gridEl.style.gridTemplateColumns=`repeat(${size},1fr)`;
-    gridEl.style.gridTemplateRows=`repeat(${size},1fr)`;
-
-    for(let y=0;y<size;y++){
-        for(let x=0;x<size;x++){
-            let c=document.createElement("div");
-            c.className="cell";
-            if(grid[y][x]===1) c.classList.add("wall");
-            gridEl.appendChild(c);
-        }
-    }
-
-    cellSize = gridEl.clientWidth / size;
 }
 
 function createGrid(){
@@ -133,47 +109,47 @@ function placeEntities(){
     clones=[];
 }
 
-function createPiece(cls,x,y){
-    let el=document.createElement("div");
-    el.className="piece "+cls;
-    el.style.width=cellSize+"px";
-    el.style.height=cellSize+"px";
-    el.style.transform=`translate(${x*cellSize}px,${y*cellSize}px)`;
-    gridEl.appendChild(el);
-    return el;
-}
-
-let playerEl;
-let cloneEls=[];
-let goalEl;
-
 function draw(){
-    setupGrid();
+    gridEl.innerHTML="";
 
-    playerEl=createPiece("player",player.x,player.y);
-    goalEl=createPiece("goal",goal.x,goal.y);
+    cellSize = Math.floor(Math.min(gridEl.clientWidth, gridEl.clientHeight) / size);
 
-    cloneEls=[];
-    clones.forEach(c=>{
-        cloneEls.push(createPiece("clone",c.x,c.y));
-    });
-}
+    // desenhar grid fixa
+    for(let y=0;y<size;y++){
+        for(let x=0;x<size;x++){
+            let c=document.createElement("div");
+            c.className="cell";
+            c.style.width=cellSize+"px";
+            c.style.height=cellSize+"px";
+            c.style.left=(x*cellSize)+"px";
+            c.style.top=(y*cellSize)+"px";
 
-function animateMove(el, path, speed=120){
-    let i=0;
+            if(grid[y][x]===1) c.classList.add("wall");
 
-    function step(){
-        if(i>=path.length) return;
-
-        let p=path[i];
-        el.style.transition=`transform ${speed}ms linear`;
-        el.style.transform=`translate(${p.x*cellSize}px,${p.y*cellSize}px)`;
-        i++;
-        setTimeout(step, speed);
+            gridEl.appendChild(c);
+        }
     }
 
-    step();
+    function piece(cls,obj){
+        let el=document.createElement("div");
+        el.className=cls;
+        el.style.width=cellSize+"px";
+        el.style.height=cellSize+"px";
+        el.style.left=(obj.x*cellSize)+"px";
+        el.style.top=(obj.y*cellSize)+"px";
+        el.style.transition="left 0.15s linear, top 0.15s linear";
+        gridEl.appendChild(el);
+        return el;
+    }
+
+    playerEl = piece("player",player);
+    goalEl = piece("goal",goal);
+
+    cloneEls=[];
+    clones.forEach(c=> cloneEls.push(piece("clone",c)));
 }
+
+let playerEl, cloneEls=[], goalEl;
 
 function slide(entity, dir){
     let dx=0,dy=0;
@@ -201,11 +177,23 @@ function slide(entity, dir){
     return {pos:{x,y}, path};
 }
 
+function animate(el, path, speed=80){
+    let i=0;
+    function step(){
+        if(i>=path.length) return;
+        el.style.left=(path[i].x*cellSize)+"px";
+        el.style.top=(path[i].y*cellSize)+"px";
+        i++;
+        setTimeout(step, speed);
+    }
+    step();
+}
+
 function move(dir){
     if(solutionFound) return;
 
     let res=slide(player,dir);
-    animateMove(playerEl,res.path);
+    animate(playerEl,res.path);
     player=res.pos;
 
     if(player.x===goal.x && player.y===goal.y){
@@ -226,7 +214,7 @@ function cloneStep(){
         let d=dirs[Math.floor(Math.random()*4)];
         let res=slide(c,d);
 
-        animateMove(cloneEls[i],res.path,80);
+        animate(cloneEls[i],res.path,60);
         c.x=res.pos.x;
         c.y=res.pos.y;
 
@@ -253,7 +241,7 @@ function clearClones(){
     draw(); saveGame();
 }
 
-function newLevel(reset){
+function newLevel(){
     solutionFound=false;
 
     size=Math.floor(window.innerWidth/35);
@@ -266,10 +254,8 @@ function newLevel(reset){
     draw(); saveGame();
 }
 
-// Swipe
-gridEl.addEventListener("touchstart",e=>{
-    startTouch=e.touches[0];
-});
+// swipe
+gridEl.addEventListener("touchstart",e=> startTouch=e.touches[0]);
 
 gridEl.addEventListener("touchend",e=>{
     if(!startTouch) return;
@@ -287,7 +273,7 @@ gridEl.addEventListener("touchend",e=>{
 
 if(!loadGame()){
     level=1;
-    newLevel(true);
+    newLevel();
 }
 </script></body>
 </html>
