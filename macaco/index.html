@@ -84,6 +84,14 @@ removeTool.onclick=()=>selectTool('remove')
 addTool.onclick=()=>selectTool('add')
 
 function selectTool(t){
+ // se clicar no mesmo botão, desativa
+ if(tool === t){
+   tool = null
+   removeTool.classList.remove('selected')
+   addTool.classList.remove('selected')
+   return
+ }
+
  tool=t
  removeTool.classList.remove('selected')
  addTool.classList.remove('selected')
