@@ -163,7 +163,6 @@ function load(){
 
 // ===== LEVEL =====
 function newLevel(){
-
  cellSize = gridEl.clientWidth / cols
  rows = Math.floor(gridEl.clientHeight / cellSize)
 
@@ -221,9 +220,21 @@ function loadLevel(i){
 
 function restartLevel(){
  let s=JSON.parse(originalState)
- grid=s.grid
- player=s.player
- moves=0
+
+ grid = s.grid
+ player = s.player
+
+ moves = 0
+
+ // 🔧 reset dos usos
+ usedAdd = false
+ usedRemove = false
+
+ // 🔧 reset visual
+ tool = null
+ removeTool.classList.remove('selected')
+ addTool.classList.remove('selected')
+
  draw()
 }
 
