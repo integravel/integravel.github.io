@@ -110,6 +110,8 @@ body{overflow:hidden;font-family:sans-serif;background:#f4f4f4}
 <script>
 const gridEl=document.getElementById('grid')
 const menu=document.getElementById('menu')
+const removeTool=document.getElementById('removeTool')
+const addTool=document.getElementById('addTool')
 
 let cols=8
 let rows
@@ -123,6 +125,26 @@ let tool=null,usedAdd=false,usedRemove=false
 let moves=0,minMoves=5
 
 let playerEl
+
+// ===== TOOL SELECT =====
+removeTool.onclick=()=>selectTool('remove')
+addTool.onclick=()=>selectTool('add')
+
+function selectTool(t){
+ if(tool===t){
+  tool=null
+  removeTool.classList.remove('selected')
+  addTool.classList.remove('selected')
+  return
+ }
+
+ tool=t
+ removeTool.classList.remove('selected')
+ addTool.classList.remove('selected')
+
+ if(t==='remove') removeTool.classList.add('selected')
+ if(t==='add') addTool.classList.add('selected')
+}
 
 // ===== STORAGE =====
 function save(){
@@ -142,7 +164,6 @@ function load(){
 // ===== LEVEL =====
 function newLevel(){
 
- // calcula grid retangular
  cellSize = gridEl.clientWidth / cols
  rows = Math.floor(gridEl.clientHeight / cellSize)
 
@@ -326,10 +347,13 @@ function finishLevel(){
 
  levels[currentLevel].stars=Math.max(levels[currentLevel].stars,stars)
 
- if(currentLevel===levels.length-1) newLevel()
- else loadLevel(currentLevel)
-
  save()
+
+ if(currentLevel===levels.length-1){
+  let keep=currentLevel
+  newLevel()
+  currentLevel=keep
+ }
 
  setTimeout(openMenu,300)
 }
