@@ -5,7 +5,7 @@
 <title>Slide Puzzle</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-html,body{height:100%;overflow:hidden;font-family:Arial;background:#f5f5f5}#topBar{height:60px;display:flex;justify-content:space-around;align-items:center;background:#222;color:#fff} #grid{ position:relative; width:100vw; height:calc(100vh - 60px); /* ocupa tudo abaixo do topo */ touch-action:none; } #bottomBar{ position:fixed; bottom:0; left:0; width:100%; height:60px; background:#ddd; display:flex; justify-content:center; align-items:center; gap:20px; z-index:10; }
+html,body{height:100%;overflow:hidden;font-family:Arial;background:#f5f5f5}#topBar{height:60px;display:flex;justify-content:space-around;align-items:center;background:#222;color:#fff} #grid{ position:relative; width:100vw; height:calc(100vh - 120px); /* topo + bottom */ touch-action:none; overflow:hidden; } #bottomBar{ position:fixed; bottom:0; left:0; width:100%; height:60px; background:#ddd; display:flex; justify-content:center; align-items:center; gap:20px; z-index:10; }
 
 .cell{position:absolute;border:1px solid rgba(0,0,0,0.15)} .wall{background:#333} .player,.goal{position:absolute;border-radius:6px} .player{background:#2ecc71} .goal{background:#e74c3c}
 
@@ -102,7 +102,7 @@ function randomEmpty(){let x,y;do{x=Math.floor(Math.random()*size);y=Math.floor(
 // ===== DRAW =====
 function draw(){
  gridEl.innerHTML=''
- cellSize=Math.floor(Math.min(gridEl.clientWidth,gridEl.clientHeight)/size)
+ cellSize=Math.floor(gridEl.clientHeight/size) /* força preencher verticalmente */
 
  for(let y=0;y<size;y++){
   for(let x=0;x<size;x++){
@@ -197,6 +197,9 @@ function finishLevel(){
  else loadLevel(currentLevel)
 
  save()
+
+ // abre menu automaticamente
+ setTimeout(()=>openMenu(),300)
 }
 
 // ===== PATHFIND =====
