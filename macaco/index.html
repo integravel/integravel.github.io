@@ -30,10 +30,10 @@ html,body{height:100%;overflow:hidden;background:#f5f5f5;font-family:Arial}
 .player{background:#2ecc71}
 .goal{background:#ff3b3b}
 
-.line{
+.arrow{
  position:absolute;
  background:#888;
- opacity:0.6;
+ opacity:0.7;
 }
 
 .solution{
@@ -168,26 +168,35 @@ function move(dir){
  })
 }
 
-// ===== BUSCA VISUAL =====
+// ===== BUSCA VISUAL CORRIGIDA =====
 
 function startSearch(){
+ gridEl.querySelectorAll('.arrow').forEach(e=>e.remove())
+
  let dirs=["up","down","left","right"]
  let visited=new Set()
  let queue=[{x:player.x,y:player.y,path:[]}]
- let lines=[]
 
  function key(x,y){return x+","+y}
  visited.add(key(player.x,player.y))
 
- function drawLine(p){
+ function drawStep(prev,p,isSolution=false){
   let el=document.createElement("div")
-  el.className="line"
-  el.style.width=cellSize+"px"
-  el.style.height=cellSize+"px"
-  el.style.left=p.x*cellSize+"px"
-  el.style.top=p.y*cellSize+"px"
+  el.className="arrow"+(isSolution?" solution":"")
+
+  if(prev.x===p.x){ // vertical
+    el.style.width=cellSize/3+"px"
+    el.style.height=cellSize+"px"
+    el.style.left=(p.x*cellSize + cellSize/3)+"px"
+    el.style.top=(p.y*cellSize)+"px"
+  } else { // horizontal
+    el.style.width=cellSize+"px"
+    el.style.height=cellSize/3+"px"
+    el.style.left=(p.x*cellSize)+"px"
+    el.style.top=(p.y*cellSize + cellSize/3)+"px"
+  }
+
   gridEl.appendChild(el)
-  lines.push(el)
  }
 
  function expand(){
@@ -199,38 +208,39 @@ function startSearch(){
 
   let next=[]
 
-  queue.forEach(node=>{
+  for(let node of queue){
    for(let d of dirs){
-    let r=slide(node,d)
-    let k=key(r.pos.x,r.pos.y)
+    let res=slide(node,d)
 
+    // verificar caminho inteiro (IMPORTANTE)
+    let prev={x:node.x,y:node.y}
+    for(let step of res.path){
+      drawStep(prev,step)
+
+      if(step.x===goal.x && step.y===goal.y){
+        // solução encontrada
+        gridEl.querySelectorAll('.arrow').forEach(e=>e.remove())
+
+        let solPrev={x:player.x,y:player.y}
+        let fullPath=[...node.path,...res.path]
+
+        fullPath.forEach(p=>{
+          drawStep(solPrev,p,true)
+          solPrev=p
+        })
+        return
+      }
+
+      prev=step
+    }
+
+    let k=key(res.pos.x,res.pos.y)
     if(!visited.has(k)){
-     visited.add(k)
-
-     let fullPath=[...node.path,...r.path]
-
-     r.path.forEach(p=>drawLine(p))
-
-     if(r.pos.x===goal.x&&r.pos.y===goal.y){
-      // limpar tudo e desenhar só solução
-      gridEl.querySelectorAll(".line").forEach(e=>e.remove())
-
-      fullPath.forEach(p=>{
-       let el=document.createElement("div")
-       el.className="line solution"
-       el.style.width=cellSize+"px"
-       el.style.height=cellSize+"px"
-       el.style.left=p.x*cellSize+"px"
-       el.style.top=p.y*cellSize+"px"
-       gridEl.appendChild(el)
-      })
-      return
-     }
-
-     next.push({x:r.pos.x,y:r.pos.y,path:fullPath})
+      visited.add(k)
+      next.push({x:res.pos.x,y:res.pos.y,path:[...node.path,...res.path]})
     }
    }
-  })
+  }
 
   queue=next
   setTimeout(expand,80)
