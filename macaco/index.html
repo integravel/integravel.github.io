@@ -2,250 +2,178 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Slide Grid Game</title><style>
+<title>Slide Puzzle</title>
+<style>
 *{margin:0;padding:0;box-sizing:border-box}
-html,body{height:100%;overflow:hidden;background:#f5f5f5;font-family:Arial}
+html,body{height:100%;overflow:hidden;font-family:Arial;background:#f5f5f5}#topBar{height:60px;display:flex;justify-content:space-around;align-items:center;background:#222;color:#fff} #grid{position:relative;width:100vw;height:calc(100vh - 120px);touch-action:none} #bottomBar{position:fixed;bottom:0;width:100%;height:60px;background:#ddd;display:flex;justify-content:center;align-items:center;gap:20px}
 
-#topBar{
- height:60px;display:flex;justify-content:space-around;align-items:center;
- background:#222;color:#fff;
-}
+.cell{position:absolute;border:1px solid rgba(0,0,0,0.2)} .wall{background:#333} .player,.goal{position:absolute;border-radius:6px} .player{background:#2ecc71} .goal{background:#e74c3c}
 
-#grid{
- position:relative;
- width:100vw;
- height:calc(100vh - 120px);
- touch-action:none;
- display:block;
-}
+.tool{width:40px;height:40px;border:2px solid #333;border-radius:6px;display:flex;align-items:center;justify-content:center} .selected{outline:3px solid #2ecc71} .dotted{border-style:dashed} .black{background:#333}
 
-#bottomBar{
- position:fixed;
- bottom:0;
- left:0;
- width:100vw;
- height:60px;
- display:flex;
- justify-content:center;
- align-items:center;
- gap:20px;
- background:#ddd;
- z-index:10;
-}
+#menu{position:fixed;top:0;left:0;width:100%;height:100%;background:#000a;color:#fff;display:none;flex-wrap:wrap;overflow:auto} .levelBtn{width:70px;height:70px;margin:10px;background:#444;display:flex;flex-direction:column;align-items:center;justify-content:center} </style>
 
-.cell{
- position:absolute;
- border:1px solid rgba(0,0,0,0.15);
-}
-.wall{background:#333}
-
-.player,.goal{
- position:absolute;border-radius:6px;
-}
-.player{background:#2ecc71}
-.goal{background:#ff3b3b}
-
-.arrow{
- position:absolute;background:#888;opacity:0.7;
-}
-.solution{background:#2ecc71!important;opacity:1}
-
-.tool{
- width:40px;height:40px;border-radius:6px;border:2px solid #333;
- display:flex;align-items:center;justify-content:center;
-}
-
-.selected{outline:3px solid #2ecc71}
-
-.dotted{border-style:dashed}
-.black{background:#333}
-
-button{
- padding:6px 10px;border:none;background:#555;color:#fff;border-radius:4px;
-}
-</style></head>
+</head>
 <body><div id="topBar">
- <span id="level">Nível: 1</span>
- <button onclick="newLevel()">Novo</button>
- <button onclick="startSearch()">Procurar solução</button>
+ <span id="levelText"></span>
+ <button onclick="openMenu()">Níveis</button>
+ <button onclick="restartLevel()">Reiniciar</button>
 </div><div id="grid"></div><div id="bottomBar">
  <div id="removeTool" class="tool dotted"></div>
  <div id="addTool" class="tool black"></div>
-</div><script>
-const gridEl=document.getElementById("grid")
-const removeTool=document.getElementById("removeTool")
-const addTool=document.getElementById("addTool")
+</div><div id="menu"></div><script>
+const gridEl=document.getElementById('grid')
+const menu=document.getElementById('menu')
+const removeTool=document.getElementById('removeTool')
+const addTool=document.getElementById('addTool')
 
-let size,grid,player,goal,level
-let cellSize,startTouch=null,animating=false
-let tool=null // 'add' ou 'remove'
+let levels=[],currentLevel=0
+let grid,player,goal,originalState
+let size=8,cellSize
+let tool=null,usedAdd=false,usedRemove=false
+let moves=0,minMoves=5
 
 removeTool.onclick=()=>selectTool('remove')
 addTool.onclick=()=>selectTool('add')
 
 function selectTool(t){
- // se clicar no mesmo botão, desativa
- if(tool === t){
-   tool = null
-   removeTool.classList.remove('selected')
-   addTool.classList.remove('selected')
-   return
- }
-
+ if(tool===t){tool=null;removeTool.classList.remove('selected');addTool.classList.remove('selected');return}
  tool=t
- removeTool.classList.remove('selected')
- addTool.classList.remove('selected')
+ removeTool.classList.remove('selected');addTool.classList.remove('selected')
  if(t==='remove') removeTool.classList.add('selected')
  if(t==='add') addTool.classList.add('selected')
 }
 
-function saveGame(){
- localStorage.setItem("slideGame",JSON.stringify({size,grid,player,goal,level}))
-}
-
-function loadGame(){
- let d=localStorage.getItem("slideGame")
- if(!d) return false
- d=JSON.parse(d)
- size=d.size;grid=d.grid;player=d.player;goal=d.goal;level=d.level
- document.getElementById("level").innerText="Nível: "+level
- draw();return true
-}
-
-function createGrid(){
- grid=[]
- for(let y=0;y<size;y++){
-  let r=[]
-  for(let x=0;x<size;x++) r.push(Math.random()<0.2?1:0)
-  grid.push(r)
+function newLevel(){
+ let valid=false
+ while(!valid){
+  grid=[]
+  for(let y=0;y<size;y++){let r=[];for(let x=0;x<size;x++) r.push(Math.random()<0.2?1:0);grid.push(r)}
+  player=randomEmpty();goal=randomEmpty()
+  let m=calcMinMoves()
+  if(m>=5){minMoves=m;valid=true}
  }
+
+ levels.push({grid:JSON.parse(JSON.stringify(grid)),player:{...player},goal:{...goal},stars:0})
+ currentLevel=levels.length-1
+ loadLevel(currentLevel)
 }
 
-function randomEmpty(){
- let x,y
- do{
-  x=Math.floor(Math.random()*size)
-  y=Math.floor(Math.random()*size)
- }while(grid[y][x]===1)
- return{x,y}
+function loadLevel(i){
+ let l=levels[i]
+ grid=JSON.parse(JSON.stringify(l.grid))
+ player={...l.player};goal={...l.goal}
+ originalState=JSON.stringify({grid,player})
+ usedAdd=false;usedRemove=false;moves=0;tool=null
+ draw();updateUI()
 }
 
-function placeEntities(){
- player=randomEmpty()
- goal=randomEmpty()
+function restartLevel(){
+ let s=JSON.parse(originalState)
+ grid=s.grid;player=s.player
+ usedAdd=false;usedRemove=false;moves=0;tool=null
+ draw();updateUI()
 }
+
+function updateUI(){
+ document.getElementById('levelText').innerText='Nível '+(currentLevel+1)
+ removeTool.classList.remove('selected');addTool.classList.remove('selected')
+}
+
+function randomEmpty(){let x,y;do{x=Math.floor(Math.random()*size);y=Math.floor(Math.random()*size)}while(grid[y][x]);return{x,y}}
 
 function draw(){
- gridEl.innerHTML=""
+ gridEl.innerHTML=''
  cellSize=Math.floor(Math.min(gridEl.clientWidth,gridEl.clientHeight)/size)
 
  for(let y=0;y<size;y++){
   for(let x=0;x<size;x++){
-   let c=document.createElement("div")
-   c.className="cell"
-   c.style.width=cellSize+"px"
-   c.style.height=cellSize+"px"
-   c.style.left=x*cellSize+"px"
-   c.style.top=y*cellSize+"px"
+   let c=document.createElement('div')
+   c.className='cell'
+   c.style.width=cellSize+'px';c.style.height=cellSize+'px'
+   c.style.left=x*cellSize+'px';c.style.top=y*cellSize+'px'
+   if(grid[y][x]) c.classList.add('wall')
 
-   if(grid[y][x]===1) c.classList.add("wall")
-
-   // interação de edição
    c.onclick=()=>{
-     if(!tool) return
-     if(tool==='add') grid[y][x]=1
-     if(tool==='remove') grid[y][x]=0
-     draw(); saveGame()
+    if(!tool) return
+    if(tool==='add' && !usedAdd){grid[y][x]=1;usedAdd=true}
+    if(tool==='remove' && !usedRemove){grid[y][x]=0;usedRemove=true}
+    draw()
    }
 
    gridEl.appendChild(c)
   }
  }
 
- playerEl=piece("player",player)
- goalEl=piece("goal",goal)
+ playerEl=piece('player',player)
+ goalEl=piece('goal',goal)
 }
 
-function piece(cls,o){
- let el=document.createElement("div")
- el.className=cls
- el.style.width=cellSize+"px"
- el.style.height=cellSize+"px"
- el.style.left=o.x*cellSize+"px"
- el.style.top=o.y*cellSize+"px"
- gridEl.appendChild(el)
- return el
-}
+function piece(cls,o){let el=document.createElement('div');el.className=cls;el.style.width=cellSize+'px';el.style.height=cellSize+'px';el.style.left=o.x*cellSize+'px';el.style.top=o.y*cellSize+'px';gridEl.appendChild(el);return el}
 
-let playerEl,goalEl
-
-function slide(entity,dir){
- let dx=0,dy=0
- if(dir==="up")dy=-1
- if(dir==="down")dy=1
- if(dir==="left")dx=-1
- if(dir==="right")dx=1
-
- let x=entity.x,y=entity.y
- let path=[]
-
- while(true){
-  let nx=x+dx,ny=y+dy
-  if(nx<0||ny<0||nx>=size||ny>=size) break
-  if(grid[ny][nx]===1) break
-  x=nx;y=ny
-  path.push({x,y})
-  if(x===goal.x&&y===goal.y) break
- }
- return{pos:{x,y},path}
-}
-
-function animateMove(el,path,cb){
- let i=0
- animating=true
- function step(){
-  if(i>=path.length){animating=false;cb&&cb();return}
-  el.style.left=path[i].x*cellSize+"px"
-  el.style.top=path[i].y*cellSize+"px"
-  i++;setTimeout(step,60)
- }
- step()
+function slide(p,dir){let dx=0,dy=0;if(dir==='up')dy=-1;if(dir==='down')dy=1;if(dir==='left')dx=-1;if(dir==='right')dx=1;let x=p.x,y=p.y,count=0
+ while(true){let nx=x+dx,ny=y+dy;if(nx<0||ny<0||nx>=size||ny>=size)break;if(grid[ny][nx])break;x=nx;y=ny;count++;if(x===goal.x&&y===goal.y)break}
+ return{x,y,count}
 }
 
 function move(dir){
- if(animating||tool) return
+ if(tool) return
  let r=slide(player,dir)
- animateMove(playerEl,r.path,()=>{
-  player=r.pos
-  if(player.x===goal.x&&player.y===goal.y){level++;newLevel()}
-  saveGame()
+ if(r.count===0) return
+ moves++
+ player=r
+ draw()
+
+ if(player.x===goal.x&&player.y===goal.y){finishLevel()}
+}
+
+function finishLevel(){
+ let stars=1
+ if(moves===minMoves) stars=2
+ if(moves<minMoves) stars=3
+
+ levels[currentLevel].stars=Math.max(levels[currentLevel].stars,stars)
+
+ if(currentLevel===levels.length-1) newLevel()
+ else loadLevel(currentLevel)
+}
+
+function calcMinMoves(){
+ let visited=new Set();let q=[{x:player.x,y:player.y,d:0}]
+ while(q.length){let n=q.shift();let k=n.x+','+n.y;if(visited.has(k))continue;visited.add(k)
+ if(n.x===goal.x&&n.y===goal.y) return n.d
+ for(let d of ['up','down','left','right']){
+  let r=slide(n,d)
+  q.push({x:r.x,y:r.y,d:n.d+1})
+ }
+ }
+ return 0
+}
+
+function openMenu(){
+ menu.style.display='flex'
+ menu.innerHTML=''
+ levels.forEach((l,i)=>{
+  let b=document.createElement('div')
+  b.className='levelBtn'
+  b.innerHTML=i+1+'<br>'+('⭐'.repeat(l.stars))
+  b.onclick=()=>{menu.style.display='none';currentLevel=i;loadLevel(i)}
+  menu.appendChild(b)
  })
 }
 
-// busca mantida igual (omitida brevidade)
-function startSearch(){ alert('Busca mantida (já implementada)') }
-
-function newLevel(){
- size=Math.floor(window.innerWidth/35)
- createGrid();placeEntities()
- document.getElementById("level").innerText="Nível: "+level
- draw();saveGame()
-}
-
 // swipe
-
-gridEl.addEventListener("touchstart",e=>startTouch=e.touches[0])
-
-gridEl.addEventListener("touchend",e=>{
- if(!startTouch) return
+let startTouch=null
+gridEl.addEventListener('touchstart',e=>startTouch=e.touches[0])
+gridEl.addEventListener('touchend',e=>{
+ if(!startTouch)return
  let dx=e.changedTouches[0].clientX-startTouch.clientX
  let dy=e.changedTouches[0].clientY-startTouch.clientY
- if(Math.abs(dx)<20&&Math.abs(dy)<20)return
- if(Math.abs(dx)>Math.abs(dy)) move(dx>0?"right":"left")
- else move(dy>0?"down":"up")
+ if(Math.abs(dx)>Math.abs(dy)) move(dx>0?'right':'left')
+ else move(dy>0?'down':'up')
  startTouch=null
 })
 
-if(!loadGame()){level=1;newLevel()}
+newLevel()
 </script></body>
 </html>
