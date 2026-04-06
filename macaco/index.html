@@ -7,11 +7,11 @@
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{height:100%;overflow:hidden;font-family:Arial;background:#f5f5f5}#topBar{height:60px;display:flex;justify-content:space-around;align-items:center;background:#222;color:#fff} #grid{position:relative;width:100vw;height:calc(100vh - 120px);touch-action:none} #bottomBar{position:fixed;bottom:0;width:100%;height:60px;background:#ddd;display:flex;justify-content:center;align-items:center;gap:20px}
 
-.cell{position:absolute;border:1px solid rgba(0,0,0,0.2)} .wall{background:#333} .player,.goal{position:absolute;border-radius:6px} .player{background:#2ecc71} .goal{background:#e74c3c}
+.cell{position:absolute;border:1px solid rgba(0,0,0,0.15)} .wall{background:#333} .player,.goal{position:absolute;border-radius:6px} .player{background:#2ecc71} .goal{background:#e74c3c}
 
 .tool{width:40px;height:40px;border:2px solid #333;border-radius:6px;display:flex;align-items:center;justify-content:center} .selected{outline:3px solid #2ecc71} .dotted{border-style:dashed} .black{background:#333}
 
-#menu{position:fixed;top:0;left:0;width:100%;height:100%;background:#000a;color:#fff;display:none;flex-wrap:wrap;overflow:auto} .levelBtn{width:70px;height:70px;margin:10px;background:#444;display:flex;flex-direction:column;align-items:center;justify-content:center} </style>
+#menu{position:fixed;top:0;left:0;width:100%;height:100%;background:#000a;color:#fff;display:none;flex-wrap:wrap;align-content:flex-start;overflow:auto;padding:10px} .levelBtn{width:60px;height:60px;margin:6px;background:#444;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:12px} </style>
 
 </head>
 <body><div id="topBar">
@@ -32,6 +32,20 @@ let grid,player,goal,originalState
 let size=8,cellSize
 let tool=null,usedAdd=false,usedRemove=false
 let moves=0,minMoves=5
+let playerEl
+
+// ===== STORAGE =====
+function save(){
+ localStorage.setItem('gameData',JSON.stringify({levels,currentLevel}))
+}
+function load(){
+ let d=localStorage.getItem('gameData')
+ if(!d) return false
+ d=JSON.parse(d)
+ levels=d.levels;currentLevel=d.currentLevel
+ loadLevel(currentLevel)
+ return true
+}
 
 removeTool.onclick=()=>selectTool('remove')
 addTool.onclick=()=>selectTool('add')
@@ -44,19 +58,23 @@ function selectTool(t){
  if(t==='add') addTool.classList.add('selected')
 }
 
+// ===== LEVEL =====
 function newLevel(){
  let valid=false
+ let difficulty = 5 + Math.floor(levels.length/3)
+
  while(!valid){
   grid=[]
-  for(let y=0;y<size;y++){let r=[];for(let x=0;x<size;x++) r.push(Math.random()<0.2?1:0);grid.push(r)}
+  for(let y=0;y<size;y++){let r=[];for(let x=0;x<size;x++) r.push(Math.random()<0.25?1:0);grid.push(r)}
   player=randomEmpty();goal=randomEmpty()
   let m=calcMinMoves()
-  if(m>=5){minMoves=m;valid=true}
+  if(m>=difficulty){minMoves=m;valid=true}
  }
 
  levels.push({grid:JSON.parse(JSON.stringify(grid)),player:{...player},goal:{...goal},stars:0})
  currentLevel=levels.length-1
  loadLevel(currentLevel)
+ save()
 }
 
 function loadLevel(i){
@@ -77,11 +95,11 @@ function restartLevel(){
 
 function updateUI(){
  document.getElementById('levelText').innerText='Nível '+(currentLevel+1)
- removeTool.classList.remove('selected');addTool.classList.remove('selected')
 }
 
 function randomEmpty(){let x,y;do{x=Math.floor(Math.random()*size);y=Math.floor(Math.random()*size)}while(grid[y][x]);return{x,y}}
 
+// ===== DRAW =====
 function draw(){
  gridEl.innerHTML=''
  cellSize=Math.floor(Math.min(gridEl.clientWidth,gridEl.clientHeight)/size)
@@ -98,7 +116,7 @@ function draw(){
     if(!tool) return
     if(tool==='add' && !usedAdd){grid[y][x]=1;usedAdd=true}
     if(tool==='remove' && !usedRemove){grid[y][x]=0;usedRemove=true}
-    draw()
+    draw();save()
    }
 
    gridEl.appendChild(c)
@@ -109,22 +127,63 @@ function draw(){
  goalEl=piece('goal',goal)
 }
 
-function piece(cls,o){let el=document.createElement('div');el.className=cls;el.style.width=cellSize+'px';el.style.height=cellSize+'px';el.style.left=o.x*cellSize+'px';el.style.top=o.y*cellSize+'px';gridEl.appendChild(el);return el}
+function piece(cls,o){
+ let el=document.createElement('div')
+ el.className=cls
+ el.style.width=cellSize+'px'
+ el.style.height=cellSize+'px'
+ el.style.left=o.x*cellSize+'px'
+ el.style.top=o.y*cellSize+'px'
+ el.style.transition='left 0.15s linear, top 0.15s linear'
+ gridEl.appendChild(el)
+ return el
+}
 
-function slide(p,dir){let dx=0,dy=0;if(dir==='up')dy=-1;if(dir==='down')dy=1;if(dir==='left')dx=-1;if(dir==='right')dx=1;let x=p.x,y=p.y,count=0
- while(true){let nx=x+dx,ny=y+dy;if(nx<0||ny<0||nx>=size||ny>=size)break;if(grid[ny][nx])break;x=nx;y=ny;count++;if(x===goal.x&&y===goal.y)break}
- return{x,y,count}
+// ===== MOVE =====
+function slide(p,dir){
+ let dx=0,dy=0
+ if(dir==='up')dy=-1
+ if(dir==='down')dy=1
+ if(dir==='left')dx=-1
+ if(dir==='right')dx=1
+
+ let x=p.x,y=p.y
+ let path=[]
+
+ while(true){
+  let nx=x+dx,ny=y+dy
+  if(nx<0||ny<0||nx>=size||ny>=size) break
+  if(grid[ny][nx]) break
+  x=nx;y=ny
+  path.push({x,y})
+  if(x===goal.x&&y===goal.y) break
+ }
+ return{pos:{x,y},path}
+}
+
+function animate(path,cb){
+ let i=0
+ function step(){
+  if(i>=path.length){cb();return}
+  playerEl.style.left=path[i].x*cellSize+'px'
+  playerEl.style.top=path[i].y*cellSize+'px'
+  i++
+  setTimeout(step,80)
+ }
+ step()
 }
 
 function move(dir){
  if(tool) return
  let r=slide(player,dir)
- if(r.count===0) return
+ if(!r.path.length) return
  moves++
- player=r
- draw()
 
- if(player.x===goal.x&&player.y===goal.y){finishLevel()}
+ animate(r.path,()=>{
+  player=r.pos
+  if(player.x===goal.x&&player.y===goal.y){finishLevel()}
+  save()
+ })
 }
 
 function finishLevel(){
@@ -136,20 +195,24 @@ function finishLevel(){
 
  if(currentLevel===levels.length-1) newLevel()
  else loadLevel(currentLevel)
+
+ save()
 }
 
+// ===== PATHFIND =====
 function calcMinMoves(){
  let visited=new Set();let q=[{x:player.x,y:player.y,d:0}]
  while(q.length){let n=q.shift();let k=n.x+','+n.y;if(visited.has(k))continue;visited.add(k)
  if(n.x===goal.x&&n.y===goal.y) return n.d
  for(let d of ['up','down','left','right']){
   let r=slide(n,d)
-  q.push({x:r.x,y:r.y,d:n.d+1})
+  q.push({x:r.pos.x,y:r.pos.y,d:n.d+1})
  }
  }
  return 0
 }
 
+// ===== MENU =====
 function openMenu(){
  menu.style.display='flex'
  menu.innerHTML=''
@@ -174,6 +237,6 @@ gridEl.addEventListener('touchend',e=>{
  startTouch=null
 })
 
-newLevel()
+if(!load()) newLevel()
 </script></body>
 </html>
