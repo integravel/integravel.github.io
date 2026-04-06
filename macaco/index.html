@@ -131,6 +131,11 @@ removeTool.onclick=()=>selectTool('remove')
 addTool.onclick=()=>selectTool('add')
 
 function selectTool(t){
+
+ // 🚫 impede seleção se já usado
+ if(t==='add' && usedAdd) return
+ if(t==='remove' && usedRemove) return
+
  if(tool===t){
   tool=null
   removeTool.classList.remove('selected')
@@ -225,12 +230,9 @@ function restartLevel(){
  player = s.player
 
  moves = 0
-
- // 🔧 reset dos usos
  usedAdd = false
  usedRemove = false
 
- // 🔧 reset visual
  tool = null
  removeTool.classList.remove('selected')
  addTool.classList.remove('selected')
@@ -272,8 +274,22 @@ function draw(){
 
    c.onclick=()=>{
     if(!tool)return
-    if(tool==='add'&&!usedAdd){grid[y][x]=1;usedAdd=true}
-    if(tool==='remove'&&!usedRemove){grid[y][x]=0;usedRemove=true}
+
+    if(tool==='add'&&!usedAdd){
+     grid[y][x]=1
+     usedAdd=true
+    }
+
+    if(tool==='remove'&&!usedRemove){
+     grid[y][x]=0
+     usedRemove=true
+    }
+
+    // 🔧 des-seleciona após uso
+    tool=null
+    removeTool.classList.remove('selected')
+    addTool.classList.remove('selected')
+
     draw()
    }
 
