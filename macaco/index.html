@@ -1,77 +1,181 @@
-<!DOCTYPE html><html lang="pt-BR">
+<!DOCTYPE html>
+<html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>Slide Puzzle</title>
+
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-html,body{height:100%;overflow:hidden;font-family:Arial;background:#f5f5f5}#topBar{height:60px;display:flex;justify-content:space-around;align-items:center;background:#222;color:#fff} #grid{ position:relative; width:100vw; height:calc(100vh - 120px); /* topo + bottom */ touch-action:none; overflow:hidden; } #bottomBar{ position:fixed; bottom:0; left:0; width:100%; height:60px; background:#ddd; display:flex; justify-content:center; align-items:center; gap:20px; z-index:10; }
+body{overflow:hidden;font-family:sans-serif;background:#f4f4f4}
 
-.cell{position:absolute;border:1px solid rgba(0,0,0,0.15)} .wall{background:#333} .player,.goal{position:absolute;border-radius:6px} .player{background:#2ecc71} .goal{background:#e74c3c}
+#topBar{
+ height:60px;
+ background:#222;
+ color:#fff;
+ display:flex;
+ justify-content:space-around;
+ align-items:center;
+}
 
-.tool{width:40px;height:40px;border:2px solid #333;border-radius:6px;display:flex;align-items:center;justify-content:center} .selected{outline:3px solid #2ecc71} .dotted{border-style:dashed} .black{background:#333}
+#grid{
+ position:relative;
+ width:100vw;
+ height:calc(100vh - 120px);
+ touch-action:none;
+ overflow:hidden;
+}
 
-#menu{position:fixed;top:0;left:0;width:100%;height:100%;background:#000a;color:#fff;display:none;flex-wrap:wrap;align-content:flex-start;overflow:auto;padding:10px} .levelBtn{width:60px;height:60px;margin:6px;background:#444;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:12px} </style>
+#bottomBar{
+ position:fixed;
+ bottom:0;
+ width:100%;
+ height:60px;
+ background:#ddd;
+ display:flex;
+ justify-content:center;
+ align-items:center;
+ gap:20px;
+}
 
+.cell{
+ position:absolute;
+ border:1px solid rgba(0,0,0,0.2);
+}
+
+.wall{background:#333}
+
+.player,.goal{
+ position:absolute;
+ border-radius:6px;
+ transition:left 0.08s linear, top 0.08s linear;
+}
+
+.player{background:#2ecc71}
+.goal{background:#e74c3c}
+
+.tool{
+ width:40px;height:40px;
+ border:2px solid #333;
+ border-radius:6px;
+}
+
+.selected{outline:3px solid #2ecc71}
+.dotted{border-style:dashed}
+.black{background:#333}
+
+#menu{
+ position:fixed;
+ top:0;left:0;
+ width:100%;height:100%;
+ background:#000a;
+ display:none;
+ flex-wrap:wrap;
+ align-content:flex-start;
+ padding:10px;
+ overflow:auto;
+}
+
+.levelBtn{
+ width:60px;height:60px;
+ margin:4px;
+ background:#444;
+ color:#fff;
+ display:flex;
+ flex-direction:column;
+ justify-content:center;
+ align-items:center;
+ font-size:12px;
+}
+</style>
 </head>
-<body><div id="topBar">
+
+<body>
+
+<div id="topBar">
  <span id="levelText"></span>
  <button onclick="openMenu()">Níveis</button>
  <button onclick="restartLevel()">Reiniciar</button>
-</div><div id="grid"></div><div id="bottomBar">
+</div>
+
+<div id="grid"></div>
+
+<div id="bottomBar">
  <div id="removeTool" class="tool dotted"></div>
  <div id="addTool" class="tool black"></div>
-</div><div id="menu"></div><script>
+</div>
+
+<div id="menu"></div>
+
+<script>
 const gridEl=document.getElementById('grid')
 const menu=document.getElementById('menu')
-const removeTool=document.getElementById('removeTool')
-const addTool=document.getElementById('addTool')
 
+let cols=8
+let rows
+let cellSize
+
+let grid,player,goal
 let levels=[],currentLevel=0
-let grid,player,goal,originalState
-let size=8,cellSize
+let originalState
+
 let tool=null,usedAdd=false,usedRemove=false
 let moves=0,minMoves=5
+
 let playerEl
 
 // ===== STORAGE =====
 function save(){
- localStorage.setItem('gameData',JSON.stringify({levels,currentLevel}))
+ localStorage.setItem('game',JSON.stringify({levels,currentLevel}))
 }
+
 function load(){
- let d=localStorage.getItem('gameData')
- if(!d) return false
+ let d=localStorage.getItem('game')
+ if(!d)return false
  d=JSON.parse(d)
- levels=d.levels;currentLevel=d.currentLevel
+ levels=d.levels
+ currentLevel=d.currentLevel
  loadLevel(currentLevel)
  return true
 }
 
-removeTool.onclick=()=>selectTool('remove')
-addTool.onclick=()=>selectTool('add')
-
-function selectTool(t){
- if(tool===t){tool=null;removeTool.classList.remove('selected');addTool.classList.remove('selected');return}
- tool=t
- removeTool.classList.remove('selected');addTool.classList.remove('selected')
- if(t==='remove') removeTool.classList.add('selected')
- if(t==='add') addTool.classList.add('selected')
-}
-
 // ===== LEVEL =====
 function newLevel(){
+
+ // calcula grid retangular
+ cellSize = gridEl.clientWidth / cols
+ rows = Math.floor(gridEl.clientHeight / cellSize)
+
  let valid=false
  let difficulty = 5 + Math.floor(levels.length/3)
 
  while(!valid){
   grid=[]
-  for(let y=0;y<size;y++){let r=[];for(let x=0;x<size;x++) r.push(Math.random()<0.25?1:0);grid.push(r)}
-  player=randomEmpty();goal=randomEmpty()
+  for(let y=0;y<rows;y++){
+   let r=[]
+   for(let x=0;x<cols;x++){
+    r.push(Math.random()<0.25?1:0)
+   }
+   grid.push(r)
+  }
+
+  player=randomEmpty()
+  goal=randomEmpty()
+
   let m=calcMinMoves()
-  if(m>=difficulty){minMoves=m;valid=true}
+  if(m>=difficulty){
+   minMoves=m
+   valid=true
+  }
  }
 
- levels.push({grid:JSON.parse(JSON.stringify(grid)),player:{...player},goal:{...goal},stars:0})
+ levels.push({
+  grid:JSON.parse(JSON.stringify(grid)),
+  player:{...player},
+  goal:{...goal},
+  stars:0
+ })
+
  currentLevel=levels.length-1
  loadLevel(currentLevel)
  save()
@@ -80,66 +184,87 @@ function newLevel(){
 function loadLevel(i){
  let l=levels[i]
  grid=JSON.parse(JSON.stringify(l.grid))
- player={...l.player};goal={...l.goal}
+ player={...l.player}
+ goal={...l.goal}
+
  originalState=JSON.stringify({grid,player})
- usedAdd=false;usedRemove=false;moves=0;tool=null
- draw();updateUI()
+
+ usedAdd=false
+ usedRemove=false
+ moves=0
+ tool=null
+
+ draw()
+ updateUI()
 }
 
 function restartLevel(){
  let s=JSON.parse(originalState)
- grid=s.grid;player=s.player
- usedAdd=false;usedRemove=false;moves=0;tool=null
- draw();updateUI()
+ grid=s.grid
+ player=s.player
+ moves=0
+ draw()
 }
 
+// ===== UI =====
 function updateUI(){
- document.getElementById('levelText').innerText='Nível '+(currentLevel+1)
+ document.getElementById('levelText').innerText="Nível "+(currentLevel+1)
 }
 
-function randomEmpty(){let x,y;do{x=Math.floor(Math.random()*size);y=Math.floor(Math.random()*size)}while(grid[y][x]);return{x,y}}
+function randomEmpty(){
+ let x,y
+ do{
+  x=Math.floor(Math.random()*cols)
+  y=Math.floor(Math.random()*rows)
+ }while(grid[y][x])
+ return {x,y}
+}
 
 // ===== DRAW =====
 function draw(){
- gridEl.innerHTML=''
- cellSize=Math.floor(gridEl.clientHeight/size) /* força preencher verticalmente */
+ gridEl.innerHTML=""
 
- for(let y=0;y<size;y++){
-  for(let x=0;x<size;x++){
+ cellSize = gridEl.clientWidth / cols
+ rows = Math.floor(gridEl.clientHeight / cellSize)
+
+ for(let y=0;y<rows;y++){
+  for(let x=0;x<cols;x++){
    let c=document.createElement('div')
    c.className='cell'
-   c.style.width=cellSize+'px';c.style.height=cellSize+'px'
-   c.style.left=x*cellSize+'px';c.style.top=y*cellSize+'px'
+   c.style.width=cellSize+'px'
+   c.style.height=cellSize+'px'
+   c.style.left=x*cellSize+'px'
+   c.style.top=y*cellSize+'px'
+
    if(grid[y][x]) c.classList.add('wall')
 
    c.onclick=()=>{
-    if(!tool) return
-    if(tool==='add' && !usedAdd){grid[y][x]=1;usedAdd=true}
-    if(tool==='remove' && !usedRemove){grid[y][x]=0;usedRemove=true}
-    draw();save()
+    if(!tool)return
+    if(tool==='add'&&!usedAdd){grid[y][x]=1;usedAdd=true}
+    if(tool==='remove'&&!usedRemove){grid[y][x]=0;usedRemove=true}
+    draw()
    }
 
    gridEl.appendChild(c)
   }
  }
 
- playerEl=piece('player',player)
- goalEl=piece('goal',goal)
+ playerEl=createPiece('player',player)
+ createPiece('goal',goal)
 }
 
-function piece(cls,o){
+function createPiece(cls,o){
  let el=document.createElement('div')
  el.className=cls
  el.style.width=cellSize+'px'
  el.style.height=cellSize+'px'
  el.style.left=o.x*cellSize+'px'
  el.style.top=o.y*cellSize+'px'
- el.style.transition='left 0.15s linear, top 0.15s linear'
  gridEl.appendChild(el)
  return el
 }
 
-// ===== MOVE =====
+// ===== MOVEMENT =====
 function slide(p,dir){
  let dx=0,dy=0
  if(dir==='up')dy=-1
@@ -152,13 +277,14 @@ function slide(p,dir){
 
  while(true){
   let nx=x+dx,ny=y+dy
-  if(nx<0||ny<0||nx>=size||ny>=size) break
+  if(nx<0||ny<0||nx>=cols||ny>=rows) break
   if(grid[ny][nx]) break
   x=nx;y=ny
   path.push({x,y})
   if(x===goal.x&&y===goal.y) break
  }
- return{pos:{x,y},path}
+
+ return {pos:{x,y},path}
 }
 
 function animate(path,cb){
@@ -168,24 +294,31 @@ function animate(path,cb){
   playerEl.style.left=path[i].x*cellSize+'px'
   playerEl.style.top=path[i].y*cellSize+'px'
   i++
-  setTimeout(step,80)
+  setTimeout(step,70)
  }
  step()
 }
 
 function move(dir){
- if(tool) return
+ if(tool)return
+
  let r=slide(player,dir)
- if(!r.path.length) return
+ if(!r.path.length)return
+
  moves++
 
  animate(r.path,()=>{
   player=r.pos
-  if(player.x===goal.x&&player.y===goal.y){finishLevel()}
+
+  if(player.x===goal.x&&player.y===goal.y){
+   finishLevel()
+  }
+
   save()
  })
 }
 
+// ===== FINISH =====
 function finishLevel(){
  let stars=1
  if(moves===minMoves) stars=2
@@ -198,20 +331,28 @@ function finishLevel(){
 
  save()
 
- // abre menu automaticamente
- setTimeout(()=>openMenu(),300)
+ setTimeout(openMenu,300)
 }
 
-// ===== PATHFIND =====
+// ===== PATH =====
 function calcMinMoves(){
- let visited=new Set();let q=[{x:player.x,y:player.y,d:0}]
- while(q.length){let n=q.shift();let k=n.x+','+n.y;if(visited.has(k))continue;visited.add(k)
- if(n.x===goal.x&&n.y===goal.y) return n.d
- for(let d of ['up','down','left','right']){
-  let r=slide(n,d)
-  q.push({x:r.pos.x,y:r.pos.y,d:n.d+1})
+ let visited=new Set()
+ let q=[{x:player.x,y:player.y,d:0}]
+
+ while(q.length){
+  let n=q.shift()
+  let k=n.x+","+n.y
+  if(visited.has(k))continue
+  visited.add(k)
+
+  if(n.x===goal.x&&n.y===goal.y) return n.d
+
+  for(let d of ['up','down','left','right']){
+   let r=slide(n,d)
+   q.push({x:r.pos.x,y:r.pos.y,d:n.d+1})
+  }
  }
- }
+
  return 0
 }
 
@@ -219,27 +360,45 @@ function calcMinMoves(){
 function openMenu(){
  menu.style.display='flex'
  menu.innerHTML=''
+
  levels.forEach((l,i)=>{
   let b=document.createElement('div')
   b.className='levelBtn'
-  b.innerHTML=i+1+'<br>'+('⭐'.repeat(l.stars))
-  b.onclick=()=>{menu.style.display='none';currentLevel=i;loadLevel(i)}
+  b.innerHTML=(i+1)+"<br>"+("⭐".repeat(l.stars))
+  b.onclick=()=>{
+   menu.style.display='none'
+   currentLevel=i
+   loadLevel(i)
+  }
   menu.appendChild(b)
  })
 }
 
-// swipe
+// ===== SWIPE =====
 let startTouch=null
-gridEl.addEventListener('touchstart',e=>startTouch=e.touches[0])
+
+gridEl.addEventListener('touchstart',e=>{
+ startTouch=e.touches[0]
+})
+
 gridEl.addEventListener('touchend',e=>{
  if(!startTouch)return
+
  let dx=e.changedTouches[0].clientX-startTouch.clientX
  let dy=e.changedTouches[0].clientY-startTouch.clientY
- if(Math.abs(dx)>Math.abs(dy)) move(dx>0?'right':'left')
- else move(dy>0?'down':'up')
+
+ if(Math.abs(dx)>Math.abs(dy)){
+  move(dx>0?'right':'left')
+ }else{
+  move(dy>0?'down':'up')
+ }
+
  startTouch=null
 })
 
+// ===== INIT =====
 if(!load()) newLevel()
-</script></body>
+</script>
+
+</body>
 </html>
