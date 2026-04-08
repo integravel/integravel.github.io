@@ -29,7 +29,7 @@ body{
 .white{background:#ddd;}
 
 .menuPiece{
- font-size:48px; /* 🔥 maior */
+ font-size:48px;
 }
 
 /* TABULEIRO */
@@ -55,15 +55,13 @@ body{
 .light{background:#f0d9b5;}
 .dark{background:#b58863;}
 
-/* peça dentro da célula */
+/* PEÇA */
 .piece{
  position:absolute;
  inset:0;
-
  display:flex;
  align-items:center;
  justify-content:center;
-
  font-size:6vw;
 }
 
@@ -75,26 +73,23 @@ body{
  transform:translate(-50%,-50%);
 }
 
-/* CASA SELECIONADA */
-.selected {
-  outline: 3px solid yellow;
+/* SELEÇÃO */
+.selected{
+ outline:3px solid #ffd54f;
 }
 
-/* MOVIMENTOS POSSÍVEIS */
-.move::after {
-  content: "";
-  position: absolute;
-  width: 40%;
-  height: 40%;
-  background: rgba(0, 0, 0, 0.3);
-  border-radius: 50%;
+/* MOVIMENTO SUAVE */
+.light.move{
+ background-color:#c8e6c9 !important;
+}
+.dark.move{
+ background-color:#81c784 !important;
 }
 
 /* CAPTURA */
-.capture::after {
-  content: "";
-  position: absolute;
-  inset: 10%;
-  border: 3px solid red;
-  border-radius: 50%;
+.light.capture{
+ background-color:#ef9a9a !important;
+}
+.dark.capture{
+ background-color:#e57373 !important;
 }
