@@ -65,17 +65,23 @@ function drawBoard(){
    cell.dataset.r=r;
    cell.dataset.c=c;
 
-   // destaque da peça selecionada
-   if(selected && selected.r===r && selected.c===c){
-     cell.style.outline="3px solid yellow";
-   }
-
-   // destaque dos movimentos
-   if(possibleMoves.some(m=>m.r===r && m.c===c)){
-     cell.style.background = "#90ee90";
-   }
-
    let p=game.board[r][c];
+
+   /* destaque seleção */
+   if(selected && selected.r===r && selected.c===c){
+     cell.classList.add("selected");
+   }
+
+   /* destaque movimentos */
+   let move = possibleMoves.find(m=>m.r===r && m.c===c);
+
+   if(move){
+     if(p){
+       cell.classList.add("capture");
+     } else {
+       cell.classList.add("move");
+     }
+   }
 
    if(p){
     let el=document.createElement("div");
@@ -106,7 +112,7 @@ document.addEventListener("touchend", e=>{
  if(!dragging) return;
 
  let t=e.changedTouches[0];
- let el=document.elementFromPoint(t.clientX,t.clientY);
+ let el=document.elementFromPoint(t.clientX, t.clientY);
 
  if(el && el.dataset){
 
@@ -132,9 +138,11 @@ function handleClick(r,c){
 
  let p=game.board[r][c];
 
- // mover peça
+ // mover
  if(selected){
-   if(possibleMoves.some(m=>m.r===r && m.c===c)){
+   let valid = possibleMoves.some(m=>m.r===r && m.c===c);
+
+   if(valid){
      game.board[r][c]=game.board[selected.r][selected.c];
      game.board[selected.r][selected.c]="";
 
@@ -147,7 +155,7 @@ function handleClick(r,c){
    }
  }
 
- // selecionar nova peça
+ // selecionar
  if(!p) return;
 
  if(game.turn==="w" && p!==p.toUpperCase()) return;
