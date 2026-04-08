@@ -3,27 +3,29 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>Chess Battle</title>
 
 <style>
 body {
   margin:0;
-  font-family: Arial;
   display:flex;
   flex-direction:column;
-  align-items:center;
-  justify-content:center;
   height:100vh;
+  font-family:Arial;
 }
 
-/* MENU */
-#menu {
+/* MENUS */
+.menu {
   display:flex;
-  gap:10px;
-  margin-bottom:10px;
-  flex-wrap:wrap;
   justify-content:center;
+  gap:10px;
+  padding:10px;
+  background:#222;
 }
+
+.menu.white { background:#ddd; }
+.menu.black { background:#222; color:white; }
 
 .piece {
   font-size:28px;
@@ -33,38 +35,49 @@ body {
 /* TABULEIRO */
 #board {
   display:grid;
-  grid-template-columns:repeat(8, 45px);
+  grid-template-columns:repeat(8, 1fr);
+  width:100vw;
+  aspect-ratio:1;
 }
 
 .cell {
-  width:45px;
-  height:45px;
   display:flex;
   align-items:center;
   justify-content:center;
-  font-size:24px;
+  font-size:5vw;
 }
 
-.white { background:#f0d9b5; }
-.black { background:#b58863; }
+/* cores boas */
+.whiteCell { background:#f0d9b5; }
+.blackCell { background:#b58863; }
+
+.selected {
+  outline:3px solid red;
+}
 </style>
 </head>
 
 <body>
 
-<div id="menu"></div>
+<!-- PEÇAS PRETAS -->
+<div id="topMenu" class="menu black"></div>
+
+<!-- TABULEIRO -->
 <div id="board"></div>
+
+<!-- PEÇAS BRANCAS -->
+<div id="bottomMenu" class="menu white"></div>
 
 <script>
 
 /* ================= ESTADO ================= */
 let board = Array.from({length:8},()=>Array(8).fill(""));
-let selectedPiece = null;
+let selected = null;
 let running = false;
 let turn = "w";
 
-let whiteKingPlaced = false;
-let blackKingPlaced = false;
+let whiteKing = false;
+let blackKing = false;
 
 /* ================= PEÇAS ================= */
 const pieces = {
@@ -73,27 +86,37 @@ const pieces = {
 };
 
 /* ================= MENU ================= */
-function renderMenu(){
-  const menu = document.getElementById("menu");
-  menu.innerHTML = "";
+function renderMenus(){
 
-  for(let key in pieces){
+  const top = document.getElementById("topMenu");
+  const bottom = document.getElementById("bottomMenu");
 
-    if(key==="K" && whiteKingPlaced) continue;
-    if(key==="k" && blackKingPlaced) continue;
+  top.innerHTML = "";
+  bottom.innerHTML = "";
+
+  for(let k in pieces){
 
     let el = document.createElement("div");
     el.className = "piece";
-    el.textContent = pieces[key];
+    el.textContent = pieces[k];
 
-    el.onclick = () => selectedPiece = key;
+    el.onclick = () => {
+      selected = k;
+    };
 
-    menu.appendChild(el);
+    if(k === k.toLowerCase()){
+      if(k === "k" && blackKing) continue;
+      top.appendChild(el);
+    } else {
+      if(k === "K" && whiteKing) continue;
+      bottom.appendChild(el);
+    }
   }
 }
 
 /* ================= TABULEIRO ================= */
 function renderBoard(){
+
   const el = document.getElementById("board");
   el.innerHTML = "";
 
@@ -101,7 +124,7 @@ function renderBoard(){
     for(let c=0;c<8;c++){
 
       let d = document.createElement("div");
-      d.className = "cell " + ((r+c)%2?"black":"white");
+      d.className = "cell " + ((r+c)%2 ? "blackCell":"whiteCell");
       d.textContent = pieces[board[r][c]] || "";
 
       d.onclick = () => handleCell(r,c);
@@ -113,30 +136,38 @@ function renderBoard(){
 
 /* ================= INTERAÇÃO ================= */
 function handleCell(r,c){
+
   if(running) return;
 
-  if(selectedPiece){
+  // remover peça
+  if(!selected && board[r][c]){
+    if(board[r][c] === "K") whiteKing = false;
+    if(board[r][c] === "k") blackKing = false;
 
-    if(selectedPiece==="K") whiteKingPlaced = true;
-    if(selectedPiece==="k") blackKingPlaced = true;
+    board[r][c] = "";
+    render();
+    return;
+  }
 
-    board[r][c] = selectedPiece;
-    selectedPiece = null;
+  if(selected){
+
+    if(selected === "K" && whiteKing) return;
+    if(selected === "k" && blackKing) return;
+
+    if(selected === "K") whiteKing = true;
+    if(selected === "k") blackKing = true;
+
+    board[r][c] = selected;
+    selected = null;
 
     render();
-
     checkStart();
   }
 }
 
-/* remover peça tocando topo */
-document.getElementById("menu").onclick = () => {
-  selectedPiece = null;
-};
-
 /* ================= START ================= */
 function checkStart(){
-  if(whiteKingPlaced && blackKingPlaced){
+  if(whiteKing && blackKing){
     running = true;
     setTimeout(step, 500);
   }
@@ -158,9 +189,7 @@ function evaluate(b){
   return s;
 }
 
-function clone(b){
-  return b.map(r=>r.slice());
-}
+function clone(b){ return b.map(r=>r.slice()); }
 
 function apply(b,m){
   let nb = clone(b);
@@ -187,8 +216,8 @@ function getMoves(b, side){
 
       function add(r2,c2){
         if(r2<0||r2>7||c2<0||c2>7) return;
-        let target=b[r2][c2];
-        if(!target || (isWhite && target!==target.toUpperCase()) || (!isWhite && target!==target.toLowerCase())){
+        let t=b[r2][c2];
+        if(!t || (isWhite && t!==t.toUpperCase()) || (!isWhite && t!==t.toLowerCase())){
           moves.push({r,c,r2,c2});
         }
       }
@@ -196,21 +225,21 @@ function getMoves(b, side){
       switch(p.toLowerCase()){
 
         case "p":
-          let dir = isWhite ? -1 : 1;
-          add(r+dir,c);
-          add(r+dir,c+1);
-          add(r+dir,c-1);
+          let d = isWhite?-1:1;
+          add(r+d,c);
+          add(r+d,c+1);
+          add(r+d,c-1);
         break;
 
         case "n":
           [[2,1],[2,-1],[-2,1],[-2,-1],[1,2],[1,-2],[-1,2],[-1,-2]]
-          .forEach(d=>add(r+d[0],c+d[1]));
+          .forEach(v=>add(r+v[0],c+v[1]));
         break;
 
         case "b":
-          [[1,1],[1,-1],[-1,1],[-1,-1]].forEach(d=>{
+          [[1,1],[1,-1],[-1,1],[-1,-1]].forEach(v=>{
             for(let i=1;i<8;i++){
-              let r2=r+d[0]*i, c2=c+d[1]*i;
+              let r2=r+v[0]*i,c2=c+v[1]*i;
               if(r2<0||r2>7||c2<0||c2>7) break;
               add(r2,c2);
               if(b[r2][c2]) break;
@@ -219,9 +248,9 @@ function getMoves(b, side){
         break;
 
         case "r":
-          [[1,0],[-1,0],[0,1],[0,-1]].forEach(d=>{
+          [[1,0],[-1,0],[0,1],[0,-1]].forEach(v=>{
             for(let i=1;i<8;i++){
-              let r2=r+d[0]*i, c2=c+d[1]*i;
+              let r2=r+v[0]*i,c2=c+v[1]*i;
               if(r2<0||r2>7||c2<0||c2>7) break;
               add(r2,c2);
               if(b[r2][c2]) break;
@@ -231,9 +260,9 @@ function getMoves(b, side){
 
         case "q":
           [[1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]]
-          .forEach(d=>{
+          .forEach(v=>{
             for(let i=1;i<8;i++){
-              let r2=r+d[0]*i, c2=c+d[1]*i;
+              let r2=r+v[0]*i,c2=c+v[1]*i;
               if(r2<0||r2>7||c2<0||c2>7) break;
               add(r2,c2);
               if(b[r2][c2]) break;
@@ -243,7 +272,7 @@ function getMoves(b, side){
 
         case "k":
           [[1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]]
-          .forEach(d=>add(r+d[0],c+d[1]));
+          .forEach(v=>add(r+v[0],c+v[1]));
         break;
       }
     }
@@ -255,9 +284,9 @@ function getMoves(b, side){
 /* IA */
 function bestMove(){
   let moves=getMoves(board,turn);
-  if(moves.length===0) return null;
+  if(!moves.length) return null;
 
-  let scored=moves.map(m=>{
+  let scored = moves.map(m=>{
     let val=evaluate(apply(board,m));
     return {m,val};
   });
@@ -286,7 +315,7 @@ function step(){
 
 /* ================= INIT ================= */
 function render(){
-  renderMenu();
+  renderMenus();
   renderBoard();
 }
 
