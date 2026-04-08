@@ -4,7 +4,9 @@ const game = {
  turn:"w",
  selected:null,
  moves:[],
- lastMove:null
+ lastMove:null,
+ enPassant:null,
+ moved:{K:false,k:false,R0:false,R7:false,r0:false,r7:false}
 };
 
 /* ================= ELEMENTOS ================= */
@@ -41,14 +43,13 @@ function findKing(b,side){
 /* ================= ATAQUE ================= */
 
 function isAttacked(b,r,c,by){
-
- let moves = getPseudoMoves(b,by);
- return moves.some(m=>m.r2===r && m.c2===c);
+ return getPseudoMoves(b,by,true)
+   .some(m=>m.r2===r && m.c2===c);
 }
 
 /* ================= MOVIMENTOS ================= */
 
-function getPseudoMoves(b,side){
+function getPseudoMoves(b,side,attackOnly=false){
 
  let moves=[];
 
@@ -63,11 +64,11 @@ function getPseudoMoves(b,side){
 
    let isWhite=p===p.toUpperCase();
 
-   function push(r2,c2){
+   function push(r2,c2,extra={}){
     if(r2<0||r2>7||c2<0||c2>7) return;
     let t=b[r2][c2];
     if(!t || isEnemy(p,t))
-      moves.push({r,c,r2,c2});
+      moves.push({r,c,r2,c2,...extra});
    }
 
    switch(p.toLowerCase()){
@@ -75,16 +76,24 @@ function getPseudoMoves(b,side){
     case "p":{
       let d=isWhite?-1:1;
 
-      if(!b[r+d]?.[c]) push(r+d,c);
+      if(!attackOnly){
+        if(!b[r+d]?.[c]) push(r+d,c);
 
-      if((isWhite&&r===6)||(!isWhite&&r===1)){
-        if(!b[r+d][c]&&!b[r+2*d][c]) push(r+2*d,c);
+        if((isWhite&&r===6)||(!isWhite&&r===1)){
+          if(!b[r+d][c]&&!b[r+2*d][c])
+            push(r+2*d,c,{double:true});
+        }
       }
 
       for(let dc of [-1,1]){
         let r2=r+d,c2=c+dc;
         if(b[r2]?.[c2] && isEnemy(p,b[r2][c2]))
           push(r2,c2);
+
+        // en passant
+        if(game.enPassant && game.enPassant.r===r && game.enPassant.c===c2){
+          push(r+d,c2,{enPassant:true});
+        }
       }
 
     } break;
@@ -101,6 +110,32 @@ function getPseudoMoves(b,side){
     case "k":
       [[1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]]
       .forEach(v=>push(r+v[0],c+v[1]));
+
+      if(!attackOnly){
+        // roque
+        if(isWhite && !game.moved.K){
+          if(!game.moved.R7 && !b[7][5] && !b[7][6]){
+            if(!isAttacked(b,7,4,"b") && !isAttacked(b,7,5,"b") && !isAttacked(b,7,6,"b"))
+              push(7,6,{castle:"short"});
+          }
+          if(!game.moved.R0 && !b[7][1] && !b[7][2] && !b[7][3]){
+            if(!isAttacked(b,7,4,"b") && !isAttacked(b,7,3,"b") && !isAttacked(b,7,2,"b"))
+              push(7,2,{castle:"long"});
+          }
+        }
+
+        if(!isWhite && !game.moved.k){
+          if(!game.moved.r7 && !b[0][5] && !b[0][6]){
+            if(!isAttacked(b,0,4,"w") && !isAttacked(b,0,5,"w") && !isAttacked(b,0,6,"w"))
+              push(0,6,{castle:"short"});
+          }
+          if(!game.moved.r0 && !b[0][1] && !b[0][2] && !b[0][3]){
+            if(!isAttacked(b,0,4,"w") && !isAttacked(b,0,3,"w") && !isAttacked(b,0,2,"w"))
+              push(0,2,{castle:"long"});
+          }
+        }
+      }
+
     break;
    }
 
@@ -124,17 +159,19 @@ function getPseudoMoves(b,side){
  return moves;
 }
 
-/* FILTRAR LEGAIS */
+/* LEGAIS */
 function getLegalMoves(b,side){
-
  return getPseudoMoves(b,side).filter(m=>{
   let nb=clone(b);
+
   nb[m.r2][m.c2]=nb[m.r][m.c];
   nb[m.r][m.c]="";
 
-  let k=findKing(nb,side);
-  if(!k) return false;
+  if(m.enPassant){
+    nb[m.r][m.c2]="";
+  }
 
+  let k=findKing(nb,side);
   return !isAttacked(nb,k[0],k[1],side==="w"?"b":"w");
  });
 }
@@ -146,7 +183,6 @@ function drawMenus(){
  bottomMenu.innerHTML="";
 
  for(let k in symbols){
-
   let el=document.createElement("div");
   el.className="menuPiece";
   el.textContent=symbols[k];
@@ -154,16 +190,13 @@ function drawMenus(){
   el.ontouchstart=e=>{
     dragging=k;
     let t=e.touches[0];
-    dragEl.style.left = t.clientX + "px";
-    dragEl.style.top = t.clientY + "px";
+    dragEl.style.left=t.clientX+"px";
+    dragEl.style.top=t.clientY+"px";
     dragEl.textContent=symbols[k];
   };
 
-  if(k===k.toLowerCase()){
-    topMenu.appendChild(el);
-  } else {
-    bottomMenu.appendChild(el);
-  }
+  if(k===k.toLowerCase()) topMenu.appendChild(el);
+  else bottomMenu.appendChild(el);
  }
 }
 
@@ -184,24 +217,14 @@ function drawBoard(){
 
    let p=game.board[r][c];
 
-   if(game.selected && game.selected.r===r && game.selected.c===c){
+   if(game.selected && game.selected.r===r && game.selected.c===c)
      cell.classList.add("selected");
-   }
 
-   if(game.moves.some(m=>m.r2===r && m.c2===c)){
+   if(game.moves.some(m=>m.r2===r && m.c2===c))
      cell.classList.add(p?"capture":"move");
-   }
 
-   if(game.lastMove && (
-     (game.lastMove.r===r && game.lastMove.c===c) ||
-     (game.lastMove.r2===r && game.lastMove.c2===c)
-   )){
-     cell.classList.add("lastMove");
-   }
-
-   if(inCheck && kingPos && kingPos[0]===r && kingPos[1]===c){
+   if(inCheck && kingPos && kingPos[0]===r && kingPos[1]===c)
      cell.classList.add("check");
-   }
 
    if(p){
     let el=document.createElement("div");
@@ -217,32 +240,61 @@ function drawBoard(){
  }
 }
 
-/* ================= INTERAÇÃO ================= */
+/* ================= JOGADA ================= */
 
 function handleClick(r,c){
 
  let p=game.board[r][c];
 
  if(game.selected){
+
   let move = game.moves.find(m=>m.r2===r && m.c2===c);
 
   if(move){
-    game.board[r][c]=game.board[game.selected.r][game.selected.c];
+
+    game.enPassant=null;
+
+    if(move.double){
+      game.enPassant={r:move.r2,c:move.c2};
+    }
+
+    if(move.enPassant){
+      game.board[move.r][move.c2]="";
+    }
+
+    if(move.castle){
+      if(move.castle==="short"){
+        game.board[r][5]=game.board[r][7];
+        game.board[r][7]="";
+      } else {
+        game.board[r][3]=game.board[r][0];
+        game.board[r][0]="";
+      }
+    }
+
+    let piece=game.board[game.selected.r][game.selected.c];
+
+    game.board[r][c]=piece;
     game.board[game.selected.r][game.selected.c]="";
 
-    game.lastMove=move;
+    // promoção
+    if(piece.toLowerCase()==="p" && (r===0||r===7)){
+      let choice=prompt("Promover para (q,r,b,n):","q");
+      game.board[r][c]= piece===piece.toUpperCase()
+        ? choice.toUpperCase()
+        : choice.toLowerCase();
+    }
 
     game.turn = game.turn==="w"?"b":"w";
 
-    let nextMoves=getLegalMoves(game.board,game.turn);
+    let next=getLegalMoves(game.board,game.turn);
 
-    if(!nextMoves.length){
-      let king=findKing(game.board,game.turn);
-      if(king && isAttacked(game.board,king[0],king[1],game.turn==="w"?"b":"w")){
+    if(!next.length){
+      let k=findKing(game.board,game.turn);
+      if(isAttacked(game.board,k[0],k[1],game.turn==="w"?"b":"w"))
         alert("Xeque-mate!");
-      } else {
+      else
         alert("Empate!");
-      }
     }
 
     game.selected=null;
@@ -258,7 +310,8 @@ function handleClick(r,c){
  if(game.turn==="b" && p!==p.toLowerCase()) return;
 
  game.selected={r,c};
- game.moves=getLegalMoves(game.board,game.turn);
+ game.moves=getLegalMoves(game.board,game.turn)
+   .filter(m=>m.r===r && m.c===c);
 
  drawBoard();
 }
@@ -266,27 +319,26 @@ function handleClick(r,c){
 /* ================= DRAG ================= */
 
 document.addEventListener("touchmove", e=>{
- if(!dragging) return;
-
+ if(!dragging)return;
  let t=e.touches[0];
- dragEl.style.left = t.clientX + "px";
- dragEl.style.top = t.clientY + "px";
+ dragEl.style.left=t.clientX+"px";
+ dragEl.style.top=t.clientY+"px";
 });
 
 document.addEventListener("touchend", e=>{
- if(!dragging) return;
+ if(!dragging)return;
 
- let t = e.changedTouches[0];
- let el = document.elementFromPoint(t.clientX, t.clientY);
+ let t=e.changedTouches[0];
+ let el=document.elementFromPoint(t.clientX,t.clientY);
 
  if(el && el.dataset){
-   let r = parseInt(el.dataset.r);
-   let c = parseInt(el.dataset.c);
-   game.board[r][c] = dragging;
+  let r=parseInt(el.dataset.r);
+  let c=parseInt(el.dataset.c);
+  game.board[r][c]=dragging;
  }
 
- dragging = null;
- dragEl.textContent = "";
+ dragging=null;
+ dragEl.textContent="";
  drawBoard();
 });
 
