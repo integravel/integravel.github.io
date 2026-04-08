@@ -74,3 +74,27 @@ body{
  font-size:42px;
  transform:translate(-50%,-50%);
 }
+
+/* CASA SELECIONADA */
+.selected {
+  outline: 3px solid yellow;
+}
+
+/* MOVIMENTOS POSSÍVEIS */
+.move::after {
+  content: "";
+  position: absolute;
+  width: 40%;
+  height: 40%;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 50%;
+}
+
+/* CAPTURA */
+.capture::after {
+  content: "";
+  position: absolute;
+  inset: 10%;
+  border: 3px solid red;
+  border-radius: 50%;
+}
