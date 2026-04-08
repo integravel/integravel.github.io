@@ -40,16 +40,73 @@ function findKing(b,side){
  return null;
 }
 
-/* ================= ATAQUE ================= */
+/* ================= ATAQUE CORRETO ================= */
 
 function isAttacked(b,r,c,by){
- return getPseudoMoves(b,by,true)
-   .some(m=>m.r2===r && m.c2===c);
+
+ for(let i=0;i<8;i++){
+  for(let j=0;j<8;j++){
+
+   let p=b[i][j];
+   if(!p) continue;
+
+   if(by==="w" && p!==p.toUpperCase()) continue;
+   if(by==="b" && p!==p.toLowerCase()) continue;
+
+   let isWhite = p===p.toUpperCase();
+
+   switch(p.toLowerCase()){
+
+    case "p":{
+      let d = isWhite ? -1 : 1;
+      if(i+d===r && (j+1===c || j-1===c)) return true;
+    } break;
+
+    case "n":{
+      let moves=[[2,1],[2,-1],[-2,1],[-2,-1],[1,2],[1,-2],[-1,2],[-1,-2]];
+      for(let m of moves){
+        if(i+m[0]===r && j+m[1]===c) return true;
+      }
+    } break;
+
+    case "b":
+    case "r":
+    case "q":{
+      let dirs=[];
+      if(p.toLowerCase()!=="r") dirs.push([1,1],[1,-1],[-1,1],[-1,-1]);
+      if(p.toLowerCase()!=="b") dirs.push([1,0],[-1,0],[0,1],[0,-1]);
+
+      for(let d of dirs){
+        for(let k=1;k<8;k++){
+          let r2=i+d[0]*k;
+          let c2=j+d[1]*k;
+
+          if(r2<0||r2>7||c2<0||c2>7) break;
+
+          if(r2===r && c2===c) return true;
+
+          if(b[r2][c2]) break;
+        }
+      }
+    } break;
+
+    case "k":{
+      let dirs=[[1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]];
+      for(let d of dirs){
+        if(i+d[0]===r && j+d[1]===c) return true;
+      }
+    } break;
+
+   }
+  }
+ }
+
+ return false;
 }
 
 /* ================= MOVIMENTOS ================= */
 
-function getPseudoMoves(b,side,attackOnly=false){
+function getPseudoMoves(b,side){
 
  let moves=[];
 
@@ -76,21 +133,19 @@ function getPseudoMoves(b,side,attackOnly=false){
     case "p":{
       let d=isWhite?-1:1;
 
-      if(!attackOnly){
-        if(!b[r+d]?.[c]) push(r+d,c);
+      if(!b[r+d]?.[c]) push(r+d,c);
 
-        if((isWhite&&r===6)||(!isWhite&&r===1)){
-          if(!b[r+d][c]&&!b[r+2*d][c])
-            push(r+2*d,c,{double:true});
-        }
+      if((isWhite&&r===6)||(!isWhite&&r===1)){
+        if(!b[r+d][c]&&!b[r+2*d][c])
+          push(r+2*d,c,{double:true});
       }
 
       for(let dc of [-1,1]){
         let r2=r+d,c2=c+dc;
+
         if(b[r2]?.[c2] && isEnemy(p,b[r2][c2]))
           push(r2,c2);
 
-        // en passant
         if(game.enPassant && game.enPassant.r===r && game.enPassant.c===c2){
           push(r+d,c2,{enPassant:true});
         }
@@ -110,32 +165,6 @@ function getPseudoMoves(b,side,attackOnly=false){
     case "k":
       [[1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]]
       .forEach(v=>push(r+v[0],c+v[1]));
-
-      if(!attackOnly){
-        // roque
-        if(isWhite && !game.moved.K){
-          if(!game.moved.R7 && !b[7][5] && !b[7][6]){
-            if(!isAttacked(b,7,4,"b") && !isAttacked(b,7,5,"b") && !isAttacked(b,7,6,"b"))
-              push(7,6,{castle:"short"});
-          }
-          if(!game.moved.R0 && !b[7][1] && !b[7][2] && !b[7][3]){
-            if(!isAttacked(b,7,4,"b") && !isAttacked(b,7,3,"b") && !isAttacked(b,7,2,"b"))
-              push(7,2,{castle:"long"});
-          }
-        }
-
-        if(!isWhite && !game.moved.k){
-          if(!game.moved.r7 && !b[0][5] && !b[0][6]){
-            if(!isAttacked(b,0,4,"w") && !isAttacked(b,0,5,"w") && !isAttacked(b,0,6,"w"))
-              push(0,6,{castle:"short"});
-          }
-          if(!game.moved.r0 && !b[0][1] && !b[0][2] && !b[0][3]){
-            if(!isAttacked(b,0,4,"w") && !isAttacked(b,0,3,"w") && !isAttacked(b,0,2,"w"))
-              push(0,2,{castle:"long"});
-          }
-        }
-      }
-
     break;
    }
 
@@ -204,9 +233,6 @@ function drawBoard(){
 
  boardEl.innerHTML="";
 
- let kingPos=findKing(game.board,game.turn);
- let inCheck = kingPos && isAttacked(game.board,kingPos[0],kingPos[1],game.turn==="w"?"b":"w");
-
  for(let r=0;r<8;r++){
   for(let c=0;c<8;c++){
 
@@ -223,9 +249,6 @@ function drawBoard(){
    if(game.moves.some(m=>m.r2===r && m.c2===c))
      cell.classList.add(p?"capture":"move");
 
-   if(inCheck && kingPos && kingPos[0]===r && kingPos[1]===c)
-     cell.classList.add("check");
-
    if(p){
     let el=document.createElement("div");
     el.className="piece";
@@ -240,7 +263,7 @@ function drawBoard(){
  }
 }
 
-/* ================= JOGADA ================= */
+/* ================= INTERAÇÃO ================= */
 
 function handleClick(r,c){
 
@@ -252,38 +275,8 @@ function handleClick(r,c){
 
   if(move){
 
-    game.enPassant=null;
-
-    if(move.double){
-      game.enPassant={r:move.r2,c:move.c2};
-    }
-
-    if(move.enPassant){
-      game.board[move.r][move.c2]="";
-    }
-
-    if(move.castle){
-      if(move.castle==="short"){
-        game.board[r][5]=game.board[r][7];
-        game.board[r][7]="";
-      } else {
-        game.board[r][3]=game.board[r][0];
-        game.board[r][0]="";
-      }
-    }
-
-    let piece=game.board[game.selected.r][game.selected.c];
-
-    game.board[r][c]=piece;
+    game.board[r][c]=game.board[game.selected.r][game.selected.c];
     game.board[game.selected.r][game.selected.c]="";
-
-    // promoção
-    if(piece.toLowerCase()==="p" && (r===0||r===7)){
-      let choice=prompt("Promover para (q,r,b,n):","q");
-      game.board[r][c]= piece===piece.toUpperCase()
-        ? choice.toUpperCase()
-        : choice.toLowerCase();
-    }
 
     game.turn = game.turn==="w"?"b":"w";
 
@@ -315,32 +308,6 @@ function handleClick(r,c){
 
  drawBoard();
 }
-
-/* ================= DRAG ================= */
-
-document.addEventListener("touchmove", e=>{
- if(!dragging)return;
- let t=e.touches[0];
- dragEl.style.left=t.clientX+"px";
- dragEl.style.top=t.clientY+"px";
-});
-
-document.addEventListener("touchend", e=>{
- if(!dragging)return;
-
- let t=e.changedTouches[0];
- let el=document.elementFromPoint(t.clientX,t.clientY);
-
- if(el && el.dataset){
-  let r=parseInt(el.dataset.r);
-  let c=parseInt(el.dataset.c);
-  game.board[r][c]=dragging;
- }
-
- dragging=null;
- dragEl.textContent="";
- drawBoard();
-});
 
 /* INIT */
 drawMenus();
