@@ -18,6 +18,7 @@ const symbols = {
 
 let dragging = null;
 let selected = null;
+let possibleMoves = [];
 
 /* ================= MENUS ================= */
 function drawMenus(){
@@ -63,6 +64,16 @@ function drawBoard(){
    cell.className="cell "+((r+c)%2?"dark":"light");
    cell.dataset.r=r;
    cell.dataset.c=c;
+
+   // destaque da peça selecionada
+   if(selected && selected.r===r && selected.c===c){
+     cell.style.outline="3px solid yellow";
+   }
+
+   // destaque dos movimentos
+   if(possibleMoves.some(m=>m.r===r && m.c===c)){
+     cell.style.background = "#90ee90";
+   }
 
    let p=game.board[r][c];
 
@@ -115,29 +126,114 @@ document.addEventListener("touchend", e=>{
  dragEl.textContent="";
 });
 
-/* ================= CLIQUE (PvP) ================= */
+/* ================= CLIQUE ================= */
 
 function handleClick(r,c){
 
  let p=game.board[r][c];
 
+ // mover peça
  if(selected){
-  game.board[r][c]=game.board[selected.r][selected.c];
-  game.board[selected.r][selected.c]="";
+   if(possibleMoves.some(m=>m.r===r && m.c===c)){
+     game.board[r][c]=game.board[selected.r][selected.c];
+     game.board[selected.r][selected.c]="";
 
-  selected=null;
-  game.turn = game.turn==="w"?"b":"w";
+     selected=null;
+     possibleMoves=[];
+     game.turn = game.turn==="w"?"b":"w";
 
-  drawBoard();
-  return;
+     drawBoard();
+     return;
+   }
  }
 
+ // selecionar nova peça
  if(!p) return;
 
  if(game.turn==="w" && p!==p.toUpperCase()) return;
  if(game.turn==="b" && p!==p.toLowerCase()) return;
 
  selected={r,c};
+ possibleMoves = getMoves(r,c);
+
+ drawBoard();
+}
+
+/* ================= MOVIMENTOS ================= */
+
+function getMoves(r,c){
+
+ let p=game.board[r][c];
+ if(!p) return [];
+
+ let moves=[];
+ let isWhite=p===p.toUpperCase();
+
+ function add(r2,c2){
+   if(r2<0||r2>7||c2<0||c2>7) return;
+
+   let t=game.board[r2][c2];
+   if(!t || (isWhite && t!==t.toUpperCase()) || (!isWhite && t!==t.toLowerCase())){
+     moves.push({r:r2,c:c2});
+   }
+ }
+
+ switch(p.toLowerCase()){
+
+  case "p":{
+    let d=isWhite?-1:1;
+
+    if(!game.board[r+d]?.[c]) add(r+d,c);
+
+    if((isWhite && r===6)||(!isWhite && r===1)){
+      if(!game.board[r+d][c] && !game.board[r+2*d][c])
+        add(r+2*d,c);
+    }
+
+    for(let dc of [-1,1]){
+      let r2=r+d,c2=c+dc;
+      let t=game.board[r2]?.[c2];
+      if(t && ((isWhite && t!==t.toUpperCase()) || (!isWhite && t!==t.toLowerCase())))
+        moves.push({r:r2,c:c2});
+    }
+
+  } break;
+
+  case "n":
+    [[2,1],[2,-1],[-2,1],[-2,-1],[1,2],[1,-2],[-1,2],[-1,-2]]
+    .forEach(v=>add(r+v[0],c+v[1]));
+  break;
+
+  case "b": slide([[1,1],[1,-1],[-1,1],[-1,-1]]); break;
+  case "r": slide([[1,0],[-1,0],[0,1],[0,-1]]); break;
+  case "q": slide([[1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]]); break;
+
+  case "k":
+    [[1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]]
+    .forEach(v=>add(r+v[0],c+v[1]));
+  break;
+ }
+
+ function slide(dirs){
+   for(let d of dirs){
+     for(let i=1;i<8;i++){
+       let r2=r+d[0]*i,c2=c+d[1]*i;
+       if(r2<0||r2>7||c2<0||c2>7) break;
+
+       let t=game.board[r2][c2];
+
+       if(!t){
+         moves.push({r:r2,c:c2});
+       } else {
+         if((isWhite && t!==t.toUpperCase()) || (!isWhite && t!==t.toLowerCase()))
+           moves.push({r:r2,c:c2});
+         break;
+       }
+     }
+   }
+ }
+
+ return moves;
 }
 
 /* ================= UTIL ================= */
