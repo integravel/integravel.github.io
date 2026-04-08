@@ -67,17 +67,26 @@ function drawBoard(){
 
    let p=game.board[r][c];
 
-   /* destaque seleção */
+   /* seleção */
    if(selected && selected.r===r && selected.c===c){
      cell.classList.add("selected");
    }
 
-   /* destaque movimentos */
+   /* movimentos */
    let move = possibleMoves.find(m=>m.r===r && m.c===c);
 
    if(move){
-     if(p){
-       cell.classList.add("capture");
+     if(p && selected){
+       let original = game.board[selected.r][selected.c];
+
+       if(
+         (original === original.toUpperCase() && p !== p.toUpperCase()) ||
+         (original === original.toLowerCase() && p !== p.toLowerCase())
+       ){
+         cell.classList.add("capture");
+       } else {
+         cell.classList.add("move");
+       }
      } else {
        cell.classList.add("move");
      }
