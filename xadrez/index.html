@@ -23,14 +23,14 @@ body {
 .black { background:#222; color:white; }
 .white { background:#ddd; }
 
-.piece { font-size:28px; cursor:pointer; }
+.piece {
+  font-size:28px;
+}
 
-/* TABULEIRO FIXO */
 #board {
   display:grid;
-  grid-template-columns:repeat(8, 1fr);
+  grid-template-columns:repeat(8,1fr);
   width:100vw;
-  max-width:100vw;
   aspect-ratio:1;
 }
 
@@ -44,7 +44,6 @@ body {
 
 .light { background:#f0d9b5; }
 .dark { background:#b58863; }
-
 </style>
 </head>
 
@@ -56,20 +55,24 @@ body {
 
 <script>
 
+/* ================= ESTADO ================= */
 let board = Array.from({length:8},()=>Array(8).fill(""));
-let selected=null;
+let dragPiece = null;
 let running=false;
 let turn="w";
 
 let whiteKing=false;
 let blackKing=false;
 
+/* ================= PEÇAS ================= */
 const pieces={
 P:"♙",R:"♖",N:"♘",B:"♗",Q:"♕",K:"♔",
 p:"♟",r:"♜",n:"♞",b:"♝",q:"♛",k:"♚"
 };
 
+/* ================= MENU ================= */
 function renderMenus(){
+
   let top=document.getElementById("topMenu");
   let bottom=document.getElementById("bottomMenu");
 
@@ -77,10 +80,14 @@ function renderMenus(){
   bottom.innerHTML="";
 
   for(let k in pieces){
+
     let el=document.createElement("div");
     el.className="piece";
     el.textContent=pieces[k];
-    el.onclick=()=>selected=k;
+
+    el.ontouchstart=(e)=>{
+      dragPiece=k;
+    };
 
     if(k===k.toLowerCase()){
       if(k==="k" && blackKing) continue;
@@ -92,90 +99,62 @@ function renderMenus(){
   }
 }
 
+/* ================= TABULEIRO ================= */
 function renderBoard(){
+
   let el=document.getElementById("board");
   el.innerHTML="";
 
   for(let r=0;r<8;r++){
     for(let c=0;c<8;c++){
+
       let d=document.createElement("div");
       d.className="cell "+((r+c)%2?"dark":"light");
       d.textContent=pieces[board[r][c]]||"";
-      d.onclick=()=>handleCell(r,c);
+
+      d.ontouchend=(e)=>{
+        if(!dragPiece || running) return;
+
+        if(dragPiece==="K" && whiteKing) return;
+        if(dragPiece==="k" && blackKing) return;
+
+        if(dragPiece==="K") whiteKing=true;
+        if(dragPiece==="k") blackKing=true;
+
+        board[r][c]=dragPiece;
+        dragPiece=null;
+
+        render();
+        checkStart();
+      };
+
       el.appendChild(d);
     }
   }
 }
 
-function handleCell(r,c){
-  if(running) return;
-
-  if(!selected && board[r][c]){
-    if(board[r][c]=="K") whiteKing=false;
-    if(board[r][c]=="k") blackKing=false;
-    board[r][c]="";
-    render();
-    return;
-  }
-
-  if(selected){
-    if(selected=="K" && whiteKing) return;
-    if(selected=="k" && blackKing) return;
-
-    if(selected=="K") whiteKing=true;
-    if(selected=="k") blackKing=true;
-
-    board[r][c]=selected;
-    selected=null;
-    render();
-    checkStart();
-  }
-}
-
-function checkStart(){
-  if(whiteKing && blackKing){
-    running=true;
-    setTimeout(step,300);
-  }
-}
-
-/* ================= IA ================= */
-
-const values={p:1,n:3,b:3,r:5,q:9,k:1000};
-
-function evaluate(b){
-  let s=0;
-  let whiteAlive=false, blackAlive=false;
-
-  for(let row of b){
-    for(let p of row){
-      if(!p) continue;
-
-      if(p==="K") whiteAlive=true;
-      if(p==="k") blackAlive=true;
-
-      let v=values[p.toLowerCase()];
-      s += (p===p.toUpperCase()?v:-v);
-    }
-  }
-
-  if(!whiteAlive) return -9999;
-  if(!blackAlive) return 9999;
-
-  return s;
-}
+/* ================= REGRAS ================= */
 
 function clone(b){ return b.map(r=>r.slice()); }
 
-function apply(b,m){
-  let nb=clone(b);
-  nb[m.r2][m.c2]=nb[m.r][m.c];
-  nb[m.r][m.c]="";
-  return nb;
+function findKing(b,side){
+  for(let r=0;r<8;r++){
+    for(let c=0;c<8;c++){
+      if(side==="w" && b[r][c]==="K") return [r,c];
+      if(side==="b" && b[r][c]==="k") return [r,c];
+    }
+  }
 }
 
-/* MOVIMENTOS */
-function getMoves(b, side){
+function isAttacked(b,r,c,bySide){
+
+  let enemyMoves = getMoves(b,bySide,true);
+
+  return enemyMoves.some(m=>m.r2===r && m.c2===c);
+}
+
+/* movimentos brutos */
+function getMoves(b, side, raw=false){
 
   let moves=[];
 
@@ -188,35 +167,25 @@ function getMoves(b, side){
       if(side==="w" && p!==p.toUpperCase()) continue;
       if(side==="b" && p!==p.toLowerCase()) continue;
 
-      let isWhite = p===p.toUpperCase();
+      let isWhite=p===p.toUpperCase();
 
-      function add(r2,c2,captureOnly=false){
+      function add(r2,c2){
         if(r2<0||r2>7||c2<0||c2>7) return;
         let t=b[r2][c2];
-
-        if(captureOnly){
-          if(t && ((isWhite && t!==t.toUpperCase()) || (!isWhite && t!==t.toLowerCase())))
-            moves.push({r,c,r2,c2});
-        } else {
-          if(!t || ((isWhite && t!==t.toUpperCase()) || (!isWhite && t!==t.toLowerCase())))
-            moves.push({r,c,r2,c2});
+        if(!t || (isWhite && t!==t.toUpperCase()) || (!isWhite && t!==t.toLowerCase())){
+          moves.push({r,c,r2,c2});
         }
       }
 
       switch(p.toLowerCase()){
 
         case "p":
-          let dir = isWhite?-1:1;
+          let d=isWhite?-1:1;
 
-          if(!b[r+dir]?.[c]) add(r+dir,c);
+          if(!b[r+d]?.[c]) add(r+d,c);
 
-          if((isWhite && r===6) || (!isWhite && r===1)){
-            if(!b[r+dir]?.[c] && !b[r+2*dir]?.[c])
-              add(r+2*dir,c);
-          }
-
-          add(r+dir,c+1,true);
-          add(r+dir,c-1,true);
+          add(r+d,c+1);
+          add(r+d,c-1);
         break;
 
         case "n":
@@ -225,32 +194,17 @@ function getMoves(b, side){
         break;
 
         case "b":
-          [[1,1],[1,-1],[-1,1],[-1,-1]].forEach(v=>{
-            for(let i=1;i<8;i++){
-              let r2=r+v[0]*i,c2=c+v[1]*i;
-              if(r2<0||r2>7||c2<0||c2>7) break;
-              add(r2,c2);
-              if(b[r2][c2]) break;
-            }
-          });
-        break;
-
         case "r":
-          [[1,0],[-1,0],[0,1],[0,-1]].forEach(v=>{
-            for(let i=1;i<8;i++){
-              let r2=r+v[0]*i,c2=c+v[1]*i;
-              if(r2<0||r2>7||c2<0||c2>7) break;
-              add(r2,c2);
-              if(b[r2][c2]) break;
-            }
-          });
-        break;
-
         case "q":
-          [[1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]]
-          .forEach(v=>{
+          let dirs = p.toLowerCase()==="b"
+            ? [[1,1],[1,-1],[-1,1],[-1,-1]]
+            : p.toLowerCase()==="r"
+            ? [[1,0],[-1,0],[0,1],[0,-1]]
+            : [[1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]];
+
+          dirs.forEach(d=>{
             for(let i=1;i<8;i++){
-              let r2=r+v[0]*i,c2=c+v[1]*i;
+              let r2=r+d[0]*i,c2=c+d[1]*i;
               if(r2<0||r2>7||c2<0||c2>7) break;
               add(r2,c2);
               if(b[r2][c2]) break;
@@ -266,18 +220,48 @@ function getMoves(b, side){
     }
   }
 
+  /* filtra movimentos ilegais */
+  if(!raw){
+    moves = moves.filter(m=>{
+      let nb=clone(b);
+      nb[m.r2][m.c2]=nb[m.r][m.c];
+      nb[m.r][m.c]="";
+
+      let kingPos=findKing(nb,side);
+      return !isAttacked(nb,kingPos[0],kingPos[1], side==="w"?"b":"w");
+    });
+  }
+
   return moves;
 }
 
-/* IA */
+/* ================= IA ================= */
+
+const values={p:1,n:3,b:3,r:5,q:9,k:1000};
+
+function evaluate(b){
+  let s=0;
+  for(let row of b){
+    for(let p of row){
+      if(!p) continue;
+      let v=values[p.toLowerCase()];
+      s += (p===p.toUpperCase()?v:-v);
+    }
+  }
+  return s;
+}
+
 function bestMove(){
 
   let moves=getMoves(board,turn);
+
   if(!moves.length) return null;
 
   let scored=moves.map(m=>{
-    let val=evaluate(apply(board,m));
-    return {m,val};
+    let nb=clone(board);
+    nb[m.r2][m.c2]=nb[m.r][m.c];
+    nb[m.r][m.c]="";
+    return {m,val:evaluate(nb)};
   });
 
   scored.sort((a,b)=>turn==="w"?b.val-a.val:a.val-b.val);
@@ -285,43 +269,50 @@ function bestMove(){
   return scored[0].m;
 }
 
-/* LOOP */
+/* ================= LOOP ================= */
+
 function step(){
 
   if(!running) return;
 
+  let moves=getMoves(board,turn);
+
+  if(!moves.length){
+
+    let king=findKing(board,turn);
+    if(isAttacked(board,king[0],king[1], turn==="w"?"b":"w")){
+      alert((turn==="w"?"Pretas":"Brancas")+" venceram por xeque-mate!");
+    } else {
+      alert("Empate!");
+    }
+
+    running=false;
+    return;
+  }
+
   let m=bestMove();
 
-  if(!m){
-    running=false;
-    alert("Empate");
-    return;
-  }
-
-  board=apply(board,m);
-
-  let evalScore=evaluate(board);
+  board[m.r2][m.c2]=board[m.r][m.c];
+  board[m.r][m.c]="";
 
   renderBoard();
-
-  if(evalScore>9000){
-    alert("Brancas vencem");
-    running=false;
-    return;
-  }
-
-  if(evalScore<-9000){
-    alert("Pretas vencem");
-    running=false;
-    return;
-  }
 
   turn = turn==="w"?"b":"w";
 
   setTimeout(step,300);
 }
 
-/* INIT */
+/* ================= START ================= */
+
+function checkStart(){
+  if(whiteKing && blackKing){
+    running=true;
+    setTimeout(step,300);
+  }
+}
+
+/* ================= INIT ================= */
+
 function render(){
   renderMenus();
   renderBoard();
