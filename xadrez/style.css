@@ -16,19 +16,26 @@ body{
  font-family:sans-serif;
 }
 
+/* MENUS */
 .menu{
- height:70px;
+ height:80px;
  display:flex;
  justify-content:center;
  align-items:center;
- gap:10px;
+ gap:14px;
 }
 
 .black{background:#222;color:white;}
 .white{background:#ddd;}
 
-.menuPiece{font-size:48px;}
+/* PEÇAS DO MENU */
+.menuPiece{
+ font-size:56px;
+ font-family: "Noto Sans Symbols 2", "Segoe UI Symbol", sans-serif;
+ line-height:1;
+}
 
+/* TABULEIRO */
 #board{
  width:100vw;
  height:100vw;
@@ -40,51 +47,55 @@ body{
  grid-template-rows:repeat(8,1fr);
 }
 
+/* CASAS */
 .cell{
  position:relative;
  width:100%;
  height:100%;
+ display:flex;
+ align-items:center;
+ justify-content:center;
 }
 
 .light{background:#f0d9b5;}
 .dark{background:#b58863;}
 
+/* PEÇAS NO TABULEIRO */
 .piece{
  position:absolute;
  inset:0;
  display:flex;
  align-items:center;
  justify-content:center;
- font-size:6vw;
- transition:transform 0.2s;
+ font-size:7vw; /* 🔥 maior */
+ font-family: "Noto Sans Symbols 2", "Segoe UI Symbol", sans-serif;
+ line-height:1;
+ pointer-events:none;
 }
 
-/* seleção */
+/* SELEÇÃO */
 .selected{
  outline:3px solid #ffd54f;
 }
 
-/* movimentos */
+/* MOVIMENTOS */
 .light.move{background:#c8e6c9;}
 .dark.move{background:#81c784;}
 
-/* captura */
+/* CAPTURA */
 .light.capture{background:#ef9a9a;}
 .dark.capture{background:#e57373;}
 
-/* xeque */
+/* XEQUE */
 .check{
  background:#ff5252 !important;
 }
 
-/* último movimento */
-.lastMove{
- box-shadow: inset 0 0 0 4px rgba(255,255,0,0.4);
-}
-
+/* DRAG */
 #drag{
  position:fixed;
  pointer-events:none;
- font-size:42px;
+ font-size:56px;
+ font-family: "Noto Sans Symbols 2", "Segoe UI Symbol", sans-serif;
  transform:translate(-50%,-50%);
 }
