@@ -1,7 +1,10 @@
 /* ================= ESTADO ================= */
 const game = {
  board: Array.from({length:8},()=>Array(8).fill("")),
- turn:"w"
+ turn:"w",
+ selected:null,
+ moves:[],
+ lastMove:null
 };
 
 /* ================= ELEMENTOS ================= */
@@ -11,18 +14,131 @@ const topMenu = document.getElementById("topMenu");
 const bottomMenu = document.getElementById("bottomMenu");
 
 /* ================= PEÇAS ================= */
-const symbols = {
- P:"♙",R:"♖",N:"♘",B:"♗",Q:"♕",K:"♔",
- p:"♟",r:"♜",n:"♞",b:"♝",q:"♛",k:"♚"
+const symbols={
+P:"♙",R:"♖",N:"♘",B:"♗",Q:"♕",K:"♔",
+p:"♟",r:"♜",n:"♞",b:"♝",q:"♛",k:"♚"
 };
 
-let dragging = null;
-let selected = null;
-let possibleMoves = [];
+let dragging=null;
 
-/* ================= MENUS ================= */
+/* ================= UTIL ================= */
+
+function clone(b){return b.map(r=>r.slice());}
+
+function isEnemy(a,b){
+ return b && ((a===a.toUpperCase()) !== (b===b.toUpperCase()));
+}
+
+function findKing(b,side){
+ for(let r=0;r<8;r++)
+ for(let c=0;c<8;c++){
+  if(side==="w" && b[r][c]==="K") return [r,c];
+  if(side==="b" && b[r][c]==="k") return [r,c];
+ }
+}
+
+/* ================= ATAQUE ================= */
+
+function isAttacked(b,r,c,by){
+
+ let moves = getPseudoMoves(b,by);
+ return moves.some(m=>m.r2===r && m.c2===c);
+}
+
+/* ================= MOVIMENTOS ================= */
+
+function getPseudoMoves(b,side){
+
+ let moves=[];
+
+ for(let r=0;r<8;r++){
+  for(let c=0;c<8;c++){
+
+   let p=b[r][c];
+   if(!p) continue;
+
+   if(side==="w" && p!==p.toUpperCase()) continue;
+   if(side==="b" && p!==p.toLowerCase()) continue;
+
+   let isWhite=p===p.toUpperCase();
+
+   function push(r2,c2){
+    if(r2<0||r2>7||c2<0||c2>7) return;
+    let t=b[r2][c2];
+    if(!t || isEnemy(p,t))
+      moves.push({r,c,r2,c2});
+   }
+
+   switch(p.toLowerCase()){
+
+    case "p":{
+      let d=isWhite?-1:1;
+
+      if(!b[r+d]?.[c]) push(r+d,c);
+
+      if((isWhite&&r===6)||(!isWhite&&r===1)){
+        if(!b[r+d][c]&&!b[r+2*d][c]) push(r+2*d,c);
+      }
+
+      for(let dc of [-1,1]){
+        let r2=r+d,c2=c+dc;
+        if(b[r2]?.[c2] && isEnemy(p,b[r2][c2]))
+          push(r2,c2);
+      }
+
+    } break;
+
+    case "n":
+      [[2,1],[2,-1],[-2,1],[-2,-1],[1,2],[1,-2],[-1,2],[-1,-2]]
+      .forEach(v=>push(r+v[0],c+v[1]));
+    break;
+
+    case "b": slide([[1,1],[1,-1],[-1,1],[-1,-1]]); break;
+    case "r": slide([[1,0],[-1,0],[0,1],[0,-1]]); break;
+    case "q": slide([[1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]]); break;
+
+    case "k":
+      [[1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]]
+      .forEach(v=>push(r+v[0],c+v[1]));
+    break;
+   }
+
+   function slide(dirs){
+    for(let d of dirs){
+     for(let i=1;i<8;i++){
+      let r2=r+d[0]*i,c2=c+d[1]*i;
+      if(r2<0||r2>7||c2<0||c2>7) break;
+
+      if(!b[r2][c2]) moves.push({r,c,r2,c2});
+      else{
+        if(isEnemy(p,b[r2][c2])) moves.push({r,c,r2,c2});
+        break;
+      }
+     }
+    }
+   }
+  }
+ }
+
+ return moves;
+}
+
+/* FILTRAR LEGAIS */
+function getLegalMoves(b,side){
+
+ return getPseudoMoves(b,side).filter(m=>{
+  let nb=clone(b);
+  nb[m.r2][m.c2]=nb[m.r][m.c];
+  nb[m.r][m.c]="";
+
+  let k=findKing(nb,side);
+  return !isAttacked(nb,k[0],k[1],side==="w"?"b":"w");
+ });
+}
+
+/* ================= UI ================= */
+
 function drawMenus(){
-
  topMenu.innerHTML="";
  bottomMenu.innerHTML="";
 
@@ -32,64 +148,54 @@ function drawMenus(){
   el.className="menuPiece";
   el.textContent=symbols[k];
 
-  el.addEventListener("touchstart", e=>{
+  el.ontouchstart=e=>{
     dragging=k;
-
     let t=e.touches[0];
-    dragEl.style.left=t.clientX+"px";
-    dragEl.style.top=t.clientY+"px";
-
+    dragEl.style.left=t.clientX+"px;
+    dragEl.style.top=t.clientY+"px;
     dragEl.textContent=symbols[k];
-  });
+  };
 
   if(k===k.toLowerCase()){
-    if(k==="k" && hasKing("b")) continue;
     topMenu.appendChild(el);
   } else {
-    if(k==="K" && hasKing("w")) continue;
     bottomMenu.appendChild(el);
   }
  }
 }
 
-/* ================= TABULEIRO ================= */
 function drawBoard(){
 
  boardEl.innerHTML="";
+
+ let kingPos=findKing(game.board,game.turn);
+ let inCheck = kingPos && isAttacked(game.board,kingPos[0],kingPos[1],game.turn==="w"?"b":"w");
 
  for(let r=0;r<8;r++){
   for(let c=0;c<8;c++){
 
    let cell=document.createElement("div");
    cell.className="cell "+((r+c)%2?"dark":"light");
-   cell.dataset.r=r;
-   cell.dataset.c=c;
 
    let p=game.board[r][c];
 
-   /* seleção */
-   if(selected && selected.r===r && selected.c===c){
+   if(game.selected && game.selected.r===r && game.selected.c===c){
      cell.classList.add("selected");
    }
 
-   /* movimentos */
-   let move = possibleMoves.find(m=>m.r===r && m.c===c);
+   if(game.moves.some(m=>m.r2===r && m.c2===c)){
+     cell.classList.add(p?"capture":"move");
+   }
 
-   if(move){
-     if(p && selected){
-       let original = game.board[selected.r][selected.c];
+   if(game.lastMove && (
+     (game.lastMove.r===r && game.lastMove.c===c) ||
+     (game.lastMove.r2===r && game.lastMove.c2===c)
+   )){
+     cell.classList.add("lastMove");
+   }
 
-       if(
-         (original === original.toUpperCase() && p !== p.toUpperCase()) ||
-         (original === original.toLowerCase() && p !== p.toLowerCase())
-       ){
-         cell.classList.add("capture");
-       } else {
-         cell.classList.add("move");
-       }
-     } else {
-       cell.classList.add("move");
-     }
+   if(inCheck && kingPos[0]===r && kingPos[1]===c){
+     cell.classList.add("check");
    }
 
    if(p){
@@ -99,173 +205,86 @@ function drawBoard(){
     cell.appendChild(el);
    }
 
-   cell.addEventListener("click", ()=>handleClick(r,c));
+   cell.onclick=()=>handleClick(r,c);
 
    boardEl.appendChild(cell);
   }
  }
 }
 
+/* ================= INTERAÇÃO ================= */
+
+function handleClick(r,c){
+
+ let p=game.board[r][c];
+
+ if(game.selected){
+  let move = game.moves.find(m=>m.r2===r && m.c2===c);
+
+  if(move){
+    game.board[r][c]=game.board[game.selected.r][game.selected.c];
+    game.board[game.selected.r][game.selected.c]="";
+
+    game.lastMove=move;
+
+    game.turn = game.turn==="w"?"b":"w";
+
+    let nextMoves=getLegalMoves(game.board,game.turn);
+
+    if(!nextMoves.length){
+      let king=findKing(game.board,game.turn);
+      if(isAttacked(game.board,king[0],king[1],game.turn==="w"?"b":"w")){
+        alert("Xeque-mate!");
+      } else {
+        alert("Empate!");
+      }
+    }
+
+    game.selected=null;
+    game.moves=[];
+    drawBoard();
+    return;
+  }
+ }
+
+ if(!p) return;
+
+ if(game.turn==="w" && p!==p.toUpperCase()) return;
+ if(game.turn==="b" && p!==p.toLowerCase()) return;
+
+ game.selected={r,c};
+ game.moves=getLegalMoves(game.board,game.turn);
+
+ drawBoard();
+}
+
 /* ================= DRAG ================= */
 
 document.addEventListener("touchmove", e=>{
- if(!dragging) return;
-
+ if(!dragging)return;
  let t=e.touches[0];
  dragEl.style.left=t.clientX+"px";
  dragEl.style.top=t.clientY+"px";
 });
 
 document.addEventListener("touchend", e=>{
-
- if(!dragging) return;
+ if(!dragging)return;
 
  let t=e.changedTouches[0];
- let el=document.elementFromPoint(t.clientX, t.clientY);
+ let el=document.elementFromPoint(t.clientX,t.clientY);
 
- if(el && el.dataset){
-
-  let r=+el.dataset.r;
-  let c=+el.dataset.c;
-
-  if(dragging==="K" && hasKing("w")) return;
-  if(dragging==="k" && hasKing("b")) return;
+ if(el && el.classList.contains("cell")){
+  let r=[...boardEl.children].indexOf(el)/8|0;
+  let c=[...boardEl.children].indexOf(el)%8;
 
   game.board[r][c]=dragging;
-
-  drawBoard();
-  drawMenus();
  }
 
  dragging=null;
  dragEl.textContent="";
+ drawBoard();
 });
 
-/* ================= CLIQUE ================= */
-
-function handleClick(r,c){
-
- let p=game.board[r][c];
-
- // mover
- if(selected){
-   let valid = possibleMoves.some(m=>m.r===r && m.c===c);
-
-   if(valid){
-     game.board[r][c]=game.board[selected.r][selected.c];
-     game.board[selected.r][selected.c]="";
-
-     selected=null;
-     possibleMoves=[];
-     game.turn = game.turn==="w"?"b":"w";
-
-     drawBoard();
-     return;
-   }
- }
-
- // selecionar
- if(!p) return;
-
- if(game.turn==="w" && p!==p.toUpperCase()) return;
- if(game.turn==="b" && p!==p.toLowerCase()) return;
-
- selected={r,c};
- possibleMoves = getMoves(r,c);
-
- drawBoard();
-}
-
-/* ================= MOVIMENTOS ================= */
-
-function getMoves(r,c){
-
- let p=game.board[r][c];
- if(!p) return [];
-
- let moves=[];
- let isWhite=p===p.toUpperCase();
-
- function add(r2,c2){
-   if(r2<0||r2>7||c2<0||c2>7) return;
-
-   let t=game.board[r2][c2];
-   if(!t || (isWhite && t!==t.toUpperCase()) || (!isWhite && t!==t.toLowerCase())){
-     moves.push({r:r2,c:c2});
-   }
- }
-
- switch(p.toLowerCase()){
-
-  case "p":{
-    let d=isWhite?-1:1;
-
-    if(!game.board[r+d]?.[c]) add(r+d,c);
-
-    if((isWhite && r===6)||(!isWhite && r===1)){
-      if(!game.board[r+d][c] && !game.board[r+2*d][c])
-        add(r+2*d,c);
-    }
-
-    for(let dc of [-1,1]){
-      let r2=r+d,c2=c+dc;
-      let t=game.board[r2]?.[c2];
-      if(t && ((isWhite && t!==t.toUpperCase()) || (!isWhite && t!==t.toLowerCase())))
-        moves.push({r:r2,c:c2});
-    }
-
-  } break;
-
-  case "n":
-    [[2,1],[2,-1],[-2,1],[-2,-1],[1,2],[1,-2],[-1,2],[-1,-2]]
-    .forEach(v=>add(r+v[0],c+v[1]));
-  break;
-
-  case "b": slide([[1,1],[1,-1],[-1,1],[-1,-1]]); break;
-  case "r": slide([[1,0],[-1,0],[0,1],[0,-1]]); break;
-  case "q": slide([[1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]]); break;
-
-  case "k":
-    [[1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]]
-    .forEach(v=>add(r+v[0],c+v[1]));
-  break;
- }
-
- function slide(dirs){
-   for(let d of dirs){
-     for(let i=1;i<8;i++){
-       let r2=r+d[0]*i,c2=c+d[1]*i;
-       if(r2<0||r2>7||c2<0||c2>7) break;
-
-       let t=game.board[r2][c2];
-
-       if(!t){
-         moves.push({r:r2,c:c2});
-       } else {
-         if((isWhite && t!==t.toUpperCase()) || (!isWhite && t!==t.toLowerCase()))
-           moves.push({r:r2,c:c2});
-         break;
-       }
-     }
-   }
- }
-
- return moves;
-}
-
-/* ================= UTIL ================= */
-
-function hasKing(side){
- for(let r=0;r<8;r++){
-  for(let c=0;c<8;c++){
-   if(side==="w" && game.board[r][c]==="K") return true;
-   if(side==="b" && game.board[r][c]==="k") return true;
-  }
- }
- return false;
-}
-
-/* ================= INIT ================= */
-
+/* INIT */
 drawMenus();
 drawBoard();
