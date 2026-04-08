@@ -6,9 +6,9 @@
 body { font-family: Arial; text-align: center; }
 #board { display: grid; grid-template-columns: repeat(8,60px); margin:20px auto; }
 .cell { width:60px;height:60px;display:flex;align-items:center;justify-content:center;font-size:28px;cursor:pointer; }
-.white { background:#eee; }
-.black { background:#555;color:white; }
-.selected { outline:3px solid red; }
+/* cores corrigidas (xadrez padrão) */
+.white { background:#f0d9b5; }
+.black { background:#b58863; }
 </style>
 </head>
 <body>
@@ -67,6 +67,7 @@ function evaluate(b){
  return s;
 }
 
+/* LIMITAÇÃO CRÍTICA: reduzir movimentos pra não travar */
 function getMoves(b, side){
  let moves=[];
  for(let r=0;r<8;r++){
@@ -75,11 +76,14 @@ function getMoves(b, side){
    if(side==='w' && p!==p.toUpperCase()) continue;
    if(side==='b' && p!==p.toLowerCase()) continue;
 
-   for(let r2=0;r2<8;r2++){
-    for(let c2=0;c2<8;c2++){
-     if(r===r2&&c===c2) continue;
-     moves.push({r,c,r2,c2});
-    }
+   /* gera só alguns movimentos locais (evita explosão) */
+   let dirs=[[1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]];
+   for(let d of dirs){
+     let r2=r+d[0];
+     let c2=c+d[1];
+     if(r2>=0&&r2<8&&c2>=0&&c2<8){
+       moves.push({r,c,r2,c2});
+     }
    }
   }
  }
@@ -100,6 +104,8 @@ function minimax(b, depth, maximizing){
 
  let moves=getMoves(b,maximizing?'w':'b');
 
+ if(moves.length===0) return evaluate(b);
+
  if(maximizing){
   let max=-Infinity;
   for(let m of moves){
@@ -119,11 +125,15 @@ function minimax(b, depth, maximizing){
 
 function bestMove(){
  let moves=getMoves(board,turn);
+
+ if(moves.length===0) return null;
+
  let scored=[];
  for(let m of moves){
-  let val=minimax(apply(board,m),2,turn==='b');
+  let val=minimax(apply(board,m),1,turn==='b'); // depth reduzido
   scored.push({m,val});
  }
+
  scored.sort((a,b)=>turn==='w'?b.val-a.val:a.val-b.val);
 
  let top=scored.slice(0,3);
@@ -132,12 +142,16 @@ function bestMove(){
 
 function step(){
  if(!running) return;
+
  let m=bestMove();
+ if(!m){ running=false; return; }
+
  board=apply(board,m);
  render();
 
  turn = (turn==='w')?'b':'w';
- setTimeout(step,500);
+
+ setTimeout(step,400);
 }
 
 function hasKing(side){
