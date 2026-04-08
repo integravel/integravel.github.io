@@ -15,8 +15,8 @@ const bottomMenu = document.getElementById("bottomMenu");
 
 /* ================= PEÇAS ================= */
 const symbols={
-P:"♙",R:"♖",N:"♘",B:"♗",Q:"♕",K:"♔",
-p:"♟",r:"♜",n:"♞",b:"♝",q:"♛",k:"♚"
+ P:"♙",R:"♖",N:"♘",B:"♗",Q:"♕",K:"♔",
+ p:"♟",r:"♜",n:"♞",b:"♝",q:"♛",k:"♚"
 };
 
 let dragging=null;
@@ -35,6 +35,7 @@ function findKing(b,side){
   if(side==="w" && b[r][c]==="K") return [r,c];
   if(side==="b" && b[r][c]==="k") return [r,c];
  }
+ return null;
 }
 
 /* ================= ATAQUE ================= */
@@ -132,6 +133,8 @@ function getLegalMoves(b,side){
   nb[m.r][m.c]="";
 
   let k=findKing(nb,side);
+  if(!k) return false;
+
   return !isAttacked(nb,k[0],k[1],side==="w"?"b":"w");
  });
 }
@@ -151,8 +154,8 @@ function drawMenus(){
   el.ontouchstart=e=>{
     dragging=k;
     let t=e.touches[0];
-    dragEl.style.left=t.clientX+"px;
-    dragEl.style.top=t.clientY+"px;
+    dragEl.style.left = t.clientX + "px";
+    dragEl.style.top = t.clientY + "px";
     dragEl.textContent=symbols[k];
   };
 
@@ -176,6 +179,8 @@ function drawBoard(){
 
    let cell=document.createElement("div");
    cell.className="cell "+((r+c)%2?"dark":"light");
+   cell.dataset.r=r;
+   cell.dataset.c=c;
 
    let p=game.board[r][c];
 
@@ -194,7 +199,7 @@ function drawBoard(){
      cell.classList.add("lastMove");
    }
 
-   if(inCheck && kingPos[0]===r && kingPos[1]===c){
+   if(inCheck && kingPos && kingPos[0]===r && kingPos[1]===c){
      cell.classList.add("check");
    }
 
@@ -233,7 +238,7 @@ function handleClick(r,c){
 
     if(!nextMoves.length){
       let king=findKing(game.board,game.turn);
-      if(isAttacked(game.board,king[0],king[1],game.turn==="w"?"b":"w")){
+      if(king && isAttacked(game.board,king[0],king[1],game.turn==="w"?"b":"w")){
         alert("Xeque-mate!");
       } else {
         alert("Empate!");
@@ -261,27 +266,27 @@ function handleClick(r,c){
 /* ================= DRAG ================= */
 
 document.addEventListener("touchmove", e=>{
- if(!dragging)return;
+ if(!dragging) return;
+
  let t=e.touches[0];
- dragEl.style.left=t.clientX+"px";
- dragEl.style.top=t.clientY+"px";
+ dragEl.style.left = t.clientX + "px";
+ dragEl.style.top = t.clientY + "px";
 });
 
 document.addEventListener("touchend", e=>{
- if(!dragging)return;
+ if(!dragging) return;
 
- let t=e.changedTouches[0];
- let el=document.elementFromPoint(t.clientX,t.clientY);
+ let t = e.changedTouches[0];
+ let el = document.elementFromPoint(t.clientX, t.clientY);
 
- if(el && el.classList.contains("cell")){
-  let r=[...boardEl.children].indexOf(el)/8|0;
-  let c=[...boardEl.children].indexOf(el)%8;
-
-  game.board[r][c]=dragging;
+ if(el && el.dataset){
+   let r = parseInt(el.dataset.r);
+   let c = parseInt(el.dataset.c);
+   game.board[r][c] = dragging;
  }
 
- dragging=null;
- dragEl.textContent="";
+ dragging = null;
+ dragEl.textContent = "";
  drawBoard();
 });
 
