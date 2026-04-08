@@ -1,79 +1,57 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
+*{box-sizing:border-box;touch-action:none;}
+html,body{margin:0;height:100%;overflow:hidden;}
 
-/* ================= RESET ================= */
-* {
-  box-sizing:border-box;
-  touch-action:none;
+body{
+ display:flex;
+ flex-direction:column;
+ justify-content:space-between;
+ font-family:Arial;
 }
 
-html, body {
-  margin:0;
-  padding:0;
-  height:100%;
-  overflow:hidden;
+.menu{
+ height:60px;
+ display:flex;
+ justify-content:center;
+ align-items:center;
+ gap:12px;
+}
+.black{background:#222;color:white;}
+.white{background:#ddd;}
+
+.piece{font-size:28px;}
+
+#board{
+ width:100vw;
+ height:100vw;
+ max-width:100vh;
+ max-height:100vh;
+ margin:auto;
+ display:grid;
+ grid-template-columns:repeat(8,1fr);
 }
 
-/* ================= LAYOUT ================= */
-body {
-  display:flex;
-  flex-direction:column;
-  justify-content:space-between;
-  font-family:Arial;
+.cell{
+ display:flex;
+ align-items:center;
+ justify-content:center;
+ font-size:4.5vw;
 }
 
-/* MENUS */
-.menu {
-  height:60px;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  gap:12px;
+.light{background:#f0d9b5;}
+.dark{background:#b58863;}
+
+#drag{
+ position:fixed;
+ pointer-events:none;
+ font-size:32px;
+ transform:translate(-50%,-50%);
 }
-
-.black { background:#222; color:white; }
-.white { background:#ddd; }
-
-.piece {
-  font-size:28px;
-}
-
-/* TABULEIRO FIXO */
-#board {
-  width:100vw;
-  height:100vw;
-  max-width:100vh;
-  max-height:100vh;
-  margin:auto;
-
-  display:grid;
-  grid-template-columns:repeat(8,1fr);
-  grid-template-rows:repeat(8,1fr);
-}
-
-.cell {
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:4.5vw;
-}
-
-.light { background:#f0d9b5; }
-.dark { background:#b58863; }
-
-/* DRAG */
-#drag {
-  position:fixed;
-  pointer-events:none;
-  font-size:32px;
-  transform:translate(-50%, -50%);
-}
-
 </style>
 </head>
 
@@ -84,332 +62,6 @@ body {
 <div id="bottomMenu" class="menu white"></div>
 <div id="drag"></div>
 
-<script>
-
-/* ================= ESTADO ================= */
-let board = Array.from({length:8},()=>Array(8).fill(""));
-let running=false, turn="w";
-let whiteKing=false, blackKing=false;
-
-let dragPiece=null;
-let dragEl=document.getElementById("drag");
-
-let history={};
-
-/* ================= PEÇAS ================= */
-const pieces={
-P:"♙",R:"♖",N:"♘",B:"♗",Q:"♕",K:"♔",
-p:"♟",r:"♜",n:"♞",b:"♝",q:"♛",k:"♚"
-};
-
-/* ================= MENU ================= */
-function renderMenus(){
-
- let top=document.getElementById("topMenu");
- let bot=document.getElementById("bottomMenu");
-
- top.innerHTML=""; bot.innerHTML="";
-
- for(let k in pieces){
-
-  let el=document.createElement("div");
-  el.className="piece";
-  el.textContent=pieces[k];
-
-  el.ontouchstart=e=>{
-    dragPiece=k;
-    dragEl.textContent=pieces[k];
-  };
-
-  if(k===k.toLowerCase()){
-    if(k==="k"&&blackKing) continue;
-    top.appendChild(el);
-  }else{
-    if(k==="K"&&whiteKing) continue;
-    bot.appendChild(el);
-  }
- }
-}
-
-/* ================= TABULEIRO ================= */
-function renderBoard(){
-
- let el=document.getElementById("board");
- el.innerHTML="";
-
- for(let r=0;r<8;r++){
-  for(let c=0;c<8;c++){
-
-   let d=document.createElement("div");
-   d.className="cell "+((r+c)%2?"dark":"light");
-   d.textContent=pieces[board[r][c]]||"";
-
-   d.dataset.r=r;
-   d.dataset.c=c;
-
-   el.appendChild(d);
-  }
- }
-}
-
-/* ================= DRAG ================= */
-
-document.addEventListener("touchmove",e=>{
- if(!dragPiece) return;
-
- let t=e.touches[0];
- dragEl.style.left=t.clientX+"px";
- dragEl.style.top=t.clientY+"px";
-});
-
-document.addEventListener("touchend",e=>{
- if(!dragPiece || running) return;
-
- let t=e.changedTouches[0];
- let el=document.elementFromPoint(t.clientX,t.clientY);
-
- if(el && el.dataset){
-  let r=+el.dataset.r;
-  let c=+el.dataset.c;
-
-  if(dragPiece==="K" && whiteKing) return;
-  if(dragPiece==="k" && blackKing) return;
-
-  if(dragPiece==="K") whiteKing=true;
-  if(dragPiece==="k") blackKing=true;
-
-  board[r][c]=dragPiece;
-
-  render();
-  checkStart();
- }
-
- dragPiece=null;
- dragEl.textContent="";
-});
-
-/* ================= MOTOR ================= */
-
-function clone(b){return b.map(r=>r.slice());}
-
-function hash(b){return JSON.stringify(b);}
-
-function findKing(b,side){
- for(let r=0;r<8;r++){
-  for(let c=0;c<8;c++){
-   if(side==="w" && b[r][c]==="K") return [r,c];
-   if(side==="b" && b[r][c]==="k") return [r,c];
-  }
- }
-}
-
-function isAttacked(b,r,c,bySide){
- let moves=getMoves(b,bySide,true);
- return moves.some(m=>m.r2===r && m.c2===c);
-}
-
-function getMoves(b,side,raw=false){
-
- let moves=[];
-
- for(let r=0;r<8;r++){
-  for(let c=0;c<8;c++){
-
-   let p=b[r][c];
-   if(!p) continue;
-
-   if(side==="w"&&p!==p.toUpperCase()) continue;
-   if(side==="b"&&p!==p.toLowerCase()) continue;
-
-   let isWhite=p===p.toUpperCase();
-
-   function add(r2,c2){
-    if(r2<0||r2>7||c2<0||c2>7) return;
-    let t=b[r2][c2];
-    if(!t||(isWhite&&t!==t.toUpperCase())||(!isWhite&&t!==t.toLowerCase()))
-      moves.push({r,c,r2,c2});
-   }
-
-   switch(p.toLowerCase()){
-
-    case "p":
-      let d=isWhite?-1:1;
-      if(!b[r+d]?.[c]) add(r+d,c);
-      add(r+d,c+1);
-      add(r+d,c-1);
-    break;
-
-    case "n":
-      [[2,1],[2,-1],[-2,1],[-2,-1],[1,2],[1,-2],[-1,2],[-1,-2]]
-      .forEach(v=>add(r+v[0],c+v[1]));
-    break;
-
-    case "b":
-    case "r":
-    case "q":
-      let dirs = p==="b"?[[1,1],[1,-1],[-1,1],[-1,-1]]:
-                 p==="r"?[[1,0],[-1,0],[0,1],[0,-1]]:
-                 [[1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]];
-
-      dirs.forEach(v=>{
-        for(let i=1;i<8;i++){
-          let r2=r+v[0]*i,c2=c+v[1]*i;
-          if(r2<0||r2>7||c2<0||c2>7) break;
-          add(r2,c2);
-          if(b[r2][c2]) break;
-        }
-      });
-    break;
-
-    case "k":
-      [[1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]]
-      .forEach(v=>add(r+v[0],c+v[1]));
-    break;
-   }
-  }
- }
-
- if(!raw){
-  moves = moves.filter(m=>{
-    let nb=clone(b);
-    nb[m.r2][m.c2]=nb[m.r][m.c];
-    nb[m.r][m.c]="";
-
-    let king=findKing(nb,side);
-    return !isAttacked(nb,king[0],king[1],side==="w"?"b":"w");
-  });
- }
-
- return moves;
-}
-
-/* ================= IA ================= */
-
-const values={p:1,n:3,b:3,r:5,q:9,k:1000};
-
-function evaluate(b){
- let s=0;
- for(let row of b){
-  for(let p of row){
-   if(!p) continue;
-   s += (p===p.toUpperCase()?1:-1)*values[p.toLowerCase()];
-  }
- }
- return s;
-}
-
-function minimax(b,depth,alpha,beta,maximizing){
-
- let key=hash(b);
- history[key]=(history[key]||0)+1;
-
- if(history[key]>=3) return 0;
-
- if(depth===0) return evaluate(b);
-
- let moves=getMoves(b,maximizing?"w":"b");
-
- if(maximizing){
-  let max=-Infinity;
-  for(let m of moves){
-    let nb=clone(b);
-    nb[m.r2][m.c2]=nb[m.r][m.c];
-    nb[m.r][m.c]="";
-
-    let val=minimax(nb,depth-1,alpha,beta,false);
-    max=Math.max(max,val);
-    alpha=Math.max(alpha,val);
-    if(beta<=alpha) break;
-  }
-  return max;
- }else{
-  let min=Infinity;
-  for(let m of moves){
-    let nb=clone(b);
-    nb[m.r2][m.c2]=nb[m.r][m.c];
-    nb[m.r][m.c]="";
-
-    let val=minimax(nb,depth-1,alpha,beta,true);
-    min=Math.min(min,val);
-    beta=Math.min(beta,val);
-    if(beta<=alpha) break;
-  }
-  return min;
- }
-}
-
-function bestMove(){
-
- let moves=getMoves(board,turn);
- if(!moves.length) return null;
-
- let best=null;
- let bestVal = turn==="w"?-Infinity:Infinity;
-
- for(let m of moves){
-
-  let nb=clone(board);
-  nb[m.r2][m.c2]=nb[m.r][m.c];
-  nb[m.r][m.c]="";
-
-  let val=minimax(nb,3,-Infinity,Infinity,turn==="b");
-
-  if(turn==="w" && val>bestVal){ bestVal=val; best=m; }
-  if(turn==="b" && val<bestVal){ bestVal=val; best=m; }
- }
-
- return best;
-}
-
-/* ================= LOOP ================= */
-
-function step(){
-
- if(!running) return;
-
- let moves=getMoves(board,turn);
-
- if(!moves.length){
-  let king=findKing(board,turn);
-  if(isAttacked(board,king[0],king[1],turn==="w"?"b":"w")){
-    alert((turn==="w"?"Pretas":"Brancas")+" venceram por xeque-mate!");
-  } else {
-    alert("Empate!");
-  }
-  running=false;
-  return;
- }
-
- let m=bestMove();
-
- board[m.r2][m.c2]=board[m.r][m.c];
- board[m.r][m.c]="";
-
- renderBoard();
-
- turn = turn==="w"?"b":"w";
-
- setTimeout(step,300);
-}
-
-/* ================= START ================= */
-
-function checkStart(){
- if(whiteKing && blackKing){
-  running=true;
-  setTimeout(step,300);
- }
-}
-
-/* ================= INIT ================= */
-
-function render(){
- renderMenus();
- renderBoard();
-}
-
-render();
-
-</script>
+<script src="engine.js"></script>
 </body>
 </html>
