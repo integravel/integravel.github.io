@@ -5,8 +5,7 @@ const game = {
  selected:null,
  moves:[],
  lastMove:null,
- enPassant:null,
- moved:{K:false,k:false,R0:false,R7:false,r0:false,r7:false}
+ enPassant:null
 };
 
 /* ================= ELEMENTOS ================= */
@@ -21,7 +20,46 @@ const symbols={
  p:"♟",r:"♜",n:"♞",b:"♝",q:"♛",k:"♚"
 };
 
-let dragging=null;
+/* ================= DRAG ================= */
+let draggingPiece=null;
+
+function startDrag(piece,x,y){
+ draggingPiece=piece;
+ dragEl.textContent=symbols[piece];
+ dragEl.style.display="block";
+ moveDrag(x,y);
+}
+
+function moveDrag(x,y){
+ dragEl.style.left=x+"px";
+ dragEl.style.top=y+"px";
+}
+
+function endDrag(x,y){
+
+ if(!draggingPiece) return;
+
+ let el=document.elementFromPoint(x,y);
+
+ if(el && el.dataset){
+  let r=parseInt(el.dataset.r);
+  let c=parseInt(el.dataset.c);
+  game.board[r][c]=draggingPiece;
+ }
+
+ draggingPiece=null;
+ dragEl.textContent="";
+ dragEl.style.display="none";
+ drawBoard();
+}
+
+document.addEventListener("pointermove",e=>{
+ if(draggingPiece) moveDrag(e.clientX,e.clientY);
+});
+
+document.addEventListener("pointerup",e=>{
+ endDrag(e.clientX,e.clientY);
+});
 
 /* ================= UTIL ================= */
 
@@ -137,7 +175,7 @@ function getPseudoMoves(b,side){
 
       if((isWhite&&r===6)||(!isWhite&&r===1)){
         if(!b[r+d][c]&&!b[r+2*d][c])
-          push(r+2*d,c,{double:true});
+          push(r+2*d,c);
       }
 
       for(let dc of [-1,1]){
@@ -145,10 +183,6 @@ function getPseudoMoves(b,side){
 
         if(b[r2]?.[c2] && isEnemy(p,b[r2][c2]))
           push(r2,c2);
-
-        if(game.enPassant && game.enPassant.r===r && game.enPassant.c===c2){
-          push(r+d,c2,{enPassant:true});
-        }
       }
 
     } break;
@@ -196,10 +230,6 @@ function getLegalMoves(b,side){
   nb[m.r2][m.c2]=nb[m.r][m.c];
   nb[m.r][m.c]="";
 
-  if(m.enPassant){
-    nb[m.r][m.c2]="";
-  }
-
   let k=findKing(nb,side);
   return !isAttacked(nb,k[0],k[1],side==="w"?"b":"w");
  });
@@ -216,12 +246,8 @@ function drawMenus(){
   el.className="menuPiece";
   el.textContent=symbols[k];
 
-  el.ontouchstart=e=>{
-    dragging=k;
-    let t=e.touches[0];
-    dragEl.style.left=t.clientX+"px";
-    dragEl.style.top=t.clientY+"px";
-    dragEl.textContent=symbols[k];
+  el.onpointerdown=(e)=>{
+    startDrag(k,e.clientX,e.clientY);
   };
 
   if(k===k.toLowerCase()) topMenu.appendChild(el);
@@ -274,7 +300,6 @@ function handleClick(r,c){
   let move = game.moves.find(m=>m.r2===r && m.c2===c);
 
   if(move){
-
     game.board[r][c]=game.board[game.selected.r][game.selected.c];
     game.board[game.selected.r][game.selected.c]="";
 
