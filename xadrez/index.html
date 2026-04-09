@@ -10,62 +10,73 @@
 
 body{
  margin:0;
- overflow:hidden;
+ height:100vh;
+ display:flex;
+ flex-direction:column;
  background:#222;
  font-family:sans-serif;
+ overflow:hidden;
 }
 
 /* MENUS */
 .menu{
- height:100px;
+ height:120px;
  display:flex;
  justify-content:center;
  align-items:center;
+ gap:12px;
  background:#333;
- gap:10px;
 }
 
 .menuPiece{
- font-size:40px;
- cursor:pointer;
+ font-size:48px;
 }
 
 /* TABULEIRO */
+#boardContainer{
+ flex:1;
+ display:flex;
+ justify-content:center;
+ align-items:center;
+}
+
 #board{
  width:100vw;
- height:calc(100vh - 260px);
+ max-width:500px;
+ aspect-ratio:1;
  display:grid;
  grid-template-columns:repeat(8,1fr);
 }
 
 .cell{
  display:flex;
- align-items:center;
  justify-content:center;
+ align-items:center;
 }
 
 .light{ background:#f0d9b5; }
 .dark{ background:#b58863; }
 
 .piece{
- font-size:42px;
+ font-size:48px;
  pointer-events:none;
 }
 
 /* DRAG */
 #drag{
  position:fixed;
- font-size:42px;
+ font-size:48px;
  pointer-events:none;
  transform:translate(-50%,-50%);
 }
 
-/* BOTÃO */
+/* CONTROLES */
 #controls{
- height:60px;
+ height:80px;
  display:flex;
  justify-content:center;
  align-items:center;
+ gap:20px;
  background:#444;
 }
 
@@ -88,8 +99,8 @@ button{
 }
 
 #editor button{
+ font-size:30px;
  margin:5px;
- font-size:28px;
 }
 
 </style>
@@ -99,12 +110,15 @@ button{
 
 <div id="topMenu" class="menu"></div>
 
-<div id="board"></div>
+<div id="boardContainer">
+  <div id="board"></div>
+</div>
 
 <div id="bottomMenu" class="menu"></div>
 
 <div id="controls">
  <button onclick="openEditor()">Editor</button>
+ <button onclick="resetBoard()">Reset</button>
 </div>
 
 <div id="drag"></div>
@@ -113,27 +127,21 @@ button{
 
 <script>
 
-/* ================= STORAGE ================= */
+/* ================= ESTADO ================= */
+
+const game={
+ board:Array.from({length:8},()=>Array(8).fill(""))
+};
 
 let customPieces = JSON.parse(localStorage.getItem("customPieces")||"[]");
 
-function save(){
- localStorage.setItem("customPieces", JSON.stringify(customPieces));
-}
-
 /* ================= ELEMENTOS ================= */
 
-const boardEl = document.getElementById("board");
-const dragEl = document.getElementById("drag");
-const topMenu = document.getElementById("topMenu");
-const bottomMenu = document.getElementById("bottomMenu");
-const editor = document.getElementById("editor");
-
-/* ================= ESTADO ================= */
-
-const game = {
- board: Array.from({length:8},()=>Array(8).fill(""))
-};
+const boardEl=document.getElementById("board");
+const dragEl=document.getElementById("drag");
+const topMenu=document.getElementById("topMenu");
+const bottomMenu=document.getElementById("bottomMenu");
+const editor=document.getElementById("editor");
 
 /* ================= PEÇAS ================= */
 
@@ -142,8 +150,8 @@ const baseSymbols={
  p:"♟",r:"♜",n:"♞",b:"♝",q:"♛",k:"♚"
 };
 
-const iconList = [
- "★","✦","✪","☀","☠","☢","☣","⚔","⚙","⚡","🔥","💀","👑","🛡"
+const iconList=[
+ "★","✦","✪","☀","☠","⚔","⚙","⚡","🔥","💀","👑","🛡"
 ];
 
 /* ================= DRAG ================= */
@@ -152,20 +160,20 @@ let dragging=null;
 
 document.addEventListener("pointermove",e=>{
  if(dragging){
-  dragEl.style.left = e.clientX+"px";
-  dragEl.style.top = e.clientY+"px";
+  dragEl.style.left=e.clientX+"px";
+  dragEl.style.top=e.clientY+"px";
  }
 });
 
 document.addEventListener("pointerup",e=>{
  if(!dragging) return;
 
- let el = document.elementFromPoint(e.clientX,e.clientY);
+ let el=document.elementFromPoint(e.clientX,e.clientY);
 
  if(el?.dataset){
-  let r = +el.dataset.r;
-  let c = +el.dataset.c;
-  game.board[r][c] = dragging;
+  let r=+el.dataset.r;
+  let c=+el.dataset.c;
+  game.board[r][c]=dragging;
  }
 
  dragging=null;
@@ -176,14 +184,14 @@ document.addEventListener("pointerup",e=>{
 /* ================= MENUS ================= */
 
 function getAllPieces(){
- let list = [...Object.keys(baseSymbols)];
+ let list=[...Object.keys(baseSymbols)];
  customPieces.forEach((_,i)=>list.push("c"+i));
  return list;
 }
 
 function getSymbol(p){
  if(baseSymbols[p]) return baseSymbols[p];
- return customPieces[parseInt(p.slice(1))]?.symbol || "?";
+ return customPieces[parseInt(p.slice(1))]?.symbol||"?";
 }
 
 function drawMenus(){
@@ -192,91 +200,9 @@ function drawMenus(){
  bottomMenu.innerHTML="";
 
  getAllPieces().forEach(p=>{
-
   let el=document.createElement("div");
   el.className="menuPiece";
   el.textContent=getSymbol(p);
 
-  el.onpointerdown=e=>{
+  el.onpointerdown=()=>{
     dragging=p;
-    dragEl.textContent=getSymbol(p);
-  };
-
-  topMenu.appendChild(el);
-  bottomMenu.appendChild(el);
- });
-}
-
-/* ================= TABULEIRO ================= */
-
-function draw(){
-
- boardEl.innerHTML="";
-
- for(let r=0;r<8;r++){
-  for(let c=0;c<8;c++){
-
-   let cell=document.createElement("div");
-   cell.className="cell "+((r+c)%2?"dark":"light");
-   cell.dataset.r=r;
-   cell.dataset.c=c;
-
-   let p=game.board[r][c];
-
-   if(p){
-    let el=document.createElement("div");
-    el.className="piece";
-    el.textContent=getSymbol(p);
-    cell.appendChild(el);
-   }
-
-   boardEl.appendChild(cell);
-  }
- }
-
- drawMenus();
-}
-
-/* ================= EDITOR ================= */
-
-function openEditor(){
- editor.style.display="flex";
- showIconPicker();
-}
-
-function closeEditor(){
- editor.style.display="none";
-}
-
-function showIconPicker(){
-
- editor.innerHTML="<h2>Escolha um símbolo</h2>";
-
- iconList.forEach(icon=>{
-  let btn=document.createElement("button");
-  btn.textContent=icon;
-
-  btn.onclick=()=>{
-    customPieces.push({symbol:icon});
-    save();
-    drawMenus();
-    closeEditor();
-  };
-
-  editor.appendChild(btn);
- });
-
- let closeBtn=document.createElement("button");
- closeBtn.textContent="Fechar";
- closeBtn.onclick=closeEditor;
- editor.appendChild(closeBtn);
-}
-
-/* ================= INIT ================= */
-
-draw();
-
-</script>
-
-</body>
-</html>
