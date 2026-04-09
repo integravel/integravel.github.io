@@ -9,8 +9,7 @@ function save(){
 /* ================= ESTADO ================= */
 
 const game={
- board:Array.from({length:8},()=>Array(8).fill("")),
- turn:"w"
+ board:Array.from({length:8},()=>Array(8).fill(""))
 };
 
 const boardEl=document.getElementById("board");
@@ -18,12 +17,17 @@ const dragEl=document.getElementById("drag");
 const topMenu=document.getElementById("topMenu");
 const bottomMenu=document.getElementById("bottomMenu");
 
-/* ================= PEÇAS BASE ================= */
+/* ================= SÍMBOLOS ================= */
 
 const baseSymbols={
  P:"♙",R:"♖",N:"♘",B:"♗",Q:"♕",K:"♔",
  p:"♟",r:"♜",n:"♞",b:"♝",q:"♛",k:"♚"
 };
+
+const iconList=[
+ "★","✦","✪","☀","☠","☢","☣","⚔","⚙","♞","♜","♛",
+ "⚡","🔥","💀","👑","🛡","🧿","🔮","🌀"
+];
 
 /* ================= DRAG ================= */
 
@@ -55,22 +59,14 @@ document.addEventListener("pointerup",e=>{
 /* ================= MENUS ================= */
 
 function getAllPieces(){
-
  let list=[...Object.keys(baseSymbols)];
-
- customPieces.forEach((p,i)=>{
-  list.push("c"+i);
- });
-
+ customPieces.forEach((p,i)=>list.push("c"+i));
  return list;
 }
 
 function getSymbol(p){
-
  if(baseSymbols[p]) return baseSymbols[p];
-
- let i=parseInt(p.slice(1));
- return customPieces[i].symbol;
+ return customPieces[parseInt(p.slice(1))].symbol;
 }
 
 function drawMenus(){
@@ -79,7 +75,6 @@ function drawMenus(){
  bottomMenu.innerHTML="";
 
  getAllPieces().forEach(p=>{
-
   let el=document.createElement("div");
   el.className="menuPiece";
   el.textContent=getSymbol(p);
@@ -89,8 +84,8 @@ function drawMenus(){
     dragEl.textContent=getSymbol(p);
   };
 
-  if(p===p.toLowerCase()) topMenu.appendChild(el);
-  else bottomMenu.appendChild(el);
+  topMenu.appendChild(el);
+  bottomMenu.appendChild(el);
  });
 }
 
@@ -128,78 +123,129 @@ function draw(){
 
 const editor=document.getElementById("editor");
 
+let creating=null;
+let phase=0;
+let anchor=null;
+
+const phases=[
+ {text:"Movimento (Topo Esquerda)", anchor:[0,0], type:"move"},
+ {text:"Ataque (Topo Esquerda)", anchor:[0,0], type:"attack"},
+
+ {text:"Movimento (Topo Direita)", anchor:[0,7], type:"move"},
+ {text:"Ataque (Topo Direita)", anchor:[0,7], type:"attack"},
+
+ {text:"Movimento (Baixo Esquerda)", anchor:[7,0], type:"move"},
+ {text:"Ataque (Baixo Esquerda)", anchor:[7,0], type:"attack"},
+
+ {text:"Movimento (Baixo Direita)", anchor:[7,7], type:"move"},
+ {text:"Ataque (Baixo Direita)", anchor:[7,7], type:"attack"}
+];
+
+/* abrir */
 function openEditor(){
  editor.classList.remove("hidden");
- renderEditor();
+ showIconPicker();
 }
 
 function closeEditor(){
  editor.classList.add("hidden");
 }
 
-function renderEditor(){
+/* ================= ESCOLHER ÍCONE ================= */
 
- let list=document.getElementById("pieceList");
- list.innerHTML="";
+function showIconPicker(){
 
- customPieces.forEach((p,i)=>{
+ editor.innerHTML="<h2>Escolha um símbolo</h2>";
 
-  let div=document.createElement("div");
-  div.innerHTML=`
-   ${p.symbol}
-   <button onclick="deletePiece(${i})">Apagar</button>
-  `;
+ iconList.forEach(icon=>{
+  let btn=document.createElement("button");
+  btn.textContent=icon;
+  btn.style.fontSize="30px";
 
-  list.appendChild(div);
- });
+  btn.onclick=()=>{
+    creating={
+      symbol:icon,
+      move:[],
+      attack:[]
+    };
+    startPlacement();
+  };
+
+  editor.appendChild(btn);
+});
+
+/* ================= DEFINIÇÃO ================= */
+
+let boardClickHandler=null;
+
+boardEl.addEventListener("click",e=>{
+ let cell=e.target.closest(".cell");
+ if(!cell || !boardClickHandler) return;
+
+ let r=+cell.dataset.r;
+ let c=+cell.dataset.c;
+
+ boardClickHandler(r,c);
+});
+
+function startPlacement(){
+
+ phase=0;
+ game.board=Array.from({length:8},()=>Array(8).fill(""));
+
+ updatePhaseUI();
+ boardClickHandler=handlePlacement;
 }
 
-/* ================= CRIAR PEÇA ================= */
+function updatePhaseUI(){
+ let p=phases[phase];
+ editor.innerHTML=`<h2>${p.text}</h2>`;
+ anchor=p.anchor;
+}
 
-function createPiece(){
+function handlePlacement(r,c){
 
- if(customPieces.length>=6){
-  alert("Máximo 6 peças");
-  return;
+ let dx=r-anchor[0];
+ let dy=c-anchor[1];
+
+ let type=phases[phase].type;
+
+ creating[type].push([dx,dy]);
+
+ game.board[r][c]="X";
+ draw();
+
+ phase++;
+
+ if(phase>=phases.length){
+  finishPiece();
+ } else {
+  updatePhaseUI();
  }
-
- let symbol=prompt("Digite um símbolo (ex: ★ ☠ ♞)");
-
- if(!symbol) return;
-
- let move=prompt("Movimento (ex: N, B, R, Q, K)");
- let attack=prompt("Ataque (ex: N, B, R, Q, K)");
-
- customPieces.push({symbol,move,attack});
-
- save();
- renderEditor();
- drawMenus();
 }
 
-/* ================= DELETE ================= */
+/* ================= FINALIZAR ================= */
 
-function deletePiece(i){
- customPieces.splice(i,1);
+function finishPiece(){
+
+ customPieces.push(creating);
  save();
- renderEditor();
- drawMenus();
+
+ boardClickHandler=null;
+
+ alert("Peça criada!");
+ openEditor();
 }
 
 /* ================= RESET ================= */
 
 function resetAll(){
-
- if(!confirm("Tem certeza? Isso apaga tudo!")) return;
+ if(!confirm("Apagar tudo?")) return;
 
  customPieces=[];
- game.board=Array.from({length:8},()=>Array(8).fill(""));
-
  save();
  draw();
- renderEditor();
 }
 
-/* ================= INIT ================= */
-
+/* INIT */
 draw();
