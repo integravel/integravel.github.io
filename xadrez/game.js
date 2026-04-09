@@ -1,261 +1,102 @@
+/* ================= STORAGE ================= */
+
+let customPieces = JSON.parse(localStorage.getItem("customPieces")||"[]");
+
+function save(){
+ localStorage.setItem("customPieces", JSON.stringify(customPieces));
+}
+
 /* ================= ESTADO ================= */
-const game = {
- board: Array.from({length:8},()=>Array(8).fill("")),
- turn:"w",
- selected:null,
- moves:[],
- lastMove:null,
- enPassant:null
+
+const game={
+ board:Array.from({length:8},()=>Array(8).fill("")),
+ turn:"w"
 };
 
-/* ================= ELEMENTOS ================= */
-const boardEl = document.getElementById("board");
-const dragEl = document.getElementById("drag");
-const topMenu = document.getElementById("topMenu");
-const bottomMenu = document.getElementById("bottomMenu");
+const boardEl=document.getElementById("board");
+const dragEl=document.getElementById("drag");
+const topMenu=document.getElementById("topMenu");
+const bottomMenu=document.getElementById("bottomMenu");
 
-/* ================= PEÇAS ================= */
-const symbols={
+/* ================= PEÇAS BASE ================= */
+
+const baseSymbols={
  P:"♙",R:"♖",N:"♘",B:"♗",Q:"♕",K:"♔",
  p:"♟",r:"♜",n:"♞",b:"♝",q:"♛",k:"♚"
 };
 
 /* ================= DRAG ================= */
-let draggingPiece=null;
 
-function startDrag(piece,x,y){
- draggingPiece=piece;
- dragEl.textContent=symbols[piece];
- dragEl.style.display="block";
- moveDrag(x,y);
-}
-
-function moveDrag(x,y){
- dragEl.style.left=x+"px";
- dragEl.style.top=y+"px";
-}
-
-function endDrag(x,y){
-
- if(!draggingPiece) return;
-
- let el=document.elementFromPoint(x,y);
-
- if(el && el.dataset){
-  let r=parseInt(el.dataset.r);
-  let c=parseInt(el.dataset.c);
-  game.board[r][c]=draggingPiece;
- }
-
- draggingPiece=null;
- dragEl.textContent="";
- dragEl.style.display="none";
- drawBoard();
-}
+let dragging=null;
 
 document.addEventListener("pointermove",e=>{
- if(draggingPiece) moveDrag(e.clientX,e.clientY);
+ if(dragging){
+  dragEl.style.left=e.clientX+"px";
+  dragEl.style.top=e.clientY+"px";
+ }
 });
 
 document.addEventListener("pointerup",e=>{
- endDrag(e.clientX,e.clientY);
+ if(!dragging) return;
+
+ let el=document.elementFromPoint(e.clientX,e.clientY);
+
+ if(el?.dataset){
+  let r=+el.dataset.r;
+  let c=+el.dataset.c;
+  game.board[r][c]=dragging;
+ }
+
+ dragging=null;
+ dragEl.textContent="";
+ draw();
 });
 
-/* ================= UTIL ================= */
+/* ================= MENUS ================= */
 
-function clone(b){return b.map(r=>r.slice());}
+function getAllPieces(){
 
-function isEnemy(a,b){
- return b && ((a===a.toUpperCase()) !== (b===b.toUpperCase()));
-}
+ let list=[...Object.keys(baseSymbols)];
 
-function findKing(b,side){
- for(let r=0;r<8;r++)
- for(let c=0;c<8;c++){
-  if(side==="w" && b[r][c]==="K") return [r,c];
-  if(side==="b" && b[r][c]==="k") return [r,c];
- }
- return null;
-}
-
-/* ================= ATAQUE CORRETO ================= */
-
-function isAttacked(b,r,c,by){
-
- for(let i=0;i<8;i++){
-  for(let j=0;j<8;j++){
-
-   let p=b[i][j];
-   if(!p) continue;
-
-   if(by==="w" && p!==p.toUpperCase()) continue;
-   if(by==="b" && p!==p.toLowerCase()) continue;
-
-   let isWhite = p===p.toUpperCase();
-
-   switch(p.toLowerCase()){
-
-    case "p":{
-      let d = isWhite ? -1 : 1;
-      if(i+d===r && (j+1===c || j-1===c)) return true;
-    } break;
-
-    case "n":{
-      let moves=[[2,1],[2,-1],[-2,1],[-2,-1],[1,2],[1,-2],[-1,2],[-1,-2]];
-      for(let m of moves){
-        if(i+m[0]===r && j+m[1]===c) return true;
-      }
-    } break;
-
-    case "b":
-    case "r":
-    case "q":{
-      let dirs=[];
-      if(p.toLowerCase()!=="r") dirs.push([1,1],[1,-1],[-1,1],[-1,-1]);
-      if(p.toLowerCase()!=="b") dirs.push([1,0],[-1,0],[0,1],[0,-1]);
-
-      for(let d of dirs){
-        for(let k=1;k<8;k++){
-          let r2=i+d[0]*k;
-          let c2=j+d[1]*k;
-
-          if(r2<0||r2>7||c2<0||c2>7) break;
-
-          if(r2===r && c2===c) return true;
-
-          if(b[r2][c2]) break;
-        }
-      }
-    } break;
-
-    case "k":{
-      let dirs=[[1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]];
-      for(let d of dirs){
-        if(i+d[0]===r && j+d[1]===c) return true;
-      }
-    } break;
-
-   }
-  }
- }
-
- return false;
-}
-
-/* ================= MOVIMENTOS ================= */
-
-function getPseudoMoves(b,side){
-
- let moves=[];
-
- for(let r=0;r<8;r++){
-  for(let c=0;c<8;c++){
-
-   let p=b[r][c];
-   if(!p) continue;
-
-   if(side==="w" && p!==p.toUpperCase()) continue;
-   if(side==="b" && p!==p.toLowerCase()) continue;
-
-   let isWhite=p===p.toUpperCase();
-
-   function push(r2,c2,extra={}){
-    if(r2<0||r2>7||c2<0||c2>7) return;
-    let t=b[r2][c2];
-    if(!t || isEnemy(p,t))
-      moves.push({r,c,r2,c2,...extra});
-   }
-
-   switch(p.toLowerCase()){
-
-    case "p":{
-      let d=isWhite?-1:1;
-
-      if(!b[r+d]?.[c]) push(r+d,c);
-
-      if((isWhite&&r===6)||(!isWhite&&r===1)){
-        if(!b[r+d][c]&&!b[r+2*d][c])
-          push(r+2*d,c);
-      }
-
-      for(let dc of [-1,1]){
-        let r2=r+d,c2=c+dc;
-
-        if(b[r2]?.[c2] && isEnemy(p,b[r2][c2]))
-          push(r2,c2);
-      }
-
-    } break;
-
-    case "n":
-      [[2,1],[2,-1],[-2,1],[-2,-1],[1,2],[1,-2],[-1,2],[-1,-2]]
-      .forEach(v=>push(r+v[0],c+v[1]));
-    break;
-
-    case "b": slide([[1,1],[1,-1],[-1,1],[-1,-1]]); break;
-    case "r": slide([[1,0],[-1,0],[0,1],[0,-1]]); break;
-    case "q": slide([[1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]]); break;
-
-    case "k":
-      [[1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]]
-      .forEach(v=>push(r+v[0],c+v[1]));
-    break;
-   }
-
-   function slide(dirs){
-    for(let d of dirs){
-     for(let i=1;i<8;i++){
-      let r2=r+d[0]*i,c2=c+d[1]*i;
-      if(r2<0||r2>7||c2<0||c2>7) break;
-
-      if(!b[r2][c2]) moves.push({r,c,r2,c2});
-      else{
-        if(isEnemy(p,b[r2][c2])) moves.push({r,c,r2,c2});
-        break;
-      }
-     }
-    }
-   }
-  }
- }
-
- return moves;
-}
-
-/* LEGAIS */
-function getLegalMoves(b,side){
- return getPseudoMoves(b,side).filter(m=>{
-  let nb=clone(b);
-
-  nb[m.r2][m.c2]=nb[m.r][m.c];
-  nb[m.r][m.c]="";
-
-  let k=findKing(nb,side);
-  return !isAttacked(nb,k[0],k[1],side==="w"?"b":"w");
+ customPieces.forEach((p,i)=>{
+  list.push("c"+i);
  });
+
+ return list;
 }
 
-/* ================= UI ================= */
+function getSymbol(p){
+
+ if(baseSymbols[p]) return baseSymbols[p];
+
+ let i=parseInt(p.slice(1));
+ return customPieces[i].symbol;
+}
 
 function drawMenus(){
+
  topMenu.innerHTML="";
  bottomMenu.innerHTML="";
 
- for(let k in symbols){
+ getAllPieces().forEach(p=>{
+
   let el=document.createElement("div");
   el.className="menuPiece";
-  el.textContent=symbols[k];
+  el.textContent=getSymbol(p);
 
-  el.onpointerdown=(e)=>{
-    startDrag(k,e.clientX,e.clientY);
+  el.onpointerdown=e=>{
+    dragging=p;
+    dragEl.textContent=getSymbol(p);
   };
 
-  if(k===k.toLowerCase()) topMenu.appendChild(el);
+  if(p===p.toLowerCase()) topMenu.appendChild(el);
   else bottomMenu.appendChild(el);
- }
+ });
 }
 
-function drawBoard(){
+/* ================= TABULEIRO ================= */
+
+function draw(){
 
  boardEl.innerHTML="";
 
@@ -269,71 +110,96 @@ function drawBoard(){
 
    let p=game.board[r][c];
 
-   if(game.selected && game.selected.r===r && game.selected.c===c)
-     cell.classList.add("selected");
-
-   if(game.moves.some(m=>m.r2===r && m.c2===c))
-     cell.classList.add(p?"capture":"move");
-
    if(p){
     let el=document.createElement("div");
     el.className="piece";
-    el.textContent=symbols[p];
+    el.textContent=getSymbol(p);
     cell.appendChild(el);
    }
-
-   cell.onclick=()=>handleClick(r,c);
 
    boardEl.appendChild(cell);
   }
  }
+
+ drawMenus();
 }
 
-/* ================= INTERAÇÃO ================= */
+/* ================= EDITOR ================= */
 
-function handleClick(r,c){
+const editor=document.getElementById("editor");
 
- let p=game.board[r][c];
+function openEditor(){
+ editor.classList.remove("hidden");
+ renderEditor();
+}
 
- if(game.selected){
+function closeEditor(){
+ editor.classList.add("hidden");
+}
 
-  let move = game.moves.find(m=>m.r2===r && m.c2===c);
+function renderEditor(){
 
-  if(move){
-    game.board[r][c]=game.board[game.selected.r][game.selected.c];
-    game.board[game.selected.r][game.selected.c]="";
+ let list=document.getElementById("pieceList");
+ list.innerHTML="";
 
-    game.turn = game.turn==="w"?"b":"w";
+ customPieces.forEach((p,i)=>{
 
-    let next=getLegalMoves(game.board,game.turn);
+  let div=document.createElement("div");
+  div.innerHTML=`
+   ${p.symbol}
+   <button onclick="deletePiece(${i})">Apagar</button>
+  `;
 
-    if(!next.length){
-      let k=findKing(game.board,game.turn);
-      if(isAttacked(game.board,k[0],k[1],game.turn==="w"?"b":"w"))
-        alert("Xeque-mate!");
-      else
-        alert("Empate!");
-    }
+  list.appendChild(div);
+ });
+}
 
-    game.selected=null;
-    game.moves=[];
-    drawBoard();
-    return;
-  }
+/* ================= CRIAR PEÇA ================= */
+
+function createPiece(){
+
+ if(customPieces.length>=6){
+  alert("Máximo 6 peças");
+  return;
  }
 
- if(!p) return;
+ let symbol=prompt("Digite um símbolo (ex: ★ ☠ ♞)");
 
- if(game.turn==="w" && p!==p.toUpperCase()) return;
- if(game.turn==="b" && p!==p.toLowerCase()) return;
+ if(!symbol) return;
 
- game.selected={r,c};
- game.moves=getLegalMoves(game.board,game.turn)
-   .filter(m=>m.r===r && m.c===c);
+ let move=prompt("Movimento (ex: N, B, R, Q, K)");
+ let attack=prompt("Ataque (ex: N, B, R, Q, K)");
 
- drawBoard();
+ customPieces.push({symbol,move,attack});
+
+ save();
+ renderEditor();
+ drawMenus();
 }
 
-/* INIT */
-drawMenus();
-drawBoard();
+/* ================= DELETE ================= */
+
+function deletePiece(i){
+ customPieces.splice(i,1);
+ save();
+ renderEditor();
+ drawMenus();
+}
+
+/* ================= RESET ================= */
+
+function resetAll(){
+
+ if(!confirm("Tem certeza? Isso apaga tudo!")) return;
+
+ customPieces=[];
+ game.board=Array.from({length:8},()=>Array(8).fill(""));
+
+ save();
+ draw();
+ renderEditor();
+}
+
+/* ================= INIT ================= */
+
+draw();
