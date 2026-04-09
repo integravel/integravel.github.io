@@ -1,18 +1,39 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html>
 <head>
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Xadrez Custom</title>
 <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
 <div id="topMenu" class="menu black"></div>
+
 <div id="board"></div>
+
 <div id="bottomMenu" class="menu white"></div>
+
+<div class="controls">
+ <button onclick="openEditor()">Editor</button>
+</div>
+
+<!-- EDITOR -->
+<div id="editor" class="editor hidden">
+
+ <h2>Editor de Peças</h2>
+
+ <div id="pieceList"></div>
+
+ <button onclick="createPiece()">Criar Peça</button>
+ <button onclick="resetAll()">Resetar Tudo</button>
+ <button onclick="closeEditor()">Voltar</button>
+
+</div>
+
 <div id="drag"></div>
 
 <script src="game.js"></script>
-
 </body>
 </html>
