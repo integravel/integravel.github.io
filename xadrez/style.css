@@ -1,7 +1,4 @@
-*{
- box-sizing:border-box;
- touch-action:none;
-}
+*{box-sizing:border-box; touch-action:none;}
 
 html,body{
  margin:0;
@@ -12,94 +9,73 @@ html,body{
 body{
  display:flex;
  flex-direction:column;
- justify-content:space-between;
- font-family:sans-serif;
 }
 
-/* MENUS */
+/* MENUS DOBRADOS */
 .menu{
- height:80px;
+ height:160px;
  display:flex;
+ flex-wrap:wrap;
  justify-content:center;
  align-items:center;
- gap:14px;
+ gap:10px;
 }
 
 .black{background:#222;color:white;}
 .white{background:#ddd;}
 
-/* PEÇAS DO MENU */
 .menuPiece{
- font-size:64px; /* 🔥 maior */
- font-family: Arial, "Segoe UI Symbol", sans-serif; /* 🔥 mais simples */
- line-height:1;
+ font-size:48px;
 }
 
 /* TABULEIRO */
 #board{
  width:100vw;
  height:100vw;
- max-width:100vh;
- max-height:100vh;
+ max-height:calc(100vh - 320px);
  margin:auto;
  display:grid;
  grid-template-columns:repeat(8,1fr);
- grid-template-rows:repeat(8,1fr);
 }
 
 /* CASAS */
 .cell{
- position:relative;
- width:100%;
- height:100%;
  display:flex;
- align-items:center;
  justify-content:center;
+ align-items:center;
 }
 
 .light{background:#f0d9b5;}
 .dark{background:#b58863;}
 
-/* PEÇAS NO TABULEIRO */
 .piece{
- position:absolute;
- inset:0;
- display:flex;
- align-items:center;
- justify-content:center;
-
- font-size:9vw; /* 🔥 BEM maior */
- font-family: Arial, "Segoe UI Symbol", sans-serif;
- line-height:1;
-
- transform:scale(1.1); /* 🔥 ocupa quase toda casa */
+ font-size:9vw;
  pointer-events:none;
 }
 
-/* SELEÇÃO */
-.selected{
- outline:3px solid #ffd54f;
+/* CONTROLES */
+.controls{
+ height:60px;
+ display:flex;
+ justify-content:center;
+ align-items:center;
 }
 
-/* MOVIMENTOS */
-.light.move{background:#c8e6c9;}
-.dark.move{background:#81c784;}
-
-/* CAPTURA */
-.light.capture{background:#ef9a9a;}
-.dark.capture{background:#e57373;}
-
-/* XEQUE */
-.check{
- background:#ff5252 !important;
+/* EDITOR */
+.editor{
+ position:fixed;
+ inset:0;
+ background:#111;
+ color:white;
+ padding:20px;
+ overflow:auto;
 }
 
-/* DRAG */
+.hidden{display:none;}
+
 #drag{
  position:fixed;
  pointer-events:none;
- font-size:64px;
- font-family: Arial, "Segoe UI Symbol", sans-serif;
+ font-size:60px;
  transform:translate(-50%,-50%);
- display:none;
 }
