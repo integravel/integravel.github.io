@@ -1,39 +1,282 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-br">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>Xadrez Custom</title>
-<link rel="stylesheet" href="style.css">
+
+<style>
+
+body{
+ margin:0;
+ overflow:hidden;
+ background:#222;
+ font-family:sans-serif;
+}
+
+/* MENUS */
+.menu{
+ height:100px;
+ display:flex;
+ justify-content:center;
+ align-items:center;
+ background:#333;
+ gap:10px;
+}
+
+.menuPiece{
+ font-size:40px;
+ cursor:pointer;
+}
+
+/* TABULEIRO */
+#board{
+ width:100vw;
+ height:calc(100vh - 260px);
+ display:grid;
+ grid-template-columns:repeat(8,1fr);
+}
+
+.cell{
+ display:flex;
+ align-items:center;
+ justify-content:center;
+}
+
+.light{ background:#f0d9b5; }
+.dark{ background:#b58863; }
+
+.piece{
+ font-size:42px;
+ pointer-events:none;
+}
+
+/* DRAG */
+#drag{
+ position:fixed;
+ font-size:42px;
+ pointer-events:none;
+ transform:translate(-50%,-50%);
+}
+
+/* BOTÃO */
+#controls{
+ height:60px;
+ display:flex;
+ justify-content:center;
+ align-items:center;
+ background:#444;
+}
+
+button{
+ padding:10px 20px;
+ font-size:16px;
+}
+
+/* EDITOR */
+#editor{
+ position:fixed;
+ inset:0;
+ background:#111;
+ color:white;
+ display:none;
+ flex-direction:column;
+ align-items:center;
+ padding:20px;
+ overflow:auto;
+}
+
+#editor button{
+ margin:5px;
+ font-size:28px;
+}
+
+</style>
 </head>
 
 <body>
 
-<div id="topMenu" class="menu black"></div>
+<div id="topMenu" class="menu"></div>
 
 <div id="board"></div>
 
-<div id="bottomMenu" class="menu white"></div>
+<div id="bottomMenu" class="menu"></div>
 
-<div class="controls">
+<div id="controls">
  <button onclick="openEditor()">Editor</button>
-</div>
-
-<!-- EDITOR -->
-<div id="editor" class="editor hidden">
-
- <h2>Editor de Peças</h2>
-
- <div id="pieceList"></div>
-
- <button onclick="createPiece()">Criar Peça</button>
- <button onclick="resetAll()">Resetar Tudo</button>
- <button onclick="closeEditor()">Voltar</button>
-
 </div>
 
 <div id="drag"></div>
 
-<script src="game.js"></script>
+<div id="editor"></div>
+
+<script>
+
+/* ================= STORAGE ================= */
+
+let customPieces = JSON.parse(localStorage.getItem("customPieces")||"[]");
+
+function save(){
+ localStorage.setItem("customPieces", JSON.stringify(customPieces));
+}
+
+/* ================= ELEMENTOS ================= */
+
+const boardEl = document.getElementById("board");
+const dragEl = document.getElementById("drag");
+const topMenu = document.getElementById("topMenu");
+const bottomMenu = document.getElementById("bottomMenu");
+const editor = document.getElementById("editor");
+
+/* ================= ESTADO ================= */
+
+const game = {
+ board: Array.from({length:8},()=>Array(8).fill(""))
+};
+
+/* ================= PEÇAS ================= */
+
+const baseSymbols={
+ P:"♙",R:"♖",N:"♘",B:"♗",Q:"♕",K:"♔",
+ p:"♟",r:"♜",n:"♞",b:"♝",q:"♛",k:"♚"
+};
+
+const iconList = [
+ "★","✦","✪","☀","☠","☢","☣","⚔","⚙","⚡","🔥","💀","👑","🛡"
+];
+
+/* ================= DRAG ================= */
+
+let dragging=null;
+
+document.addEventListener("pointermove",e=>{
+ if(dragging){
+  dragEl.style.left = e.clientX+"px";
+  dragEl.style.top = e.clientY+"px";
+ }
+});
+
+document.addEventListener("pointerup",e=>{
+ if(!dragging) return;
+
+ let el = document.elementFromPoint(e.clientX,e.clientY);
+
+ if(el?.dataset){
+  let r = +el.dataset.r;
+  let c = +el.dataset.c;
+  game.board[r][c] = dragging;
+ }
+
+ dragging=null;
+ dragEl.textContent="";
+ draw();
+});
+
+/* ================= MENUS ================= */
+
+function getAllPieces(){
+ let list = [...Object.keys(baseSymbols)];
+ customPieces.forEach((_,i)=>list.push("c"+i));
+ return list;
+}
+
+function getSymbol(p){
+ if(baseSymbols[p]) return baseSymbols[p];
+ return customPieces[parseInt(p.slice(1))]?.symbol || "?";
+}
+
+function drawMenus(){
+
+ topMenu.innerHTML="";
+ bottomMenu.innerHTML="";
+
+ getAllPieces().forEach(p=>{
+
+  let el=document.createElement("div");
+  el.className="menuPiece";
+  el.textContent=getSymbol(p);
+
+  el.onpointerdown=e=>{
+    dragging=p;
+    dragEl.textContent=getSymbol(p);
+  };
+
+  topMenu.appendChild(el);
+  bottomMenu.appendChild(el);
+ });
+}
+
+/* ================= TABULEIRO ================= */
+
+function draw(){
+
+ boardEl.innerHTML="";
+
+ for(let r=0;r<8;r++){
+  for(let c=0;c<8;c++){
+
+   let cell=document.createElement("div");
+   cell.className="cell "+((r+c)%2?"dark":"light");
+   cell.dataset.r=r;
+   cell.dataset.c=c;
+
+   let p=game.board[r][c];
+
+   if(p){
+    let el=document.createElement("div");
+    el.className="piece";
+    el.textContent=getSymbol(p);
+    cell.appendChild(el);
+   }
+
+   boardEl.appendChild(cell);
+  }
+ }
+
+ drawMenus();
+}
+
+/* ================= EDITOR ================= */
+
+function openEditor(){
+ editor.style.display="flex";
+ showIconPicker();
+}
+
+function closeEditor(){
+ editor.style.display="none";
+}
+
+function showIconPicker(){
+
+ editor.innerHTML="<h2>Escolha um símbolo</h2>";
+
+ iconList.forEach(icon=>{
+  let btn=document.createElement("button");
+  btn.textContent=icon;
+
+  btn.onclick=()=>{
+    customPieces.push({symbol:icon});
+    save();
+    drawMenus();
+    closeEditor();
+  };
+
+  editor.appendChild(btn);
+ });
+
+ let closeBtn=document.createElement("button");
+ closeBtn.textContent="Fechar";
+ closeBtn.onclick=closeEditor;
+ editor.appendChild(closeBtn);
+}
+
+/* ================= INIT ================= */
+
+draw();
+
+</script>
+
 </body>
 </html>
