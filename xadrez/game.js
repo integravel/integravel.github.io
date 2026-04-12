@@ -21,9 +21,7 @@ gameOver:false
 };
 
 function clone(b){return b.map(r=>r.slice())}
-
 function sideOf(p){return p===p.toUpperCase()?"w":"b"}
-
 function isEnemy(a,b){return b && sideOf(a)!==sideOf(b)}
 
 function findKing(board,side){
@@ -57,7 +55,6 @@ return false
 function kingWouldBeInCheck(board,side){
 
 let king=findKing(board,side)
-
 let enemy=side==="w"?"b":"w"
 
 return isSquareAttacked(board,king[0],king[1],enemy)
@@ -169,76 +166,28 @@ moves.push({r,c,r2:r+1,c2:c+1})
 return moves
 }
 
-function showPromotion(r,c,piece){
+function getLegalMoves(board,r,c){
 
-game.promotionPending=true
+let p=board[r][c]
+let side=sideOf(p)
 
-promotionMenu.innerHTML=""
+let pseudo=getPseudoMoves(board,r,c)
 
-;["Q","R","B","N"].forEach(type=>{
+let legal=[]
 
-let promoted = piece===piece.toUpperCase()?type:type.toLowerCase()
+for(let m of pseudo){
 
-let el=document.createElement("div")
-el.className="promoPiece"
-el.textContent=symbols[promoted]
+let newBoard=clone(board)
 
-el.onclick=()=>{
+newBoard[m.r2][m.c2]=p
+newBoard[m.r][m.c]=""
 
-game.board[r][c]=promoted
-promotionMenu.style.display="none"
-game.promotionPending=false
-
-endTurn()
+if(!kingWouldBeInCheck(newBoard,side))
+legal.push(m)
 
 }
 
-promotionMenu.appendChild(el)
-
-})
-
-promotionMenu.style.display="flex"
-
-}
-
-function drawUI(){
-
-topMenu.innerHTML=""
-bottomMenu.innerHTML=""
-
-;["b","w"].forEach(side=>{
-
-let menu = side==="w"?bottomMenu:topMenu
-
-game.hand[side].forEach((card,i)=>{
-
-let el=document.createElement("div")
-el.className="menuPiece"
-el.textContent=symbols[card.p]
-
-if(game.selectedCard===i && game.turn===side)
-el.style.outline="3px solid yellow"
-
-el.onclick=()=>{
-
-if(game.turn!==side) return
-if(game.promotionPending) return
-
-game.selected=null
-game.moves=[]
-
-game.selectedCard = game.selectedCard===i?null:i
-
-drawBoard()
-drawUI()
-
-}
-
-menu.appendChild(el)
-
-})
-
-})
+return legal
 
 }
 
@@ -262,8 +211,14 @@ if(game.selectedCard!==null){
 
 let card=game.hand[game.turn][game.selectedCard]
 
-if(card && r===card.r && c===card.c && !game.board[r][c])
+if(card && r===card.r && c===card.c){
+
+if(!game.board[r][c])
 cell.classList.add("move")
+else
+cell.classList.add("blocked")
+
+}
 
 }
 
@@ -297,10 +252,8 @@ newBoard[r][c]=card.p
 if(kingWouldBeInCheck(newBoard,game.turn)) return
 
 game.board=newBoard
-game.hand[game.turn].splice(game.selectedCard,1)
 
-if(card.p==="P" && r===0){drawBoard();showPromotion(r,c,"P");return}
-if(card.p==="p" && r===7){drawBoard();showPromotion(r,c,"p");return}
+game.hand[game.turn].splice(game.selectedCard,1)
 
 endTurn()
 
@@ -326,10 +279,8 @@ if(kingWouldBeInCheck(newBoard,game.turn)) return
 
 game.board=newBoard
 
-if(piece==="P" && move.r2===0){drawBoard();showPromotion(move.r2,move.c2,"P");return}
-if(piece==="p" && move.r2===7){drawBoard();showPromotion(move.r2,move.c2,"p");return}
-
 endTurn()
+
 return
 
 }
@@ -344,7 +295,7 @@ if(sideOf(p)!==game.turn) return
 game.selectedCard=null
 game.selected={r,c}
 
-game.moves=getPseudoMoves(game.board,r,c)
+game.moves=getLegalMoves(game.board,r,c)
 
 drawBoard()
 
@@ -385,6 +336,46 @@ if(!c) break
 game.hand[side].push(c)
 
 }
+
+}
+
+function drawUI(){
+
+topMenu.innerHTML=""
+bottomMenu.innerHTML=""
+
+;["b","w"].forEach(side=>{
+
+let menu = side==="w"?bottomMenu:topMenu
+
+game.hand[side].forEach((card,i)=>{
+
+let el=document.createElement("div")
+el.className="menuPiece"
+el.textContent=symbols[card.p]
+
+if(game.selectedCard===i && game.turn===side)
+el.style.outline="3px solid yellow"
+
+el.onclick=()=>{
+
+if(game.turn!==side) return
+
+game.selected=null
+game.moves=[]
+
+game.selectedCard = game.selectedCard===i?null:i
+
+drawBoard()
+drawUI()
+
+}
+
+menu.appendChild(el)
+
+})
+
+})
 
 }
 
