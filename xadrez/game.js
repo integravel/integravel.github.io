@@ -37,11 +37,7 @@ function createDeck(side){
 
  let deck = base.map(card=>{
   if(side==="b"){
-    return {
-      p:card.p.toLowerCase(),
-      r:7-card.r,
-      c:card.c
-    };
+    return { p:card.p.toLowerCase(), r:7-card.r, c:card.c };
   }
   return {...card};
  });
@@ -222,19 +218,28 @@ function getLegalMoves(b,side){
  });
 }
 
+/* ================= PROMOÇÃO ================= */
+
+function promotePawn(r,c){
+ let piece = prompt("Promover para: Q, R, B ou N").toUpperCase();
+
+ if(!["Q","R","B","N"].includes(piece)) piece="Q";
+
+ if(game.turn==="b") piece=piece.toLowerCase();
+
+ game.board[r][c]=piece;
+}
+
 /* ================= UI ================= */
 
 function drawUI(){
-
  topMenu.innerHTML="";
  bottomMenu.innerHTML="";
 
  ["b","w"].forEach(side=>{
-
   let menu = side==="w" ? bottomMenu : topMenu;
 
   game.hand[side].forEach((card,i)=>{
-
    let el=document.createElement("div");
    el.className="menuPiece";
    el.textContent=symbols[card.p];
@@ -260,56 +265,27 @@ function drawUI(){
 
    menu.appendChild(el);
   });
-
-  if(game.turn===side){
-    let btn=document.createElement("button");
-    btn.textContent="Comprar";
-    btn.onclick=drawCard;
-    menu.appendChild(btn);
-  }
-
  });
 }
 
 /* ================= AÇÕES ================= */
 
-function drawCard(){
-
- let side=game.turn;
-
- if(game.hand[side].length>=5)
-  return alert("Mão cheia");
-
- let k=findKing(game.board,side);
- if(isAttacked(game.board,k[0],k[1],side==="w"?"b":"w"))
-  return alert("Não pode comprar em xeque");
-
- let card=game.deck[side].pop();
- if(card) game.hand[side].push(card);
-
- endTurn();
-}
-
-/* 🔥 CORRIGIDO */
 function placeCard(r,c){
 
  let side=game.turn;
  let card=game.hand[side][game.selectedCard];
 
- if(r!==card.r || c!==card.c)
-  return alert("Posição incorreta");
+ if(r!==card.r || c!==card.c) return;
+ if(game.board[r][c]) return;
 
- if(game.board[r][c])
-  return alert("Casa ocupada");
-
- // simular jogada
  let newBoard = clone(game.board);
  newBoard[r][c] = card.p;
 
  let king = findKing(newBoard, side);
 
  if(isAttacked(newBoard, king[0], king[1], side==="w"?"b":"w")){
-  return alert("Jogada ilegal: rei continua em xeque");
+  alert("Jogada ilegal");
+  return;
  }
 
  game.board[r][c]=card.p;
@@ -346,7 +322,6 @@ function handleClick(r,c){
   }
 
   game.moves=[];
-
   placeCard(r,c);
   return;
  }
@@ -356,8 +331,15 @@ function handleClick(r,c){
   let move=game.moves.find(m=>m.r2===r && m.c2===c);
 
   if(move){
-    game.board[r][c]=game.board[game.selected.r][game.selected.c];
+
+    let piece = game.board[game.selected.r][game.selected.c];
+
+    game.board[r][c]=piece;
     game.board[game.selected.r][game.selected.c]="";
+
+    // promoção
+    if(piece==="P" && r===0) promotePawn(r,c);
+    if(piece==="p" && r===7) promotePawn(r,c);
 
     endTurn();
     return;
@@ -376,56 +358,23 @@ function handleClick(r,c){
  drawBoard();
 }
 
-/* ================= DRAW ================= */
+/* ================= TURNO ================= */
 
-function drawBoard(){
-
- boardEl.innerHTML="";
-
- for(let r=0;r<8;r++){
-  for(let c=0;c<8;c++){
-
-   let cell=document.createElement("div");
-   cell.className="cell "+((r+c)%2?"dark":"light");
-
-   if(game.selectedCard!==null){
-    let card=game.hand[game.turn][game.selectedCard];
-    if(card && r===card.r && c===card.c){
-      cell.classList.add("move");
-    }
-   }
-
-   if(game.selected && game.selected.r===r && game.selected.c===c){
-    cell.classList.add("selected");
-   }
-
-   if(game.moves.some(m=>m.r2===r && m.c2===c)){
-    cell.classList.add("move");
-   }
-
-   let p=game.board[r][c];
-
-   if(p){
-    let el=document.createElement("div");
-    el.className="piece";
-    el.textContent=symbols[p];
-    cell.appendChild(el);
-   }
-
-   cell.onclick=()=>handleClick(r,c);
-
-   boardEl.appendChild(cell);
-  }
+function autoDraw(side){
+ while(game.hand[side].length < 4 && game.deck[side].length > 0){
+  game.hand[side].push(game.deck[side].pop());
  }
 }
 
-/* ================= TURNO ================= */
-
 function endTurn(){
  game.turn = game.turn==="w"?"b":"w";
+
+ autoDraw(game.turn);
+
  game.selected=null;
  game.moves=[];
  game.selectedCard=null;
+
  drawBoard();
  drawUI();
 }
@@ -439,6 +388,9 @@ function init(){
 
  game.deck.w=createDeck("w");
  game.deck.b=createDeck("b");
+
+ autoDraw("w");
+ autoDraw("b");
 
  drawBoard();
  drawUI();
