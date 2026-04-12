@@ -80,3 +80,38 @@ background:#c8e6c9;
 .move.dark{
 background:#81c784;
 }
+
+
+
+
+
+
+
+
+
+.check{
+background:#ff5252 !important;
+}
+
+.piece{
+transition: transform .25s ease;
+}
+
+#promotionMenu{
+position:fixed;
+top:50%;
+left:50%;
+transform:translate(-50%,-50%);
+background:white;
+border-radius:8px;
+padding:10px;
+display:none;
+gap:10px;
+box-shadow:0 0 10px rgba(0,0,0,.4);
+z-index:999;
+}
+
+.promoPiece{
+font-size:48px;
+cursor:pointer;
+}
