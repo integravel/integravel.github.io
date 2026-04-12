@@ -191,21 +191,52 @@ return legal
 
 }
 
+function showPromotion(r,c,piece){
+
+game.promotionPending=true
+
+promotionMenu.innerHTML=""
+
+;["Q","R","B","N"].forEach(type=>{
+
+let promoted = piece===piece.toUpperCase()?type:type.toLowerCase()
+
+let el=document.createElement("div")
+el.className="promoPiece"
+el.textContent=symbols[promoted]
+
+el.onclick=()=>{
+
+game.board[r][c]=promoted
+
+promotionMenu.style.display="none"
+game.promotionPending=false
+
+endTurn()
+
+}
+
+promotionMenu.appendChild(el)
+
+})
+
+promotionMenu.style.display="flex"
+
+}
+
 function drawBoard(){
 
 boardEl.innerHTML=""
 
 let card=null
-
 if(game.selectedCard!==null)
 card=game.hand[game.turn][game.selectedCard]
 
 for(let r=0;r<8;r++)
 for(let c=0;c<8;c++){
 
-let cell=document.createElement("div")
-
 let light=(r+c)%2===0
+let cell=document.createElement("div")
 
 cell.className="cell "+(light?"light":"dark")
 
@@ -214,8 +245,6 @@ cell.classList.add("selected")
 
 if(game.moves.some(m=>m.r2===r && m.c2===c))
 cell.classList.add("move")
-
-/* destaque da carta */
 
 if(card && r===card.r && c===card.c){
 
@@ -241,6 +270,7 @@ boardEl.appendChild(cell)
 function handleClick(r,c){
 
 if(game.gameOver) return
+if(game.promotionPending) return
 
 if(game.selectedCard!==null){
 
@@ -249,14 +279,15 @@ let card=game.hand[game.turn][game.selectedCard]
 if(r===card.r && c===card.c && !game.board[r][c]){
 
 let newBoard=clone(game.board)
-
 newBoard[r][c]=card.p
 
 if(kingWouldBeInCheck(newBoard,game.turn)) return
 
 game.board=newBoard
-
 game.hand[game.turn].splice(game.selectedCard,1)
+
+if(card.p==="P" && r===0){drawBoard();showPromotion(r,c,"P");return}
+if(card.p==="p" && r===7){drawBoard();showPromotion(r,c,"p");return}
 
 endTurn()
 
@@ -274,7 +305,6 @@ if(move){
 let piece=game.board[move.r][move.c]
 
 let newBoard=clone(game.board)
-
 newBoard[move.r2][move.c2]=piece
 newBoard[move.r][move.c]=""
 
@@ -282,8 +312,10 @@ if(kingWouldBeInCheck(newBoard,game.turn)) return
 
 game.board=newBoard
 
-endTurn()
+if(piece==="P" && move.r2===0){drawBoard();showPromotion(move.r2,move.c2,"P");return}
+if(piece==="p" && move.r2===7){drawBoard();showPromotion(move.r2,move.c2,"p");return}
 
+endTurn()
 return
 
 }
