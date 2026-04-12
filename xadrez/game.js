@@ -2,6 +2,7 @@ const boardEl = document.getElementById("board");
 const topMenu = document.getElementById("topMenu");
 const bottomMenu = document.getElementById("bottomMenu");
 const promotionMenu = document.getElementById("promotionMenu");
+const mateMessage = document.getElementById("mateMessage");
 
 const symbols={
 P:"♙",R:"♖",N:"♘",B:"♗",Q:"♕",K:"♔",
@@ -58,6 +59,42 @@ let king=findKing(board,side)
 let enemy=side==="w"?"b":"w"
 
 return isSquareAttacked(board,king[0],king[1],enemy)
+
+}
+
+function playerHasMoves(side){
+
+for(let r=0;r<8;r++)
+for(let c=0;c<8;c++){
+
+let p=game.board[r][c]
+
+if(!p) continue
+if(sideOf(p)!==side) continue
+
+let moves=getLegalMoves(game.board,r,c)
+
+if(moves.length>0) return true
+
+}
+
+return false
+}
+
+function checkMate(){
+
+let side=game.turn
+
+if(kingWouldBeInCheck(game.board,side) && !playerHasMoves(side)){
+
+game.gameOver=true
+
+mateMessage.style.display="block"
+
+mateMessage.innerText=
+side==="w"?"Xeque-mate! Pretas vencem":"Xeque-mate! Brancas vencem"
+
+}
 
 }
 
@@ -423,6 +460,8 @@ drawUpToFour(game.turn)
 game.selected=null
 game.moves=[]
 game.selectedCard=null
+
+checkMate()
 
 drawBoard()
 drawUI()
