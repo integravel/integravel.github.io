@@ -69,35 +69,135 @@ game.hand[side].push(card);
 
 function getMoves(r,c){
 
-let p=game.board[r][c];
-let moves=[];
+let p=game.board[r][c]
+let moves=[]
 
-if(!p) return moves;
+if(!p) return moves
 
 function push(r2,c2){
 
-if(r2<0||r2>7||c2<0||c2>7) return;
+if(r2<0||r2>7||c2<0||c2>7) return
 
-let t=game.board[r2][c2];
+let t=game.board[r2][c2]
 
 if(!t||isEnemy(p,t))
-moves.push({r2,c2});
+moves.push({r2,c2})
 
 }
+
+function slide(dirs){
+
+for(let d of dirs){
+
+for(let i=1;i<8;i++){
+
+let r2=r+d[0]*i
+let c2=c+d[1]*i
+
+if(r2<0||r2>7||c2<0||c2>7) break
+
+let t=game.board[r2][c2]
+
+if(!t){
+moves.push({r2,c2})
+}
+else{
+
+if(isEnemy(p,t))
+moves.push({r2,c2})
+
+break
+}
+
+}
+
+}
+
+}
+
+/* CAVALO */
 
 if(p.toLowerCase()==="n"){
+
 [[2,1],[2,-1],[-2,1],[-2,-1],[1,2],[1,-2],[-1,2],[-1,-2]]
-.forEach(v=>push(r+v[0],c+v[1]));
+.forEach(v=>push(r+v[0],c+v[1]))
+
 }
+
+/* REI */
 
 if(p.toLowerCase()==="k"){
+
 [[1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]]
-.forEach(v=>push(r+v[0],c+v[1]));
-}
-
-return moves;
+.forEach(v=>push(r+v[0],c+v[1]))
 
 }
+
+/* TORRE */
+
+if(p.toLowerCase()==="r"){
+
+slide([[1,0],[-1,0],[0,1],[0,-1]])
+
+}
+
+/* BISPO */
+
+if(p.toLowerCase()==="b"){
+
+slide([[1,1],[1,-1],[-1,1],[-1,-1]])
+
+}
+
+/* RAINHA */
+
+if(p.toLowerCase()==="q"){
+
+slide([
+[1,0],[-1,0],[0,1],[0,-1],
+[1,1],[1,-1],[-1,1],[-1,-1]
+])
+
+}
+
+/* PEÃO */
+
+if(p==="P"){
+
+if(!game.board[r-1]?.[c])
+moves.push({r2:r-1,c2:c})
+
+if(r===6 && !game.board[r-1]?.[c] && !game.board[r-2]?.[c])
+moves.push({r2:r-2,c2:c})
+
+if(game.board[r-1]?.[c-1] && isEnemy(p,game.board[r-1][c-1]))
+moves.push({r2:r-1,c2:c-1})
+
+if(game.board[r-1]?.[c+1] && isEnemy(p,game.board[r-1][c+1]))
+moves.push({r2:r-1,c2:c+1})
+
+}
+
+if(p==="p"){
+
+if(!game.board[r+1]?.[c])
+moves.push({r2:r+1,c2:c})
+
+if(r===1 && !game.board[r+1]?.[c] && !game.board[r+2]?.[c])
+moves.push({r2:r+2,c2:c})
+
+if(game.board[r+1]?.[c-1] && isEnemy(p,game.board[r+1][c-1]))
+moves.push({r2:r+1,c2:c-1})
+
+if(game.board[r+1]?.[c+1] && isEnemy(p,game.board[r+1][c+1]))
+moves.push({r2:r+1,c2:c+1})
+
+}
+
+return moves
+}
+
+
 
 /* PROMOÇÃO */
 
