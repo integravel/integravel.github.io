@@ -57,7 +57,7 @@ return shuffle(deck)
 function shuffle(a){
 for(let i=a.length-1;i>0;i--){
 let j=Math.floor(Math.random()*(i+1))
-;a[i],a[j]=[a[j],a[i]]
+let t=a[i];a[i]=a[j];a[j]=t
 }
 return a
 }
@@ -70,43 +70,13 @@ game.hand[side].push(c)
 }
 }
 
-/* ATAQUE */
-
-function isAttacked(b,r,c,by){
-
-for(let i=0;i<8;i++)
-for(let j=0;j<8;j++){
-
-let p=b[i][j]
-if(!p) continue
-
-if(by==="w" && p!==p.toUpperCase()) continue
-if(by==="b" && p!==p.toLowerCase()) continue
-
-let w=p===p.toUpperCase()
-
-if(p.toLowerCase()==="p"){
-let d=w?-1:1
-if(i+d===r && (j+1===c||j-1===c)) return true
-}
-
-if(p.toLowerCase()==="n"){
-let m=[[2,1],[2,-1],[-2,1],[-2,-1],[1,2],[1,-2],[-1,2],[-1,-2]]
-for(let v of m)
-if(i+v[0]===r && j+v[1]===c) return true
-}
-
-}
-
-return false
-}
-
-/* MOVIMENTOS SIMPLES */
+/* MOVIMENTOS BÁSICOS */
 
 function getMoves(r,c){
 
 let p=game.board[r][c]
 let moves=[]
+
 if(!p) return moves
 
 function push(r2,c2){
@@ -177,11 +147,17 @@ if(game.selectedCard===i && game.turn===side)
 el.style.outline="3px solid yellow"
 
 el.onclick=()=>{
+
 if(game.turn!==side) return
+
 game.selected=null
-game.selectedCard=i
+game.moves=[]
+
+game.selectedCard = (game.selectedCard===i)?null:i
+
 drawBoard()
 drawUI()
+
 }
 
 menu.appendChild(el)
@@ -210,6 +186,17 @@ cell.classList.add("selected")
 if(game.moves.some(m=>m.r2===r && m.c2===c))
 cell.classList.add("move")
 
+/* destaque carta */
+
+if(game.selectedCard!==null){
+
+let card=game.hand[game.turn][game.selectedCard]
+
+if(card && r===card.r && c===card.c && !game.board[r][c])
+cell.classList.add("move")
+
+}
+
 let p=game.board[r][c]
 
 if(p) cell.textContent=symbols[p]
@@ -226,7 +213,26 @@ boardEl.appendChild(cell)
 
 function handleClick(r,c){
 
-let p=game.board[r][c]
+/* colocar carta */
+
+if(game.selectedCard!==null){
+
+let card=game.hand[game.turn][game.selectedCard]
+
+if(r===card.r && c===card.c && !game.board[r][c]){
+
+game.board[r][c]=card.p
+
+game.hand[game.turn].splice(game.selectedCard,1)
+
+endTurn()
+
+}
+
+return
+}
+
+/* mover peça */
 
 if(game.selected){
 
@@ -248,6 +254,8 @@ return
 }
 
 }
+
+let p=game.board[r][c]
 
 if(!p) return
 
