@@ -14,7 +14,10 @@ display:flex;
 flex-direction:column;
 justify-content:space-between;
 font-family:sans-serif;
+background:#ccc;
 }
+
+/* MENUS */
 
 .menu{
 height:80px;
@@ -24,14 +27,25 @@ align-items:center;
 gap:14px;
 }
 
-.black{background:#222;color:white;}
-.white{background:#ddd;}
+.black{
+background:#222;
+color:white;
+}
+
+.white{
+background:#ddd;
+}
+
+/* CARTAS */
 
 .menuPiece{
 font-size:64px;
-font-family: Arial, "Segoe UI Symbol", sans-serif;
+font-family:Arial,"Segoe UI Symbol",sans-serif;
 line-height:1;
+cursor:pointer;
 }
+
+/* TABULEIRO */
 
 #board{
 width:100vw;
@@ -43,6 +57,8 @@ display:grid;
 grid-template-columns:repeat(8,1fr);
 grid-template-rows:repeat(8,1fr);
 }
+
+/* CASAS */
 
 .cell{
 position:relative;
@@ -56,6 +72,8 @@ justify-content:center;
 .light{background:#f0d9b5;}
 .dark{background:#b58863;}
 
+/* PEÇAS */
+
 .piece{
 position:absolute;
 inset:0;
@@ -63,11 +81,11 @@ display:flex;
 align-items:center;
 justify-content:center;
 font-size:9vw;
-font-family: Arial, "Segoe UI Symbol", sans-serif;
-line-height:1;
-transform:scale(1.1);
-pointer-events:none;
+font-family:Arial,"Segoe UI Symbol",sans-serif;
+transition:transform .2s ease;
 }
+
+/* SELEÇÃO */
 
 .selected{
 outline:3px solid yellow;
@@ -81,21 +99,13 @@ background:#c8e6c9;
 background:#81c784;
 }
 
-
-
-
-
-
-
-
+/* XEQUE */
 
 .check{
 background:#ff5252 !important;
 }
 
-.piece{
-transition: transform .25s ease;
-}
+/* PROMOÇÃO */
 
 #promotionMenu{
 position:fixed;
@@ -106,8 +116,8 @@ background:white;
 border-radius:8px;
 padding:10px;
 display:none;
-gap:10px;
-box-shadow:0 0 10px rgba(0,0,0,.4);
+gap:12px;
+box-shadow:0 0 12px rgba(0,0,0,.5);
 z-index:999;
 }
 
