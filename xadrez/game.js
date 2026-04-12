@@ -45,7 +45,6 @@ for(let i=0;i<8;i++)
 for(let j=0;j<8;j++){
 
 let p=board[i][j]
-
 if(!p) continue
 if(sideOf(p)!==bySide) continue
 
@@ -166,79 +165,6 @@ moves.push({r,c,r2:r+1,c2:c+1})
 return moves
 }
 
-/* MOVIMENTOS LEGAIS */
-
-function getLegalMoves(board,side){
-
-let legal=[]
-
-for(let r=0;r<8;r++)
-for(let c=0;c<8;c++){
-
-let p=board[r][c]
-if(!p || sideOf(p)!==side) continue
-
-let pseudo=getPseudoMoves(board,r,c)
-
-pseudo.forEach(m=>{
-
-let newBoard=clone(board)
-
-newBoard[m.r2][m.c2]=newBoard[m.r][m.c]
-newBoard[m.r][m.c]=""
-
-let king=findKing(newBoard,side)
-
-if(!isSquareAttacked(newBoard,king[0],king[1],side==="w"?"b":"w"))
-legal.push(m)
-
-})
-
-}
-
-return legal
-}
-
-/* BARALHO */
-
-function createDeck(side){
-
-const base=[
-{p:"R",r:7,c:0},{p:"N",r:7,c:1},{p:"B",r:7,c:2},{p:"Q",r:7,c:3},
-{p:"B",r:7,c:5},{p:"N",r:7,c:6},{p:"R",r:7,c:7},
-{p:"P",r:6,c:0},{p:"P",r:6,c:1},{p:"P",r:6,c:2},{p:"P",r:6,c:3},
-{p:"P",r:6,c:4},{p:"P",r:6,c:5},{p:"P",r:6,c:6},{p:"P",r:6,c:7}
-]
-
-let deck=base.map(x=>{
-if(side==="b") return {p:x.p.toLowerCase(),r:7-x.r,c:x.c}
-return {...x}
-})
-
-return shuffle(deck)
-}
-
-function shuffle(a){
-for(let i=a.length-1;i>0;i--){
-let j=Math.floor(Math.random()*(i+1))
-let t=a[i];a[i]=a[j];a[j]=t
-}
-return a
-}
-
-function drawUpToFour(side){
-
-while(game.hand[side].length<4){
-
-let c=game.deck[side].pop()
-if(!c) break
-
-game.hand[side].push(c)
-
-}
-
-}
-
 /* PROMOÇÃO */
 
 function showPromotion(r,c,piece){
@@ -246,7 +172,6 @@ function showPromotion(r,c,piece){
 game.promotionPending=true
 
 promotionMenu.innerHTML=""
-promotionMenu.style.display="flex"
 
 const opts=["Q","R","B","N"]
 
@@ -273,48 +198,7 @@ promotionMenu.appendChild(el)
 
 })
 
-}
-
-/* UI */
-
-function drawUI(){
-
-topMenu.innerHTML=""
-bottomMenu.innerHTML=""
-
-;["b","w"].forEach(side=>{
-
-let menu=side==="w"?bottomMenu:topMenu
-
-game.hand[side].forEach((card,i)=>{
-
-let el=document.createElement("div")
-el.className="menuPiece"
-el.textContent=symbols[card.p]
-
-if(game.selectedCard===i && game.turn===side)
-el.style.outline="3px solid yellow"
-
-el.onclick=()=>{
-
-if(game.turn!==side) return
-if(game.promotionPending) return
-
-game.selected=null
-game.moves=[]
-
-game.selectedCard=game.selectedCard===i?null:i
-
-drawBoard()
-drawUI()
-
-}
-
-menu.appendChild(el)
-
-})
-
-})
+promotionMenu.style.display="flex"
 
 }
 
@@ -336,15 +220,6 @@ cell.classList.add("selected")
 if(game.moves.some(m=>m.r2===r && m.c2===c))
 cell.classList.add("move")
 
-if(game.selectedCard!==null){
-
-let card=game.hand[game.turn][game.selectedCard]
-
-if(card && r===card.r && c===card.c && !game.board[r][c])
-cell.classList.add("move")
-
-}
-
 let p=game.board[r][c]
 
 if(p) cell.textContent=symbols[p]
@@ -363,35 +238,6 @@ function handleClick(r,c){
 
 if(game.gameOver) return
 if(game.promotionPending) return
-
-if(game.selectedCard!==null){
-
-let card=game.hand[game.turn][game.selectedCard]
-
-if(r===card.r && c===card.c && !game.board[r][c]){
-
-let newBoard=clone(game.board)
-
-newBoard[r][c]=card.p
-
-let king=findKing(newBoard,game.turn)
-
-if(!isSquareAttacked(newBoard,king[0],king[1],game.turn==="w"?"b":"w")){
-
-game.board=newBoard
-game.hand[game.turn].splice(game.selectedCard,1)
-
-if(card.p==="P" && r===0){drawBoard();showPromotion(r,c,"P");return}
-if(card.p==="p" && r===7){drawBoard();showPromotion(r,c,"p");return}
-
-endTurn()
-
-}
-
-}
-
-return
-}
 
 if(game.selected){
 
@@ -419,11 +265,8 @@ let p=game.board[r][c]
 if(!p) return
 if(sideOf(p)!==game.turn) return
 
-game.selectedCard=null
 game.selected={r,c}
-
-game.moves=getLegalMoves(game.board,game.turn)
-.filter(m=>m.r===r && m.c===c)
+game.moves=getPseudoMoves(game.board,r,c)
 
 drawBoard()
 
@@ -435,28 +278,10 @@ function endTurn(){
 
 game.turn=game.turn==="w"?"b":"w"
 
-drawUpToFour(game.turn)
-
 game.selected=null
 game.moves=[]
-game.selectedCard=null
-
-let legal=getLegalMoves(game.board,game.turn)
-
-let king=findKing(game.board,game.turn)
-
-let inCheck=isSquareAttacked(game.board,king[0],king[1],game.turn==="w"?"b":"w")
-
-if(inCheck && legal.length===0){
-
-alert("Xeque-mate!")
-
-game.gameOver=true
-
-}
 
 drawBoard()
-drawUI()
 
 }
 
@@ -467,14 +292,7 @@ function init(){
 game.board[7][4]="K"
 game.board[0][4]="k"
 
-game.deck.w=createDeck("w")
-game.deck.b=createDeck("b")
-
-drawUpToFour("w")
-drawUpToFour("b")
-
 drawBoard()
-drawUI()
 
 }
 
