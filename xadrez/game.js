@@ -35,7 +35,7 @@ function createDeck(side){
   {p:"P",r:6,c:4},{p:"P",r:6,c:5},{p:"P",r:6,c:6},{p:"P",r:6,c:7}
  ];
 
- return base.map(card=>{
+ let deck = base.map(card=>{
   if(side==="b"){
     return {
       p:card.p.toLowerCase(),
@@ -45,6 +45,16 @@ function createDeck(side){
   }
   return {...card};
  });
+
+ return shuffle(deck);
+}
+
+function shuffle(arr){
+ for(let i=arr.length-1;i>0;i--){
+  let j=Math.floor(Math.random()*(i+1));
+  [arr[i],arr[j]]=[arr[j],arr[i]];
+ }
+ return arr;
 }
 
 /* ================= UTIL ================= */
@@ -229,11 +239,17 @@ function drawUI(){
    el.className="menuPiece";
    el.textContent=symbols[card.p];
 
+   if(game.selectedCard===i && game.turn===side)
+     el.style.outline="3px solid yellow";
+
    el.onclick=()=>{
     if(game.turn!==side) return;
+
     game.selectedCard=i;
     game.selected=null;
+
     drawBoard();
+    drawUI();
    };
 
    menu.appendChild(el);
@@ -335,6 +351,25 @@ function drawBoard(){
    let cell=document.createElement("div");
    cell.className="cell "+((r+c)%2?"dark":"light");
 
+   // carta selecionada (onde pode colocar)
+   if(game.selectedCard!==null){
+    let side=game.turn;
+    let card=game.hand[side][game.selectedCard];
+    if(card && r===card.r && c===card.c){
+      cell.classList.add("move");
+    }
+   }
+
+   // peça selecionada
+   if(game.selected && game.selected.r===r && game.selected.c===c){
+    cell.classList.add("selected");
+   }
+
+   // movimentos possíveis
+   if(game.moves.some(m=>m.r2===r && m.c2===c)){
+    cell.classList.add("move");
+   }
+
    let p=game.board[r][c];
 
    if(p){
@@ -357,6 +392,7 @@ function endTurn(){
  game.turn = game.turn==="w"?"b":"w";
  game.selected=null;
  game.moves=[];
+ game.selectedCard=null;
  drawBoard();
  drawUI();
 }
