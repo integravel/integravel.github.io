@@ -9,7 +9,9 @@ moves:[],
 selectedCard:null,
 
 deck:{ w:[], b:[] },
-hand:{ w:[], b:[] }
+hand:{ w:[], b:[] },
+
+gameOver:false
 };
 
 /* ================= ELEMENTOS ================= */
@@ -39,7 +41,7 @@ const base = [
 
 let deck = base.map(card=>{
 if(side==="b"){
-return { p:card.p.toLowerCase(), r:7-card.r, c:card.c };
+return {p:card.p.toLowerCase(),r:7-card.r,c:card.c};
 }
 return {...card};
 });
@@ -86,21 +88,79 @@ if(side==="b" && b[r][c]==="k") return [r,c];
 return null;
 }
 
+/* ================= ATAQUE ================= */
+
+function isAttacked(b,r,c,by){
+
+for(let i=0;i<8;i++){
+for(let j=0;j<8;j++){
+
+let p=b[i][j];
+if(!p) continue;
+
+if(by==="w" && p!==p.toUpperCase()) continue;
+if(by==="b" && p!==p.toLowerCase()) continue;
+
+let isWhite=p===p.toUpperCase();
+
+switch(p.toLowerCase()){
+
+case "p":{
+ let d=isWhite?-1:1;
+ if(i+d===r && (j+1===c || j-1===c)) return true;
+} break;
+
+case "n":{
+ let m=[[2,1],[2,-1],[-2,1],[-2,-1],[1,2],[1,-2],[-1,2],[-1,-2]];
+ for(let v of m)
+  if(i+v[0]===r && j+v[1]===c) return true;
+} break;
+
+case "b":
+case "r":
+case "q":{
+ let dirs=[];
+ if(p!=="r") dirs.push([1,1],[1,-1],[-1,1],[-1,-1]);
+ if(p!=="b") dirs.push([1,0],[-1,0],[0,1],[0,-1]);
+
+ for(let d of dirs){
+  for(let k=1;k<8;k++){
+   let r2=i+d[0]*k,c2=j+d[1]*k;
+   if(r2<0||r2>7||c2<0||c2>7) break;
+   if(r2===r && c2===c) return true;
+   if(b[r2][c2]) break;
+  }
+ }
+} break;
+
+case "k":{
+ let d=[[1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]];
+ for(let v of d)
+  if(i+v[0]===r && j+v[1]===c) return true;
+} break;
+
+}
+}
+}
+
+return false;
+}
+
 /* ================= PROMOÇÃO ================= */
 
 function promotePawn(piece){
 
-let choice = prompt("Promover para: Q (Rainha), R (Torre), B (Bispo), N (Cavalo)","Q");
+let choice = prompt("Promover para: Q R B N","Q");
 
 if(!choice) choice="Q";
 
-choice = choice.toUpperCase();
+choice=choice.toUpperCase();
 
 if(!["Q","R","B","N"].includes(choice))
 choice="Q";
 
 if(piece===piece.toLowerCase())
-choice = choice.toLowerCase();
+choice=choice.toLowerCase();
 
 return choice;
 }
@@ -132,26 +192,26 @@ moves.push({r,c,r2,c2});
 switch(p.toLowerCase()){
 
 case "p":{
-  let d=isWhite?-1:1;
+ let d=isWhite?-1:1;
 
-  if(!b[r+d]?.[c]) push(r+d,c);
+ if(!b[r+d]?.[c]) push(r+d,c);
 
-  if((isWhite&&r===6)||(!isWhite&&r===1)){
-    if(!b[r+d][c]&&!b[r+2*d][c])
-      push(r+2*d,c);
-  }
+ if((isWhite&&r===6)||(!isWhite&&r===1)){
+  if(!b[r+d][c]&&!b[r+2*d][c])
+   push(r+2*d,c);
+ }
 
-  for(let dc of [-1,1]){
-    let r2=r+d,c2=c+dc;
-    if(b[r2]?.[c2] && isEnemy(p,b[r2][c2]))
-      push(r2,c2);
-  }
+ for(let dc of [-1,1]){
+  let r2=r+d,c2=c+dc;
+  if(b[r2]?.[c2] && isEnemy(p,b[r2][c2]))
+   push(r2,c2);
+ }
 
 } break;
 
 case "n":
-  [[2,1],[2,-1],[-2,1],[-2,-1],[1,2],[1,-2],[-1,2],[-1,-2]]
-  .forEach(v=>push(r+v[0],c+v[1]));
+ [[2,1],[2,-1],[-2,1],[-2,-1],[1,2],[1,-2],[-1,2],[-1,-2]]
+ .forEach(v=>push(r+v[0],c+v[1]));
 break;
 
 case "b": slide([[1,1],[1,-1],[-1,1],[-1,-1]]); break;
@@ -159,8 +219,8 @@ case "r": slide([[1,0],[-1,0],[0,1],[0,-1]]); break;
 case "q": slide([[1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]]); break;
 
 case "k":
-  [[1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]]
-  .forEach(v=>push(r+v[0],c+v[1]));
+ [[1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]]
+ .forEach(v=>push(r+v[0],c+v[1]));
 break;
 
 }
@@ -173,8 +233,8 @@ if(r2<0||r2>7||c2<0||c2>7) break;
 
   if(!b[r2][c2]) moves.push({r,c,r2,c2});
   else{
-    if(isEnemy(p,b[r2][c2])) moves.push({r,c,r2,c2});
-    break;
+   if(isEnemy(p,b[r2][c2])) moves.push({r,c,r2,c2});
+   break;
   }
  }
 }
@@ -187,7 +247,44 @@ return moves;
 }
 
 function getLegalMoves(b,side){
-return getPseudoMoves(b,side);
+
+return getPseudoMoves(b,side).filter(m=>{
+
+let nb=clone(b);
+
+nb[m.r2][m.c2]=nb[m.r][m.c];
+nb[m.r][m.c]="";
+
+let k=findKing(nb,side);
+
+return !isAttacked(nb,k[0],k[1],side==="w"?"b":"w");
+
+});
+}
+
+/* ================= CARTAS LEGAIS ================= */
+
+function getLegalDrops(side){
+
+let result=[];
+
+game.hand[side].forEach((card,i)=>{
+
+let b=clone(game.board);
+
+if(b[card.r][card.c]) return;
+
+b[card.r][card.c]=card.p;
+
+let k=findKing(b,side);
+
+if(!isAttacked(b,k[0],k[1],side==="w"?"b":"w")){
+result.push({index:i,r:card.r,c:card.c});
+}
+
+});
+
+return result;
 }
 
 /* ================= UI ================= */
@@ -211,7 +308,8 @@ if(game.selectedCard===i && game.turn===side)
 el.style.outline="3px solid yellow";
 
 el.onclick=()=>{
-if(game.turn!==side) return;
+
+if(game.turn!==side || game.gameOver) return;
 
 game.selectedCard = game.selectedCard===i ? null : i;
 
@@ -224,42 +322,36 @@ drawUI();
 };
 
 menu.appendChild(el);
-});
 
 });
-}
 
-/* ================= COLOCAR PEÇA ================= */
-
-function placeCard(r,c){
-
-let side=game.turn;
-let card=game.hand[side][game.selectedCard];
-
-if(r!==card.r || c!==card.c)
-return alert("Posição incorreta");
-
-if(game.board[r][c])
-return alert("Casa ocupada");
-
-game.board[r][c]=card.p;
-
-game.hand[side].splice(game.selectedCard,1);
-
-game.selectedCard=null;
-
-endTurn();
+});
 }
 
 /* ================= INTERAÇÃO ================= */
 
 function handleClick(r,c){
 
+if(game.gameOver) return;
+
 let p=game.board[r][c];
 
 if(game.selectedCard!==null){
 
-placeCard(r,c);
+let drops=getLegalDrops(game.turn)
+.filter(d=>d.index===game.selectedCard);
+
+let d=drops.find(x=>x.r===r && x.c===c);
+
+if(!d) return;
+
+let card=game.hand[game.turn][game.selectedCard];
+
+game.board[r][c]=card.p;
+
+game.hand[game.turn].splice(game.selectedCard,1);
+
+endTurn();
 return;
 }
 
@@ -269,21 +361,19 @@ let move=game.moves.find(m=>m.r2===r && m.c2===c);
 
 if(move){
 
-let piece = game.board[game.selected.r][game.selected.c];
+let piece=game.board[game.selected.r][game.selected.c];
 
 game.board[r][c]=piece;
 game.board[game.selected.r][game.selected.c]="";
 
-/* PROMOÇÃO */
 if(piece==="P" && r===0)
-  game.board[r][c]=promotePawn(piece);
+game.board[r][c]=promotePawn(piece);
 
 if(piece==="p" && r===7)
-  game.board[r][c]=promotePawn(piece);
+game.board[r][c]=promotePawn(piece);
 
 endTurn();
 return;
-
 }
 }
 
@@ -292,7 +382,10 @@ if(!p) return;
 if(game.turn==="w" && p!==p.toUpperCase()) return;
 if(game.turn==="b" && p!==p.toLowerCase()) return;
 
+game.selectedCard=null;
+
 game.selected={r,c};
+
 game.moves=getLegalMoves(game.board,game.turn)
 .filter(m=>m.r===r && m.c===c);
 
@@ -305,18 +398,24 @@ function drawBoard(){
 
 boardEl.innerHTML="";
 
+let drops=getLegalDrops(game.turn);
+
 for(let r=0;r<8;r++){
 for(let c=0;c<8;c++){
 
 let cell=document.createElement("div");
+
 cell.className="cell "+((r+c)%2?"dark":"light");
 
-if(game.selected && game.selected.r===r && game.selected.c===c){
+if(game.selected && game.selected.r===r && game.selected.c===c)
 cell.classList.add("selected");
-}
 
-if(game.moves.some(m=>m.r2===r && m.c2===c)){
+if(game.moves.some(m=>m.r2===r && m.c2===c))
 cell.classList.add("move");
+
+if(game.selectedCard!==null){
+let d=drops.find(x=>x.index===game.selectedCard && x.r===r && x.c===c);
+if(d) cell.classList.add("move");
 }
 
 let p=game.board[r][c];
@@ -335,6 +434,19 @@ boardEl.appendChild(cell);
 }
 }
 
+/* ================= XEQUE MATE ================= */
+
+function hasAnyMove(side){
+
+if(getLegalMoves(game.board,side).length>0)
+return true;
+
+if(getLegalDrops(side).length>0)
+return true;
+
+return false;
+}
+
 /* ================= TURNO ================= */
 
 function endTurn(){
@@ -342,6 +454,19 @@ function endTurn(){
 game.turn = game.turn==="w"?"b":"w";
 
 drawUpToFour(game.turn);
+
+if(!hasAnyMove(game.turn)){
+
+let king=findKing(game.board,game.turn);
+
+if(isAttacked(game.board,king[0],king[1],game.turn==="w"?"b":"w")){
+alert("Xeque-mate!");
+}else{
+alert("Empate!");
+}
+
+game.gameOver=true;
+}
 
 game.selected=null;
 game.moves=[];
