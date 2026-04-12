@@ -245,7 +245,12 @@ function drawUI(){
    el.onclick=()=>{
     if(game.turn!==side) return;
 
-    game.selectedCard=i;
+    if(game.selectedCard===i){
+      game.selectedCard=null;
+    } else {
+      game.selectedCard=i;
+    }
+
     game.selected=null;
 
     drawBoard();
@@ -307,12 +312,29 @@ function placeCard(r,c){
 
 function handleClick(r,c){
 
+ let p=game.board[r][c];
+
  if(game.selectedCard!==null){
+
+  if(p){
+    if(
+      (game.turn==="w" && p===p.toUpperCase()) ||
+      (game.turn==="b" && p===p.toLowerCase())
+    ){
+      game.selectedCard=null;
+      game.selected={r,c};
+      game.moves=getLegalMoves(game.board,game.turn)
+        .filter(m=>m.r===r && m.c===c);
+
+      drawBoard();
+      drawUI();
+      return;
+    }
+  }
+
   placeCard(r,c);
   return;
  }
-
- let p=game.board[r][c];
 
  if(game.selected){
 
@@ -351,10 +373,9 @@ function drawBoard(){
    let cell=document.createElement("div");
    cell.className="cell "+((r+c)%2?"dark":"light");
 
-   // carta selecionada (onde pode colocar)
+   // carta selecionada
    if(game.selectedCard!==null){
-    let side=game.turn;
-    let card=game.hand[side][game.selectedCard];
+    let card=game.hand[game.turn][game.selectedCard];
     if(card && r===card.r && c===card.c){
       cell.classList.add("move");
     }
