@@ -207,16 +207,18 @@ cell.classList.add("selected")
 if(game.moves.some(m=>m.r2===r && m.c2===c))
 cell.classList.add("move")
 
+/* posição da carta */
+
 if(game.selectedCard!==null){
 
 let card=game.hand[game.turn][game.selectedCard]
 
 if(card && r===card.r && c===card.c){
 
-if(!game.board[r][c])
-cell.classList.add("move")
-else
+if(game.board[r][c])
 cell.classList.add("blocked")
+else
+cell.classList.add("move")
 
 }
 
