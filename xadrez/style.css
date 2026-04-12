@@ -103,3 +103,16 @@ body{
  transform:translate(-50%,-50%);
  display:none;
 }
+
+.selected{
+ outline:3px solid yellow;
+}
+
+.move.light{
+ background:#c8e6c9;
+}
+
+.move.dark{
+ background:#81c784;
+}
+
