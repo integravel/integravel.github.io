@@ -1,125 +1,69 @@
-*{
- box-sizing:border-box;
- touch-action:none;
-}
-
-html,body{
- margin:0;
- height:100%;
- overflow:hidden;
-}
-
+/* RESET */
 body{
+ margin:0;
+ padding:0;
  display:flex;
  flex-direction:column;
- justify-content:space-between;
+ align-items:center;
+ background:#222;
+ color:white;
  font-family:sans-serif;
 }
 
-/* MENUS */
-.menu{
- height:80px;
- display:flex;
- justify-content:center;
- align-items:center;
- gap:14px;
-}
-
-.black{background:#222;color:white;}
-.white{background:#ddd;}
-
-/* PEÇAS DO MENU */
-.menuPiece{
- font-size:64px; /* 🔥 maior */
- font-family: Arial, "Segoe UI Symbol", sans-serif; /* 🔥 mais simples */
- line-height:1;
+/* GARANTE QUE IMAGENS NÃO QUEBREM */
+img{
+ max-width:100%;
+ height:auto;
+ display:block;
 }
 
 /* TABULEIRO */
 #board{
- width:100vw;
- height:100vw;
- max-width:100vh;
- max-height:100vh;
- margin:auto;
  display:grid;
  grid-template-columns:repeat(8,1fr);
- grid-template-rows:repeat(8,1fr);
+ width:90vmin;
+ height:90vmin;
+ margin:10px 0;
 }
 
 /* CASAS */
 .cell{
- position:relative;
- width:100%;
- height:100%;
  display:flex;
  align-items:center;
  justify-content:center;
+ font-size:32px;
 }
 
-.light{background:#f0d9b5;}
-.dark{background:#b58863;}
+.light{ background:#f0d9b5; }
+.dark{ background:#b58863; }
 
-/* PEÇAS NO TABULEIRO */
+/* PEÇAS */
 .piece{
- position:absolute;
- inset:0;
+ cursor:pointer;
+}
+
+/* MENUS */
+.menu{
  display:flex;
- align-items:center;
- justify-content:center;
+ gap:10px;
+ padding:10px;
+ min-height:60px;
+}
 
- font-size:9vw; /* 🔥 BEM maior */
- font-family: Arial, "Segoe UI Symbol", sans-serif;
- line-height:1;
-
- transform:scale(1.1); /* 🔥 ocupa quase toda casa */
- pointer-events:none;
+/* CARTAS */
+.menuPiece{
+ font-size:28px;
+ padding:5px;
+ background:#444;
+ border-radius:6px;
 }
 
 /* SELEÇÃO */
 .selected{
- outline:3px solid #ffd54f;
+ outline:3px solid yellow;
 }
 
 /* MOVIMENTOS */
-.light.move{background:#c8e6c9;}
-.dark.move{background:#81c784;}
-
-/* CAPTURA */
-.light.capture{background:#ef9a9a;}
-.dark.capture{background:#e57373;}
-
-/* XEQUE */
-.check{
- background:#ff5252 !important;
-}
-
-/* DRAG */
-#drag{
- position:fixed;
- pointer-events:none;
- font-size:64px;
- font-family: Arial, "Segoe UI Symbol", sans-serif;
- transform:translate(-50%,-50%);
- display:none;
-}
-
-.selected{
- outline:3px solid yellow;
-}
-
-.move.light{
- background:#c8e6c9;
-}
-
-.move.dark{
- background:#81c784;
-}
-
-.selected{
- outline:3px solid yellow;
-}
-
 .move.light{
  background:#c8e6c9;
 }
