@@ -6,27 +6,32 @@ align-items:center;
 background:#222;
 color:white;
 margin:0;
-padding:10px;
+padding:6px;
 }
 
-/* TABULEIRO RESPONSIVO */
+/* TABULEIRO MAIS LARGO */
 
 #board{
 display:grid;
-grid-template-columns:repeat(8,11vw);
-grid-template-rows:repeat(8,11vw);
-max-width:95vw;
-max-height:95vw;
-margin:15px auto;
+grid-template-columns:repeat(8,12vw);
+grid-template-rows:repeat(8,12vw);
+
+max-width:98vw;
+max-height:98vw;
+
+margin:10px auto;
 }
 
 /* CÉLULAS */
 
 .cell{
-width:11vw;
-height:11vw;
-max-width:70px;
-max-height:70px;
+position:relative;
+
+width:12vw;
+height:12vw;
+
+max-width:80px;
+max-height:80px;
 
 display:flex;
 align-items:center;
@@ -37,7 +42,6 @@ font-size:6vw;
 cursor:pointer;
 
 transition:
-background 0.2s ease,
 transform 0.15s ease;
 }
 
@@ -54,7 +58,7 @@ background:#b58863;
 /* PEÇAS BRANCAS */
 
 .cell{
-color:#ffffff;
+color:white;
 text-shadow:
 -1.5px -1.5px 0 #222,
 1.5px -1.5px 0 #222,
@@ -73,56 +77,68 @@ text-shadow:
 1.5px 1.5px 0 #eee;
 }
 
-/* MOVIMENTOS POSSÍVEIS */
-
-.move{
-background:rgba(120,200,120,0.45) !important;
-}
-
-/* CASA SELECIONADA */
+/* SELEÇÃO */
 
 .selected{
 outline:3px solid yellow;
 }
 
-/* POSIÇÃO DE CARTA BLOQUEADA */
-
-.blocked-light{
-background:rgba(255,120,80,0.45);
-}
-
-.blocked-dark{
-background:rgba(255,90,50,0.45);
-}
-
-/* REI EM XEQUE */
-
-.check{
-background:rgba(255,60,60,0.55) !important;
-}
-
-/* ÚLTIMO MOVIMENTO */
-
-.lastMoveLight{
-background:rgba(240,220,80,0.45) !important;
-}
-
-.lastMoveDark{
-background:rgba(210,180,40,0.45) !important;
-}
-
-/* ANIMAÇÃO DE CLIQUE */
+/* ANIMAÇÃO */
 
 .cell:active{
 transform:scale(0.9);
 }
 
-/* MENUS DE CARTAS */
+/* OVERLAY BASE */
+
+.cell::after{
+content:"";
+position:absolute;
+top:0;
+left:0;
+width:100%;
+height:100%;
+pointer-events:none;
+}
+
+/* MOVIMENTO POSSÍVEL */
+
+.move::after{
+background:rgba(120,200,120,0.45);
+}
+
+/* CARTA BLOQUEADA */
+
+.blocked-light::after{
+background:rgba(255,120,80,0.45);
+}
+
+.blocked-dark::after{
+background:rgba(255,80,40,0.45);
+}
+
+/* REI EM XEQUE */
+
+.check::after{
+background:rgba(255,60,60,0.55);
+}
+
+/* ÚLTIMO MOVIMENTO */
+
+.lastMoveLight::after{
+background:rgba(240,220,80,0.45);
+}
+
+.lastMoveDark::after{
+background:rgba(210,180,40,0.45);
+}
+
+/* MENUS */
 
 #topMenu,#bottomMenu{
 display:flex;
 gap:8px;
-margin:10px;
+margin:8px;
 flex-wrap:wrap;
 justify-content:center;
 }
@@ -131,11 +147,22 @@ justify-content:center;
 font-size:36px;
 cursor:pointer;
 color:white;
+
 text-shadow:
 -1.5px -1.5px 0 black,
 1.5px -1.5px 0 black,
 -1.5px 1.5px 0 black,
 1.5px 1.5px 0 black;
+}
+
+.menuPiece.black{
+color:#111;
+
+text-shadow:
+-1.5px -1.5px 0 #eee,
+1.5px -1.5px 0 #eee,
+-1.5px 1.5px 0 #eee,
+1.5px 1.5px 0 #eee;
 }
 
 /* PROMOÇÃO */
@@ -157,7 +184,7 @@ font-size:45px;
 cursor:pointer;
 }
 
-/* MENSAGEM XEQUE-MATE */
+/* XEQUE-MATE */
 
 #mateMessage{
 position:fixed;
