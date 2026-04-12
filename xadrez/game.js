@@ -252,6 +252,7 @@ function drawUI(){
     }
 
     game.selected=null;
+    game.moves=[]; // 🔥 CORREÇÃO
 
     drawBoard();
     drawUI();
@@ -322,6 +323,7 @@ function handleClick(r,c){
       (game.turn==="b" && p===p.toLowerCase())
     ){
       game.selectedCard=null;
+
       game.selected={r,c};
       game.moves=getLegalMoves(game.board,game.turn)
         .filter(m=>m.r===r && m.c===c);
@@ -331,6 +333,8 @@ function handleClick(r,c){
       return;
     }
   }
+
+  game.moves=[]; // 🔥 CORREÇÃO
 
   placeCard(r,c);
   return;
@@ -373,7 +377,6 @@ function drawBoard(){
    let cell=document.createElement("div");
    cell.className="cell "+((r+c)%2?"dark":"light");
 
-   // carta selecionada
    if(game.selectedCard!==null){
     let card=game.hand[game.turn][game.selectedCard];
     if(card && r===card.r && c===card.c){
@@ -381,12 +384,10 @@ function drawBoard(){
     }
    }
 
-   // peça selecionada
    if(game.selected && game.selected.r===r && game.selected.c===c){
     cell.classList.add("selected");
    }
 
-   // movimentos possíveis
    if(game.moves.some(m=>m.r2===r && m.c2===c)){
     cell.classList.add("move");
    }
