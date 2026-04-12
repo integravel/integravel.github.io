@@ -252,7 +252,7 @@ function drawUI(){
     }
 
     game.selected=null;
-    game.moves=[]; // 🔥 CORREÇÃO
+    game.moves=[];
 
     drawBoard();
     drawUI();
@@ -290,6 +290,7 @@ function drawCard(){
  endTurn();
 }
 
+/* 🔥 CORRIGIDO */
 function placeCard(r,c){
 
  let side=game.turn;
@@ -300,6 +301,16 @@ function placeCard(r,c){
 
  if(game.board[r][c])
   return alert("Casa ocupada");
+
+ // simular jogada
+ let newBoard = clone(game.board);
+ newBoard[r][c] = card.p;
+
+ let king = findKing(newBoard, side);
+
+ if(isAttacked(newBoard, king[0], king[1], side==="w"?"b":"w")){
+  return alert("Jogada ilegal: rei continua em xeque");
+ }
 
  game.board[r][c]=card.p;
  game.hand[side].splice(game.selectedCard,1);
@@ -334,7 +345,7 @@ function handleClick(r,c){
     }
   }
 
-  game.moves=[]; // 🔥 CORREÇÃO
+  game.moves=[];
 
   placeCard(r,c);
   return;
