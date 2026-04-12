@@ -195,11 +195,19 @@ function drawBoard(){
 
 boardEl.innerHTML=""
 
+let card=null
+
+if(game.selectedCard!==null)
+card=game.hand[game.turn][game.selectedCard]
+
 for(let r=0;r<8;r++)
 for(let c=0;c<8;c++){
 
 let cell=document.createElement("div")
-cell.className="cell "+((r+c)%2?"dark":"light")
+
+let light=(r+c)%2===0
+
+cell.className="cell "+(light?"light":"dark")
 
 if(game.selected && game.selected.r===r && game.selected.c===c)
 cell.classList.add("selected")
@@ -207,20 +215,14 @@ cell.classList.add("selected")
 if(game.moves.some(m=>m.r2===r && m.c2===c))
 cell.classList.add("move")
 
-/* posição da carta */
-
-if(game.selectedCard!==null){
-
-let card=game.hand[game.turn][game.selectedCard]
+/* destaque da carta */
 
 if(card && r===card.r && c===card.c){
 
 if(game.board[r][c])
-cell.classList.add("blocked")
+cell.classList.add(light?"blocked-light":"blocked-dark")
 else
 cell.classList.add("move")
-
-}
 
 }
 
@@ -239,7 +241,6 @@ boardEl.appendChild(cell)
 function handleClick(r,c){
 
 if(game.gameOver) return
-if(game.promotionPending) return
 
 if(game.selectedCard!==null){
 
