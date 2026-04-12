@@ -33,7 +33,6 @@ align-items:center;
 justify-content:center;
 
 font-size:6vw;
-max-font-size:42px;
 
 cursor:pointer;
 
@@ -52,62 +51,70 @@ background:#f0d9b5;
 background:#b58863;
 }
 
-/* DESTAQUES */
+/* PEÇAS BRANCAS */
+
+.cell{
+color:#ffffff;
+text-shadow:
+-1.5px -1.5px 0 #222,
+1.5px -1.5px 0 #222,
+-1.5px 1.5px 0 #222,
+1.5px 1.5px 0 #222;
+}
+
+/* PEÇAS PRETAS */
+
+.cell.black{
+color:#111;
+text-shadow:
+-1.5px -1.5px 0 #eee,
+1.5px -1.5px 0 #eee,
+-1.5px 1.5px 0 #eee,
+1.5px 1.5px 0 #eee;
+}
+
+/* MOVIMENTOS POSSÍVEIS */
 
 .move{
-background:#a9d18e !important;
+background:rgba(120,200,120,0.45) !important;
 }
+
+/* CASA SELECIONADA */
 
 .selected{
 outline:3px solid yellow;
 }
 
+/* POSIÇÃO DE CARTA BLOQUEADA */
+
 .blocked-light{
-background:#ffccbc;
+background:rgba(255,120,80,0.45);
 }
 
 .blocked-dark{
-background:#ff8a65;
+background:rgba(255,90,50,0.45);
 }
 
 /* REI EM XEQUE */
 
 .check{
-background:#ff4c4c !important;
+background:rgba(255,60,60,0.55) !important;
 }
 
 /* ÚLTIMO MOVIMENTO */
 
 .lastMoveLight{
-background:#f7ec6e !important;
+background:rgba(240,220,80,0.45) !important;
 }
 
 .lastMoveDark{
-background:#dac64b !important;
+background:rgba(210,180,40,0.45) !important;
 }
 
 /* ANIMAÇÃO DE CLIQUE */
 
 .cell:active{
 transform:scale(0.9);
-}
-
-/* CORES DAS PEÇAS */
-
-.cell{
-color:white;
-text-shadow:
--1px -1px 0 black,
-1px -1px 0 black,
--1px 1px 0 black,
-1px 1px 0 black;
-}
-
-/* PEÇAS PRETAS */
-
-.cell:has(> .black){
-color:black;
-text-shadow:none;
 }
 
 /* MENUS DE CARTAS */
@@ -123,9 +130,15 @@ justify-content:center;
 .menuPiece{
 font-size:36px;
 cursor:pointer;
+color:white;
+text-shadow:
+-1.5px -1.5px 0 black,
+1.5px -1.5px 0 black,
+-1.5px 1.5px 0 black,
+1.5px 1.5px 0 black;
 }
 
-/* MENU PROMOÇÃO */
+/* PROMOÇÃO */
 
 #promotionMenu{
 position:fixed;
