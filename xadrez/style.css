@@ -94,3 +94,11 @@ flex-direction:row;
 font-size:50px;
 cursor:pointer;
 }
+
+.blocked-light{
+background:#ffccbc;
+}
+
+.blocked-dark{
+background:#ff8a65;
+}
