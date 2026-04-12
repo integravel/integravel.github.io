@@ -16,20 +16,17 @@ moves:[],
 selectedCard:null,
 deck:{w:[],b:[]},
 hand:{w:[],b:[]},
-gameOver:false
+gameOver:false,
+promotionPending:false
 };
 
 /* UTIL */
 
 function clone(b){return b.map(r=>r.slice())}
 
-function sideOf(p){
-return p===p.toUpperCase()?"w":"b"
-}
+function sideOf(p){return p===p.toUpperCase()?"w":"b"}
 
-function isEnemy(a,b){
-return b && sideOf(a)!==sideOf(b)
-}
+function isEnemy(a,b){return b && sideOf(a)!==sideOf(b)}
 
 function findKing(board,side){
 for(let r=0;r<8;r++)
@@ -48,6 +45,7 @@ for(let i=0;i<8;i++)
 for(let j=0;j<8;j++){
 
 let p=board[i][j]
+
 if(!p) continue
 if(sideOf(p)!==bySide) continue
 
@@ -109,17 +107,13 @@ break
 }
 
 if(p.toLowerCase()==="n"){
-
 [[2,1],[2,-1],[-2,1],[-2,-1],[1,2],[1,-2],[-1,2],[-1,-2]]
 .forEach(v=>push(r+v[0],c+v[1]))
-
 }
 
 if(p.toLowerCase()==="k"){
-
 [[1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]]
 .forEach(v=>push(r+v[0],c+v[1]))
-
 }
 
 if(p.toLowerCase()==="r"){
@@ -171,6 +165,8 @@ moves.push({r,c,r2:r+1,c2:c+1})
 
 return moves
 }
+
+/* MOVIMENTOS LEGAIS */
 
 function getLegalMoves(board,side){
 
@@ -247,10 +243,14 @@ game.hand[side].push(c)
 
 function showPromotion(r,c,piece){
 
+game.promotionPending=true
+
 promotionMenu.innerHTML=""
 promotionMenu.style.display="flex"
 
-;["Q","R","B","N"].forEach(t=>{
+const opts=["Q","R","B","N"]
+
+opts.forEach(t=>{
 
 let p=piece===piece.toUpperCase()?t:t.toLowerCase()
 
@@ -261,7 +261,9 @@ el.textContent=symbols[p]
 el.onclick=()=>{
 
 game.board[r][c]=p
+
 promotionMenu.style.display="none"
+game.promotionPending=false
 
 endTurn()
 
@@ -296,6 +298,7 @@ el.style.outline="3px solid yellow"
 el.onclick=()=>{
 
 if(game.turn!==side) return
+if(game.promotionPending) return
 
 game.selected=null
 game.moves=[]
@@ -359,6 +362,7 @@ boardEl.appendChild(cell)
 function handleClick(r,c){
 
 if(game.gameOver) return
+if(game.promotionPending) return
 
 if(game.selectedCard!==null){
 
