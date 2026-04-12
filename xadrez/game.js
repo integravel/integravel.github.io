@@ -1,7 +1,7 @@
-const boardEl=document.getElementById("board");
-const topMenu=document.getElementById("topMenu");
-const bottomMenu=document.getElementById("bottomMenu");
-const promotionMenu=document.getElementById("promotionMenu");
+const boardEl = document.getElementById("board");
+const topMenu = document.getElementById("topMenu");
+const bottomMenu = document.getElementById("bottomMenu");
+const promotionMenu = document.getElementById("promotionMenu");
 
 const symbols={
 P:"♙",R:"♖",N:"♘",B:"♗",Q:"♕",K:"♔",
@@ -16,17 +16,17 @@ moves:[],
 selectedCard:null,
 deck:{w:[],b:[]},
 hand:{w:[],b:[]},
-gameOver:false,
-promotionPending:false
+promotionPending:false,
+gameOver:false
 };
 
 /* UTIL */
 
 function clone(b){return b.map(r=>r.slice())}
-
 function sideOf(p){return p===p.toUpperCase()?"w":"b"}
-
 function isEnemy(a,b){return b && sideOf(a)!==sideOf(b)}
+
+/* KING */
 
 function findKing(board,side){
 for(let r=0;r<8;r++)
@@ -37,7 +37,7 @@ if(side==="b" && p==="k") return [r,c]
 }
 }
 
-/* ATAQUE */
+/* ATTACK */
 
 function isSquareAttacked(board,r,c,bySide){
 
@@ -58,7 +58,7 @@ return true
 return false
 }
 
-/* MOVIMENTOS */
+/* MOVES */
 
 function getPseudoMoves(board,r,c){
 
@@ -165,7 +165,47 @@ moves.push({r,c,r2:r+1,c2:c+1})
 return moves
 }
 
-/* PROMOÇÃO */
+/* DECK */
+
+function createDeck(side){
+
+const base=[
+{p:"R",r:7,c:0},{p:"N",r:7,c:1},{p:"B",r:7,c:2},{p:"Q",r:7,c:3},
+{p:"B",r:7,c:5},{p:"N",r:7,c:6},{p:"R",r:7,c:7},
+{p:"P",r:6,c:0},{p:"P",r:6,c:1},{p:"P",r:6,c:2},{p:"P",r:6,c:3},
+{p:"P",r:6,c:4},{p:"P",r:6,c:5},{p:"P",r:6,c:6},{p:"P",r:6,c:7}
+]
+
+let deck=base.map(x=>{
+if(side==="b") return {p:x.p.toLowerCase(),r:7-x.r,c:x.c}
+return {...x}
+})
+
+return shuffle(deck)
+}
+
+function shuffle(a){
+for(let i=a.length-1;i>0;i--){
+let j=Math.floor(Math.random()*(i+1))
+let t=a[i];a[i]=a[j];a[j]=t
+}
+return a
+}
+
+function drawUpToFour(side){
+
+while(game.hand[side].length<4){
+
+let c=game.deck[side].pop()
+if(!c) break
+
+game.hand[side].push(c)
+
+}
+
+}
+
+/* PROMOTION */
 
 function showPromotion(r,c,piece){
 
@@ -173,21 +213,19 @@ game.promotionPending=true
 
 promotionMenu.innerHTML=""
 
-const opts=["Q","R","B","N"]
+;["Q","R","B","N"].forEach(type=>{
 
-opts.forEach(t=>{
-
-let p=piece===piece.toUpperCase()?t:t.toLowerCase()
+let promoted = piece===piece.toUpperCase()?type:type.toLowerCase()
 
 let el=document.createElement("div")
 el.className="promoPiece"
-el.textContent=symbols[p]
+el.textContent=symbols[promoted]
 
 el.onclick=()=>{
 
-game.board[r][c]=p
-
+game.board[r][c]=promoted
 promotionMenu.style.display="none"
+
 game.promotionPending=false
 
 endTurn()
@@ -202,7 +240,50 @@ promotionMenu.style.display="flex"
 
 }
 
-/* TABULEIRO */
+/* UI */
+
+function drawUI(){
+
+topMenu.innerHTML=""
+bottomMenu.innerHTML=""
+
+;["b","w"].forEach(side=>{
+
+let menu = side==="w"?bottomMenu:topMenu
+
+game.hand[side].forEach((card,i)=>{
+
+let el=document.createElement("div")
+el.className="menuPiece"
+el.textContent=symbols[card.p]
+
+if(game.selectedCard===i && game.turn===side)
+el.style.outline="3px solid yellow"
+
+el.onclick=()=>{
+
+if(game.turn!==side) return
+if(game.promotionPending) return
+
+game.selected=null
+game.moves=[]
+
+game.selectedCard = game.selectedCard===i?null:i
+
+drawBoard()
+drawUI()
+
+}
+
+menu.appendChild(el)
+
+})
+
+})
+
+}
+
+/* BOARD */
 
 function drawBoard(){
 
@@ -220,6 +301,15 @@ cell.classList.add("selected")
 if(game.moves.some(m=>m.r2===r && m.c2===c))
 cell.classList.add("move")
 
+if(game.selectedCard!==null){
+
+let card=game.hand[game.turn][game.selectedCard]
+
+if(card && r===card.r && c===card.c && !game.board[r][c])
+cell.classList.add("move")
+
+}
+
 let p=game.board[r][c]
 
 if(p) cell.textContent=symbols[p]
@@ -232,12 +322,36 @@ boardEl.appendChild(cell)
 
 }
 
-/* CLIQUE */
+/* CLICK */
 
 function handleClick(r,c){
 
 if(game.gameOver) return
 if(game.promotionPending) return
+
+/* card placement */
+
+if(game.selectedCard!==null){
+
+let card=game.hand[game.turn][game.selectedCard]
+
+if(r===card.r && c===card.c && !game.board[r][c]){
+
+game.board[r][c]=card.p
+
+game.hand[game.turn].splice(game.selectedCard,1)
+
+if(card.p==="P" && r===0){drawBoard();showPromotion(r,c,"P");return}
+if(card.p==="p" && r===7){drawBoard();showPromotion(r,c,"p");return}
+
+endTurn()
+
+}
+
+return
+}
+
+/* move piece */
 
 if(game.selected){
 
@@ -260,28 +374,36 @@ return
 
 }
 
+/* select piece */
+
 let p=game.board[r][c]
 
 if(!p) return
 if(sideOf(p)!==game.turn) return
 
+game.selectedCard=null
 game.selected={r,c}
+
 game.moves=getPseudoMoves(game.board,r,c)
 
 drawBoard()
 
 }
 
-/* TURNO */
+/* TURN */
 
 function endTurn(){
 
-game.turn=game.turn==="w"?"b":"w"
+game.turn = game.turn==="w"?"b":"w"
+
+drawUpToFour(game.turn)
 
 game.selected=null
 game.moves=[]
+game.selectedCard=null
 
 drawBoard()
+drawUI()
 
 }
 
@@ -292,7 +414,14 @@ function init(){
 game.board[7][4]="K"
 game.board[0][4]="k"
 
+game.deck.w=createDeck("w")
+game.deck.b=createDeck("b")
+
+drawUpToFour("w")
+drawUpToFour("b")
+
 drawBoard()
+drawUI()
 
 }
 
