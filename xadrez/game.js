@@ -23,12 +23,12 @@ gameOver:false
 
 function clone(b){return b.map(r=>r.slice())}
 
-function isEnemy(a,b){
-return b && ((a===a.toUpperCase())!=(b===b.toUpperCase()))
-}
-
 function sideOf(p){
 return p===p.toUpperCase()?"w":"b"
+}
+
+function isEnemy(a,b){
+return b && sideOf(a)!==sideOf(b)
 }
 
 function findKing(board,side){
@@ -61,7 +61,7 @@ return true
 return false
 }
 
-/* PSEUDO MOVES */
+/* MOVIMENTOS */
 
 function getPseudoMoves(board,r,c){
 
@@ -172,8 +172,6 @@ moves.push({r,c,r2:r+1,c2:c+1})
 return moves
 }
 
-/* LEGAL MOVES */
-
 function getLegalMoves(board,side){
 
 let legal=[]
@@ -182,7 +180,6 @@ for(let r=0;r<8;r++)
 for(let c=0;c<8;c++){
 
 let p=board[r][c]
-
 if(!p || sideOf(p)!==side) continue
 
 let pseudo=getPseudoMoves(board,r,c)
@@ -238,7 +235,6 @@ function drawUpToFour(side){
 while(game.hand[side].length<4){
 
 let c=game.deck[side].pop()
-
 if(!c) break
 
 game.hand[side].push(c)
@@ -265,7 +261,6 @@ el.textContent=symbols[p]
 el.onclick=()=>{
 
 game.board[r][c]=p
-
 promotionMenu.style.display="none"
 
 endTurn()
@@ -292,9 +287,7 @@ let menu=side==="w"?bottomMenu:topMenu
 game.hand[side].forEach((card,i)=>{
 
 let el=document.createElement("div")
-
 el.className="menuPiece"
-
 el.textContent=symbols[card.p]
 
 if(game.selectedCard===i && game.turn===side)
@@ -332,7 +325,6 @@ for(let r=0;r<8;r++)
 for(let c=0;c<8;c++){
 
 let cell=document.createElement("div")
-
 cell.className="cell "+((r+c)%2?"dark":"light")
 
 if(game.selected && game.selected.r===r && game.selected.c===c)
@@ -383,8 +375,10 @@ let king=findKing(newBoard,game.turn)
 if(!isSquareAttacked(newBoard,king[0],king[1],game.turn==="w"?"b":"w")){
 
 game.board=newBoard
-
 game.hand[game.turn].splice(game.selectedCard,1)
+
+if(card.p==="P" && r===0){drawBoard();showPromotion(r,c,"P");return}
+if(card.p==="p" && r===7){drawBoard();showPromotion(r,c,"p");return}
 
 endTurn()
 
@@ -406,8 +400,8 @@ let piece=game.board[move.r][move.c]
 game.board[move.r2][move.c2]=piece
 game.board[move.r][move.c]=""
 
-if(piece==="P" && move.r2===0){showPromotion(move.r2,move.c2,piece);return}
-if(piece==="p" && move.r2===7){showPromotion(move.r2,move.c2,piece);return}
+if(piece==="P" && move.r2===0){drawBoard();showPromotion(move.r2,move.c2,"P");return}
+if(piece==="p" && move.r2===7){drawBoard();showPromotion(move.r2,move.c2,"p");return}
 
 endTurn()
 return
@@ -419,7 +413,6 @@ return
 let p=game.board[r][c]
 
 if(!p) return
-
 if(sideOf(p)!==game.turn) return
 
 game.selectedCard=null
