@@ -316,7 +316,10 @@ cell.classList.add("check")
 
 let p=game.board[r][c]
 
-if(p) cell.textContent=symbols[p]
+if(p){
+cell.textContent=symbols[p]
+if(p===p.toLowerCase()) cell.classList.add("black")
+}
 
 cell.onclick=()=>handleClick(r,c)
 
