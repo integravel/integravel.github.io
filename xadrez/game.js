@@ -20,13 +20,11 @@ promotionPending:false,
 gameOver:false
 };
 
-/* UTIL */
-
 function clone(b){return b.map(r=>r.slice())}
-function sideOf(p){return p===p.toUpperCase()?"w":"b"}
-function isEnemy(a,b){return b && sideOf(a)!==sideOf(b)}
 
-/* KING */
+function sideOf(p){return p===p.toUpperCase()?"w":"b"}
+
+function isEnemy(a,b){return b && sideOf(a)!==sideOf(b)}
 
 function findKing(board,side){
 for(let r=0;r<8;r++)
@@ -36,8 +34,6 @@ if(side==="w" && p==="K") return [r,c]
 if(side==="b" && p==="k") return [r,c]
 }
 }
-
-/* ATTACK */
 
 function isSquareAttacked(board,r,c,bySide){
 
@@ -58,7 +54,15 @@ return true
 return false
 }
 
-/* MOVES */
+function kingWouldBeInCheck(board,side){
+
+let king=findKing(board,side)
+
+let enemy=side==="w"?"b":"w"
+
+return isSquareAttacked(board,king[0],king[1],enemy)
+
+}
 
 function getPseudoMoves(board,r,c){
 
@@ -165,48 +169,6 @@ moves.push({r,c,r2:r+1,c2:c+1})
 return moves
 }
 
-/* DECK */
-
-function createDeck(side){
-
-const base=[
-{p:"R",r:7,c:0},{p:"N",r:7,c:1},{p:"B",r:7,c:2},{p:"Q",r:7,c:3},
-{p:"B",r:7,c:5},{p:"N",r:7,c:6},{p:"R",r:7,c:7},
-{p:"P",r:6,c:0},{p:"P",r:6,c:1},{p:"P",r:6,c:2},{p:"P",r:6,c:3},
-{p:"P",r:6,c:4},{p:"P",r:6,c:5},{p:"P",r:6,c:6},{p:"P",r:6,c:7}
-]
-
-let deck=base.map(x=>{
-if(side==="b") return {p:x.p.toLowerCase(),r:7-x.r,c:x.c}
-return {...x}
-})
-
-return shuffle(deck)
-}
-
-function shuffle(a){
-for(let i=a.length-1;i>0;i--){
-let j=Math.floor(Math.random()*(i+1))
-let t=a[i];a[i]=a[j];a[j]=t
-}
-return a
-}
-
-function drawUpToFour(side){
-
-while(game.hand[side].length<4){
-
-let c=game.deck[side].pop()
-if(!c) break
-
-game.hand[side].push(c)
-
-}
-
-}
-
-/* PROMOTION */
-
 function showPromotion(r,c,piece){
 
 game.promotionPending=true
@@ -225,7 +187,6 @@ el.onclick=()=>{
 
 game.board[r][c]=promoted
 promotionMenu.style.display="none"
-
 game.promotionPending=false
 
 endTurn()
@@ -239,8 +200,6 @@ promotionMenu.appendChild(el)
 promotionMenu.style.display="flex"
 
 }
-
-/* UI */
 
 function drawUI(){
 
@@ -283,8 +242,6 @@ menu.appendChild(el)
 
 }
 
-/* BOARD */
-
 function drawBoard(){
 
 boardEl.innerHTML=""
@@ -322,14 +279,10 @@ boardEl.appendChild(cell)
 
 }
 
-/* CLICK */
-
 function handleClick(r,c){
 
 if(game.gameOver) return
 if(game.promotionPending) return
-
-/* card placement */
 
 if(game.selectedCard!==null){
 
@@ -337,8 +290,13 @@ let card=game.hand[game.turn][game.selectedCard]
 
 if(r===card.r && c===card.c && !game.board[r][c]){
 
-game.board[r][c]=card.p
+let newBoard=clone(game.board)
 
+newBoard[r][c]=card.p
+
+if(kingWouldBeInCheck(newBoard,game.turn)) return
+
+game.board=newBoard
 game.hand[game.turn].splice(game.selectedCard,1)
 
 if(card.p==="P" && r===0){drawBoard();showPromotion(r,c,"P");return}
@@ -351,8 +309,6 @@ endTurn()
 return
 }
 
-/* move piece */
-
 if(game.selected){
 
 let move=game.moves.find(m=>m.r2===r && m.c2===c)
@@ -361,8 +317,14 @@ if(move){
 
 let piece=game.board[move.r][move.c]
 
-game.board[move.r2][move.c2]=piece
-game.board[move.r][move.c]=""
+let newBoard=clone(game.board)
+
+newBoard[move.r2][move.c2]=piece
+newBoard[move.r][move.c]=""
+
+if(kingWouldBeInCheck(newBoard,game.turn)) return
+
+game.board=newBoard
 
 if(piece==="P" && move.r2===0){drawBoard();showPromotion(move.r2,move.c2,"P");return}
 if(piece==="p" && move.r2===7){drawBoard();showPromotion(move.r2,move.c2,"p");return}
@@ -373,8 +335,6 @@ return
 }
 
 }
-
-/* select piece */
 
 let p=game.board[r][c]
 
@@ -390,7 +350,43 @@ drawBoard()
 
 }
 
-/* TURN */
+function createDeck(side){
+
+const base=[
+{p:"R",r:7,c:0},{p:"N",r:7,c:1},{p:"B",r:7,c:2},{p:"Q",r:7,c:3},
+{p:"B",r:7,c:5},{p:"N",r:7,c:6},{p:"R",r:7,c:7},
+{p:"P",r:6,c:0},{p:"P",r:6,c:1},{p:"P",r:6,c:2},{p:"P",r:6,c:3},
+{p:"P",r:6,c:4},{p:"P",r:6,c:5},{p:"P",r:6,c:6},{p:"P",r:6,c:7}
+]
+
+let deck=base.map(x=>{
+if(side==="b") return {p:x.p.toLowerCase(),r:7-x.r,c:x.c}
+return {...x}
+})
+
+return shuffle(deck)
+}
+
+function shuffle(a){
+for(let i=a.length-1;i>0;i--){
+let j=Math.floor(Math.random()*(i+1))
+let t=a[i];a[i]=a[j];a[j]=t
+}
+return a
+}
+
+function drawUpToFour(side){
+
+while(game.hand[side].length<4){
+
+let c=game.deck[side].pop()
+if(!c) break
+
+game.hand[side].push(c)
+
+}
+
+}
 
 function endTurn(){
 
@@ -406,8 +402,6 @@ drawBoard()
 drawUI()
 
 }
-
-/* INIT */
 
 function init(){
 
