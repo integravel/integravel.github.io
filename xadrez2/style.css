@@ -5,25 +5,44 @@ flex-direction:column;
 align-items:center;
 background:#222;
 color:white;
+margin:0;
+padding:10px;
 }
+
+/* TABULEIRO RESPONSIVO */
 
 #board{
 display:grid;
-grid-template-columns:repeat(8,70px);
-grid-template-rows:repeat(8,70px);
-margin:20px;
+grid-template-columns:repeat(8,11vw);
+grid-template-rows:repeat(8,11vw);
+max-width:95vw;
+max-height:95vw;
+margin:15px auto;
 }
 
+/* CÉLULAS */
+
 .cell{
-width:70px;
-height:70px;
+width:11vw;
+height:11vw;
+max-width:70px;
+max-height:70px;
+
 display:flex;
 align-items:center;
 justify-content:center;
-font-size:40px;
+
+font-size:6vw;
+max-font-size:42px;
+
 cursor:pointer;
-transition:background 0.2s ease;
+
+transition:
+background 0.2s ease,
+transform 0.15s ease;
 }
+
+/* CORES DO TABULEIRO */
 
 .light{
 background:#f0d9b5;
@@ -32,6 +51,8 @@ background:#f0d9b5;
 .dark{
 background:#b58863;
 }
+
+/* DESTAQUES */
 
 .move{
 background:#a9d18e !important;
@@ -49,13 +70,13 @@ background:#ffccbc;
 background:#ff8a65;
 }
 
-/* rei em xeque */
+/* REI EM XEQUE */
 
 .check{
 background:#ff4c4c !important;
 }
 
-/* último movimento */
+/* ÚLTIMO MOVIMENTO */
 
 .lastMoveLight{
 background:#f7ec6e !important;
@@ -65,32 +86,46 @@ background:#f7ec6e !important;
 background:#dac64b !important;
 }
 
-/* animação de peça */
-
-.cell{
-transition:
-background 0.2s ease,
-transform 0.15s ease;
-}
+/* ANIMAÇÃO DE CLIQUE */
 
 .cell:active{
 transform:scale(0.9);
 }
 
-/* menus */
+/* CORES DAS PEÇAS */
+
+.cell{
+color:white;
+text-shadow:
+-1px -1px 0 black,
+1px -1px 0 black,
+-1px 1px 0 black,
+1px 1px 0 black;
+}
+
+/* PEÇAS PRETAS */
+
+.cell:has(> .black){
+color:black;
+text-shadow:none;
+}
+
+/* MENUS DE CARTAS */
 
 #topMenu,#bottomMenu{
 display:flex;
-gap:10px;
+gap:8px;
 margin:10px;
+flex-wrap:wrap;
+justify-content:center;
 }
 
 .menuPiece{
-font-size:40px;
+font-size:36px;
 cursor:pointer;
 }
 
-/* promoção */
+/* MENU PROMOÇÃO */
 
 #promotionMenu{
 position:fixed;
@@ -109,16 +144,16 @@ font-size:45px;
 cursor:pointer;
 }
 
-/* xeque mate discreto */
+/* MENSAGEM XEQUE-MATE */
 
 #mateMessage{
 position:fixed;
-top:15px;
-right:15px;
+top:10px;
+right:10px;
 background:#333;
-padding:12px 20px;
-border-radius:8px;
-font-size:18px;
+padding:10px 16px;
+border-radius:6px;
+font-size:16px;
 display:none;
 box-shadow:0 0 10px rgba(0,0,0,0.4);
 }
