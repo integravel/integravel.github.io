@@ -60,12 +60,10 @@ color:#ffffff;
 
 #board{
 
+flex:8;
+
 width:100vw;
-height:100vw;
-
-max-height:82vh;
-
-margin:auto;
+height:100%;
 
 display:grid;
 grid-template-columns:repeat(8,1fr);
