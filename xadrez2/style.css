@@ -7,28 +7,44 @@ flex-direction:column;
 align-items:center;
 }
 
-/* MENUS */
+/* MENU SUPERIOR (PRETAS) */
 
-#topMenu,
-#bottomMenu{
+#topMenu{
 width:100%;
-background:#dcdcdc;
+background:white;
 display:flex;
 justify-content:center;
 gap:20px;
 padding:12px 0;
 }
 
+/* MENU INFERIOR (BRANCAS) */
+
+#bottomMenu{
+width:100%;
+background:black;
+display:flex;
+justify-content:center;
+gap:20px;
+padding:12px 0;
+}
+
+/* PEÇAS DO MENU */
+
 .menuPiece{
 font-size:40px;
 cursor:pointer;
 }
 
-.menuPiece.black{
+/* PEÇAS PRETAS */
+
+#topMenu .menuPiece{
 color:black;
 }
 
-.menuPiece:not(.black){
+/* PEÇAS BRANCAS */
+
+#bottomMenu .menuPiece{
 color:white;
 }
 
@@ -38,7 +54,6 @@ color:white;
 display:grid;
 grid-template-columns:repeat(8,12vw);
 grid-template-rows:repeat(8,12vw);
-
 max-width:96vw;
 max-height:96vw;
 }
@@ -49,18 +64,14 @@ max-height:96vw;
 display:flex;
 align-items:center;
 justify-content:center;
-
 font-size:7vw;
-
 max-width:85px;
 max-height:85px;
-
 cursor:pointer;
-
 position:relative;
 }
 
-/* CORES TABULEIRO */
+/* CORES DO TABULEIRO */
 
 .light{
 background:#e7d3b0;
@@ -80,7 +91,7 @@ color:white;
 color:black;
 }
 
-/* OVERLAY BASE */
+/* CAMADA DE DESTAQUE */
 
 .cell::after{
 content:"";
@@ -92,13 +103,13 @@ height:100%;
 pointer-events:none;
 }
 
-/* MOVIMENTO */
+/* MOVIMENTOS */
 
 .move::after{
 background:rgba(120,200,120,0.35);
 }
 
-/* CASA BLOQUEADA */
+/* BLOQUEADO */
 
 .blocked-light::after{
 background:rgba(255,120,80,0.35);
