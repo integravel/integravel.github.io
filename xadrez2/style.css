@@ -1,7 +1,7 @@
 body{
 margin:0;
 font-family:Arial,Helvetica,sans-serif;
-background:#2b2b2b;
+background:#1e1e1e;
 
 display:flex;
 flex-direction:column;
@@ -10,51 +10,50 @@ height:100vh;
 overflow:hidden;
 }
 
-/* MENU SUPERIOR */
+/* MENU SUPERIOR (PRETAS) */
 
 #topMenu{
 flex:1;
-
-background:white;
+background:#f2f2f2;
 
 display:flex;
 justify-content:center;
 align-items:center;
-
-gap:20px;
+gap:24px;
 }
 
-/* MENU INFERIOR */
+/* MENU INFERIOR (BRANCAS) */
 
 #bottomMenu{
 flex:1;
-
-background:black;
+background:#111;
 
 display:flex;
 justify-content:center;
 align-items:center;
-
-gap:20px;
+gap:24px;
 }
 
 /* PEÇAS DO MENU */
 
 .menuPiece{
-font-size:40px;
+font-size:42px;
 cursor:pointer;
+transition:transform 0.15s;
 }
 
-/* PEÇAS PRETAS (MENU DE CIMA) */
+.menuPiece:hover{
+transform:scale(1.15);
+}
+
+/* CORES DAS PEÇAS */
 
 #topMenu .menuPiece{
-color:black;
+color:#111;
 }
 
-/* PEÇAS BRANCAS (MENU DE BAIXO) */
-
 #bottomMenu .menuPiece{
-color:white;
+color:#ffffff;
 }
 
 /* TABULEIRO */
@@ -64,7 +63,7 @@ color:white;
 width:100vw;
 height:100vw;
 
-max-height:80vh;
+max-height:82vh;
 
 margin:auto;
 
@@ -80,17 +79,17 @@ display:flex;
 align-items:center;
 justify-content:center;
 
-font-size:7vw;
+font-size:7.2vw;
 
 cursor:pointer;
 
 position:relative;
 }
 
-/* CORES TABULEIRO */
+/* CORES DO TABULEIRO (MAIS CONTRASTE) */
 
 .light{
-background:#e7d3b0;
+background:#f0d9b5;
 }
 
 .dark{
@@ -100,14 +99,14 @@ background:#b58863;
 /* PEÇAS */
 
 .cell{
-color:white;
+color:#ffffff;
 }
 
 .cell.black{
-color:black;
+color:#111111;
 }
 
-/* OVERLAY */
+/* CAMADA DE DESTAQUE */
 
 .cell::after{
 content:"";
@@ -119,42 +118,42 @@ height:100%;
 pointer-events:none;
 }
 
-/* MOVIMENTO */
+/* MOVIMENTOS POSSÍVEIS */
 
 .move::after{
-background:rgba(120,200,120,0.35);
+background:rgba(0,200,90,0.35);
 }
 
-/* BLOQUEADO */
+/* CASA BLOQUEADA (CARTA) */
 
 .blocked-light::after{
-background:rgba(255,120,80,0.35);
+background:rgba(255,140,0,0.35);
 }
 
 .blocked-dark::after{
-background:rgba(255,80,40,0.35);
+background:rgba(255,120,0,0.35);
 }
 
 /* XEQUE */
 
 .check::after{
-background:rgba(255,60,60,0.45);
+background:rgba(255,0,0,0.45);
 }
 
 /* ÚLTIMO MOVIMENTO */
 
 .lastMoveLight::after{
-background:rgba(240,220,80,0.35);
+background:rgba(255,255,0,0.25);
 }
 
 .lastMoveDark::after{
-background:rgba(210,180,40,0.35);
+background:rgba(255,255,0,0.25);
 }
 
-/* SELEÇÃO */
+/* CASA SELECIONADA */
 
 .selected{
-outline:3px solid yellow;
+outline:4px solid #00bfff;
 }
 
 /* PROMOÇÃO */
@@ -164,15 +163,18 @@ position:fixed;
 top:50%;
 left:50%;
 transform:translate(-50%,-50%);
-background:#333;
+
+background:#2c2c2c;
+
 padding:20px;
-border-radius:10px;
+border-radius:12px;
+
 display:none;
-gap:15px;
+gap:20px;
 }
 
 .promoPiece{
-font-size:45px;
+font-size:46px;
 cursor:pointer;
 color:white;
 }
@@ -181,12 +183,18 @@ color:white;
 
 #mateMessage{
 position:fixed;
-top:10px;
-right:10px;
-background:#333;
+top:12px;
+right:12px;
+
+background:#202020;
+
 color:white;
+
 padding:10px 16px;
-border-radius:6px;
-font-size:16px;
+
+border-radius:8px;
+
+font-size:15px;
+
 display:none;
 }
