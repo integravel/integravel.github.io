@@ -5,7 +5,7 @@ const promotionMenu = document.getElementById("promotionMenu");
 const mateMessage = document.getElementById("mateMessage");
 
 const symbols={
-P:"♙",R:"♖",N:"♘",B:"♗",Q:"♕",K:"♔",
+P:"♟",R:"♜",N:"♞",B:"♝",Q:"♛",K:"♚",
 p:"♟",r:"♜",n:"♞",b:"♝",q:"♛",k:"♚"
 };
 
