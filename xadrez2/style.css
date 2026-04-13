@@ -1,54 +1,64 @@
 body{
+margin:0;
 font-family:Arial,Helvetica,sans-serif;
+background:#2b2b2b;
 display:flex;
 flex-direction:column;
 align-items:center;
-background:#222;
-color:white;
-margin:0;
-padding:6px;
 }
 
-/* TABULEIRO MAIS LARGO */
+/* MENUS */
+
+#topMenu,
+#bottomMenu{
+width:100%;
+background:#dcdcdc;
+display:flex;
+justify-content:center;
+align-items:center;
+gap:20px;
+padding:12px 0;
+}
+
+.menuPiece{
+font-size:42px;
+cursor:pointer;
+}
+
+/* TABULEIRO */
 
 #board{
 display:grid;
 grid-template-columns:repeat(8,12vw);
 grid-template-rows:repeat(8,12vw);
 
-max-width:98vw;
-max-height:98vw;
+max-width:95vw;
+max-height:95vw;
 
-margin:10px auto;
+margin:0 auto;
 }
 
-/* CÉLULAS */
+/* CASAS */
 
 .cell{
-position:relative;
-
-width:12vw;
-height:12vw;
-
-max-width:80px;
-max-height:80px;
-
 display:flex;
 align-items:center;
 justify-content:center;
 
-font-size:6vw;
+font-size:7vw;
+
+max-width:80px;
+max-height:80px;
 
 cursor:pointer;
 
-transition:
-transform 0.15s ease;
+position:relative;
 }
 
 /* CORES DO TABULEIRO */
 
 .light{
-background:#f0d9b5;
+background:#e7d3b0;
 }
 
 .dark{
@@ -58,7 +68,7 @@ background:#b58863;
 /* PEÇAS BRANCAS */
 
 .cell{
-color:white;
+color:#ffffff;
 text-shadow:
 -1.5px -1.5px 0 #222,
 1.5px -1.5px 0 #222,
@@ -77,19 +87,7 @@ text-shadow:
 1.5px 1.5px 0 #eee;
 }
 
-/* SELEÇÃO */
-
-.selected{
-outline:3px solid yellow;
-}
-
-/* ANIMAÇÃO */
-
-.cell:active{
-transform:scale(0.9);
-}
-
-/* OVERLAY BASE */
+/* SOBREPOSIÇÕES */
 
 .cell::after{
 content:"";
@@ -101,75 +99,49 @@ height:100%;
 pointer-events:none;
 }
 
-/* MOVIMENTO POSSÍVEL */
+/* MOVIMENTO */
 
 .move::after{
-background:rgba(120,200,120,0.45);
+background:rgba(120,200,120,0.35);
 }
 
 /* CARTA BLOQUEADA */
 
 .blocked-light::after{
-background:rgba(255,120,80,0.45);
+background:rgba(255,120,80,0.35);
 }
 
 .blocked-dark::after{
-background:rgba(255,80,40,0.45);
+background:rgba(255,80,40,0.35);
 }
 
-/* REI EM XEQUE */
+/* XEQUE */
 
 .check::after{
-background:rgba(255,60,60,0.55);
+background:rgba(255,60,60,0.45);
 }
 
 /* ÚLTIMO MOVIMENTO */
 
 .lastMoveLight::after{
-background:rgba(240,220,80,0.45);
+background:rgba(240,220,80,0.35);
 }
 
 .lastMoveDark::after{
-background:rgba(210,180,40,0.45);
+background:rgba(210,180,40,0.35);
 }
 
-/* MENUS */
+/* CASA SELECIONADA */
 
-#topMenu,#bottomMenu{
-display:flex;
-gap:8px;
-margin:8px;
-flex-wrap:wrap;
-justify-content:center;
-}
-
-.menuPiece{
-font-size:36px;
-cursor:pointer;
-color:white;
-
-text-shadow:
--1.5px -1.5px 0 black,
-1.5px -1.5px 0 black,
--1.5px 1.5px 0 black,
-1.5px 1.5px 0 black;
-}
-
-.menuPiece.black{
-color:#111;
-
-text-shadow:
--1.5px -1.5px 0 #eee,
-1.5px -1.5px 0 #eee,
--1.5px 1.5px 0 #eee,
-1.5px 1.5px 0 #eee;
+.selected{
+outline:3px solid yellow;
 }
 
 /* PROMOÇÃO */
 
 #promotionMenu{
 position:fixed;
-top:40%;
+top:50%;
 left:50%;
 transform:translate(-50%,-50%);
 background:#333;
@@ -191,9 +163,9 @@ position:fixed;
 top:10px;
 right:10px;
 background:#333;
+color:white;
 padding:10px 16px;
 border-radius:6px;
 font-size:16px;
 display:none;
-box-shadow:0 0 10px rgba(0,0,0,0.4);
 }
