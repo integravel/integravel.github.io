@@ -15,44 +15,74 @@
 
 <style>
 
-body{
-font-family:Arial;
-background:#f2f2f2;
+*{
+box-sizing:border-box;
 margin:0;
 padding:0;
-text-align:center;
+}
+
+html,body{
+height:100%;
+width:100%;
 overflow:hidden;
+font-family:Arial;
+background:#f2f2f2;
+}
+
+#app{
+
+height:100vh;
+
+display:grid;
+
+grid-template-rows:
+auto
+1fr
+auto
+auto
+1fr;
+
 }
 
 .section{
-width:100%;
-padding:4px;
+
+display:flex;
+flex-direction:column;
+align-items:center;
+justify-content:center;
+
 }
 
 .graph{
 width:100%;
-height:220px;
+height:100%;
 }
 
 .func{
 font-size:20px;
-margin:6px;
+margin:4px;
 }
 
 .controls{
+
 display:flex;
-flex-wrap:wrap;
 justify-content:center;
+flex-wrap:wrap;
 gap:6px;
-margin:6px;
+padding:4px;
+
 }
 
 button{
-padding:10px 12px;
-font-size:15px;
+
+padding:8px 10px;
+font-size:14px;
+
 border-radius:6px;
-border:1px solid #999;
+border:1px solid #888;
+
 background:white;
+
 }
 
 button:active{
@@ -60,9 +90,20 @@ background:#ddd;
 }
 
 #msg{
-height:20px;
+
+height:18px;
 font-weight:bold;
 color:green;
+
+display:flex;
+align-items:center;
+justify-content:center;
+
+}
+
+h3{
+font-size:16px;
+margin:2px;
 }
 
 </style>
@@ -71,15 +112,17 @@ color:green;
 
 <body>
 
+<div id="app">
+
 <div class="section">
 
 <h3>Função Atual</h3>
 
 <div id="funcAtual" class="func"></div>
 
-<div id="graficoAtual" class="graph"></div>
-
 </div>
+
+<div id="graficoAtual" class="graph"></div>
 
 <div class="controls">
 
@@ -98,6 +141,8 @@ color:green;
 <h3>Função Objetivo</h3>
 
 <div id="funcObjetivo" class="func"></div>
+
+</div>
 
 <div id="graficoObjetivo" class="graph"></div>
 
