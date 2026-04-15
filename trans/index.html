@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>Quebra-cabeça de Funções</title>
+
+<script src="https://unpkg.com/algebrite/dist/algebrite.bundle-for-browser.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mathjs@11/lib/browser/math.js"></script>
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+
+<style>
+
+body{
+font-family:Arial;
+background:#f2f2f2;
+margin:0;
+padding:0;
+text-align:center;
+overflow-x:hidden;
+}
+
+h2{
+margin:6px;
+}
+
+.section{
+width:100%;
+padding:4px;
+}
+
+.graph{
+width:100%;
+height:230px;
+}
+
+.func{
+font-size:20px;
+margin:6px;
+}
+
+.controls{
+display:flex;
+flex-wrap:wrap;
+justify-content:center;
+gap:6px;
+margin:6px;
+}
+
+button{
+padding:10px 12px;
+font-size:15px;
+border-radius:6px;
+border:1px solid #999;
+background:white;
+}
+
+button:active{
+background:#ddd;
+}
+
+#msg{
+height:22px;
+font-weight:bold;
+color:green;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h2>Quebra-cabeça de Funções</h2>
+
+<div class="section">
+
+<h3>Função Atual</h3>
+
+<div id="funcAtual" class="func"></div>
+
+<div id="graficoAtual" class="graph"></div>
+
+</div>
+
+<div class="controls">
+
+<button onclick="acao('dx')">∂/∂x</button>
+<button onclick="acao('dy')">∂/∂y</button>
+<button onclick="acao('ix')">∫ dx</button>
+<button onclick="acao('iy')">∫ dy</button>
+<button onclick="resetar()">Reiniciar</button>
+
+</div>
+
+<div id="msg"></div>
+
+<div class="section">
+
+<h3>Função Objetivo</h3>
+
+<div id="funcObjetivo" class="func"></div>
+
+<div id="graficoObjetivo" class="graph"></div>
+
+</div>
+
+<script>
+
+let funcInicial
+let funcAtual
+let funcObjetivo
+
+function simplificar(f){
+return Algebrite.run("simplify("+f+")")
+}
+
+function gerarFuncBase(){
+
+let lista=[
+"x^2+y^2",
+"x*y",
+"x^3+y",
+"sin(x)+y",
+"x^2+3*y"
+]
+
+return lista[Math.floor(Math.random()*lista.length)]
+
+}
+
+function gerarFase(){
+
+funcInicial=gerarFuncBase()
+funcAtual=funcInicial
+
+let f=funcInicial
+
+let passos=1+Math.floor(Math.random()*2)
+
+for(let i=0;i<passos;i++){
+
+let ops=["dx","dy","ix","iy"]
+let op=ops[Math.floor(Math.random()*ops.length)]
+
+if(op=="dx") f=Algebrite.run("d("+f+",x)")
+if(op=="dy") f=Algebrite.run("d("+f+",y)")
+if(op=="ix") f=Algebrite.run("integral("+f+",x)")
+if(op=="iy") f=Algebrite.run("integral("+f+",y)")
+
+}
+
+funcObjetivo=simplificar(f)
+
+atualizarTela()
+
+}
+
+function acao(tipo){
+
+let f=funcAtual
+
+if(tipo=="dx") f=Algebrite.run("d("+f+",x)")
+if(tipo=="dy") f=Algebrite.run("d("+f+",y)")
+if(tipo=="ix") f=Algebrite.run("integral("+f+",x)")
+if(tipo=="iy") f=Algebrite.run("integral("+f+",y)")
+
+funcAtual=simplificar(f)
+
+atualizarTela()
+
+checarVitoria()
+
+}
+
+function resetar(){
+
+funcAtual=funcInicial
+atualizarTela()
+
+}
+
+function checarVitoria(){
+
+if(simplificar(funcAtual)==simplificar(funcObjetivo)){
+
+document.getElementById("msg").innerText="✔ Função encontrada!"
+
+setTimeout(()=>{
+
+document.getElementById("msg").innerText=""
+gerarFase()
+
+},2000)
+
+}
+
+}
+
+function latex(f){
+
+return f
+.replace(/sin/g,"\\sin")
+.replace(/\^/g,"^")
+
+}
+
+function mostrarFuncao(id,f){
+
+katex.render(latex(f),document.getElementById(id),{
+throwOnError:false
+})
+
+}
+
+function atualizarTela(){
+
+mostrarFuncao("funcAtual",funcAtual)
+mostrarFuncao("funcObjetivo",funcObjetivo)
+
+plotar(funcAtual,"graficoAtual")
+plotar(funcObjetivo,"graficoObjetivo")
+
+}
+
+function plotar(func,id){
+
+let x=[]
+let y=[]
+let z=[]
+
+for(let i=-5;i<=5;i+=0.4){
+x.push(i)
+y.push(i)
+}
+
+for(let i=0;i<x.length;i++){
+
+z[i]=[]
+
+for(let j=0;j<y.length;j++){
+
+try{
+z[i][j]=math.evaluate(func,{x:x[i],y:y[j]})
+}catch{
+z[i][j]=NaN
+}
+
+}
+
+}
+
+let data=[{x:x,y:y,z:z,type:"surface"}]
+
+let layout={
+margin:{l:0,r:0,b:0,t:0},
+scene:{aspectratio:{x:1,y:1,z:0.7}}
+}
+
+Plotly.newPlot(id,data,layout,{responsive:true})
+
+}
+
+gerarFase()
+
+</script>
+
+</body>
+
+</html>
