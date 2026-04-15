@@ -7,21 +7,60 @@
 
 <title>Calculadora de Funções f(x,y)</title>
 
+<!-- Math.js -->
 <script src="https://cdn.jsdelivr.net/npm/mathjs@11/lib/browser/math.js"></script>
 
+<!-- Nerdamer -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/nerdamer/1.1.13/nerdamer.core.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/nerdamer/1.1.13/Algebra.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/nerdamer/1.1.13/Calculus.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/nerdamer/1.1.13/Solve.js"></script>
+
+<!-- Plotly -->
 <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 
-<link rel="stylesheet" href="style.css">
+<style>
+
+body{
+font-family:Arial;
+text-align:center;
+background:#f2f2f2;
+}
+
+h2{
+margin-top:20px;
+}
+
+input{
+width:320px;
+padding:10px;
+font-size:16px;
+}
+
+button{
+padding:10px;
+margin:5px;
+font-size:14px;
+cursor:pointer;
+}
+
+#grafico{
+width:90%;
+height:500px;
+margin:auto;
+}
+
+</style>
 
 </head>
 
 <body>
 
-<h2>Função de duas variáveis</h2>
+<h2>Função de duas variáveis f(x,y)</h2>
 
 <input id="func" value="x^2 + y^2">
 
-<div class="botoes">
+<br><br>
 
 <button onclick="derivarX()">Derivar em x</button>
 
@@ -32,8 +71,6 @@
 <button onclick="integrarY()">Integrar em y</button>
 
 <button onclick="plotarAtual()">Plotar</button>
-
-</div>
 
 <p id="resultado"></p>
 
