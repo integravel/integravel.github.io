@@ -20,7 +20,7 @@ plotar(funcAtual)
 
 }catch{
 
-document.getElementById("resultado").innerText="Erro"
+document.getElementById("resultado").innerText="Erro na derivada"
 
 }
 
@@ -42,7 +42,7 @@ plotar(funcAtual)
 
 }catch{
 
-document.getElementById("resultado").innerText="Erro"
+document.getElementById("resultado").innerText="Erro na derivada"
 
 }
 
@@ -54,7 +54,7 @@ pegarFunc()
 
 try{
 
-let r = nerdamer(`integrate(${funcAtual},x)`).toString()
+let r = nerdamer.integrate(funcAtual,"x").toString()
 
 funcAtual = r
 
@@ -62,9 +62,9 @@ document.getElementById("resultado").innerText="Resultado: "+r
 
 plotar(funcAtual)
 
-}catch{
+}catch(e){
 
-document.getElementById("resultado").innerText="Erro"
+document.getElementById("resultado").innerText="Erro na integral"
 
 }
 
@@ -76,7 +76,7 @@ pegarFunc()
 
 try{
 
-let r = nerdamer(`integrate(${funcAtual},y)`).toString()
+let r = nerdamer.integrate(funcAtual,"y").toString()
 
 funcAtual = r
 
@@ -84,9 +84,9 @@ document.getElementById("resultado").innerText="Resultado: "+r
 
 plotar(funcAtual)
 
-}catch{
+}catch(e){
 
-document.getElementById("resultado").innerText="Erro"
+document.getElementById("resultado").innerText="Erro na integral"
 
 }
 
@@ -107,8 +107,10 @@ let y=[]
 let z=[]
 
 for(let i=-5;i<=5;i+=0.5){
+
 x.push(i)
 y.push(i)
+
 }
 
 for(let i=0;i<x.length;i++){
