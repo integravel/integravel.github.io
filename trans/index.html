@@ -149,26 +149,47 @@ return lista[Math.floor(Math.random()*lista.length)]
 
 function gerarFase(){
 
-funcInicial=gerarFuncBase()
-funcAtual=funcInicial
+let tentativas = 0
 
-let f=funcInicial
+while(true){
 
-let passos=1+Math.floor(Math.random()*2)
+funcInicial = gerarFuncBase()
+funcAtual = funcInicial
+
+let f = funcInicial
+
+let passos = 1 + Math.floor(Math.random()*2)
 
 for(let i=0;i<passos;i++){
 
-let ops=["dx","dy","ix","iy"]
-let op=ops[Math.floor(Math.random()*ops.length)]
+let ops = ["dx","dy","ix","iy"]
+let op = ops[Math.floor(Math.random()*ops.length)]
 
-if(op=="dx") f=Algebrite.run("d("+f+",x)")
-if(op=="dy") f=Algebrite.run("d("+f+",y)")
-if(op=="ix") f=Algebrite.run("integral("+f+",x)")
-if(op=="iy") f=Algebrite.run("integral("+f+",y)")
+if(op=="dx") f = Algebrite.run("d("+f+",x)")
+if(op=="dy") f = Algebrite.run("d("+f+",y)")
+if(op=="ix") f = Algebrite.run("integral("+f+",x)")
+if(op=="iy") f = Algebrite.run("integral("+f+",y)")
 
 }
 
-funcObjetivo=simplificar(f)
+let inicialSimplificada = simplificar(funcInicial)
+let objetivoSimplificado = simplificar(f)
+
+if(inicialSimplificada !== objetivoSimplificado){
+
+funcObjetivo = objetivoSimplificado
+break
+
+}
+
+tentativas++
+
+if(tentativas > 20){
+funcObjetivo = objetivoSimplificado
+break
+}
+
+}
 
 atualizarTela()
 
