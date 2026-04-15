@@ -10,7 +10,7 @@ pegarFunc()
 
 try{
 
-let r = math.derivative(funcAtual,"x").toString()
+let r = Algebrite.run("d("+funcAtual+",x)")
 
 funcAtual = r
 
@@ -32,7 +32,7 @@ pegarFunc()
 
 try{
 
-let r = math.derivative(funcAtual,"y").toString()
+let r = Algebrite.run("d("+funcAtual+",y)")
 
 funcAtual = r
 
@@ -54,7 +54,7 @@ pegarFunc()
 
 try{
 
-let r = nerdamer.integrate(funcAtual,"x").toString()
+let r = Algebrite.run("integral("+funcAtual+",x)")
 
 funcAtual = r
 
@@ -62,7 +62,7 @@ document.getElementById("resultado").innerText="Resultado: "+r
 
 plotar(funcAtual)
 
-}catch(e){
+}catch{
 
 document.getElementById("resultado").innerText="Erro na integral"
 
@@ -76,7 +76,7 @@ pegarFunc()
 
 try{
 
-let r = nerdamer.integrate(funcAtual,"y").toString()
+let r = Algebrite.run("integral("+funcAtual+",y)")
 
 funcAtual = r
 
@@ -84,7 +84,7 @@ document.getElementById("resultado").innerText="Resultado: "+r
 
 plotar(funcAtual)
 
-}catch(e){
+}catch{
 
 document.getElementById("resultado").innerText="Erro na integral"
 
@@ -106,7 +106,7 @@ let x=[]
 let y=[]
 let z=[]
 
-for(let i=-5;i<=5;i+=0.5){
+for(let i=-5;i<=5;i+=0.4){
 
 x.push(i)
 y.push(i)
@@ -121,9 +121,13 @@ for(let j=0;j<y.length;j++){
 
 try{
 
-let scope={x:x[i],y:y[j]}
+let expr = func
+.replace(/x/g,"("+x[i]+")")
+.replace(/y/g,"("+y[j]+")")
 
-z[i][j]=math.evaluate(func,scope)
+let v = Algebrite.run(expr)
+
+z[i][j] = Number(v)
 
 }catch{
 
