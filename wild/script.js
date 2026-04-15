@@ -10,17 +10,17 @@ pegarFunc();
 
 try{
 
-let deriv = math.derivative(funcAtual,"x").toString();
+let r = nerdamer.diff(funcAtual,"x").toString();
 
-funcAtual = deriv;
+funcAtual = r;
 
-document.getElementById("resultado").innerText = "Resultado: "+deriv;
+document.getElementById("resultado").innerText="Resultado: "+r;
 
 plotar(funcAtual);
 
-}catch(e){
+}catch{
 
-document.getElementById("resultado").innerText = "Erro na derivada";
+document.getElementById("resultado").innerText="Erro";
 
 }
 
@@ -32,17 +32,17 @@ pegarFunc();
 
 try{
 
-let deriv = math.derivative(funcAtual,"y").toString();
+let r = nerdamer.diff(funcAtual,"y").toString();
 
-funcAtual = deriv;
+funcAtual = r;
 
-document.getElementById("resultado").innerText = "Resultado: "+deriv;
+document.getElementById("resultado").innerText="Resultado: "+r;
 
 plotar(funcAtual);
 
-}catch(e){
+}catch{
 
-document.getElementById("resultado").innerText = "Erro na derivada";
+document.getElementById("resultado").innerText="Erro";
 
 }
 
@@ -54,17 +54,17 @@ pegarFunc();
 
 try{
 
-let integral = nerdamer(`integrate(${funcAtual},x)`).toString();
+let r = nerdamer.integrate(funcAtual,"x").toString();
 
-funcAtual = integral;
+funcAtual = r;
 
-document.getElementById("resultado").innerText = "Resultado: "+integral;
+document.getElementById("resultado").innerText="Resultado: "+r;
 
 plotar(funcAtual);
 
-}catch(e){
+}catch{
 
-document.getElementById("resultado").innerText = "Erro na integral";
+document.getElementById("resultado").innerText="Erro";
 
 }
 
@@ -76,17 +76,17 @@ pegarFunc();
 
 try{
 
-let integral = nerdamer(`integrate(${funcAtual},y)`).toString();
+let r = nerdamer.integrate(funcAtual,"y").toString();
 
-funcAtual = integral;
+funcAtual = r;
 
-document.getElementById("resultado").innerText = "Resultado: "+integral;
+document.getElementById("resultado").innerText="Resultado: "+r;
 
 plotar(funcAtual);
 
-}catch(e){
+}catch{
 
-document.getElementById("resultado").innerText = "Erro na integral";
+document.getElementById("resultado").innerText="Erro";
 
 }
 
@@ -106,11 +106,9 @@ let x=[];
 let y=[];
 let z=[];
 
-for(let i=-5;i<=5;i+=0.4){
-
+for(let i=-5;i<=5;i+=0.5){
 x.push(i);
 y.push(i);
-
 }
 
 for(let i=0;i<x.length;i++){
@@ -119,11 +117,11 @@ z[i]=[];
 
 for(let j=0;j<y.length;j++){
 
-let scope={x:x[i],y:y[j]};
-
 try{
 
-z[i][j]=math.evaluate(func,scope);
+let v = nerdamer(func,{x:x[i],y:y[j]}).evaluate().text();
+
+z[i][j] = parseFloat(v);
 
 }catch{
 
