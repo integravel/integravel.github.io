@@ -4,6 +4,7 @@
 <head>
 
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
 <title>Function Puzzle</title>
 
@@ -15,28 +16,53 @@
 
 body{
 font-family:Arial;
-text-align:center;
 background:#f2f2f2;
+margin:0;
+padding:0;
+text-align:center;
 }
 
-.container{
-width:90%;
-margin:auto;
+h2{
+margin-top:10px;
+}
+
+.section{
+width:100%;
+padding:5px;
 }
 
 .graph{
-height:300px;
+width:100%;
+height:260px;
+}
+
+.func{
+font-weight:bold;
+margin:6px;
+}
+
+.controls{
+display:flex;
+flex-wrap:wrap;
+justify-content:center;
+gap:8px;
+margin:10px;
 }
 
 button{
-padding:10px;
-margin:5px;
+padding:10px 14px;
 font-size:16px;
-cursor:pointer;
+border-radius:6px;
+border:1px solid #999;
+background:white;
+}
+
+button:active{
+background:#ddd;
 }
 
 #msg{
-height:30px;
+height:24px;
 font-weight:bold;
 color:green;
 }
@@ -49,35 +75,43 @@ color:green;
 
 <h2>Function Puzzle</h2>
 
-<div class="container">
+<div class="section">
 
 <h3>Current Function</h3>
-<div id="funcAtual"></div>
+
+<div id="funcAtual" class="func"></div>
+
 <div id="graficoAtual" class="graph"></div>
 
-<div>
+</div>
 
-<button onclick="acao('dx')">∂/∂x</button>
-<button onclick="acao('dy')">∂/∂y</button>
-<button onclick="acao('ix')">∫dx</button>
-<button onclick="acao('iy')">∫dy</button>
-<button onclick="desfazer()">Undo</button>
+<div class="controls">
+
+<button onclick="acao('dx')">∂x</button>
+<button onclick="acao('dy')">∂y</button>
+<button onclick="acao('ix')">∫x</button>
+<button onclick="acao('iy')">∫y</button>
+<button onclick="resetar()">Reset</button>
 
 </div>
 
 <div id="msg"></div>
 
+<div class="section">
+
 <h3>Target Function</h3>
-<div id="funcObjetivo"></div>
+
+<div id="funcObjetivo" class="func"></div>
+
 <div id="graficoObjetivo" class="graph"></div>
 
 </div>
 
 <script>
 
+let funcInicial
 let funcAtual
 let funcObjetivo
-let historico=[]
 
 function simplificar(f){
 return Algebrite.run("simplify("+f+")")
@@ -99,9 +133,10 @@ return lista[Math.floor(Math.random()*lista.length)]
 
 function gerarFase(){
 
-funcAtual=gerarFuncBase()
+funcInicial=gerarFuncBase()
+funcAtual=funcInicial
 
-let f=funcAtual
+let f=funcInicial
 
 let passos=1+Math.floor(Math.random()*2)
 
@@ -119,8 +154,6 @@ if(op=="iy") f=Algebrite.run("integral("+f+",y)")
 
 funcObjetivo=simplificar(f)
 
-historico=[funcAtual]
-
 atualizarTela()
 
 }
@@ -136,24 +169,17 @@ if(tipo=="iy") f=Algebrite.run("integral("+f+",y)")
 
 funcAtual=simplificar(f)
 
-historico.push(funcAtual)
-
 atualizarTela()
 
 checarVitoria()
 
 }
 
-function desfazer(){
+function resetar(){
 
-if(historico.length>1){
-
-historico.pop()
-funcAtual=historico[historico.length-1]
+funcAtual=funcInicial
 
 atualizarTela()
-
-}
 
 }
 
@@ -168,7 +194,7 @@ setTimeout(()=>{
 document.getElementById("msg").innerText=""
 gerarFase()
 
-},2500)
+},2000)
 
 }
 
@@ -190,7 +216,7 @@ let x=[]
 let y=[]
 let z=[]
 
-for(let i=-5;i<=5;i+=0.5){
+for(let i=-5;i<=5;i+=0.4){
 x.push(i)
 y.push(i)
 }
@@ -215,9 +241,21 @@ z[i][j]=NaN
 
 }
 
-let data=[{x:x,y:y,z:z,type:"surface"}]
+let data=[{
+x:x,
+y:y,
+z:z,
+type:"surface"
+}]
 
-Plotly.newPlot(id,data,{margin:{t:0}})
+let layout={
+margin:{l:0,r:0,b:0,t:0},
+scene:{
+aspectratio:{x:1,y:1,z:0.7}
+}
+}
+
+Plotly.newPlot(id,data,layout,{responsive:true})
 
 }
 
