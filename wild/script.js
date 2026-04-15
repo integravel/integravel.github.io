@@ -1,128 +1,154 @@
-let funcAtual = "x^2 + y^2"
+let funcAtual = "x^2 + y^2";
 
-function pegarFunc(){
+function pegarFunc() {
+    funcAtual = document.getElementById("func").value;
+}
 
-funcAtual = document.getElementById("func").value
+function derivarX() {
+
+    pegarFunc();
+
+    try {
+
+        let deriv = math.derivative(funcAtual, "x").toString();
+
+        document.getElementById("resultado").innerText = "Resultado: " + deriv;
+
+        funcAtual = deriv;
+
+        plotar(funcAtual);
+
+    } catch (erro) {
+
+        document.getElementById("resultado").innerText = "Erro ao derivar.";
+
+    }
 
 }
 
-function derivarX(){
+function derivarY() {
 
-pegarFunc()
+    pegarFunc();
 
-let deriv = math.derivative(funcAtual,"x").toString()
+    try {
 
-document.getElementById("resultado").innerText = "Resultado: " + deriv
+        let deriv = math.derivative(funcAtual, "y").toString();
 
-funcAtual = deriv
+        document.getElementById("resultado").innerText = "Resultado: " + deriv;
 
-plotar(funcAtual)
+        funcAtual = deriv;
 
-}
+        plotar(funcAtual);
 
-function derivarY(){
+    } catch (erro) {
 
-pegarFunc()
+        document.getElementById("resultado").innerText = "Erro ao derivar.";
 
-let deriv = math.derivative(funcAtual,"y").toString()
-
-document.getElementById("resultado").innerText = "Resultado: " + deriv
-
-funcAtual = deriv
-
-plotar(funcAtual)
+    }
 
 }
 
-function integrarX(){
+function integrarX() {
 
-pegarFunc()
+    pegarFunc();
 
-let integral = math.integral(funcAtual,"x").toString()
+    try {
 
-document.getElementById("resultado").innerText = "Resultado: " + integral
+        let integral = nerdamer.integrate(funcAtual, "x").toString();
 
-funcAtual = integral
+        document.getElementById("resultado").innerText = "Resultado: " + integral;
 
-plotar(funcAtual)
+        funcAtual = integral;
 
-}
+        plotar(funcAtual);
 
-function integrarY(){
+    } catch (erro) {
 
-pegarFunc()
+        document.getElementById("resultado").innerText = "Erro ao integrar.";
 
-let integral = math.integral(funcAtual,"y").toString()
-
-document.getElementById("resultado").innerText = "Resultado: " + integral
-
-funcAtual = integral
-
-plotar(funcAtual)
+    }
 
 }
 
-function plotarAtual(){
+function integrarY() {
 
-pegarFunc()
+    pegarFunc();
 
-plotar(funcAtual)
+    try {
 
-}
+        let integral = nerdamer.integrate(funcAtual, "y").toString();
 
-function plotar(func){
+        document.getElementById("resultado").innerText = "Resultado: " + integral;
 
-let x = []
-let y = []
-let z = []
+        funcAtual = integral;
 
-for(let i=-5;i<=5;i+=0.3){
+        plotar(funcAtual);
 
-x.push(i)
-y.push(i)
+    } catch (erro) {
 
-}
+        document.getElementById("resultado").innerText = "Erro ao integrar.";
 
-for(let i=0;i<x.length;i++){
-
-z[i] = []
-
-for(let j=0;j<y.length;j++){
-
-let scope = {x:x[i],y:y[j]}
-
-try{
-
-z[i][j] = math.evaluate(func,scope)
-
-}catch{
-
-z[i][j] = 0
+    }
 
 }
 
-}
+function plotarAtual() {
+
+    pegarFunc();
+
+    plotar(funcAtual);
 
 }
 
-let data = [{
+function plotar(func) {
 
-x:x,
-y:y,
-z:z,
-type:'surface'
+    let x = [];
+    let y = [];
+    let z = [];
 
-}]
+    for (let i = -5; i <= 5; i += 0.4) {
 
-let layout = {
+        x.push(i);
+        y.push(i);
 
-title:"Superfície da função",
-autosize:true
+    }
+
+    for (let i = 0; i < x.length; i++) {
+
+        z[i] = [];
+
+        for (let j = 0; j < y.length; j++) {
+
+            let scope = { x: x[i], y: y[j] };
+
+            try {
+
+                z[i][j] = math.evaluate(func, scope);
+
+            } catch {
+
+                z[i][j] = 0;
+
+            }
+
+        }
+
+    }
+
+    let data = [{
+        x: x,
+        y: y,
+        z: z,
+        type: 'surface'
+    }];
+
+    let layout = {
+        title: "Superfície da função",
+        autosize: true
+    };
+
+    Plotly.newPlot("grafico", data, layout);
 
 }
 
-Plotly.newPlot("grafico",data,layout)
-
-}
-
-plotar(funcAtual)
+plotar(funcAtual);
