@@ -1,1 +1,31 @@
-tt
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Funções de Duas Variáveis</title>
+
+<script src="https://cdn.jsdelivr.net/npm/mathjs@11/lib/browser/math.js"></script>
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<h2>Função f(x,y)</h2>
+
+<input id="func" value="x^2 + y^2">
+
+<button onclick="derivarX()">∂/∂x</button>
+<button onclick="derivarY()">∂/∂y</button>
+<button onclick="integrarX()">∫ dx</button>
+<button onclick="integrarY()">∫ dy</button>
+
+<p id="resultado"></p>
+
+<div id="grafico"></div>
+
+<script src="script.js"></script>
+
+</body>
+</html>
