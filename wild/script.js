@@ -1,153 +1,148 @@
 let funcAtual = "x^2 + y^2";
 
-function pegarFunc() {
-    funcAtual = document.getElementById("func").value;
+function pegarFunc(){
+funcAtual = document.getElementById("func").value;
 }
 
-function derivarX() {
+function derivarX(){
 
-    pegarFunc();
+pegarFunc();
 
-    try {
+try{
 
-        let deriv = math.derivative(funcAtual, "x").toString();
+let deriv = math.derivative(funcAtual,"x").toString();
 
-        document.getElementById("resultado").innerText = "Resultado: " + deriv;
+funcAtual = deriv;
 
-        funcAtual = deriv;
+document.getElementById("resultado").innerText = "Resultado: "+deriv;
 
-        plotar(funcAtual);
+plotar(funcAtual);
 
-    } catch (erro) {
+}catch(e){
 
-        document.getElementById("resultado").innerText = "Erro ao derivar.";
-
-    }
-
-}
-
-function derivarY() {
-
-    pegarFunc();
-
-    try {
-
-        let deriv = math.derivative(funcAtual, "y").toString();
-
-        document.getElementById("resultado").innerText = "Resultado: " + deriv;
-
-        funcAtual = deriv;
-
-        plotar(funcAtual);
-
-    } catch (erro) {
-
-        document.getElementById("resultado").innerText = "Erro ao derivar.";
-
-    }
+document.getElementById("resultado").innerText = "Erro na derivada";
 
 }
 
-function integrarX() {
+}
 
-    pegarFunc();
+function derivarY(){
 
-    try {
+pegarFunc();
 
-        let integral = nerdamer.integrate(funcAtual, "x").toString();
+try{
 
-        document.getElementById("resultado").innerText = "Resultado: " + integral;
+let deriv = math.derivative(funcAtual,"y").toString();
 
-        funcAtual = integral;
+funcAtual = deriv;
 
-        plotar(funcAtual);
+document.getElementById("resultado").innerText = "Resultado: "+deriv;
 
-    } catch (erro) {
+plotar(funcAtual);
 
-        document.getElementById("resultado").innerText = "Erro ao integrar.";
+}catch(e){
 
-    }
+document.getElementById("resultado").innerText = "Erro na derivada";
 
 }
 
-function integrarY() {
+}
 
-    pegarFunc();
+function integrarX(){
 
-    try {
+pegarFunc();
 
-        let integral = nerdamer.integrate(funcAtual, "y").toString();
+try{
 
-        document.getElementById("resultado").innerText = "Resultado: " + integral;
+let integral = nerdamer(`integrate(${funcAtual},x)`).toString();
 
-        funcAtual = integral;
+funcAtual = integral;
 
-        plotar(funcAtual);
+document.getElementById("resultado").innerText = "Resultado: "+integral;
 
-    } catch (erro) {
+plotar(funcAtual);
 
-        document.getElementById("resultado").innerText = "Erro ao integrar.";
+}catch(e){
 
-    }
+document.getElementById("resultado").innerText = "Erro na integral";
 
 }
 
-function plotarAtual() {
+}
 
-    pegarFunc();
+function integrarY(){
 
-    plotar(funcAtual);
+pegarFunc();
+
+try{
+
+let integral = nerdamer(`integrate(${funcAtual},y)`).toString();
+
+funcAtual = integral;
+
+document.getElementById("resultado").innerText = "Resultado: "+integral;
+
+plotar(funcAtual);
+
+}catch(e){
+
+document.getElementById("resultado").innerText = "Erro na integral";
 
 }
 
-function plotar(func) {
+}
 
-    let x = [];
-    let y = [];
-    let z = [];
+function plotarAtual(){
 
-    for (let i = -5; i <= 5; i += 0.4) {
+pegarFunc();
 
-        x.push(i);
-        y.push(i);
+plotar(funcAtual);
 
-    }
+}
 
-    for (let i = 0; i < x.length; i++) {
+function plotar(func){
 
-        z[i] = [];
+let x=[];
+let y=[];
+let z=[];
 
-        for (let j = 0; j < y.length; j++) {
+for(let i=-5;i<=5;i+=0.4){
 
-            let scope = { x: x[i], y: y[j] };
+x.push(i);
+y.push(i);
 
-            try {
+}
 
-                z[i][j] = math.evaluate(func, scope);
+for(let i=0;i<x.length;i++){
 
-            } catch {
+z[i]=[];
 
-                z[i][j] = 0;
+for(let j=0;j<y.length;j++){
 
-            }
+let scope={x:x[i],y:y[j]};
 
-        }
+try{
 
-    }
+z[i][j]=math.evaluate(func,scope);
 
-    let data = [{
-        x: x,
-        y: y,
-        z: z,
-        type: 'surface'
-    }];
+}catch{
 
-    let layout = {
-        title: "Superfície da função",
-        autosize: true
-    };
+z[i][j]=0;
 
-    Plotly.newPlot("grafico", data, layout);
+}
+
+}
+
+}
+
+let data=[{
+x:x,
+y:y,
+z:z,
+type:"surface"
+}];
+
+Plotly.newPlot("grafico",data);
 
 }
 
