@@ -22,24 +22,22 @@ padding:0;
 }
 
 html,body{
-height:100%;
 width:100%;
+height:100%;
 overflow:hidden;
 font-family:Arial;
 background:white;
 }
 
-/* evita ficar atrás dos botões do sistema */
 #app{
 
-height:100vh;
+height:100dvh; /* altura real da tela */
 
 display:flex;
 flex-direction:column;
 justify-content:space-between;
 
-padding-bottom:env(safe-area-inset-bottom);
-padding-top:env(safe-area-inset-top);
+padding-bottom:40px; /* espaço extra acima dos botões do celular */
 
 background:white;
 
@@ -48,7 +46,7 @@ background:white;
 .graph{
 
 width:100%;
-height:30vh;
+height:28dvh;
 
 }
 
@@ -70,7 +68,7 @@ flex-wrap:wrap;
 
 gap:16px;
 
-padding:14px;
+padding:16px;
 
 }
 
@@ -196,11 +194,6 @@ break
 }
 
 tentativas++
-
-if(tentativas>20){
-funcObjetivo=objetivoSimplificado
-break
-}
 
 }
 
