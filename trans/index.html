@@ -33,10 +33,7 @@ background:#f2f2f2;
 height:100vh;
 display:flex;
 flex-direction:column;
-}
-
-.section{
-text-align:center;
+justify-content:space-between;
 }
 
 .graph{
@@ -45,8 +42,9 @@ height:32vh;
 }
 
 .func{
-font-size:20px;
-margin:4px;
+font-size:22px;
+text-align:center;
+margin:6px;
 }
 
 .controls{
@@ -54,7 +52,7 @@ display:flex;
 justify-content:center;
 flex-wrap:wrap;
 gap:6px;
-padding:6px;
+padding:8px;
 }
 
 button{
@@ -78,11 +76,6 @@ align-items:center;
 justify-content:center;
 }
 
-h3{
-font-size:16px;
-margin:4px;
-}
-
 </style>
 
 </head>
@@ -91,12 +84,7 @@ margin:4px;
 
 <div id="app">
 
-<div class="section">
-
-<h3>Função Atual</h3>
 <div id="funcAtual" class="func"></div>
-
-</div>
 
 <div id="graficoAtual" class="graph"></div>
 
@@ -112,14 +100,9 @@ margin:4px;
 
 <div id="msg"></div>
 
-<div class="section">
-
-<h3>Função Objetivo</h3>
-<div id="funcObjetivo" class="func"></div>
-
-</div>
-
 <div id="graficoObjetivo" class="graph"></div>
+
+<div id="funcObjetivo" class="func"></div>
 
 </div>
 
@@ -149,43 +132,43 @@ return lista[Math.floor(Math.random()*lista.length)]
 
 function gerarFase(){
 
-let tentativas = 0
+let tentativas=0
 
 while(true){
 
-funcInicial = gerarFuncBase()
-funcAtual = funcInicial
+funcInicial=gerarFuncBase()
+funcAtual=funcInicial
 
-let f = funcInicial
+let f=funcInicial
 
-let passos = 1 + Math.floor(Math.random()*2)
+let passos=1+Math.floor(Math.random()*2)
 
 for(let i=0;i<passos;i++){
 
-let ops = ["dx","dy","ix","iy"]
-let op = ops[Math.floor(Math.random()*ops.length)]
+let ops=["dx","dy","ix","iy"]
+let op=ops[Math.floor(Math.random()*ops.length)]
 
-if(op=="dx") f = Algebrite.run("d("+f+",x)")
-if(op=="dy") f = Algebrite.run("d("+f+",y)")
-if(op=="ix") f = Algebrite.run("integral("+f+",x)")
-if(op=="iy") f = Algebrite.run("integral("+f+",y)")
+if(op=="dx") f=Algebrite.run("d("+f+",x)")
+if(op=="dy") f=Algebrite.run("d("+f+",y)")
+if(op=="ix") f=Algebrite.run("integral("+f+",x)")
+if(op=="iy") f=Algebrite.run("integral("+f+",y)")
 
 }
 
-let inicialSimplificada = simplificar(funcInicial)
-let objetivoSimplificado = simplificar(f)
+let inicialSimplificada=simplificar(funcInicial)
+let objetivoSimplificado=simplificar(f)
 
-if(inicialSimplificada !== objetivoSimplificado){
+if(inicialSimplificada!==objetivoSimplificado){
 
-funcObjetivo = objetivoSimplificado
+funcObjetivo=objetivoSimplificado
 break
 
 }
 
 tentativas++
 
-if(tentativas > 20){
-funcObjetivo = objetivoSimplificado
+if(tentativas>20){
+funcObjetivo=objetivoSimplificado
 break
 }
 
