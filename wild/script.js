@@ -1,9 +1,7 @@
 let funcAtual = "x^2 + y^2"
 
 function pegarFunc(){
-
 funcAtual = document.getElementById("func").value
-
 }
 
 function derivarX(){
@@ -12,17 +10,17 @@ pegarFunc()
 
 try{
 
-let r = nerdamer.diff(funcAtual,"x").toString()
+let r = math.derivative(funcAtual,"x").toString()
 
 funcAtual = r
 
-document.getElementById("resultado").innerText = "Resultado: "+r
+document.getElementById("resultado").innerText="Resultado: "+r
 
 plotar(funcAtual)
 
 }catch{
 
-document.getElementById("resultado").innerText = "Erro"
+document.getElementById("resultado").innerText="Erro"
 
 }
 
@@ -34,17 +32,17 @@ pegarFunc()
 
 try{
 
-let r = nerdamer.diff(funcAtual,"y").toString()
+let r = math.derivative(funcAtual,"y").toString()
 
 funcAtual = r
 
-document.getElementById("resultado").innerText = "Resultado: "+r
+document.getElementById("resultado").innerText="Resultado: "+r
 
 plotar(funcAtual)
 
 }catch{
 
-document.getElementById("resultado").innerText = "Erro"
+document.getElementById("resultado").innerText="Erro"
 
 }
 
@@ -56,17 +54,17 @@ pegarFunc()
 
 try{
 
-let r = nerdamer.integrate(funcAtual,"x").toString()
+let r = nerdamer(`integrate(${funcAtual},x)`).toString()
 
 funcAtual = r
 
-document.getElementById("resultado").innerText = "Resultado: "+r
+document.getElementById("resultado").innerText="Resultado: "+r
 
 plotar(funcAtual)
 
 }catch{
 
-document.getElementById("resultado").innerText = "Erro"
+document.getElementById("resultado").innerText="Erro"
 
 }
 
@@ -78,17 +76,17 @@ pegarFunc()
 
 try{
 
-let r = nerdamer.integrate(funcAtual,"y").toString()
+let r = nerdamer(`integrate(${funcAtual},y)`).toString()
 
 funcAtual = r
 
-document.getElementById("resultado").innerText = "Resultado: "+r
+document.getElementById("resultado").innerText="Resultado: "+r
 
 plotar(funcAtual)
 
 }catch{
 
-document.getElementById("resultado").innerText = "Erro"
+document.getElementById("resultado").innerText="Erro"
 
 }
 
@@ -109,10 +107,8 @@ let y=[]
 let z=[]
 
 for(let i=-5;i<=5;i+=0.5){
-
 x.push(i)
 y.push(i)
-
 }
 
 for(let i=0;i<x.length;i++){
@@ -123,9 +119,9 @@ for(let j=0;j<y.length;j++){
 
 try{
 
-let valor = nerdamer(func,{x:x[i],y:y[j]}).evaluate().text()
+let scope={x:x[i],y:y[j]}
 
-z[i][j] = Number(valor)
+z[i][j]=math.evaluate(func,scope)
 
 }catch{
 
