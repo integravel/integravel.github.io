@@ -108,45 +108,73 @@ margin:2px;
 
 </style>
 
-</head>
+*{
+box-sizing:border-box;
+margin:0;
+padding:0;
+}
 
-<body>
+html,body{
+height:100%;
+width:100%;
+overflow:hidden;
+font-family:Arial;
+background:#f2f2f2;
+}
 
-<div id="app">
+#app{
+height:100vh;
+display:flex;
+flex-direction:column;
+}
 
-<div class="section">
+.section{
+text-align:center;
+}
 
-<h3>Função Atual</h3>
+.graph{
+width:100%;
+height:32vh;
+}
 
-<div id="funcAtual" class="func"></div>
+.func{
+font-size:20px;
+margin:4px;
+}
 
-</div>
+.controls{
+display:flex;
+justify-content:center;
+flex-wrap:wrap;
+gap:6px;
+padding:6px;
+}
 
-<div id="graficoAtual" class="graph"></div>
+button{
+padding:8px 10px;
+font-size:14px;
+border-radius:6px;
+border:1px solid #888;
+background:white;
+}
 
-<div class="controls">
+button:active{
+background:#ddd;
+}
 
-<button onclick="acao('dx')">∂/∂x</button>
-<button onclick="acao('dy')">∂/∂y</button>
-<button onclick="acao('ix')">∫ dx</button>
-<button onclick="acao('iy')">∫ dy</button>
-<button onclick="resetar()">Reiniciar</button>
+#msg{
+height:18px;
+font-weight:bold;
+color:green;
+display:flex;
+align-items:center;
+justify-content:center;
+}
 
-</div>
-
-<div id="msg"></div>
-
-<div class="section">
-
-<h3>Função Objetivo</h3>
-
-<div id="funcObjetivo" class="func"></div>
-
-</div>
-
-<div id="graficoObjetivo" class="graph"></div>
-
-</div>
+h3{
+font-size:16px;
+margin:4px;
+}
 
 <script>
 
