@@ -1,25 +1,39 @@
 <!DOCTYPE html>
 <html>
+
 <head>
+
 <meta charset="UTF-8">
-<title>Funções de Duas Variáveis</title>
+
+<title>Calculadora de Funções f(x,y)</title>
 
 <script src="https://cdn.jsdelivr.net/npm/mathjs@11/lib/browser/math.js"></script>
+
 <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 
 <link rel="stylesheet" href="style.css">
+
 </head>
 
 <body>
 
-<h2>Função f(x,y)</h2>
+<h2>Função de duas variáveis</h2>
 
 <input id="func" value="x^2 + y^2">
 
-<button onclick="derivarX()">∂/∂x</button>
-<button onclick="derivarY()">∂/∂y</button>
-<button onclick="integrarX()">∫ dx</button>
-<button onclick="integrarY()">∫ dy</button>
+<div class="botoes">
+
+<button onclick="derivarX()">Derivar em x</button>
+
+<button onclick="derivarY()">Derivar em y</button>
+
+<button onclick="integrarX()">Integrar em x</button>
+
+<button onclick="integrarY()">Integrar em y</button>
+
+<button onclick="plotarAtual()">Plotar</button>
+
+</div>
 
 <p id="resultado"></p>
 
@@ -28,4 +42,5 @@
 <script src="script.js"></script>
 
 </body>
+
 </html>
