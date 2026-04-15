@@ -1,26 +1,28 @@
-let funcAtual = "x^2 + y^2";
+let funcAtual = "x^2 + y^2"
 
 function pegarFunc(){
-funcAtual = document.getElementById("func").value;
+
+funcAtual = document.getElementById("func").value
+
 }
 
 function derivarX(){
 
-pegarFunc();
+pegarFunc()
 
 try{
 
-let r = nerdamer.diff(funcAtual,"x").toString();
+let r = nerdamer.diff(funcAtual,"x").toString()
 
-funcAtual = r;
+funcAtual = r
 
-document.getElementById("resultado").innerText="Resultado: "+r;
+document.getElementById("resultado").innerText = "Resultado: "+r
 
-plotar(funcAtual);
+plotar(funcAtual)
 
 }catch{
 
-document.getElementById("resultado").innerText="Erro";
+document.getElementById("resultado").innerText = "Erro"
 
 }
 
@@ -28,21 +30,21 @@ document.getElementById("resultado").innerText="Erro";
 
 function derivarY(){
 
-pegarFunc();
+pegarFunc()
 
 try{
 
-let r = nerdamer.diff(funcAtual,"y").toString();
+let r = nerdamer.diff(funcAtual,"y").toString()
 
-funcAtual = r;
+funcAtual = r
 
-document.getElementById("resultado").innerText="Resultado: "+r;
+document.getElementById("resultado").innerText = "Resultado: "+r
 
-plotar(funcAtual);
+plotar(funcAtual)
 
 }catch{
 
-document.getElementById("resultado").innerText="Erro";
+document.getElementById("resultado").innerText = "Erro"
 
 }
 
@@ -50,21 +52,21 @@ document.getElementById("resultado").innerText="Erro";
 
 function integrarX(){
 
-pegarFunc();
+pegarFunc()
 
 try{
 
-let r = nerdamer.integrate(funcAtual,"x").toString();
+let r = nerdamer.integrate(funcAtual,"x").toString()
 
-funcAtual = r;
+funcAtual = r
 
-document.getElementById("resultado").innerText="Resultado: "+r;
+document.getElementById("resultado").innerText = "Resultado: "+r
 
-plotar(funcAtual);
+plotar(funcAtual)
 
 }catch{
 
-document.getElementById("resultado").innerText="Erro";
+document.getElementById("resultado").innerText = "Erro"
 
 }
 
@@ -72,21 +74,21 @@ document.getElementById("resultado").innerText="Erro";
 
 function integrarY(){
 
-pegarFunc();
+pegarFunc()
 
 try{
 
-let r = nerdamer.integrate(funcAtual,"y").toString();
+let r = nerdamer.integrate(funcAtual,"y").toString()
 
-funcAtual = r;
+funcAtual = r
 
-document.getElementById("resultado").innerText="Resultado: "+r;
+document.getElementById("resultado").innerText = "Resultado: "+r
 
-plotar(funcAtual);
+plotar(funcAtual)
 
 }catch{
 
-document.getElementById("resultado").innerText="Erro";
+document.getElementById("resultado").innerText = "Erro"
 
 }
 
@@ -94,38 +96,40 @@ document.getElementById("resultado").innerText="Erro";
 
 function plotarAtual(){
 
-pegarFunc();
+pegarFunc()
 
-plotar(funcAtual);
+plotar(funcAtual)
 
 }
 
 function plotar(func){
 
-let x=[];
-let y=[];
-let z=[];
+let x=[]
+let y=[]
+let z=[]
 
 for(let i=-5;i<=5;i+=0.5){
-x.push(i);
-y.push(i);
+
+x.push(i)
+y.push(i)
+
 }
 
 for(let i=0;i<x.length;i++){
 
-z[i]=[];
+z[i]=[]
 
 for(let j=0;j<y.length;j++){
 
 try{
 
-let v = nerdamer(func,{x:x[i],y:y[j]}).evaluate().text();
+let valor = nerdamer(func,{x:x[i],y:y[j]}).evaluate().text()
 
-z[i][j] = parseFloat(v);
+z[i][j] = Number(valor)
 
 }catch{
 
-z[i][j]=0;
+z[i][j]=0
 
 }
 
@@ -138,10 +142,10 @@ x:x,
 y:y,
 z:z,
 type:"surface"
-}];
+}]
 
-Plotly.newPlot("grafico",data);
+Plotly.newPlot("grafico",data)
 
 }
 
-plotar(funcAtual);
+plotar(funcAtual)
