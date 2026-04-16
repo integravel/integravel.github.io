@@ -1,91 +1,92 @@
 <!DOCTYPE html><html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Labirinto do Tempo</title>
 <style>
-  body { background:#111; color:#fff; font-family:monospace; text-align:center; }
-  #game { display:grid; grid-template-columns: repeat(10, 40px); gap:2px; justify-content:center; margin-top:20px; }
-  .cell { width:40px; height:40px; display:flex; align-items:center; justify-content:center; font-size:20px; }
-  .wall { background:#333; }
-  .floor { background:#222; }
-  .player { color:#00ffcc; }
-  .clone { color:#ffcc00; }
-  .door { background:#550000; }
-  .door.open { background:#005500; }
-  .button { background:#4444aa; }
-  .time { background:#660066; }
-</style>
+  :root{
+    --cell: min(9vw, 9vh);
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:#111;color:#fff;font-family:monospace;overflow:hidden;}#container{ height:100dvh; /* respeita barras do sistema */ display:flex;flex-direction:column;justify-content:space-between;align-items:center; padding-bottom:env(safe-area-inset-bottom); }
+
+#game{ margin-top:10px; display:grid; grid-template-columns: repeat(10, var(--cell)); gap:2px; justify-content:center; }
+
+.cell{width:var(--cell);height:var(--cell);display:flex;align-items:center;justify-content:center;font-size:calc(var(--cell)*0.6);} .wall{background:#333;} .floor{background:#222;} .door{background:#550000;transition:0.2s;} .door.open{background:#006600;} .button{background:#4444aa;} .time{background:#663399;} .goal{background:#006666;}
+
+.player{color:#00ffcc;} .clone{color:#ffcc00;opacity:0.8;}
+
+#hud{ margin-bottom:20px; text-align:center; font-size:18px; opacity:0.9; }
+
+#message{ position:absolute;top:10px;left:50%;transform:translateX(-50%); background:rgba(0,0,0,0.6);padding:6px 12px;border-radius:8px; font-size:14px;opacity:0;transition:0.5s; }
+
+.rewind{ animation: rewindFlash 0.2s infinite alternate; }
+
+@keyframes rewindFlash{ from{filter:invert(0);} to{filter:invert(1);} } </style>
+
 </head>
 <body>
-<h2>Labirinto do Tempo ⏳</h2>
-<p>Use WASD para mover. Vá até a máquina do tempo (⏳).</p>
-<p id="timer">Tempo: 0</p>
-<div id="game"></div><script>
-const map = [
-  "##########",
-  "#P....B..#",
-  "#.####.#.#",
-  "#....#.#T#",
-  "#.##.#.#.#",
-  "#....#...#",
-  "#.######.#",
-  "#........#",
-  "#..D.....#",
-  "##########"
+<div id="container">
+  <div id="message"></div>
+  <div id="game"></div>
+  <div id="hud">Tempo: <span id="timer">0</span></div>
+</div><script>
+let levelIndex=0;
+const levels=[
+[
+"##########",
+"#P....B..#",
+"#.####.#.#",
+"#....#.#T#",
+"#.##.#.#.#",
+"#....#...#",
+"#.######.#",
+"#........#",
+"#..D....G#",
+"##########"
+]
 ];
 
-let player = {x:1,y:1};
-let history = [];
-let clone = null;
-let timeTravelUsed = false;
-let time = 0;
-let reversing = false;
+let map,player,history,clone,time,timeTravelUsed,reversing;
 
-const game = document.getElementById("game");
-const timerEl = document.getElementById("timer");
+const game=document.getElementById("game");
+const timerEl=document.getElementById("timer");
+const msg=document.getElementById("message");
 
-function draw(){
-  game.innerHTML="";
-  map.forEach((row,y)=>{
-    row.split("").forEach((cell,x)=>{
-      const div=document.createElement("div");
-      div.classList.add("cell");
-
-      if(cell==="#") div.classList.add("wall");
-      else div.classList.add("floor");
-
-      if(cell==="D"){
-        div.classList.add("door");
-        if(buttonPressed) div.classList.add("open");
-      }
-      if(cell==="B") div.classList.add("button");
-      if(cell==="T") div.classList.add("time");
-
-      if(player.x===x && player.y===y) div.textContent="♚";
-      if(clone && clone.x===x && clone.y===y) div.textContent="♟";
-
-      game.appendChild(div);
-    });
-  });
+function loadLevel(){
+  map=levels[levelIndex];
+  player={x:1,y:1};
+  history=[];
+  clone=null;
+  time=0;
+  timeTravelUsed=false;
+  reversing=false;
 }
 
-let buttonPressed = false;
+function getCell(x,y){return map[y][x];}
+
+function isBlocked(x,y){
+  const c=getCell(x,y);
+  if(c==="#") return true;
+  if(c==="D" && !isDoorOpen()) return true;
+  return false;
+}
+
+function isDoorOpen(){
+  return isOnButton(player) || (clone && isOnButton(clone));
+}
+
+function isOnButton(entity){
+  return getCell(entity.x,entity.y)==="B";
+}
 
 function move(dx,dy){
-  const nx = player.x+dx;
-  const ny = player.y+dy;
-  const cell = map[ny][nx];
-
-  if(cell==="#") return;
-  if(cell==="D" && !buttonPressed) return;
-
+  const nx=player.x+dx, ny=player.y+dy;
+  if(isBlocked(nx,ny)) return;
   history.push({...player});
+  player.x=nx;player.y=ny;
 
-  player.x=nx;
-  player.y=ny;
-
-  if(cell==="B") buttonPressed=true;
-  if(cell==="T" && !timeTravelUsed){
+  if(getCell(nx,ny)==="T" && !timeTravelUsed){
     reversing=true;
   }
 
@@ -94,51 +95,102 @@ function move(dx,dy){
 
 function updateClone(){
   if(!clone || !clone.path.length) return;
-  const step = clone.path.shift();
-  clone.x = step.x;
-  clone.y = step.y;
+  const step=clone.path.shift();
+  clone.x=step.x;clone.y=step.y;
 }
 
 function reverseTime(){
+  document.body.classList.add("rewind");
   if(history.length>0){
-    player = history.pop();
+    player=history.pop();
     time--;
-  } else {
+  }else{
     reversing=false;
-    clone = {
-      x: player.x,
-      y: player.y,
-      path: [...historyOriginal]
-    };
+    document.body.classList.remove("rewind");
+    clone={x:player.x,y:player.y,path:[...historyOriginal]};
     timeTravelUsed=true;
   }
 }
 
-let historyOriginal = [];
+let historyOriginal=[];
+
+function checkWin(){
+  if(getCell(player.x,player.y)==="G"){
+    showMsg("✔ Resolvido!");
+    setTimeout(()=>{
+      nextLevel();
+    },2000);
+  }
+}
+
+function nextLevel(){
+  levelIndex=(levelIndex+1)%levels.length;
+  loadLevel();
+}
+
+function showMsg(text){
+  msg.textContent=text;
+  msg.style.opacity=1;
+  setTimeout(()=>msg.style.opacity=0,1500);
+}
+
+function draw(){
+  game.innerHTML="";
+  map.forEach((row,y)=>{
+    row.split("").forEach((cell,x)=>{
+      const div=document.createElement("div");
+      div.classList.add("cell");
+
+      if(cell==="#") div.classList.add("wall"); else div.classList.add("floor");
+      if(cell==="D"){
+        div.classList.add("door");
+        if(isDoorOpen()) div.classList.add("open");
+      }
+      if(cell==="B") div.classList.add("button");
+      if(cell==="T") div.classList.add("time");
+      if(cell==="G") div.classList.add("goal");
+
+      if(player.x===x && player.y===y){div.textContent="♚";div.classList.add("player");}
+      if(clone && clone.x===x && clone.y===y){div.textContent="♟";div.classList.add("clone");}
+
+      game.appendChild(div);
+    });
+  });
+}
 
 setInterval(()=>{
-  if(reversing){
-    reverseTime();
-  } else {
-    updateClone();
-  }
-
-  timerEl.textContent = "Tempo: "+time;
+  if(reversing){reverseTime();}
+  else{updateClone();}
+  timerEl.textContent=time;
   draw();
+  checkWin();
 },200);
 
-window.addEventListener("keydown",e=>{
-  if(reversing) return;
-
-  if(e.key==='w') move(0,-1);
-  if(e.key==='s') move(0,1);
-  if(e.key==='a') move(-1,0);
-  if(e.key==='d') move(1,0);
-
-  historyOriginal = [...history];
+// TOUCH CONTROLS
+let startX=0,startY=0;
+window.addEventListener("touchstart",e=>{
+  const t=e.touches[0];
+  startX=t.clientX;startY=t.clientY;
 });
 
-// inicial
+window.addEventListener("touchend",e=>{
+  if(reversing) return;
+  const t=e.changedTouches[0];
+  const dx=t.clientX-startX;
+  const dy=t.clientY-startY;
+
+  if(Math.abs(dx)>Math.abs(dy)){
+    if(dx>20) move(1,0);
+    else if(dx<-20) move(-1,0);
+  }else{
+    if(dy>20) move(0,1);
+    else if(dy<-20) move(0,-1);
+  }
+
+  historyOriginal=[...history];
+});
+
+loadLevel();
 draw();
 </script></body>
 </html>
