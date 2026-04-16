@@ -230,13 +230,13 @@ gerarFase()
 
 }
 
-function formatarLatex(expr){
+function converterParaLatex(expr){
 
 expr = expr.replace(/\*/g,"")
 
 expr = expr.replace(/sin/g,"\\sin")
 
-expr = expr.replace(/(\d+)\/(\d+)/g,"\\\\frac{$1}{$2}")
+expr = expr.replace(/(\d+)\/(\d+)/g,"\\frac{$1}{$2}")
 
 expr = expr.replace(/\^(\d+)/g,"^{\$1}")
 
@@ -246,7 +246,7 @@ return expr
 
 function mostrarFuncao(id,f){
 
-let latexExpr = formatarLatex(f)
+let latexExpr = converterParaLatex(f)
 
 katex.render(latexExpr,document.getElementById(id),{
 throwOnError:false
