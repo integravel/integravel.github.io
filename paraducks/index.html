@@ -12,13 +12,11 @@
 
 .cell{width:var(--cell);height:var(--cell);display:flex;align-items:center;justify-content:center;font-size:calc(var(--cell)*0.6);} .wall{background:#333;} .floor{background:#222;} .door{background:#550000;} .door.open{background:#006600;} .button{background:#4444aa;} .time{background:#663399;} .goal{background:#006666;} .player{color:#00ffcc;} .clone{color:#ffcc00;opacity:0.8;}
 
-/* JOYSTICK */ #controls{ width:100%; max-width:300px; margin-bottom:10px; display:grid; grid-template-areas: ". up ." "left center right" ". down ."; gap:10px; justify-items:center; align-items:center; }
+#controls{ width:100%; max-width:300px; margin-bottom:10px; display:grid; grid-template-areas: ". up ." "left center right" ". down ."; gap:10px; justify-items:center; align-items:center; }
 
 .btn{ width:70px;height:70px;border-radius:12px;background:#333;display:flex;align-items:center;justify-content:center;font-size:22px; } .btn:active{background:#555;}
 
-#up{grid-area:up;} #down{grid-area:down;} #left{grid-area:left;} #right{grid-area:right;}
-
-#center{grid-area:center;font-size:18px;}
+#up{grid-area:up;} #down{grid-area:down;} #left{grid-area:left;} #right{grid-area:right;} #center{grid-area:center;font-size:18px;}
 
 #message{ position:absolute;top:10px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.6);padding:6px 12px;border-radius:8px;font-size:14px;opacity:0;transition:0.5s; }
 
@@ -40,26 +38,24 @@
     <div></div>
   </div>
 </div><script>
+// LABIRINTO QUE EXIGE CLONE
 let map=[
 "##########",
-"#P....B..#",
-"#.####.#.#",
-"#....#.#T#",
-"#.##.#.#.#",
-"#....#...#",
-"#.######.#",
-"#........#",
-"#..D....G#",
+"#P..#...G#",
+"#.#.#.#..#",
+"#.#.#.#T.#",
+"#.#.#.#..#",
+"#.#.#.#..#",
+"#...B.D..#",
 "##########"
 ];
 
 let player={x:1,y:1};
-let history=[]; // {x,y,time}
+let history=[]; // comandos: {dir, time}
 let clone=null;
 let time=0;
 let timeTravelUsed=false;
 let reversing=false;
-let lastMoveTime=0;
 
 const game=document.getElementById("game");
 const timerEl=document.getElementById("timer");
@@ -77,44 +73,64 @@ function isBlocked(x,y){
   return false;
 }
 
-function move(dx,dy){
+function applyMove(entity,dir){
+  let dx=0,dy=0;
+  if(dir==='U')dy=-1;
+  if(dir==='D')dy=1;
+  if(dir==='L')dx=-1;
+  if(dir==='R')dx=1;
+
+  const nx=entity.x+dx, ny=entity.y+dy;
+  if(!isBlocked(nx,ny)){
+    entity.x=nx; entity.y=ny;
+  }
+}
+
+function move(dir){
   if(reversing) return;
-  const nx=player.x+dx, ny=player.y+dy;
-  if(isBlocked(nx,ny)) return;
 
-  history.push({x:player.x,y:player.y,time:time});
+  history.push({dir,time});
+  applyMove(player,dir);
 
-  player.x=nx; player.y=ny;
-  lastMoveTime=time;
-
-  if(getCell(nx,ny)==="T"&&!timeTravelUsed){ reversing=true; }
+  if(getCell(player.x,player.y)==="T"&&!timeTravelUsed){ reversing=true; }
 }
 
 function updateClone(){
-  if(!clone||!clone.path.length) return;
+  if(!clone||!clone.commands.length) return;
 
-  // move respeitando tempo
-  if(time>=clone.path[0].time){
-    const step=clone.path.shift();
-    clone.x=step.x; clone.y=step.y;
+  if(time>=clone.commands[0].time){
+    const cmd=clone.commands.shift();
+    applyMove(clone,cmd.dir);
   }
 }
 
 function reverseTime(){
   document.body.classList.add("rewind");
-  if(history.length>0){
-    const step=history.pop();
-    player.x=step.x; player.y=step.y;
-    time=step.time;
+  if(time>0){
+    time-=0.1;
   }else{
     reversing=false;
     document.body.classList.remove("rewind");
-    clone={x:player.x,y:player.y,path:[...historyOriginal]};
+
+    // nasce clone
+    clone={x:player.x,y:player.y,commands:[...history]};
+
+    // player fica na máquina
+    const t=findTimeMachine();
+    player.x=t.x; player.y=t.y;
+
+    time=0;
     timeTravelUsed=true;
   }
 }
 
-let historyOriginal=[];
+function findTimeMachine(){
+  for(let y=0;y<map.length;y++){
+    for(let x=0;x<map[y].length;x++){
+      if(map[y][x]==='T') return {x,y};
+    }
+  }
+}
 
 function checkWin(){
   if(getCell(player.x,player.y)==="G"){
@@ -158,9 +174,28 @@ setInterval(()=>{
   checkWin();
 },100);
 
-// botões
-function bind(id,dx,dy){ document.getElementById(id).onclick=()=>{ move(dx,dy); historyOriginal=[...history]; }; }
-bind("up",0,-1); bind("down",0,1); bind("left",-1,0); bind("right",1,0);
+// MOVIMENTO CONTÍNUO
+let holdInterval=null;
+function bind(id,dir){
+  const el=document.getElementById(id);
+
+  el.onmousedown=()=>startMove(dir);
+  el.ontouchstart=(e)=>{e.preventDefault();startMove(dir);};
+
+  el.onmouseup=stopMove;
+  el.ontouchend=stopMove;
+}
+
+function startMove(dir){
+  move(dir);
+  holdInterval=setInterval(()=>move(dir),500);
+}
+
+function stopMove(){
+  clearInterval(holdInterval);
+}
+
+bind("up","U"); bind("down","D"); bind("left","L"); bind("right","R");
 
 draw();
 </script></body>
