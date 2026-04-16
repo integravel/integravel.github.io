@@ -36,25 +36,27 @@
     <div></div>
   </div>
 </div><script>
-// PUZZLE QUE OBRIGA CLONE
+// LABIRINTO CORRIGIDO (acessível + exige clone)
 let map=[
 "##########",
-"#P....#G##",
-"#.##.#.#.#",
-"#....#.#.#",
-"###D##.#.#",
-"#....#.#.#",
-"#.#B.#.#T#",
+"#P.......#",
+"#.######.#",
+"#....T...#",
+"#.######.#",
+"#..B..D..#",
+"#.######.#",
+"#......G.#",
 "##########"
 ];
 
 let startPos={x:1,y:1};
 let player={...startPos};
-let history=[]; // comandos
+let history=[];
 let clone=null;
 let time=0;
 let reversing=false;
 let rewindTimer=0;
+let lastTimestamp=Date.now();
 
 const game=document.getElementById("game");
 const timerEl=document.getElementById("timer");
@@ -96,33 +98,32 @@ function move(dir){
   }
 }
 
-function updateClone(){
-  if(!clone||clone.index>=clone.commands.length) return;
-  if(time>=clone.index*0.5){
+function updateClone(delta){
+  if(!clone) return;
+  clone.timer+=delta;
+
+  while(clone.timer>=0.5 && clone.index<clone.commands.length){
     applyMove(clone,clone.commands[clone.index]);
     clone.index++;
+    clone.timer-=0.5;
   }
 }
 
-function reverseTime(){
+function reverseTime(delta){
   document.body.classList.add("rewind");
-  rewindTimer+=0.1;
+  rewindTimer+=delta;
 
   const progress=rewindTimer/5;
   const index=Math.floor((1-progress)*history.length);
 
-  if(index>=0 && history.length>0){
-    player={...startPos};
-    for(let i=0;i<index;i++){
-      applyMove(player,history[i]);
-    }
-  }
+  player={...startPos};
+  for(let i=0;i<index;i++) applyMove(player,history[i]);
 
   if(rewindTimer>=5){
     reversing=false;
     document.body.classList.remove("rewind");
 
-    clone={x:startPos.x,y:startPos.y,commands:[...history],index:0};
+    clone={x:startPos.x,y:startPos.y,commands:[...history],index:0,timer:0};
 
     const t=findTimeMachine();
     player.x=t.x; player.y=t.y;
@@ -169,16 +170,22 @@ function draw(){
   });
 }
 
-setInterval(()=>{
-  if(!reversing) time+=0.1;
-  else reverseTime();
+function loop(){
+  const now=Date.now();
+  const delta=(now-lastTimestamp)/1000;
+  lastTimestamp=now;
 
-  updateClone();
+  if(!reversing) time+=delta;
+  else reverseTime(delta);
+
+  updateClone(delta);
 
   timerEl.textContent=Math.floor(time);
   draw();
   checkWin();
-},100);
+
+  requestAnimationFrame(loop);
+}
 
 let holdInterval=null;
 function bind(id,dir){
@@ -198,6 +205,6 @@ function stopMove(){ clearInterval(holdInterval); }
 
 bind("up","U"); bind("down","D"); bind("left","L"); bind("right","R");
 
-draw();
+loop();
 </script></body>
 </html>
