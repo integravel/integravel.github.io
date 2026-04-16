@@ -243,9 +243,16 @@ gerarFase()
 
 function latex(f){
 
-return f
+let expr = f
+
 .replace(/\*/g,"")
 .replace(/sin/g,"\\sin")
+
+/* transforma a/b em fração bonita */
+
+expr = expr.replace(/(\d+)\/(\d+)/g,"\\\\frac{$1}{$2}")
+
+return expr
 
 }
 
