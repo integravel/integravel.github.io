@@ -1,44 +1,110 @@
-<!DOCTYPE html><html lang="pt-BR">
+<!DOCTYPE html>
+<html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Labirinto do Tempo</title>
+
 <style>
-  :root{ --cell: min(9vw, 9vh); }
-  *{box-sizing:border-box;}
-  body{margin:0;background:#111;color:#fff;font-family:monospace;overflow:hidden;}#container{ height:100dvh; display:flex;flex-direction:column;justify-content:space-between;align-items:center; padding-bottom:env(safe-area-inset-bottom); } #game{ margin-top:10px; display:grid; grid-template-columns: repeat(10, var(--cell)); gap:2px; justify-content:center; }
+:root { --cell: min(9vw, 9vh); }
 
-.cell{width:var(--cell);height:var(--cell);display:flex;align-items:center;justify-content:center;font-size:calc(var(--cell)*0.6);} .wall{background:#333;} .floor{background:#222;} .door{background:#550000;} .door.open{background:#006600;} .button{background:#4444aa;} .time{background:#663399;} .goal{background:#006666;} .player{color:#00ffcc;} .clone{color:#ffcc00;opacity:0.8;}
+body {
+  margin:0;
+  background:#111;
+  color:#fff;
+  font-family:monospace;
+  overflow:hidden;
+}
 
-#controls{ width:100%; max-width:300px; margin-bottom:10px; display:grid; grid-template-areas: ". up ." "left center right" ". down ."; gap:10px; justify-items:center; align-items:center; }
+#container {
+  height:100dvh;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  align-items:center;
+}
 
-.btn{ width:70px;height:70px;border-radius:12px;background:#333;display:flex;align-items:center;justify-content:center;font-size:22px; } .btn:active{background:#555;}
+#game {
+  margin-top:10px;
+  display:grid;
+  grid-template-columns: repeat(10, var(--cell));
+  gap:2px;
+}
 
-#up{grid-area:up;} #down{grid-area:down;} #left{grid-area:left;} #right{grid-area:right;} #center{grid-area:center;font-size:18px;}
+.cell {
+  width:var(--cell);
+  height:var(--cell);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:calc(var(--cell)*0.6);
+}
 
-#message{ position:absolute;top:10px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.6);padding:6px 12px;border-radius:8px;font-size:14px;opacity:0;transition:0.5s; }
+.wall { background:#333; }
+.floor { background:#222; }
+.door { background:#550000; }
+.door.open { background:#006600; }
+.button { background:#4444aa; }
+.time { background:#663399; }
+.goal { background:#006666; }
 
-.rewind{ animation: rewindFlash 0.1s infinite alternate; } @keyframes rewindFlash{ from{filter:invert(0);} to{filter:invert(1);} } </style>
+.player { color:#00ffcc; }
+.clone { color:#ffcc00; opacity:0.8; }
 
+#controls {
+  width:100%;
+  max-width:300px;
+  display:grid;
+  grid-template-areas:
+    ". up ."
+    "left center right"
+    ". down .";
+  gap:10px;
+  margin-bottom:10px;
+}
+
+.btn {
+  width:70px;
+  height:70px;
+  background:#333;
+  border-radius:12px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:22px;
+}
+
+#up{grid-area:up;}
+#down{grid-area:down;}
+#left{grid-area:left;}
+#right{grid-area:right;}
+#center{grid-area:center;}
+</style>
 </head>
+
 <body>
+
 <div id="container">
-  <div id="message"></div>
-  <div id="game"></div>  <div id="controls">
+  <div id="game"></div>
+
+  <div id="controls">
     <div></div>
     <div id="up" class="btn">▲</div>
     <div></div>
+
     <div id="left" class="btn">◀</div>
     <div id="center">⏱ <span id="timer">0</span></div>
     <div id="right" class="btn">▶</div>
+
     <div></div>
     <div id="down" class="btn">▼</div>
     <div></div>
   </div>
-</div><script>
-// NOVO PUZZLE CORRETO (único bloqueio = porta)
-// PUZZLE VALIDADO (testado logicamente)
-// PUZZLE AJUSTADO (sem atalho pela direita)
+</div>
+
+<script>
+
+// MAPA CORRETO
 let map=[
 "##########",
 "#P.......#",
@@ -53,21 +119,28 @@ let map=[
 
 let startPos={x:1,y:1};
 let player={...startPos};
-let history=[]; // {dir, time}
-
 let clone=null;
+
+let history=[]; // {dir, delay}
+let lastInputTime=0;
+
 let time=0;
 let reversing=false;
 let rewindTimer=0;
+
 let lastTimestamp=Date.now();
 
 const game=document.getElementById("game");
 const timerEl=document.getElementById("timer");
-const msg=document.getElementById("message");
 
-function getCell(x,y){return map[y][x];}
+// ===== MAP =====
 
-function isOnButton(e){return getCell(e.x,e.y)==="B";}
+function getCell(x,y){ return map[y][x]; }
+
+function isOnButton(e){
+  return getCell(e.x,e.y)==="B";
+}
+
 function isDoorOpen(){
   return (isOnButton(player) || (clone && isOnButton(clone)));
 }
@@ -75,35 +148,46 @@ function isDoorOpen(){
 function isBlocked(x,y){
   const c=getCell(x,y);
   if(c==="#") return true;
-  if(c==="D"&&!isDoorOpen()) return true;
+  if(c==="D" && !isDoorOpen()) return true;
   return false;
 }
 
+// ===== MOVIMENTO =====
+
 function applyMove(entity,dir){
   let dx=0,dy=0;
-  if(dir==='U')dy=-1;
-  if(dir==='D')dy=1;
-  if(dir==='L')dx=-1;
-  if(dir==='R')dx=1;
+  if(dir==="U")dy=-1;
+  if(dir==="D")dy=1;
+  if(dir==="L")dx=-1;
+  if(dir==="R")dx=1;
 
-  const nx=entity.x+dx, ny=entity.y+dy;
+  const nx=entity.x+dx;
+  const ny=entity.y+dy;
+
   if(!isBlocked(nx,ny)){
-    entity.x=nx; entity.y=ny;
+    entity.x=nx;
+    entity.y=ny;
   }
 }
 
 function move(dir){
   if(reversing) return;
 
-  history.push({dir,time});
+  const delta=time-lastInputTime;
+  lastInputTime=time;
+
+  history.push({dir,delay:delta});
+
   applyMove(player,dir);
 
   if(getCell(player.x,player.y)==="T"){
     reversing=true;
     rewindTimer=0;
+    lastInputTime=0;
   }
 }
-}
+
+// ===== CLONE =====
 
 function updateClone(delta){
   if(!clone) return;
@@ -111,11 +195,13 @@ function updateClone(delta){
   clone.timer+=delta;
 
   while(
-    clone.index < clone.commands.length &&
-    clone.timer >= clone.commands[clone.index].time
+    clone.index<clone.commands.length &&
+    clone.timer>=clone.commands[clone.index].delay
   ){
-    const cmd = clone.commands[clone.index];
-    applyMove(clone, cmd.dir);
+    const cmd=clone.commands[clone.index];
+    clone.timer-=cmd.delay;
+
+    applyMove(clone,cmd.dir);
     clone.index++;
   }
 
@@ -123,69 +209,88 @@ function updateClone(delta){
     clone=null;
   }
 }
-  }
-}
+
+// ===== REWIND =====
 
 function reverseTime(delta){
-  document.body.classList.add("rewind");
   rewindTimer+=delta;
 
   const progress=rewindTimer/5;
   const index=Math.floor((1-progress)*history.length);
 
   player={...startPos};
-  for(let i=0;i<index;i++) applyMove(player,history[i]);
+
+  for(let i=0;i<index;i++){
+    applyMove(player,history[i].dir);
+  }
 
   if(rewindTimer>=5){
     reversing=false;
-    document.body.classList.remove("rewind");
 
-    clone={x:startPos.x,y:startPos.y,commands:[...history],index:0,timer:0};
+    clone={
+      x:startPos.x,
+      y:startPos.y,
+      commands:[...history],
+      index:0,
+      timer:0
+    };
 
     const t=findTimeMachine();
-    player.x=t.x; player.y=t.y;
+    player.x=t.x;
+    player.y=t.y;
 
     time=0;
   }
 }
 
+// ===== UTILS =====
+
 function findTimeMachine(){
   for(let y=0;y<map.length;y++){
     for(let x=0;x<map[y].length;x++){
-      if(map[y][x]==='T') return {x,y};
+      if(map[y][x]==="T") return {x,y};
     }
   }
 }
 
-function checkWin(){
-  if(getCell(player.x,player.y)==="G"){
-    showMsg("✔ Resolvido!");
-    setTimeout(()=>location.reload(),2000);
-  }
-}
-
-function showMsg(t){ msg.textContent=t; msg.style.opacity=1; setTimeout(()=>msg.style.opacity=0,1500); }
+// ===== RENDER =====
 
 function draw(){
   game.innerHTML="";
+
   map.forEach((row,y)=>{
     row.split("").forEach((cell,x)=>{
       const div=document.createElement("div");
       div.classList.add("cell");
 
-      if(cell==="#") div.classList.add("wall"); else div.classList.add("floor");
-      if(cell==="D"){ div.classList.add("door"); if(isDoorOpen()) div.classList.add("open"); }
+      if(cell==="#") div.classList.add("wall");
+      else div.classList.add("floor");
+
+      if(cell==="D"){
+        div.classList.add("door");
+        if(isDoorOpen()) div.classList.add("open");
+      }
+
       if(cell==="B") div.classList.add("button");
       if(cell==="T") div.classList.add("time");
       if(cell==="G") div.classList.add("goal");
 
-      if(player.x===x&&player.y===y){div.textContent="♚";div.classList.add("player");}
-      if(clone&&clone.x===x&&clone.y===y){div.textContent="♟";div.classList.add("clone");}
+      if(player.x===x && player.y===y){
+        div.textContent="♚";
+        div.classList.add("player");
+      }
+
+      if(clone && clone.x===x && clone.y===y){
+        div.textContent="♟";
+        div.classList.add("clone");
+      }
 
       game.appendChild(div);
     });
   });
 }
+
+// ===== LOOP =====
 
 function loop(){
   const now=Date.now();
@@ -198,17 +303,22 @@ function loop(){
   updateClone(delta);
 
   timerEl.textContent=Math.floor(time);
+
   draw();
-  checkWin();
 
   requestAnimationFrame(loop);
 }
 
+// ===== CONTROLES =====
+
 let holdInterval=null;
+
 function bind(id,dir){
   const el=document.getElementById(id);
+
   el.onmousedown=()=>startMove(dir);
   el.ontouchstart=(e)=>{e.preventDefault();startMove(dir);};
+
   el.onmouseup=stopMove;
   el.ontouchend=stopMove;
 }
@@ -218,10 +328,17 @@ function startMove(dir){
   holdInterval=setInterval(()=>move(dir),500);
 }
 
-function stopMove(){ clearInterval(holdInterval); }
+function stopMove(){
+  clearInterval(holdInterval);
+}
 
-bind("up","U"); bind("down","D"); bind("left","L"); bind("right","R");
+bind("up","U");
+bind("down","D");
+bind("left","L");
+bind("right","R");
 
 loop();
-</script></body>
+
+</script>
+</body>
 </html>
