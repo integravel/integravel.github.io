@@ -38,6 +38,7 @@
 </div><script>
 // NOVO PUZZLE CORRETO (único bloqueio = porta)
 // PUZZLE VALIDADO (testado logicamente)
+// PUZZLE AJUSTADO (sem atalho pela direita)
 let map=[
 "##########",
 "#P.......#",
@@ -46,13 +47,14 @@ let map=[
 "#.######.#",
 "#..B.....#",
 "#.######.#",
-"#....D.G.#",
+"#....D.G##",
 "##########"
 ];
 
 let startPos={x:1,y:1};
 let player={...startPos};
-let history=[];
+let history=[]; // {dir, time}
+
 let clone=null;
 let time=0;
 let reversing=false;
@@ -92,7 +94,8 @@ function applyMove(entity,dir){
 
 function move(dir){
   if(reversing) return;
-  history.push(dir);
+
+  history.push({dir,time});
   applyMove(player,dir);
 
   if(getCell(player.x,player.y)==="T"){
@@ -100,22 +103,26 @@ function move(dir){
     rewindTimer=0;
   }
 }
+}
 
 function updateClone(delta){
   if(!clone) return;
 
   clone.timer+=delta;
 
-  while(clone.timer>=0.5 && clone.index<clone.commands.length){
-    applyMove(clone,clone.commands[clone.index]);
+  while(
+    clone.index < clone.commands.length &&
+    clone.timer >= clone.commands[clone.index].time
+  ){
+    const cmd = clone.commands[clone.index];
+    applyMove(clone, cmd.dir);
     clone.index++;
-    clone.timer-=0.5;
+  }
 
-    // desaparece ao chegar na máquina do tempo
-    if(getCell(clone.x,clone.y)==="T"){
-      clone=null;
-      break;
-    }
+  if(getCell(clone.x,clone.y)==="T"){
+    clone=null;
+  }
+}
   }
 }
 
