@@ -36,14 +36,14 @@
     <div></div>
   </div>
 </div><script>
-// LABIRINTO CORRIGIDO (acessível + exige clone)
+// NOVO PUZZLE: IMPOSSÍVEL SEM CLONE
 let map=[
 "##########",
 "#P.......#",
 "#.######.#",
-"#....T...#",
+"#...T....#",
 "#.######.#",
-"#..B..D..#",
+"#..B#D#..#",
 "#.######.#",
 "#......G.#",
 "##########"
@@ -65,7 +65,9 @@ const msg=document.getElementById("message");
 function getCell(x,y){return map[y][x];}
 
 function isOnButton(e){return getCell(e.x,e.y)==="B";}
-function isDoorOpen(){return (clone&&isOnButton(clone));}
+function isDoorOpen(){
+  return (isOnButton(player) || (clone && isOnButton(clone)));
+}
 
 function isBlocked(x,y){
   const c=getCell(x,y);
@@ -100,12 +102,19 @@ function move(dir){
 
 function updateClone(delta){
   if(!clone) return;
+
   clone.timer+=delta;
 
   while(clone.timer>=0.5 && clone.index<clone.commands.length){
     applyMove(clone,clone.commands[clone.index]);
     clone.index++;
     clone.timer-=0.5;
+
+    // desaparece ao chegar na máquina do tempo
+    if(getCell(clone.x,clone.y)==="T"){
+      clone=null;
+      break;
+    }
   }
 }
 
