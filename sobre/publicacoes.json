@@ -1672,5 +1672,64 @@
   ]
 }
 
+{
+  "ano": 2026,
+  "tipo": "Trabalho em Evento",
+  "titulo": "Da letra à cena: a normatização no preenchimento dos vazios possíveis",
+  "arquivo": "https://drive.google.com/file/d/1mtiaEKEXIuinh6FhztVG4Z9mRWrD85AC/view?usp=sharing",
+  "evento": "Escola de Estudos de Gênero e Sexualidades em Educação Matemática - E²GSEM - 2ª Edição",
+  "instituicao": "UFRJ, Rio de Janeiro",
+  "data": "19 a 21 de novembro de 2025",
+  "eventoLink": "https://www.even3.com.br/2e2gsem-607321/",
+  "anaisLink": "https://www.even3.com.br/anais/anaisegsem/1396359-da-letra-a-cena--a-normatizacao-no-preenchimento-dos-vazios-possiveis/",
+  "palavras": [
+    "Normatização",
+    "Registros de representação",
+    "Adaptação",
+    "Literatura",
+    "Audiovisual"
+  ],
+  "autores": [
+    {
+      "nome": "Emanuelly de Paula Dias da Silva",
+      "lattes": "http://lattes.cnpq.br/6269977294035076"
+    },
+    {
+      "nome": "Marcella Mayara Araújo da Luz",
+      "lattes": "http://lattes.cnpq.br/9448284630389363"
+    }
+  ]
+}
+
+
+  {
+  "ano": 2026,
+  "tipo": "Trabalho em Evento",
+  "titulo": "As curvas que modelam os corpos: estatística, gênero e normatividade nas mídias",
+  "arquivo": "https://drive.google.com/file/d/1cTVeFnqDP1kGbaS9pm6Xy_sSVx6lcpHw/view?usp=sharing",
+  "evento": "Escola de Estudos de Gênero e Sexualidades em Educação Matemática - E²GSEM - 2ª Edição",
+  "instituicao": "UFRJ, Rio de Janeiro",
+  "data": "19 a 21 de novembro de 2025",
+  "eventoLink": "https://www.even3.com.br/2e2gsem-607321/",
+  "anaisLink": "https://www.even3.com.br/anais/anaisegsem/1393293-as-curvas-que-modelam-os-corpos--estatistica-genero-e-normatividade-nas-midias/",
+  "palavras": [
+    "Estatística",
+    "Normalidade",
+    "Gênero",
+    "Educação Matemática",
+    "RPG"
+  ],
+  "autores": [
+    {
+      "nome": "Emanuelly de Paula Dias da Silva",
+      "lattes": "http://lattes.cnpq.br/6269977294035076"
+    },
+    {
+      "nome": "Raffaela Oliveira da Silva",
+      "lattes": "http://lattes.cnpq.br/7284382996021658"
+    }
+  ]
+}
+
 
 ]
