@@ -135,7 +135,7 @@ map=[
 "#############"
 ].map(r=>r.split(""));
 
-player={x:1,y:1};
+player={x:1,y:1,dir:"L"};
 clone=null;
 history=[];
 time=0;
@@ -171,6 +171,7 @@ function applyMove(e,dir){
   if(!blocked(nx,ny)){
     e.x=nx;
     e.y=ny;
+    e.dir=dir;
   }
 }
 
@@ -220,46 +221,40 @@ function update(dt){
       let cmd = clone.commands[clone.index];
 
       if(clone.timer >= cmd.delay){
-        clone.timer -= cmd.delay;
-
-        let rev = {L:"R",R:"L",U:"D",D:"U"};
+        clone.timer = 0; // 🔥 IMPORTANTE
+        let rev={L:"R",R:"L",U:"D",D:"U"};
         applyMove(clone,rev[cmd.dir]);
-
         clone.index++;
       }
 
     }else{
-      // terminou rewind → vira clone normal
       rewinding=false;
 
-      clone.commands = [...history];
+      clone.commands=[...history];
       clone.index=0;
       clone.timer=0;
-
-      // player continua na máquina
     }
 
   }else{
     time+=dt;
   }
 
-  // clone normal
+  // CLONE NORMAL (1 movimento por frame)
   if(clone && !rewinding){
 
     clone.timer += dt;
 
-    while(
-      clone.index < clone.commands.length &&
-      clone.timer >= clone.commands[clone.index].delay
-    ){
+    if(clone.index < clone.commands.length){
+
       let cmd = clone.commands[clone.index];
-      clone.timer -= cmd.delay;
 
-      applyMove(clone,cmd.dir);
-      clone.index++;
-    }
+      if(clone.timer >= cmd.delay){
+        clone.timer = 0; // 🔥 evita pulo
+        applyMove(clone,cmd.dir);
+        clone.index++;
+      }
 
-    if(clone.index >= clone.commands.length){
+    }else{
       clone=null;
     }
   }
@@ -312,11 +307,11 @@ function draw(){
       if(c==="G") d.textContent="🏁";
 
       if(player.x===x && player.y===y){
-        d.textContent="🦆";
+        d.textContent = player.dir==="R" ? "🦆".split("").reverse().join("") : "🦆";
       }
 
       if(clone && clone.x===x && clone.y===y){
-        d.textContent="🦆";
+        d.textContent = clone.dir==="R" ? "🦆".split("").reverse().join("") : "🦆";
       }
 
       game.appendChild(d);
