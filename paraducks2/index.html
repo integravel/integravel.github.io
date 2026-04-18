@@ -48,15 +48,18 @@ body.rewind{
 .wall{ background:#2a2a2a; }
 .floor{ background:#1a1a1a; }
 
+/* 📦 máquina do tempo */
 .timeMachine{
-  animation: glitch 1.5s linear infinite;
+  animation: pulse 1s infinite;
 }
 
-@keyframes glitch{
-  0%{ filter:hue-rotate(0deg); }
-  100%{ filter:hue-rotate(360deg); }
+@keyframes pulse{
+  0%{ opacity:1; }
+  50%{ opacity:0.5; }
+  100%{ opacity:1; }
 }
 
+/* 🦆 virar */
 .flip{
   transform: scaleX(-1);
 }
@@ -308,13 +311,13 @@ function draw(){
       // PLAYER
       if(player.x===x && player.y===y){
         div.textContent="🦆";
-        if(player.dir==="L") div.classList.add("flip");
+        if(player.dir==="R") div.classList.add("flip"); // corrigido
       }
 
       // CLONE
       if(clone && clone.x===x && clone.y===y){
         div.textContent="🦆";
-        if(clone.dir==="L") div.classList.add("flip");
+        if(clone.dir==="R") div.classList.add("flip"); // corrigido
       }
 
       game.appendChild(div);
