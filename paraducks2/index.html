@@ -9,8 +9,8 @@ body{
   margin:0;
   background:#111;
   color:#fff;
-  overflow:hidden;
   font-family:sans-serif;
+  overflow:hidden;
   user-select:none;
 }
 
@@ -23,9 +23,14 @@ body{
 #game{
   flex:1;
   display:grid;
+  justify-content:center;
+  align-content:center;
 }
 
+/* GRID */
 .cell{
+  width:28px;
+  height:28px;
   display:flex;
   align-items:center;
   justify-content:center;
@@ -44,8 +49,8 @@ body{
 
 .entity{
   position:absolute;
-  transition:transform 0.2s linear;
   font-size:22px;
+  transition:transform 0.2s linear;
 }
 
 .flip{transform:scaleX(-1);}
@@ -60,9 +65,16 @@ body{
   100%{opacity:0.5;}
 }
 
+/* UI */
 #bottom{
+  display:flex;
+  justify-content:space-between;
   padding:10px;
   padding-bottom:calc(10px + env(safe-area-inset-bottom));
+}
+
+#timer{
+  font-size:22px;
 }
 
 #controls{
@@ -71,7 +83,6 @@ body{
     ". up ."
     "left down right";
   gap:10px;
-  justify-content:center;
 }
 
 .btn{
@@ -99,6 +110,8 @@ body{
   <div id="entities"></div>
 
   <div id="bottom">
+    <div id="timer">0</div>
+
     <div id="controls">
       <div></div>
       <div id="up" class="btn">▲</div>
@@ -113,17 +126,20 @@ body{
 
 <script>
 
-let map=[],W=13,H=15;
+let map=[],W=13,H=13;
 let player,clone;
 let history=[];
-let cellSize=28;
+let time=0;
+let lastInputTime=0;
 
 const game=document.getElementById("game");
 const entities=document.getElementById("entities");
+const timerEl=document.getElementById("timer");
 
-// ===== MAPA FIXO GARANTIDO =====
+let cellSize=28;
+
+// ===== MAPA =====
 function generateMap(){
-
 map=[
 "#############",
 "#P....T#....#",
@@ -143,16 +159,14 @@ map=[
 player={x:1,y:1,dir:"L"};
 clone=null;
 history=[];
+time=0;
+lastInputTime=0;
 }
 
 // ===== HELPERS =====
-function get(x,y){
-  return map[y][x];
-}
+function get(x,y){return map[y][x];}
 
-function onButton(e){
-  return get(e.x,e.y)==="B";
-}
+function onButton(e){return get(e.x,e.y)==="B";}
 
 function doorOpen(){
   return onButton(player)||(clone&&onButton(clone));
@@ -183,34 +197,55 @@ function applyMove(e,dir){
 }
 
 function move(dir){
+  const delta = time - lastInputTime;
+  lastInputTime = time;
+
+  history.push({dir,delay:delta});
+
   applyMove(player,dir);
-  history.push(dir);
 
   if(get(player.x,player.y)==="T"){
-    clone={
-      x:1,y:1,
-      moves:[...history],
-      i:0,
-      dir:"L"
-    };
-    cloneEl=createEntity();
+    startClone();
   }
 
   drawGrid();
 }
 
 // ===== CLONE =====
-function updateClone(){
-  if(!clone)return;
-  if(clone.i>=clone.moves.length)return;
+function startClone(){
+  clone={
+    x:1,y:1,
+    commands:[...history],
+    index:0,
+    timer:0,
+    dir:"L"
+  };
 
-  let dir=clone.moves[clone.i++];
-  applyMove(clone,dir);
+  time=0;
+  lastInputTime=0;
+
+  cloneEl=createEntity();
+}
+
+function updateClone(dt){
+  if(!clone) return;
+
+  clone.timer += dt;
+
+  while(
+    clone.index < clone.commands.length &&
+    clone.timer >= clone.commands[clone.index].delay
+  ){
+    const cmd = clone.commands[clone.index];
+    clone.timer -= cmd.delay;
+
+    applyMove(clone,cmd.dir);
+    clone.index++;
+  }
 }
 
 // ===== DRAW =====
 function drawGrid(){
-
   game.innerHTML="";
   game.style.gridTemplateColumns=`repeat(${W}, ${cellSize}px)`;
   game.style.gridTemplateRows=`repeat(${H}, ${cellSize}px)`;
@@ -256,14 +291,23 @@ function createEntity(){
 let playerEl=createEntity();
 let cloneEl=null;
 
+// ===== RENDER =====
 function renderEntity(e,el){
   el.style.transform=`translate(${e.x*cellSize}px,${e.y*cellSize}px)`;
   if(e.dir==="R") el.style.transform+=" scaleX(-1)";
 }
 
 // ===== LOOP =====
-function loop(){
-  updateClone();
+let lastTime=performance.now();
+
+function loop(now){
+  let dt=(now-lastTime)/1000;
+  lastTime=now;
+
+  time+=dt;
+  timerEl.textContent=Math.floor(time);
+
+  updateClone(dt);
 
   renderEntity(player,playerEl);
   if(clone && cloneEl){
@@ -294,7 +338,7 @@ hold(right,"R");
 // INIT
 generateMap();
 drawGrid();
-loop();
+requestAnimationFrame(loop);
 
 </script>
 </body>
