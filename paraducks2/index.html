@@ -10,28 +10,45 @@ body{
   background:#111;
   color:#fff;
   font-family:sans-serif;
+  overflow:hidden;
+}
+
+#container{
+  height:100dvh;
+  display:flex;
+  flex-direction:column;
 }
 
 #game{
-  height:70vh;
+  flex:1;
   display:grid;
-  justify-content:center;
-  align-content:center;
 }
 
 .cell{
-  width:40px;
-  height:40px;
   display:flex;
   align-items:center;
   justify-content:center;
-  font-size:22px;
+  font-size:20px;
 }
 
-.wall{background:#333;}
+.wall{background:#2a2a2a;}
 .floor{background:#1a1a1a;}
 
 .flip{transform:scaleX(-1);}
+
+.timeMachine{
+  animation:pulse 1s infinite;
+}
+
+@keyframes pulse{
+  0%{transform:scale(1);}
+  50%{transform:scale(1.2);}
+  100%{transform:scale(1);}
+}
+
+#bottom{
+  padding:10px;
+}
 
 #controls{
   display:grid;
@@ -46,138 +63,205 @@ body{
   width:60px;
   height:60px;
   background:#333;
-  border-radius:10px;
+  border-radius:12px;
   display:flex;
   align-items:center;
   justify-content:center;
 }
+
+#up{grid-area:up;}
+#down{grid-area:down;}
+#left{grid-area:left;}
+#right{grid-area:right;}
 </style>
 </head>
 
 <body>
 
-<div id="game"></div>
+<div id="container">
+  <div id="game"></div>
 
-<div id="controls">
-  <div></div>
-  <div id="up" class="btn">▲</div>
-  <div></div>
+  <div id="bottom">
+    <div id="controls">
+      <div></div>
+      <div id="up" class="btn">▲</div>
+      <div></div>
 
-  <div id="left" class="btn">◀</div>
-  <div id="down" class="btn">▼</div>
-  <div id="right" class="btn">▶</div>
+      <div id="left" class="btn">◀</div>
+      <div id="down" class="btn">▼</div>
+      <div id="right" class="btn">▶</div>
+    </div>
+  </div>
 </div>
 
 <script>
 
-// ===== MAPA PERFEITO =====
-let map=[
-"###########",
-"#P....T...#",
-"#.#####.#.#",
-"#.#...#.#.#",
-"#.#.B.#.#.#",
-"#.#...#.#.#",
-"#.#####.#.#",
-"#.....D..G#",
-"###########"
-].map(r=>r.split(""));
+let map=[];
+let W,H;
 
-// ===== ESTADO =====
-let player={x:1,y:1,dir:"R"};
-let clone=null;
+let player, clone;
 let history=[];
 
+const game=document.getElementById("game");
+
+// ===== GERAR MAPA CORRETO =====
+function generateMap(){
+
+  const controlsHeight = 120;
+  const availableH = window.innerHeight - controlsHeight;
+
+  const cellSize = Math.floor(Math.min(
+    window.innerWidth / 12,
+    availableH / 14
+  ));
+
+  W = Math.floor(window.innerWidth / cellSize);
+  H = Math.floor(availableH / cellSize);
+
+  W = Math.max(10, Math.min(W, 16));
+  H = Math.max(12, Math.min(H, 18));
+
+  map = Array.from({length:H},()=>Array(W).fill("."));
+
+  // borda
+  for(let y=0;y<H;y++){
+    for(let x=0;x<W;x++){
+      if(x===0||y===0||x===W-1||y===H-1){
+        map[y][x]="#";
+      }
+    }
+  }
+
+  // parede central vertical
+  let mid = Math.floor(W/2);
+  for(let y=2;y<H-2;y++){
+    map[y][mid]="#";
+  }
+
+  // ABERTURA no topo (máquina)
+  map[2][mid] = ".";
+
+  // ABERTURA no meio (porta)
+  let doorY = Math.floor(H/2);
+  map[doorY][mid] = "D";
+
+  // posições
+  let start={x:2,y:2};
+  let button={x:2,y:H-3};
+  let timeM={x:mid,y:2};
+  let goal={x:W-2,y:doorY};
+
+  map[start.y][start.x]="P";
+  map[button.y][button.x]="B";
+  map[timeM.y][timeM.x]="T";
+  map[goal.y][goal.x]="G";
+
+  player={...start,dir:"R"};
+  clone=null;
+  history=[];
+}
+
 // ===== FUNÇÕES =====
-function get(x,y){return map[y][x];}
+function get(x,y){
+  if(!map[y]||!map[y][x]) return "#";
+  return map[y][x];
+}
 
 function onButton(e){
   return get(e.x,e.y)==="B";
 }
 
 function doorOpen(){
-  return onButton(player) || (clone && onButton(clone));
+  return onButton(player)||(clone&&onButton(clone));
 }
 
 function blocked(x,y){
-  if(get(x,y)==="#") return true;
-  if(get(x,y)==="D" && !doorOpen()) return true;
+  const c=get(x,y);
+  if(c==="#") return true;
+  if(c==="D"&&!doorOpen()) return true;
   return false;
 }
 
-function move(dir){
+// ===== MOVIMENTO =====
+function applyMove(e,dir){
   let dx=0,dy=0;
   if(dir==="L")dx=-1;
   if(dir==="R")dx=1;
   if(dir==="U")dy=-1;
   if(dir==="D")dy=1;
 
-  let nx=player.x+dx;
-  let ny=player.y+dy;
+  let nx=e.x+dx;
+  let ny=e.y+dy;
 
   if(!blocked(nx,ny)){
-    player.x=nx;
-    player.y=ny;
-    player.dir=dir;
-    history.push(dir);
+    e.x=nx;
+    e.y=ny;
+    e.dir=dir;
   }
+}
+
+function move(dir){
+  applyMove(player,dir);
+  history.push(dir);
 
   if(get(player.x,player.y)==="T"){
     clone={
-      x:1,y:1,
+      x:2,y:2,
       moves:[...history],
-      i:0
+      i:0,
+      dir:"R"
     };
   }
 }
 
+// ===== CLONE =====
 function updateClone(){
   if(!clone) return;
   if(clone.i>=clone.moves.length) return;
 
-  let dir=clone.moves[clone.i];
-  clone.i++;
-
-  let dx=0,dy=0;
-  if(dir==="L")dx=-1;
-  if(dir==="R")dx=1;
-  if(dir==="U")dy=-1;
-  if(dir==="D")dy=1;
-
-  let nx=clone.x+dx;
-  let ny=clone.y+dy;
-
-  if(!blocked(nx,ny)){
-    clone.x=nx;
-    clone.y=ny;
-  }
+  let dir=clone.moves[clone.i++];
+  applyMove(clone,dir);
 }
 
 // ===== RENDER =====
 function draw(){
+
+  game.style.gridTemplateColumns=`repeat(${W},1fr)`;
   game.innerHTML="";
-  game.style.gridTemplateColumns=`repeat(${map[0].length},40px)`;
 
   map.forEach((row,y)=>{
     row.forEach((c,x)=>{
+
       let d=document.createElement("div");
       d.classList.add("cell");
 
       if(c==="#") d.classList.add("wall");
       else d.classList.add("floor");
 
-      if(c==="B") d.textContent="🔘";
-      if(c==="D" && !doorOpen()) d.textContent="🚪";
-      if(c==="T") d.textContent="📦";
+      if(c==="B"){
+        let pressed = onButton(player)||(clone&&onButton(clone));
+        d.textContent = pressed ? "🟢" : "🔘";
+      }
+
+      if(c==="D"){
+        if(!doorOpen()) d.textContent="🚪";
+      }
+
+      if(c==="T"){
+        d.textContent="📦";
+        d.classList.add("timeMachine");
+      }
+
       if(c==="G") d.textContent="🏁";
 
-      if(player.x===x && player.y===y){
+      if(player.x===x&&player.y===y){
         d.textContent="🦆";
         if(player.dir==="R") d.classList.add("flip");
       }
 
       if(clone && clone.x===x && clone.y===y){
         d.textContent="🦆";
+        if(clone.dir==="R") d.classList.add("flip");
       }
 
       game.appendChild(d);
@@ -191,16 +275,20 @@ function loop(){
   draw();
   requestAnimationFrame(loop);
 }
-loop();
 
 // ===== CONTROLES =====
 function bind(id,dir){
   document.getElementById(id).onclick=()=>move(dir);
 }
+
 bind("up","U");
 bind("down","D");
 bind("left","L");
 bind("right","R");
+
+// INIT
+generateMap();
+loop();
 
 </script>
 </body>
