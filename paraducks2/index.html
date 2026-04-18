@@ -9,8 +9,8 @@ body{
   margin:0;
   background:#111;
   color:#fff;
-  font-family:sans-serif;
   overflow:hidden;
+  font-family:sans-serif;
   user-select:none;
 }
 
@@ -30,10 +30,24 @@ body{
   align-items:center;
   justify-content:center;
   font-size:18px;
+  line-height:1;
 }
 
 .wall{background:#2a2a2a;}
 .floor{background:#1a1a1a;}
+
+#entities{
+  position:absolute;
+  top:0;
+  left:0;
+  pointer-events:none;
+}
+
+.entity{
+  position:absolute;
+  transition:transform 0.2s linear;
+  font-size:22px;
+}
 
 .flip{transform:scaleX(-1);}
 
@@ -82,6 +96,7 @@ body{
 
 <div id="container">
   <div id="game"></div>
+  <div id="entities"></div>
 
   <div id="bottom">
     <div id="controls">
@@ -101,13 +116,14 @@ body{
 let map=[],W,H;
 let player,clone;
 let history=[];
+let cellSize=24;
 
 const game=document.getElementById("game");
+const entities=document.getElementById("entities");
 
-// ===== GERAR LABIRINTO (DFS) =====
+// ===== MAZE =====
 function generateMaze(w,h){
-
-  let maze = Array.from({length:h},()=>Array(w).fill("#"));
+  let maze=Array.from({length:h},()=>Array(w).fill("#"));
 
   function carve(x,y){
     let dirs=[[2,0],[-2,0],[0,2],[0,-2]]
@@ -128,11 +144,15 @@ function generateMaze(w,h){
   return maze;
 }
 
-// ===== MAPA =====
+// ===== MAP =====
 function generateMap(){
 
   const controlsHeight=120;
-  const cellSize=28;
+
+  cellSize=Math.floor(Math.min(
+    window.innerWidth/14,
+    (window.innerHeight-controlsHeight)/18
+  ));
 
   W=Math.floor(window.innerWidth/cellSize);
   H=Math.floor((window.innerHeight-controlsHeight)/cellSize);
@@ -140,29 +160,27 @@ function generateMap(){
   if(W%2===0)W--;
   if(H%2===0)H--;
 
-  map = generateMaze(W,H);
+  map=generateMaze(W,H);
 
-  // posições fixas estratégicas
   let start={x:1,y:1};
   let button={x:1,y:H-2};
   let timeM={x:Math.floor(W/2),y:1};
   let door={x:Math.floor(W/2),y:Math.floor(H/2)};
   let goal={x:W-2,y:H-2};
 
-  // limpar caminho mínimo garantido
-  function digLine(a,b){
+  function dig(a,b){
     let x=a.x,y=a.y;
-    while(x!==b.x || y!==b.y){
+    while(x!==b.x||y!==b.y){
       map[y][x]=".";
       if(x<b.x)x++; else if(x>b.x)x--;
       if(y<b.y)y++; else if(y>b.y)y--;
     }
   }
 
-  digLine(start,button);
-  digLine(start,timeM);
-  digLine(button,door);
-  digLine(door,goal);
+  dig(start,button);
+  dig(start,timeM);
+  dig(button,door);
+  dig(door,goal);
 
   map[start.y][start.x]="P";
   map[button.y][button.x]="B";
@@ -175,7 +193,54 @@ function generateMap(){
   history=[];
 }
 
-// ===== LÓGICA =====
+// ===== DRAW GRID =====
+function drawGrid(){
+  game.innerHTML="";
+  game.style.gridTemplateColumns=`repeat(${W}, ${cellSize}px)`;
+  game.style.gridTemplateRows=`repeat(${H}, ${cellSize}px)`;
+
+  map.forEach((row,y)=>{
+    row.forEach((c,x)=>{
+      let d=document.createElement("div");
+      d.classList.add("cell");
+
+      if(c==="#") d.classList.add("wall");
+      else d.classList.add("floor");
+
+      if(c==="B"){
+        let pressed = onButton(player)||(clone&&onButton(clone));
+        d.textContent = pressed ? "🟢" : "🔘";
+      }
+
+      if(c==="D"){
+        if(!doorOpen()) d.textContent="🚪";
+      }
+
+      if(c==="T"){
+        d.textContent="📦";
+        d.classList.add("timeMachine");
+      }
+
+      if(c==="G") d.textContent="🏁";
+
+      game.appendChild(d);
+    });
+  });
+}
+
+// ===== ENTITY =====
+function createEntity(){
+  let el=document.createElement("div");
+  el.classList.add("entity");
+  el.textContent="🦆";
+  entities.appendChild(el);
+  return el;
+}
+
+let playerEl=createEntity();
+let cloneEl=null;
+
+// ===== HELPERS =====
 function get(x,y){
   if(!map[y]||!map[y][x]) return "#";
   return map[y][x];
@@ -196,6 +261,7 @@ function blocked(x,y){
   return false;
 }
 
+// ===== MOVE =====
 function applyMove(e,dir){
   let dx=0,dy=0;
   if(dir==="L")dx=-1;
@@ -223,9 +289,11 @@ function move(dir){
       i:0,
       dir:"L"
     };
+    cloneEl=createEntity();
   }
 }
 
+// ===== UPDATE =====
 function updateClone(){
   if(!clone)return;
   if(clone.i>=clone.moves.length)return;
@@ -235,70 +303,45 @@ function updateClone(){
 }
 
 // ===== RENDER =====
-function draw(){
+function renderEntity(e,el){
+  el.style.transform=`translate(${e.x*cellSize}px, ${e.y*cellSize}px)`;
 
-  game.style.gridTemplateColumns=`repeat(${W},1fr)`;
-  game.innerHTML="";
-
-  map.forEach((row,y)=>{
-    row.forEach((c,x)=>{
-
-      let d=document.createElement("div");
-      d.classList.add("cell");
-
-      if(c==="#") d.classList.add("wall");
-      else d.classList.add("floor");
-
-      if(c==="B"){
-        let pressed = onButton(player)||(clone&&onButton(clone));
-        d.textContent = pressed ? "🟢" : "🔘";
-      }
-
-      if(c==="D"){
-        if(!doorOpen()) d.textContent="🚪";
-      }
-
-      if(c==="T"){
-        d.textContent="📦";
-        d.classList.add("timeMachine");
-      }
-
-      if(c==="G") d.textContent="🏁";
-
-      if(player.x===x&&player.y===y){
-        d.textContent="🦆";
-        if(player.dir==="R") d.classList.add("flip");
-      }
-
-      if(clone && clone.x===x && clone.y===y){
-        d.textContent="🦆";
-        if(clone.dir==="R") d.classList.add("flip");
-      }
-
-      game.appendChild(d);
-    });
-  });
+  if(e.dir==="R") el.style.transform+= " scaleX(-1)";
 }
 
 // ===== LOOP =====
 function loop(){
   updateClone();
-  draw();
+
+  renderEntity(player,playerEl);
+  if(clone && cloneEl){
+    renderEntity(clone,cloneEl);
+  }
+
   requestAnimationFrame(loop);
 }
 
-// ===== CONTROLES =====
-function bind(id,dir){
-  document.getElementById(id).onclick=()=>move(dir);
+// ===== CONTROLES HOLD =====
+function hold(btn,dir){
+  let interval;
+
+  btn.onpointerdown=()=>{
+    move(dir);
+    interval=setInterval(()=>move(dir),500);
+  };
+
+  btn.onpointerup=()=>clearInterval(interval);
+  btn.onpointerleave=()=>clearInterval(interval);
 }
 
-bind("up","U");
-bind("down","D");
-bind("left","L");
-bind("right","R");
+hold(up,"U");
+hold(down,"D");
+hold(left,"L");
+hold(right,"R");
 
 // INIT
 generateMap();
+drawGrid();
 loop();
 
 </script>
