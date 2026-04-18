@@ -11,6 +11,7 @@ body{
   color:#fff;
   font-family:sans-serif;
   overflow:hidden;
+  user-select:none;
 }
 
 #container{
@@ -28,7 +29,7 @@ body{
   display:flex;
   align-items:center;
   justify-content:center;
-  font-size:20px;
+  font-size:18px;
 }
 
 .wall{background:#2a2a2a;}
@@ -41,9 +42,9 @@ body{
 }
 
 @keyframes pulse{
-  0%{transform:scale(1);}
-  50%{transform:scale(1.2);}
-  100%{transform:scale(1);}
+  0%{opacity:0.5;}
+  50%{opacity:1;}
+  100%{opacity:0.5;}
 }
 
 #bottom{
@@ -67,6 +68,7 @@ body{
   display:flex;
   align-items:center;
   justify-content:center;
+  touch-action:manipulation;
 }
 
 #up{grid-area:up;}
@@ -96,72 +98,84 @@ body{
 
 <script>
 
-let map=[];
-let W,H;
-
-let player, clone;
+let map=[],W,H;
+let player,clone;
 let history=[];
 
 const game=document.getElementById("game");
 
-// ===== GERAR MAPA CORRETO =====
-function generateMap(){
+// ===== GERAR LABIRINTO (DFS) =====
+function generateMaze(w,h){
 
-  const controlsHeight = 120;
-  const availableH = window.innerHeight - controlsHeight;
+  let maze = Array.from({length:h},()=>Array(w).fill("#"));
 
-  const cellSize = Math.floor(Math.min(
-    window.innerWidth / 12,
-    availableH / 14
-  ));
+  function carve(x,y){
+    let dirs=[[2,0],[-2,0],[0,2],[0,-2]]
+      .sort(()=>Math.random()-0.5);
 
-  W = Math.floor(window.innerWidth / cellSize);
-  H = Math.floor(availableH / cellSize);
-
-  W = Math.max(10, Math.min(W, 16));
-  H = Math.max(12, Math.min(H, 18));
-
-  map = Array.from({length:H},()=>Array(W).fill("."));
-
-  // borda
-  for(let y=0;y<H;y++){
-    for(let x=0;x<W;x++){
-      if(x===0||y===0||x===W-1||y===H-1){
-        map[y][x]="#";
+    for(let [dx,dy] of dirs){
+      let nx=x+dx, ny=y+dy;
+      if(ny>0&&ny<h-1&&nx>0&&nx<w-1 && maze[ny][nx]==="#"){
+        maze[ny][nx]=".";
+        maze[y+dy/2][x+dx/2]=".";
+        carve(nx,ny);
       }
     }
   }
 
-  // parede central vertical
-  let mid = Math.floor(W/2);
-  for(let y=2;y<H-2;y++){
-    map[y][mid]="#";
+  maze[1][1]=".";
+  carve(1,1);
+  return maze;
+}
+
+// ===== MAPA =====
+function generateMap(){
+
+  const controlsHeight=120;
+  const cellSize=28;
+
+  W=Math.floor(window.innerWidth/cellSize);
+  H=Math.floor((window.innerHeight-controlsHeight)/cellSize);
+
+  if(W%2===0)W--;
+  if(H%2===0)H--;
+
+  map = generateMaze(W,H);
+
+  // posições fixas estratégicas
+  let start={x:1,y:1};
+  let button={x:1,y:H-2};
+  let timeM={x:Math.floor(W/2),y:1};
+  let door={x:Math.floor(W/2),y:Math.floor(H/2)};
+  let goal={x:W-2,y:H-2};
+
+  // limpar caminho mínimo garantido
+  function digLine(a,b){
+    let x=a.x,y=a.y;
+    while(x!==b.x || y!==b.y){
+      map[y][x]=".";
+      if(x<b.x)x++; else if(x>b.x)x--;
+      if(y<b.y)y++; else if(y>b.y)y--;
+    }
   }
 
-  // ABERTURA no topo (máquina)
-  map[2][mid] = ".";
-
-  // ABERTURA no meio (porta)
-  let doorY = Math.floor(H/2);
-  map[doorY][mid] = "D";
-
-  // posições
-  let start={x:2,y:2};
-  let button={x:2,y:H-3};
-  let timeM={x:mid,y:2};
-  let goal={x:W-2,y:doorY};
+  digLine(start,button);
+  digLine(start,timeM);
+  digLine(button,door);
+  digLine(door,goal);
 
   map[start.y][start.x]="P";
   map[button.y][button.x]="B";
   map[timeM.y][timeM.x]="T";
+  map[door.y][door.x]="D";
   map[goal.y][goal.x]="G";
 
-  player={...start,dir:"R"};
+  player={...start,dir:"L"};
   clone=null;
   history=[];
 }
 
-// ===== FUNÇÕES =====
+// ===== LÓGICA =====
 function get(x,y){
   if(!map[y]||!map[y][x]) return "#";
   return map[y][x];
@@ -176,13 +190,12 @@ function doorOpen(){
 }
 
 function blocked(x,y){
-  const c=get(x,y);
-  if(c==="#") return true;
-  if(c==="D"&&!doorOpen()) return true;
+  let c=get(x,y);
+  if(c==="#")return true;
+  if(c==="D"&&!doorOpen())return true;
   return false;
 }
 
-// ===== MOVIMENTO =====
 function applyMove(e,dir){
   let dx=0,dy=0;
   if(dir==="L")dx=-1;
@@ -190,8 +203,7 @@ function applyMove(e,dir){
   if(dir==="U")dy=-1;
   if(dir==="D")dy=1;
 
-  let nx=e.x+dx;
-  let ny=e.y+dy;
+  let nx=e.x+dx, ny=e.y+dy;
 
   if(!blocked(nx,ny)){
     e.x=nx;
@@ -206,18 +218,17 @@ function move(dir){
 
   if(get(player.x,player.y)==="T"){
     clone={
-      x:2,y:2,
+      x:1,y:1,
       moves:[...history],
       i:0,
-      dir:"R"
+      dir:"L"
     };
   }
 }
 
-// ===== CLONE =====
 function updateClone(){
-  if(!clone) return;
-  if(clone.i>=clone.moves.length) return;
+  if(!clone)return;
+  if(clone.i>=clone.moves.length)return;
 
   let dir=clone.moves[clone.i++];
   applyMove(clone,dir);
