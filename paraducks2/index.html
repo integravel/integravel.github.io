@@ -3,7 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Labirinto do Tempo</title>
 
 <style>
 :root { --cell: min(9vw, 9vh); }
@@ -12,17 +11,16 @@ body {
   margin:0;
   background:#111;
   color:#fff;
-  font-family:monospace;
+  font-family:sans-serif;
   overflow:hidden;
   transition:0.2s;
 }
 
-/* 🔥 EFEITO REWIND */
 body.rewind{
   filter: invert(1) hue-rotate(180deg);
 }
 
-#container {
+#container{
   height:100dvh;
   display:flex;
   flex-direction:column;
@@ -30,34 +28,27 @@ body.rewind{
   align-items:center;
 }
 
-#game {
+#game{
   margin-top:10px;
   display:grid;
   grid-template-columns: repeat(10, var(--cell));
-  gap:2px;
+  gap:3px;
 }
 
-.cell {
+.cell{
   width:var(--cell);
   height:var(--cell);
   display:flex;
   align-items:center;
   justify-content:center;
   font-size:calc(var(--cell)*0.6);
+  border-radius:6px;
 }
 
-.wall { background:#333; }
-.floor { background:#222; }
-.door { background:#550000; }
-.door.open { background:#006600; }
-.button { background:#4444aa; }
-.time { background:#663399; }
-.goal { background:#006666; }
+.wall{ background:#2a2a2a; }
+.floor{ background:#1a1a1a; }
 
-.player { color:#00ffcc; }
-.clone { color:#ffcc00; opacity:0.8; }
-
-#controls {
+#controls{
   width:100%;
   max-width:300px;
   display:grid;
@@ -69,11 +60,11 @@ body.rewind{
   margin-bottom:10px;
 }
 
-.btn {
+.btn{
   width:70px;
   height:70px;
   background:#333;
-  border-radius:12px;
+  border-radius:14px;
   display:flex;
   align-items:center;
   justify-content:center;
@@ -90,12 +81,12 @@ body.rewind{
   display:flex;
   align-items:center;
   justify-content:center;
-  font-size:28px;
+  font-size:30px;
   font-weight:bold;
 }
 
 #timer{
-  font-size:32px;
+  font-size:34px;
 }
 </style>
 </head>
@@ -202,8 +193,7 @@ function move(dir){
     reversing=true;
     rewindTimer=0;
     lastInputTime=0;
-
-    document.body.classList.add("rewind"); // 🔥 ativa efeito
+    document.body.classList.add("rewind");
   }
 }
 
@@ -246,131 +236,10 @@ function reverseTime(delta){
 
   if(rewindTimer>=5){
     reversing=false;
-
-    document.body.classList.remove("rewind"); // 🔥 volta ao normal
+    document.body.classList.remove("rewind");
 
     clone={
       x:startPos.x,
       y:startPos.y,
       commands:[...history],
       index:0,
-      timer:0
-    };
-
-    const t=findTimeMachine();
-    player.x=t.x;
-    player.y=t.y;
-
-    time=0;
-  }
-}
-
-// ===== UTILS =====
-
-function findTimeMachine(){
-  for(let y=0;y<map.length;y++){
-    for(let x=0;x<map[y].length;x++){
-      if(map[y][x]==="T") return {x,y};
-    }
-  }
-}
-
-// ===== VITÓRIA =====
-
-function checkWin(){
-  if(getCell(player.x, player.y)==="G"){
-    alert("✔ Você venceu!");
-    location.reload();
-  }
-}
-
-// ===== RENDER =====
-
-function draw(){
-  game.innerHTML="";
-
-  map.forEach((row,y)=>{
-    row.split("").forEach((cell,x)=>{
-      const div=document.createElement("div");
-      div.classList.add("cell");
-
-      if(cell==="#") div.classList.add("wall");
-      else div.classList.add("floor");
-
-      if(cell==="D"){
-        div.classList.add("door");
-        if(isDoorOpen()) div.classList.add("open");
-      }
-
-      if(cell==="B") div.classList.add("button");
-      if(cell==="T") div.classList.add("time");
-      if(cell==="G") div.classList.add("goal");
-
-      if(player.x===x && player.y===y){
-        div.textContent="♚";
-        div.classList.add("player");
-      }
-
-      if(clone && clone.x===x && clone.y===y){
-        div.textContent="♟";
-        div.classList.add("clone");
-      }
-
-      game.appendChild(div);
-    });
-  });
-}
-
-// ===== LOOP =====
-
-function loop(){
-  const now=Date.now();
-  const delta=(now-lastTimestamp)/1000;
-  lastTimestamp=now;
-
-  if(!reversing) time+=delta;
-  else reverseTime(delta);
-
-  updateClone(delta);
-
-  timerEl.textContent=Math.floor(time);
-
-  draw();
-  checkWin();
-
-  requestAnimationFrame(loop);
-}
-
-// ===== CONTROLES =====
-
-let holdInterval=null;
-
-function bind(id,dir){
-  const el=document.getElementById(id);
-
-  el.onmousedown=()=>startMove(dir);
-  el.ontouchstart=(e)=>{e.preventDefault();startMove(dir);};
-
-  el.onmouseup=stopMove;
-  el.ontouchend=stopMove;
-}
-
-function startMove(dir){
-  move(dir);
-  holdInterval=setInterval(()=>move(dir),500);
-}
-
-function stopMove(){
-  clearInterval(holdInterval);
-}
-
-bind("up","U");
-bind("down","D");
-bind("left","L");
-bind("right","R");
-
-loop();
-
-</script>
-</body>
-</html>
