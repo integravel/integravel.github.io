@@ -178,7 +178,7 @@ function applyMove(entity,dir){
   if(!isBlocked(nx,ny)){
     entity.x=nx;
     entity.y=ny;
-    entity.moving = true;
+    entity.moving=true;
   }
 }
 
@@ -278,11 +278,15 @@ function checkWin(){
   }
 }
 
-// ===== ANIMAÇÃO =====
+// ===== VISUAL =====
 
-function getCharacter(entity){
-  if(!entity.moving) return "🧍";
-  return animFrame === 0 ? "🚶" : "🧍";
+function getDuck(entity){
+  if(!entity.moving) return "🦆";
+  return animFrame === 0 ? "🦆" : "🦆"; // leve "piscar"
+}
+
+function getTimeMachine(){
+  return animFrame === 0 ? "📦🌀" : "📦🔄";
 }
 
 // ===== RENDER =====
@@ -298,28 +302,24 @@ function draw(){
       if(cell==="#") div.classList.add("wall");
       else div.classList.add("floor");
 
-      // botão
       if(cell==="B"){
         const pressed = isOnButton(player) || (clone && isOnButton(clone));
         div.textContent = pressed ? "🟢" : "🔘";
       }
 
-      // porta
       if(cell==="D"){
-        if(!isDoorOpen()){
-          div.textContent="🚪";
-        }
+        if(!isDoorOpen()) div.textContent="🚪";
       }
 
-      if(cell==="T") div.textContent="🌀";
+      if(cell==="T") div.textContent = getTimeMachine();
       if(cell==="G") div.textContent="🏁";
 
       if(player.x===x && player.y===y){
-        div.textContent = getCharacter(player);
+        div.textContent = getDuck(player);
       }
 
       if(clone && clone.x===x && clone.y===y){
-        div.textContent = getCharacter(clone);
+        div.textContent = getDuck(clone);
       }
 
       game.appendChild(div);
@@ -334,10 +334,9 @@ function loop(){
   const delta=(now-lastTimestamp)/1000;
   lastTimestamp=now;
 
-  // animação
   animTimer += delta;
-  if(animTimer > 0.25){
-    animTimer = 0;
+  if(animTimer > 0.3){
+    animTimer=0;
     animFrame = 1 - animFrame;
   }
 
