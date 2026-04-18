@@ -25,6 +25,7 @@ body{
   display:grid;
   justify-content:center;
   align-content:center;
+  position:relative; /* 🔥 IMPORTANTE */
 }
 
 /* GRID */
@@ -40,6 +41,7 @@ body{
 .wall{background:#2a2a2a;}
 .floor{background:#1a1a1a;}
 
+/* ENTIDADES AGORA RELATIVAS AO GRID */
 #entities{
   position:absolute;
   top:0;
@@ -73,8 +75,12 @@ body{
   padding-bottom:calc(10px + env(safe-area-inset-bottom));
 }
 
+/* ⏱️ relógio melhorado */
 #timer{
-  font-size:22px;
+  font-size:28px;
+  display:flex;
+  align-items:center;
+  gap:6px;
 }
 
 #controls{
@@ -106,11 +112,12 @@ body{
 <body>
 
 <div id="container">
-  <div id="game"></div>
-  <div id="entities"></div>
+  <div id="game">
+    <div id="entities"></div>
+  </div>
 
   <div id="bottom">
-    <div id="timer">0</div>
+    <div id="timer">🕒 0</div>
 
     <div id="controls">
       <div></div>
@@ -165,12 +172,8 @@ lastInputTime=0;
 
 // ===== HELPERS =====
 function get(x,y){return map[y][x];}
-
 function onButton(e){return get(e.x,e.y)==="B";}
-
-function doorOpen(){
-  return onButton(player)||(clone&&onButton(clone));
-}
+function doorOpen(){return onButton(player)||(clone&&onButton(clone));}
 
 function blocked(x,y){
   let c=get(x,y);
@@ -246,9 +249,10 @@ function updateClone(dt){
 
 // ===== DRAW =====
 function drawGrid(){
-  game.innerHTML="";
   game.style.gridTemplateColumns=`repeat(${W}, ${cellSize}px)`;
   game.style.gridTemplateRows=`repeat(${H}, ${cellSize}px)`;
+
+  game.querySelectorAll(".cell").forEach(e=>e.remove());
 
   map.forEach((row,y)=>{
     row.forEach((c,x)=>{
@@ -305,7 +309,7 @@ function loop(now){
   lastTime=now;
 
   time+=dt;
-  timerEl.textContent=Math.floor(time);
+  timerEl.textContent="🕒 " + Math.floor(time);
 
   updateClone(dt);
 
