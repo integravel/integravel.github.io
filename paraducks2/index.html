@@ -10,401 +10,197 @@ body{
   background:#111;
   color:#fff;
   font-family:sans-serif;
-  overflow:hidden;
-}
-
-#container{
-  height:100dvh;
-  display:flex;
-  flex-direction:column;
 }
 
 #game{
-  flex:1;
+  height:70vh;
   display:grid;
   justify-content:center;
   align-content:center;
 }
 
 .cell{
+  width:40px;
+  height:40px;
   display:flex;
   align-items:center;
   justify-content:center;
-  font-size:18px;
+  font-size:22px;
 }
 
-.wall{ background:#2a2a2a; }
-.floor{ background:#1a1a1a; }
+.wall{background:#333;}
+.floor{background:#1a1a1a;}
 
-.timeMachine{
-  animation:pulse 1s infinite;
-}
-
-@keyframes pulse{
-  0%{transform:scale(1);}
-  50%{transform:scale(1.2);}
-  100%{transform:scale(1);}
-}
-
-/* 🦆 direção correta */
-.flip{
-  transform:scaleX(-1);
-}
-
-#bottom{
-  display:flex;
-  justify-content:space-between;
-  padding:10px;
-}
-
-#timer{
-  font-size:26px;
-}
+.flip{transform:scaleX(-1);}
 
 #controls{
   display:grid;
   grid-template-areas:
     ". up ."
     "left down right";
-  gap:8px;
+  gap:10px;
+  justify-content:center;
 }
 
 .btn{
   width:60px;
   height:60px;
   background:#333;
-  border-radius:12px;
+  border-radius:10px;
   display:flex;
   align-items:center;
   justify-content:center;
-}
-
-#up{grid-area:up;}
-#down{grid-area:down;}
-#left{grid-area:left;}
-#right{grid-area:right;}
-
-#win{
-  position:absolute;
-  top:20px;
-  left:50%;
-  transform:translateX(-50%);
-  background:#0008;
-  padding:8px 16px;
-  border-radius:10px;
-  display:none;
 }
 </style>
 </head>
 
 <body>
 
-<div id="win">✔ Resolvido!</div>
+<div id="game"></div>
 
-<div id="container">
-  <div id="game"></div>
+<div id="controls">
+  <div></div>
+  <div id="up" class="btn">▲</div>
+  <div></div>
 
-  <div id="bottom">
-    <div id="timer">0</div>
-
-    <div id="controls">
-      <div></div>
-      <div id="up" class="btn">▲</div>
-      <div></div>
-
-      <div id="left" class="btn">◀</div>
-      <div id="down" class="btn">▼</div>
-      <div id="right" class="btn">▶</div>
-    </div>
-  </div>
+  <div id="left" class="btn">◀</div>
+  <div id="down" class="btn">▼</div>
+  <div id="right" class="btn">▶</div>
 </div>
 
 <script>
 
-let map=[];
-let W=12, H=12;
+// ===== MAPA PERFEITO =====
+let map=[
+"###########",
+"#P....T...#",
+"#.#####.#.#",
+"#.#...#.#.#",
+"#.#.B.#.#.#",
+"#.#...#.#.#",
+"#.#####.#.#",
+"#.....D..G#",
+"###########"
+].map(r=>r.split(""));
 
-let player, clone;
+// ===== ESTADO =====
+let player={x:1,y:1,dir:"R"};
+let clone=null;
 let history=[];
-let lastInputTime=0;
-
-let time=0;
-let reversing=false;
-let rewindTimer=0;
-
-let lastTimestamp=Date.now();
-
-const game=document.getElementById("game");
-const timerEl=document.getElementById("timer");
-const winEl=document.getElementById("win");
-
-// ===== GERAR LABIRINTO REAL =====
-
-function generateMap(){
-
-  const controlsHeight = 120;
-  const availableH = window.innerHeight - controlsHeight;
-
-  const cellSize = Math.floor(Math.min(
-    window.innerWidth / 12,
-    availableH / 12
-  ));
-
-  W = Math.floor(window.innerWidth / cellSize);
-  H = Math.floor(availableH / cellSize);
-
-  W = Math.max(10, Math.min(W, 16));
-  H = Math.max(10, Math.min(H, 16));
-
-  map = Array.from({length:H},()=>Array(W).fill("."));
-
-  // paredes externas
-  for(let y=0;y<H;y++){
-    for(let x=0;x<W;x++){
-      if(x===0||y===0||x===W-1||y===H-1){
-        map[y][x]="#";
-      }
-    }
-  }
-
-  // corredor principal
-  for(let x=1;x<W-1;x++){
-    map[Math.floor(H/2)][x]=".";
-  }
-
-  // parede separando
-  for(let y=2;y<H-2;y++){
-    map[y][Math.floor(W/2)]="#";
-  }
-
-  let start={x:1,y:Math.floor(H/2)};
-  let button={x:2,y:H-2};
-  let timeM={x:Math.floor(W/2)-2,y:2};
-  let door={x:Math.floor(W/2),y:Math.floor(H/2)};
-  let goal={x:W-2,y:Math.floor(H/2)};
-
-  map[start.y][start.x]="P";
-  map[button.y][button.x]="B";
-  map[timeM.y][timeM.x]="T";
-  map[door.y][door.x]="D";
-  map[goal.y][goal.x]="G";
-
-  player={...start,dir:"R"};
-  clone=null;
-
-  history=[];
-  time=0;
-}
 
 // ===== FUNÇÕES =====
+function get(x,y){return map[y][x];}
 
-function getCell(x,y){
-  if(!map[y]||!map[y][x]) return "#";
-  return map[y][x];
+function onButton(e){
+  return get(e.x,e.y)==="B";
 }
 
-function isOnButton(e){
-  return getCell(e.x,e.y)==="B";
+function doorOpen(){
+  return onButton(player) || (clone && onButton(clone));
 }
 
-function isDoorOpen(){
-  return (isOnButton(player) || (clone && isOnButton(clone)));
-}
-
-function isBlocked(x,y){
-  const c=getCell(x,y);
-  if(c==="#") return true;
-  if(c==="D" && !isDoorOpen()) return true;
+function blocked(x,y){
+  if(get(x,y)==="#") return true;
+  if(get(x,y)==="D" && !doorOpen()) return true;
   return false;
 }
 
-// ===== MOVIMENTO =====
-
-function applyMove(entity,dir){
-  let dx=0,dy=0;
-
-  if(dir==="L") dx=-1;
-  if(dir==="R") dx=1;
-  if(dir==="U") dy=-1;
-  if(dir==="D") dy=1;
-
-  const nx=entity.x+dx;
-  const ny=entity.y+dy;
-
-  if(!isBlocked(nx,ny)){
-    entity.x=nx;
-    entity.y=ny;
-    entity.dir=dir;
-  }
-}
-
 function move(dir){
-  if(reversing) return;
+  let dx=0,dy=0;
+  if(dir==="L")dx=-1;
+  if(dir==="R")dx=1;
+  if(dir==="U")dy=-1;
+  if(dir==="D")dy=1;
 
-  const delta=time-lastInputTime;
-  lastInputTime=time;
+  let nx=player.x+dx;
+  let ny=player.y+dy;
 
-  history.push({dir,delay:delta});
-
-  applyMove(player,dir);
-
-  if(getCell(player.x,player.y)==="T"){
-    reversing=true;
-    rewindTimer=0;
+  if(!blocked(nx,ny)){
+    player.x=nx;
+    player.y=ny;
+    player.dir=dir;
+    history.push(dir);
   }
-}
 
-// ===== CLONE =====
-
-function updateClone(delta){
-  if(!clone) return;
-
-  clone.timer+=delta;
-
-  while(
-    clone.index<clone.commands.length &&
-    clone.timer>=clone.commands[clone.index].delay
-  ){
-    const cmd=clone.commands[clone.index];
-    clone.timer-=cmd.delay;
-
-    applyMove(clone,cmd.dir);
-    clone.index++;
-  }
-}
-
-// ===== REWIND =====
-
-function reverseTime(delta){
-  rewindTimer+=delta;
-
-  if(rewindTimer>=3){
-    reversing=false;
-
+  if(get(player.x,player.y)==="T"){
     clone={
-      x:player.x,
-      y:player.y,
-      commands:[...history],
-      index:0,
-      timer:0,
-      dir:"R"
+      x:1,y:1,
+      moves:[...history],
+      i:0
     };
-
-    player={...clone};
-    time=0;
   }
 }
 
-// ===== VITÓRIA =====
+function updateClone(){
+  if(!clone) return;
+  if(clone.i>=clone.moves.length) return;
 
-function checkWin(){
-  if(getCell(player.x,player.y)==="G"){
-    winEl.style.display="block";
+  let dir=clone.moves[clone.i];
+  clone.i++;
 
-    setTimeout(()=>{
-      winEl.style.display="none";
-      generateMap();
-    },2000);
+  let dx=0,dy=0;
+  if(dir==="L")dx=-1;
+  if(dir==="R")dx=1;
+  if(dir==="U")dy=-1;
+  if(dir==="D")dy=1;
+
+  let nx=clone.x+dx;
+  let ny=clone.y+dy;
+
+  if(!blocked(nx,ny)){
+    clone.x=nx;
+    clone.y=ny;
   }
 }
 
 // ===== RENDER =====
-
 function draw(){
-
-  game.style.gridTemplateColumns=`repeat(${W}, 1fr)`;
   game.innerHTML="";
+  game.style.gridTemplateColumns=`repeat(${map[0].length},40px)`;
 
   map.forEach((row,y)=>{
-    row.forEach((cell,x)=>{
+    row.forEach((c,x)=>{
+      let d=document.createElement("div");
+      d.classList.add("cell");
 
-      const div=document.createElement("div");
-      div.classList.add("cell");
+      if(c==="#") d.classList.add("wall");
+      else d.classList.add("floor");
 
-      if(cell==="#") div.classList.add("wall");
-      else div.classList.add("floor");
-
-      if(cell==="B"){
-        const pressed = isOnButton(player) || (clone && isOnButton(clone));
-        div.textContent = pressed ? "🟢" : "🔘";
-      }
-
-      if(cell==="D"){
-        if(!isDoorOpen()) div.textContent="🚪";
-      }
-
-      if(cell==="T"){
-        div.textContent="📦";
-        div.classList.add("timeMachine");
-      }
-
-      if(cell==="G") div.textContent="🏁";
+      if(c==="B") d.textContent="🔘";
+      if(c==="D" && !doorOpen()) d.textContent="🚪";
+      if(c==="T") d.textContent="📦";
+      if(c==="G") d.textContent="🏁";
 
       if(player.x===x && player.y===y){
-        div.textContent="🦆";
-        if(player.dir==="R") div.classList.add("flip"); // CORRIGIDO
+        d.textContent="🦆";
+        if(player.dir==="R") d.classList.add("flip");
       }
 
       if(clone && clone.x===x && clone.y===y){
-        div.textContent="🦆";
-        if(clone.dir==="R") div.classList.add("flip");
+        d.textContent="🦆";
       }
 
-      game.appendChild(div);
+      game.appendChild(d);
     });
   });
 }
 
 // ===== LOOP =====
-
 function loop(){
-  const now=Date.now();
-  const delta=(now-lastTimestamp)/1000;
-  lastTimestamp=now;
-
-  if(!reversing) time+=delta;
-  else reverseTime(delta);
-
-  updateClone(delta);
-
-  timerEl.textContent=Math.floor(time);
-
+  updateClone();
   draw();
-  checkWin();
-
   requestAnimationFrame(loop);
 }
+loop();
 
 // ===== CONTROLES =====
-
-let holdInterval=null;
-
 function bind(id,dir){
-  const el=document.getElementById(id);
-
-  el.onmousedown=()=>startMove(dir);
-  el.ontouchstart=(e)=>{e.preventDefault();startMove(dir);};
-
-  el.onmouseup=stopMove;
-  el.ontouchend=stopMove;
+  document.getElementById(id).onclick=()=>move(dir);
 }
-
-function startMove(dir){
-  move(dir);
-  holdInterval=setInterval(()=>move(dir),500);
-}
-
-function stopMove(){
-  clearInterval(holdInterval);
-}
-
 bind("up","U");
 bind("down","D");
 bind("left","L");
 bind("right","R");
-
-generateMap();
-loop();
 
 </script>
 </body>
