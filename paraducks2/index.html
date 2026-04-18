@@ -27,7 +27,6 @@ body{
   justify-content:start;
 }
 
-/* GRID */
 .cell{
   width:28px;
   height:28px;
@@ -40,14 +39,6 @@ body{
 .wall{background:#2a2a2a;}
 .floor{background:#1a1a1a;}
 
-.entity{
-  position:absolute;
-  font-size:22px;
-  transition:transform 0.15s linear;
-}
-
-.flip{transform:scaleX(-1);}
-
 .timeMachine{
   animation:pulse 1s infinite;
 }
@@ -58,7 +49,6 @@ body{
   100%{opacity:0.5;}
 }
 
-/* UI */
 #bottom{
   display:flex;
   justify-content:space-between;
@@ -150,7 +140,7 @@ map=[
 "#############"
 ].map(r=>r.split(""));
 
-player={x:1,y:1,dir:"L"};
+player={x:1,y:1};
 clone=null;
 history=[];
 time=0;
@@ -162,7 +152,9 @@ usedMachine=false;
 // ===== HELPERS =====
 function get(x,y){return map[y][x];}
 function onButton(e){return get(e.x,e.y)==="B";}
-function doorOpen(){return onButton(player)||(clone&&onButton(clone));}
+function doorOpen(){
+  return onButton(player)||(clone&&onButton(clone));
+}
 
 function blocked(x,y){
   let c=get(x,y);
@@ -184,82 +176,75 @@ function applyMove(e,dir){
   if(!blocked(nx,ny)){
     e.x=nx;
     e.y=ny;
-    e.dir=dir;
   }
 }
 
 function move(dir){
-  if(rewinding || usedMachine) return;
+  if(rewinding) return;
 
   const delta = time - lastInputTime;
   lastInputTime = time;
 
-  history.push({dir,delay:delta});
+  if(!usedMachine){
+    history.push({dir,delay:delta});
+  }
 
   applyMove(player,dir);
 
-  if(get(player.x,player.y)==="T"){
+  if(get(player.x,player.y)==="T" && !usedMachine){
     startRewind();
   }
-
-  draw();
 }
 
 // ===== REWIND =====
 function startRewind(){
   rewinding=true;
   usedMachine=true;
-
-  clone={
-    x:player.x,
-    y:player.y,
-    commands:[...history].reverse(),
-    index:0,
-    timer:0
-  };
 }
 
+// ===== UPDATE =====
 function update(dt){
 
   if(rewinding){
-
-    time -= dt * 3; // velocidade rewind
-    if(time < 0) time = 0;
-
-    clone.timer += dt * 3;
-
-    if(clone.index < clone.commands.length){
-
-      let cmd = clone.commands[clone.index];
-
-      if(clone.timer >= cmd.delay){
-        clone.timer -= cmd.delay;
-
-        // movimento reverso
-        let rev = {
-          L:"R",
-          R:"L",
-          U:"D",
-          D:"U"
-        };
-
-        applyMove(clone, rev[cmd.dir]);
-        clone.index++;
-      }
-
-    }else{
-      // terminou rewind
-      rewinding=false;
-      clone=null;
-
-      // reinicia player
-      player={x:1,y:1,dir:"L"};
+    time -= dt*3;
+    if(time<=0){
       time=0;
+      rewinding=false;
+
+      // cria clone no início
+      clone={
+        x:1,y:1,
+        commands:[...history],
+        index:0,
+        timer:0
+      };
+
       lastInputTime=0;
     }
 
   }else{
     time+=dt;
+  }
+
+  // CLONE EXECUTA NORMAL
+  if(clone){
+    clone.timer += dt;
+
+    while(
+      clone.index < clone.commands.length &&
+      clone.timer >= clone.commands[clone.index].delay
+    ){
+      let cmd = clone.commands[clone.index];
+      clone.timer -= cmd.delay;
+
+      applyMove(clone,cmd.dir);
+      clone.index++;
+    }
+
+    // termina
+    if(clone.index >= clone.commands.length){
+      clone=null;
+    }
   }
 
   timerEl.textContent="🕒 "+Math.floor(time);
@@ -294,12 +279,10 @@ function draw(){
 
       if(c==="G") d.textContent="🏁";
 
-      // player
       if(player.x===x && player.y===y){
         d.textContent="🦆";
       }
 
-      // clone
       if(clone && clone.x===x && clone.y===y){
         d.textContent="🦆";
       }
