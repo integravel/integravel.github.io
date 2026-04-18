@@ -18,6 +18,7 @@ body{
   height:100dvh;
   display:flex;
   flex-direction:column;
+  position:relative;
 }
 
 #game{
@@ -34,7 +35,6 @@ body{
   align-items:center;
   justify-content:center;
   font-size:18px;
-  transition:transform 0.1s;
 }
 
 .wall{background:#2a2a2a;}
@@ -50,6 +50,17 @@ body{
   100%{opacity:0.5;}
 }
 
+/* 🔥 REWIND VISUAL */
+#rewindEffect{
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  background:#fff;
+  mix-blend-mode:difference;
+  clip-path:circle(0px at 0 0);
+}
+
+/* UI */
 #bottom{
   display:flex;
   justify-content:space-between;
@@ -86,6 +97,7 @@ body{
 
 <div id="container">
   <div id="game"></div>
+  <div id="rewindEffect"></div>
 
   <div id="bottom">
     <div id="timer">🕒 0</div>
@@ -111,12 +123,17 @@ let time=0;
 let lastInputTime=0;
 
 let rewinding=false;
+let rewindTimer=0;
+let rewindDuration=5;
+
 let usedMachine=false;
 
 const game=document.getElementById("game");
 const timerEl=document.getElementById("timer");
+const effect=document.getElementById("rewindEffect");
 
 let cellSize=28;
+let effectCenter={x:0,y:0};
 
 // ===== MAPA =====
 function generateMap(){
@@ -193,57 +210,65 @@ function move(dir){
   }
 }
 
-// ===== REWIND =====
+// ===== REWIND VISUAL =====
 function startRewind(){
   rewinding=true;
   usedMachine=true;
+  rewindTimer=0;
 
-  clone={
-    x:player.x,
-    y:player.y,
-    commands:[...history].reverse(),
-    index:0,
-    timer:0,
-    dir:"L"
-  };
+  // posição da máquina
+  effectCenter.x = player.x * cellSize + cellSize/2;
+  effectCenter.y = player.y * cellSize + cellSize/2;
+}
+
+function updateRewind(dt){
+
+  rewindTimer += dt;
+
+  let progress = rewindTimer / rewindDuration;
+
+  // ⏱️ relógio volta
+  time = Math.max(0, time - (dt * (time / (rewindDuration - rewindTimer + dt))));
+
+  // 🎯 raio da onda
+  let maxRadius = Math.hypot(window.innerWidth, window.innerHeight);
+
+  let radius;
+
+  if(progress < 0.5){
+    radius = maxRadius * (progress * 2);
+  }else{
+    radius = maxRadius * (1 - (progress - 0.5)*2);
+  }
+
+  effect.style.clipPath = `circle(${radius}px at ${effectCenter.x}px ${effectCenter.y}px)`;
+
+  if(progress >= 1){
+    rewinding=false;
+    effect.style.clipPath="circle(0px at 0 0)";
+    time=0;
+
+    // cria clone normal
+    clone={
+      x:1,y:1,
+      commands:[...history],
+      index:0,
+      timer:0,
+      dir:"L"
+    };
+  }
 }
 
 // ===== UPDATE =====
 function update(dt){
 
   if(rewinding){
-
-    time -= dt*3;
-    if(time<0) time=0;
-
-    clone.timer += dt*3;
-
-    if(clone.index < clone.commands.length){
-
-      let cmd = clone.commands[clone.index];
-
-      if(clone.timer >= cmd.delay){
-        clone.timer = 0;
-
-        let rev={L:"R",R:"L",U:"D",D:"U"};
-        applyMove(clone,rev[cmd.dir]);
-
-        clone.index++;
-      }
-
-    }else{
-      rewinding=false;
-
-      clone.commands=[...history];
-      clone.index=0;
-      clone.timer=0;
-    }
-
+    updateRewind(dt);
   }else{
     time+=dt;
   }
 
-  // CLONE NORMAL
+  // clone normal
   if(clone && !rewinding){
 
     clone.timer += dt;
@@ -310,20 +335,14 @@ function draw(){
 
       if(c==="G") d.textContent="🏁";
 
-      // PLAYER
       if(player.x===x && player.y===y){
         d.textContent="🦆";
-        if(player.dir==="R"){
-          d.style.transform="scaleX(-1)";
-        }
+        if(player.dir==="R") d.style.transform="scaleX(-1)";
       }
 
-      // CLONE
       if(clone && clone.x===x && clone.y===y){
         d.textContent="🦆";
-        if(clone.dir==="R"){
-          d.style.transform="scaleX(-1)";
-        }
+        if(clone.dir==="R") d.style.transform="scaleX(-1)";
       }
 
       game.appendChild(d);
