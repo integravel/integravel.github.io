@@ -25,10 +25,8 @@ body{
   display:grid;
   justify-content:center;
   align-content:center;
-  position:relative; /* 🔥 IMPORTANTE */
 }
 
-/* GRID */
 .cell{
   width:28px;
   height:28px;
@@ -41,7 +39,6 @@ body{
 .wall{background:#2a2a2a;}
 .floor{background:#1a1a1a;}
 
-/* ENTIDADES AGORA RELATIVAS AO GRID */
 #entities{
   position:absolute;
   top:0;
@@ -67,7 +64,6 @@ body{
   100%{opacity:0.5;}
 }
 
-/* UI */
 #bottom{
   display:flex;
   justify-content:space-between;
@@ -75,12 +71,8 @@ body{
   padding-bottom:calc(10px + env(safe-area-inset-bottom));
 }
 
-/* ⏱️ relógio melhorado */
 #timer{
   font-size:28px;
-  display:flex;
-  align-items:center;
-  gap:6px;
 }
 
 #controls{
@@ -112,9 +104,8 @@ body{
 <body>
 
 <div id="container">
-  <div id="game">
-    <div id="entities"></div>
-  </div>
+  <div id="game"></div>
+  <div id="entities"></div>
 
   <div id="bottom">
     <div id="timer">🕒 0</div>
@@ -144,6 +135,8 @@ const entities=document.getElementById("entities");
 const timerEl=document.getElementById("timer");
 
 let cellSize=28;
+let offsetX=0;
+let offsetY=0;
 
 // ===== MAPA =====
 function generateMap(){
@@ -249,10 +242,10 @@ function updateClone(dt){
 
 // ===== DRAW =====
 function drawGrid(){
+  game.innerHTML="";
+
   game.style.gridTemplateColumns=`repeat(${W}, ${cellSize}px)`;
   game.style.gridTemplateRows=`repeat(${H}, ${cellSize}px)`;
-
-  game.querySelectorAll(".cell").forEach(e=>e.remove());
 
   map.forEach((row,y)=>{
     row.forEach((c,x)=>{
@@ -281,6 +274,11 @@ function drawGrid(){
       game.appendChild(d);
     });
   });
+
+  // 🔥 calcula posição real do grid
+  const rect = game.getBoundingClientRect();
+  offsetX = rect.left;
+  offsetY = rect.top;
 }
 
 // ===== ENTITY =====
@@ -297,7 +295,10 @@ let cloneEl=null;
 
 // ===== RENDER =====
 function renderEntity(e,el){
-  el.style.transform=`translate(${e.x*cellSize}px,${e.y*cellSize}px)`;
+  let x = offsetX + e.x * cellSize;
+  let y = offsetY + e.y * cellSize;
+
+  el.style.transform=`translate(${x}px,${y}px)`;
   if(e.dir==="R") el.style.transform+=" scaleX(-1)";
 }
 
@@ -309,7 +310,7 @@ function loop(now){
   lastTime=now;
 
   time+=dt;
-  timerEl.textContent="🕒 " + Math.floor(time);
+  timerEl.textContent="🕒 "+Math.floor(time);
 
   updateClone(dt);
 
