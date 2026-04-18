@@ -30,7 +30,6 @@ body{
   align-items:center;
   justify-content:center;
   font-size:18px;
-  line-height:1;
 }
 
 .wall{background:#2a2a2a;}
@@ -63,6 +62,7 @@ body{
 
 #bottom{
   padding:10px;
+  padding-bottom:calc(10px + env(safe-area-inset-bottom));
 }
 
 #controls{
@@ -113,136 +113,40 @@ body{
 
 <script>
 
-let map=[],W,H;
+let map=[],W=13,H=15;
 let player,clone;
 let history=[];
-let cellSize=24;
+let cellSize=28;
 
 const game=document.getElementById("game");
 const entities=document.getElementById("entities");
 
-// ===== MAZE =====
-function generateMaze(w,h){
-  let maze=Array.from({length:h},()=>Array(w).fill("#"));
-
-  function carve(x,y){
-    let dirs=[[2,0],[-2,0],[0,2],[0,-2]]
-      .sort(()=>Math.random()-0.5);
-
-    for(let [dx,dy] of dirs){
-      let nx=x+dx, ny=y+dy;
-      if(ny>0&&ny<h-1&&nx>0&&nx<w-1 && maze[ny][nx]==="#"){
-        maze[ny][nx]=".";
-        maze[y+dy/2][x+dx/2]=".";
-        carve(nx,ny);
-      }
-    }
-  }
-
-  maze[1][1]=".";
-  carve(1,1);
-  return maze;
-}
-
-// ===== MAP =====
+// ===== MAPA FIXO GARANTIDO =====
 function generateMap(){
 
-  const controlsHeight=120;
+map=[
+"#############",
+"#P....T.....#",
+"#.#####.###.#",
+"#.#...#...#.#",
+"#.#.###.#.#.#",
+"#.#.#B#.#.#.#",
+"#.#.#.#.#.#.#",
+"#...#.#.#...#",
+"###.#.#.###.#",
+"#...#.#...#.#",
+"#.###.###.#.#",
+"#.....D...#G#",
+"#############"
+].map(r=>r.split(""));
 
-  cellSize=Math.floor(Math.min(
-    window.innerWidth/14,
-    (window.innerHeight-controlsHeight)/18
-  ));
-
-  W=Math.floor(window.innerWidth/cellSize);
-  H=Math.floor((window.innerHeight-controlsHeight)/cellSize);
-
-  if(W%2===0)W--;
-  if(H%2===0)H--;
-
-  map=generateMaze(W,H);
-
-  let start={x:1,y:1};
-  let button={x:1,y:H-2};
-  let timeM={x:Math.floor(W/2),y:1};
-  let door={x:Math.floor(W/2),y:Math.floor(H/2)};
-  let goal={x:W-2,y:H-2};
-
-  function dig(a,b){
-    let x=a.x,y=a.y;
-    while(x!==b.x||y!==b.y){
-      map[y][x]=".";
-      if(x<b.x)x++; else if(x>b.x)x--;
-      if(y<b.y)y++; else if(y>b.y)y--;
-    }
-  }
-
-  dig(start,button);
-  dig(start,timeM);
-  dig(button,door);
-  dig(door,goal);
-
-  map[start.y][start.x]="P";
-  map[button.y][button.x]="B";
-  map[timeM.y][timeM.x]="T";
-  map[door.y][door.x]="D";
-  map[goal.y][goal.x]="G";
-
-  player={...start,dir:"L"};
-  clone=null;
-  history=[];
+player={x:1,y:1,dir:"L"};
+clone=null;
+history=[];
 }
-
-// ===== DRAW GRID =====
-function drawGrid(){
-  game.innerHTML="";
-  game.style.gridTemplateColumns=`repeat(${W}, ${cellSize}px)`;
-  game.style.gridTemplateRows=`repeat(${H}, ${cellSize}px)`;
-
-  map.forEach((row,y)=>{
-    row.forEach((c,x)=>{
-      let d=document.createElement("div");
-      d.classList.add("cell");
-
-      if(c==="#") d.classList.add("wall");
-      else d.classList.add("floor");
-
-      if(c==="B"){
-        let pressed = onButton(player)||(clone&&onButton(clone));
-        d.textContent = pressed ? "🟢" : "🔘";
-      }
-
-      if(c==="D"){
-        if(!doorOpen()) d.textContent="🚪";
-      }
-
-      if(c==="T"){
-        d.textContent="📦";
-        d.classList.add("timeMachine");
-      }
-
-      if(c==="G") d.textContent="🏁";
-
-      game.appendChild(d);
-    });
-  });
-}
-
-// ===== ENTITY =====
-function createEntity(){
-  let el=document.createElement("div");
-  el.classList.add("entity");
-  el.textContent="🦆";
-  entities.appendChild(el);
-  return el;
-}
-
-let playerEl=createEntity();
-let cloneEl=null;
 
 // ===== HELPERS =====
 function get(x,y){
-  if(!map[y]||!map[y][x]) return "#";
   return map[y][x];
 }
 
@@ -291,9 +195,11 @@ function move(dir){
     };
     cloneEl=createEntity();
   }
+
+  drawGrid();
 }
 
-// ===== UPDATE =====
+// ===== CLONE =====
 function updateClone(){
   if(!clone)return;
   if(clone.i>=clone.moves.length)return;
@@ -302,11 +208,57 @@ function updateClone(){
   applyMove(clone,dir);
 }
 
-// ===== RENDER =====
-function renderEntity(e,el){
-  el.style.transform=`translate(${e.x*cellSize}px, ${e.y*cellSize}px)`;
+// ===== DRAW =====
+function drawGrid(){
 
-  if(e.dir==="R") el.style.transform+= " scaleX(-1)";
+  game.innerHTML="";
+  game.style.gridTemplateColumns=`repeat(${W}, ${cellSize}px)`;
+  game.style.gridTemplateRows=`repeat(${H}, ${cellSize}px)`;
+
+  map.forEach((row,y)=>{
+    row.forEach((c,x)=>{
+      let d=document.createElement("div");
+      d.classList.add("cell");
+
+      if(c==="#") d.classList.add("wall");
+      else d.classList.add("floor");
+
+      if(c==="B"){
+        let pressed=doorOpen();
+        d.textContent=pressed?"🟢":"🔘";
+      }
+
+      if(c==="D"){
+        if(!doorOpen()) d.textContent="🚪";
+      }
+
+      if(c==="T"){
+        d.textContent="📦";
+        d.classList.add("timeMachine");
+      }
+
+      if(c==="G") d.textContent="🏁";
+
+      game.appendChild(d);
+    });
+  });
+}
+
+// ===== ENTITY =====
+function createEntity(){
+  let el=document.createElement("div");
+  el.classList.add("entity");
+  el.textContent="🦆";
+  entities.appendChild(el);
+  return el;
+}
+
+let playerEl=createEntity();
+let cloneEl=null;
+
+function renderEntity(e,el){
+  el.style.transform=`translate(${e.x*cellSize}px,${e.y*cellSize}px)`;
+  if(e.dir==="R") el.style.transform+=" scaleX(-1)";
 }
 
 // ===== LOOP =====
@@ -321,7 +273,7 @@ function loop(){
   requestAnimationFrame(loop);
 }
 
-// ===== CONTROLES HOLD =====
+// ===== CONTROLES =====
 function hold(btn,dir){
   let interval;
 
