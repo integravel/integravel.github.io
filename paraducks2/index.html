@@ -7,17 +7,12 @@
 <style>
 :root { --cell: min(9vw, 9vh); }
 
-body {
+body{
   margin:0;
   background:#111;
   color:#fff;
   font-family:sans-serif;
   overflow:hidden;
-  transition:0.2s;
-}
-
-body.rewind{
-  filter: invert(1) hue-rotate(180deg);
 }
 
 #container{
@@ -26,12 +21,9 @@ body.rewind{
   flex-direction:column;
 }
 
-/* LABIRINTO ocupa tudo possível */
 #game{
   flex:1;
   display:grid;
-  grid-template-columns: repeat(10, var(--cell));
-  gap:3px;
   justify-content:center;
   align-content:start;
   padding-top:10px;
@@ -44,15 +36,13 @@ body.rewind{
   align-items:center;
   justify-content:center;
   font-size:calc(var(--cell)*0.6);
-  border-radius:6px;
 }
 
 .wall{ background:#2a2a2a; }
 .floor{ background:#1a1a1a; }
 
-/* 📦 efeito melhorado */
 .timeMachine{
-  animation: pulse 1s infinite;
+  animation:pulse 1s infinite;
 }
 
 @keyframes pulse{
@@ -61,26 +51,16 @@ body.rewind{
   100%{ transform:scale(1); filter:brightness(1); }
 }
 
-/* 🦆 virar */
-.flip{
-  transform: scaleX(-1);
-}
+.flip{ transform:scaleX(-1); }
 
-/* CONTROLES NOVOS */
 #bottom{
   display:flex;
   justify-content:space-between;
-  align-items:flex-end;
   padding:10px;
 }
 
-/* relógio */
-#timer{
-  font-size:28px;
-  padding:10px;
-}
+#timer{ font-size:26px; }
 
-/* setas */
 #controls{
   display:grid;
   grid-template-areas:
@@ -97,17 +77,29 @@ body.rewind{
   display:flex;
   align-items:center;
   justify-content:center;
-  font-size:20px;
 }
 
 #up{grid-area:up;}
 #down{grid-area:down;}
 #left{grid-area:left;}
 #right{grid-area:right;}
+
+#win{
+  position:absolute;
+  top:20px;
+  left:50%;
+  transform:translateX(-50%);
+  background:#0008;
+  padding:8px 16px;
+  border-radius:10px;
+  display:none;
+}
 </style>
 </head>
 
 <body>
+
+<div id="win">✔ Resolvido!</div>
 
 <div id="container">
   <div id="game"></div>
@@ -129,22 +121,10 @@ body.rewind{
 
 <script>
 
-let map=[
-"##########",
-"#P.......#",
-"#.######.#",
-"#....T...#",
-"#.######.#",
-"#..B.....#",
-"#.######.#",
-"#....D.G##",
-"##########"
-];
+let map=[];
+let W=10, H=10;
 
-let startPos={x:1,y:1};
-let player={...startPos, dir:"R"};
-let clone=null;
-
+let player, clone;
 let history=[];
 let lastInputTime=0;
 
@@ -156,11 +136,55 @@ let lastTimestamp=Date.now();
 
 const game=document.getElementById("game");
 const timerEl=document.getElementById("timer");
+const winEl=document.getElementById("win");
+
+// ===== GERAR MAPA =====
+
+function generateMap(){
+
+  // tamanho baseado na tela
+  const cellSize = Math.min(window.innerWidth/10, window.innerHeight/12);
+  W = Math.floor(window.innerWidth / cellSize) - 1;
+  H = Math.floor((window.innerHeight-120) / cellSize);
+
+  W = Math.max(8, Math.min(W, 14));
+  H = Math.max(8, Math.min(H, 14));
+
+  map = Array.from({length:H},()=>Array(W).fill("."));
+
+  // bordas
+  for(let y=0;y<H;y++){
+    for(let x=0;x<W;x++){
+      if(x===0||y===0||x===W-1||y===H-1){
+        map[y][x]="#";
+      }
+    }
+  }
+
+  // posições
+  let start={x:1,y:1};
+  let button={x:2,y:H-2};
+  let timeM={x:Math.floor(W/2),y:Math.floor(H/2)};
+  let door={x:W-3,y:H-2};
+  let goal={x:W-2,y:H-2};
+
+  map[start.y][start.x]="P";
+  map[button.y][button.x]="B";
+  map[timeM.y][timeM.x]="T";
+  map[door.y][door.x]="D";
+  map[goal.y][goal.x]="G";
+
+  player={...start,dir:"R"};
+  clone=null;
+
+  history=[];
+  time=0;
+}
 
 // ===== MAP =====
 
 function getCell(x,y){
-  if(!map[y] || !map[y][x]) return "#";
+  if(!map[y]||!map[y][x]) return "#";
   return map[y][x];
 }
 
@@ -211,8 +235,6 @@ function move(dir){
   if(getCell(player.x,player.y)==="T"){
     reversing=true;
     rewindTimer=0;
-    lastInputTime=0;
-    document.body.classList.add("rewind");
   }
 }
 
@@ -233,10 +255,6 @@ function updateClone(delta){
     applyMove(clone,cmd.dir);
     clone.index++;
   }
-
-  if(getCell(clone.x,clone.y)==="T"){
-    clone=null;
-  }
 }
 
 // ===== REWIND =====
@@ -244,53 +262,47 @@ function updateClone(delta){
 function reverseTime(delta){
   rewindTimer+=delta;
 
-  const progress=rewindTimer/5;
-  const index=Math.floor((1-progress)*history.length);
-
-  player={...startPos, dir:"R"};
-
-  for(let i=0;i<index;i++){
-    applyMove(player,history[i].dir);
-  }
-
-  if(rewindTimer>=5){
+  if(rewindTimer>=3){
     reversing=false;
-    document.body.classList.remove("rewind");
 
     clone={
-      x:startPos.x,
-      y:startPos.y,
+      x:player.x,
+      y:player.y,
       commands:[...history],
       index:0,
       timer:0,
       dir:"R"
     };
 
-    const t=findTimeMachine();
-    player.x=t.x;
-    player.y=t.y;
+    player={...clone};
 
     time=0;
   }
 }
 
-// ===== UTILS =====
+// ===== VITÓRIA =====
 
-function findTimeMachine(){
-  for(let y=0;y<map.length;y++){
-    for(let x=0;x<map[y].length;x++){
-      if(map[y][x]==="T") return {x,y};
-    }
+function checkWin(){
+  if(getCell(player.x,player.y)==="G"){
+    winEl.style.display="block";
+
+    setTimeout(()=>{
+      winEl.style.display="none";
+      generateMap();
+    },2000);
   }
 }
 
 // ===== RENDER =====
 
 function draw(){
+
+  game.style.gridTemplateColumns=`repeat(${W}, var(--cell))`;
   game.innerHTML="";
 
   map.forEach((row,y)=>{
-    row.split("").forEach((cell,x)=>{
+    row.forEach((cell,x)=>{
+
       const div=document.createElement("div");
       div.classList.add("cell");
 
@@ -343,6 +355,7 @@ function loop(){
   timerEl.textContent=Math.floor(time);
 
   draw();
+  checkWin();
 
   requestAnimationFrame(loop);
 }
@@ -375,6 +388,8 @@ bind("down","D");
 bind("left","L");
 bind("right","R");
 
+// INIT
+generateMap();
 loop();
 
 </script>
