@@ -78,11 +78,6 @@ body{
   justify-content:center;
   touch-action:manipulation;
 }
-
-#up{grid-area:up;}
-#down{grid-area:down;}
-#left{grid-area:left;}
-#right{grid-area:right;}
 </style>
 </head>
 
@@ -200,34 +195,57 @@ function move(dir){
 function startRewind(){
   rewinding=true;
   usedMachine=true;
+
+  clone={
+    x:player.x,
+    y:player.y,
+    commands:[...history].reverse(),
+    index:0,
+    timer:0
+  };
 }
 
 // ===== UPDATE =====
 function update(dt){
 
   if(rewinding){
+
     time -= dt*3;
-    if(time<=0){
-      time=0;
+    if(time<0) time=0;
+
+    clone.timer += dt*3;
+
+    if(clone.index < clone.commands.length){
+
+      let cmd = clone.commands[clone.index];
+
+      if(clone.timer >= cmd.delay){
+        clone.timer -= cmd.delay;
+
+        let rev = {L:"R",R:"L",U:"D",D:"U"};
+        applyMove(clone,rev[cmd.dir]);
+
+        clone.index++;
+      }
+
+    }else{
+      // terminou rewind → vira clone normal
       rewinding=false;
 
-      // cria clone no início
-      clone={
-        x:1,y:1,
-        commands:[...history],
-        index:0,
-        timer:0
-      };
+      clone.commands = [...history];
+      clone.index=0;
+      clone.timer=0;
 
-      lastInputTime=0;
+      // player continua na máquina
     }
 
   }else{
     time+=dt;
   }
 
-  // CLONE EXECUTA NORMAL
-  if(clone){
+  // clone normal
+  if(clone && !rewinding){
+
     clone.timer += dt;
 
     while(
@@ -241,13 +259,27 @@ function update(dt){
       clone.index++;
     }
 
-    // termina
     if(clone.index >= clone.commands.length){
       clone=null;
     }
   }
 
   timerEl.textContent="🕒 "+Math.floor(time);
+
+  checkWin();
+}
+
+// ===== VITÓRIA =====
+function checkWin(){
+  if(get(player.x,player.y)==="G" ||
+     (clone && get(clone.x,clone.y)==="G")){
+    
+    timerEl.textContent="✔️";
+
+    setTimeout(()=>{
+      generateMap();
+    },2000);
+  }
 }
 
 // ===== DRAW =====
