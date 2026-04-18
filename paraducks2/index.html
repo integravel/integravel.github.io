@@ -5,8 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
-:root { --cell: min(9vw, 9vh); }
-
 body{
   margin:0;
   background:#111;
@@ -25,17 +23,14 @@ body{
   flex:1;
   display:grid;
   justify-content:center;
-  align-content:start;
-  padding-top:10px;
+  align-content:center;
 }
 
 .cell{
-  width:var(--cell);
-  height:var(--cell);
   display:flex;
   align-items:center;
   justify-content:center;
-  font-size:calc(var(--cell)*0.6);
+  font-size:18px;
 }
 
 .wall{ background:#2a2a2a; }
@@ -46,12 +41,15 @@ body{
 }
 
 @keyframes pulse{
-  0%{ transform:scale(1); filter:brightness(1); }
-  50%{ transform:scale(1.2); filter:brightness(1.6); }
-  100%{ transform:scale(1); filter:brightness(1); }
+  0%{transform:scale(1);}
+  50%{transform:scale(1.2);}
+  100%{transform:scale(1);}
 }
 
-.flip{ transform:scaleX(-1); }
+/* 🦆 direção correta */
+.flip{
+  transform:scaleX(-1);
+}
 
 #bottom{
   display:flex;
@@ -59,7 +57,9 @@ body{
   padding:10px;
 }
 
-#timer{ font-size:26px; }
+#timer{
+  font-size:26px;
+}
 
 #controls{
   display:grid;
@@ -122,7 +122,7 @@ body{
 <script>
 
 let map=[];
-let W=10, H=10;
+let W=12, H=12;
 
 let player, clone;
 let history=[];
@@ -138,21 +138,27 @@ const game=document.getElementById("game");
 const timerEl=document.getElementById("timer");
 const winEl=document.getElementById("win");
 
-// ===== GERAR MAPA =====
+// ===== GERAR LABIRINTO REAL =====
 
 function generateMap(){
 
-  // tamanho baseado na tela
-  const cellSize = Math.min(window.innerWidth/10, window.innerHeight/12);
-  W = Math.floor(window.innerWidth / cellSize) - 1;
-  H = Math.floor((window.innerHeight-120) / cellSize);
+  const controlsHeight = 120;
+  const availableH = window.innerHeight - controlsHeight;
 
-  W = Math.max(8, Math.min(W, 14));
-  H = Math.max(8, Math.min(H, 14));
+  const cellSize = Math.floor(Math.min(
+    window.innerWidth / 12,
+    availableH / 12
+  ));
+
+  W = Math.floor(window.innerWidth / cellSize);
+  H = Math.floor(availableH / cellSize);
+
+  W = Math.max(10, Math.min(W, 16));
+  H = Math.max(10, Math.min(H, 16));
 
   map = Array.from({length:H},()=>Array(W).fill("."));
 
-  // bordas
+  // paredes externas
   for(let y=0;y<H;y++){
     for(let x=0;x<W;x++){
       if(x===0||y===0||x===W-1||y===H-1){
@@ -161,12 +167,21 @@ function generateMap(){
     }
   }
 
-  // posições
-  let start={x:1,y:1};
+  // corredor principal
+  for(let x=1;x<W-1;x++){
+    map[Math.floor(H/2)][x]=".";
+  }
+
+  // parede separando
+  for(let y=2;y<H-2;y++){
+    map[y][Math.floor(W/2)]="#";
+  }
+
+  let start={x:1,y:Math.floor(H/2)};
   let button={x:2,y:H-2};
-  let timeM={x:Math.floor(W/2),y:Math.floor(H/2)};
-  let door={x:W-3,y:H-2};
-  let goal={x:W-2,y:H-2};
+  let timeM={x:Math.floor(W/2)-2,y:2};
+  let door={x:Math.floor(W/2),y:Math.floor(H/2)};
+  let goal={x:W-2,y:Math.floor(H/2)};
 
   map[start.y][start.x]="P";
   map[button.y][button.x]="B";
@@ -181,7 +196,7 @@ function generateMap(){
   time=0;
 }
 
-// ===== MAP =====
+// ===== FUNÇÕES =====
 
 function getCell(x,y){
   if(!map[y]||!map[y][x]) return "#";
@@ -207,10 +222,11 @@ function isBlocked(x,y){
 
 function applyMove(entity,dir){
   let dx=0,dy=0;
-  if(dir==="U")dy=-1;
-  if(dir==="D")dy=1;
-  if(dir==="L")dx=-1;
-  if(dir==="R")dx=1;
+
+  if(dir==="L") dx=-1;
+  if(dir==="R") dx=1;
+  if(dir==="U") dy=-1;
+  if(dir==="D") dy=1;
 
   const nx=entity.x+dx;
   const ny=entity.y+dy;
@@ -275,7 +291,6 @@ function reverseTime(delta){
     };
 
     player={...clone};
-
     time=0;
   }
 }
@@ -297,7 +312,7 @@ function checkWin(){
 
 function draw(){
 
-  game.style.gridTemplateColumns=`repeat(${W}, var(--cell))`;
+  game.style.gridTemplateColumns=`repeat(${W}, 1fr)`;
   game.innerHTML="";
 
   map.forEach((row,y)=>{
@@ -327,12 +342,12 @@ function draw(){
 
       if(player.x===x && player.y===y){
         div.textContent="🦆";
-        if(player.dir==="L") div.classList.add("flip");
+        if(player.dir==="R") div.classList.add("flip"); // CORRIGIDO
       }
 
       if(clone && clone.x===x && clone.y===y){
         div.textContent="🦆";
-        if(clone.dir==="L") div.classList.add("flip");
+        if(clone.dir==="R") div.classList.add("flip");
       }
 
       game.appendChild(div);
@@ -388,7 +403,6 @@ bind("down","D");
 bind("left","L");
 bind("right","R");
 
-// INIT
 generateMap();
 loop();
 
