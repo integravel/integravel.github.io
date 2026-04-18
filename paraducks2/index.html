@@ -34,6 +34,7 @@ body{
   align-items:center;
   justify-content:center;
   font-size:18px;
+  transition:transform 0.1s;
 }
 
 .wall{background:#2a2a2a;}
@@ -202,7 +203,8 @@ function startRewind(){
     y:player.y,
     commands:[...history].reverse(),
     index:0,
-    timer:0
+    timer:0,
+    dir:"L"
   };
 }
 
@@ -221,9 +223,11 @@ function update(dt){
       let cmd = clone.commands[clone.index];
 
       if(clone.timer >= cmd.delay){
-        clone.timer = 0; // 🔥 IMPORTANTE
+        clone.timer = 0;
+
         let rev={L:"R",R:"L",U:"D",D:"U"};
         applyMove(clone,rev[cmd.dir]);
+
         clone.index++;
       }
 
@@ -239,7 +243,7 @@ function update(dt){
     time+=dt;
   }
 
-  // CLONE NORMAL (1 movimento por frame)
+  // CLONE NORMAL
   if(clone && !rewinding){
 
     clone.timer += dt;
@@ -249,7 +253,7 @@ function update(dt){
       let cmd = clone.commands[clone.index];
 
       if(clone.timer >= cmd.delay){
-        clone.timer = 0; // 🔥 evita pulo
+        clone.timer = 0;
         applyMove(clone,cmd.dir);
         clone.index++;
       }
@@ -306,12 +310,20 @@ function draw(){
 
       if(c==="G") d.textContent="🏁";
 
+      // PLAYER
       if(player.x===x && player.y===y){
-        d.textContent = player.dir==="R" ? "🦆".split("").reverse().join("") : "🦆";
+        d.textContent="🦆";
+        if(player.dir==="R"){
+          d.style.transform="scaleX(-1)";
+        }
       }
 
+      // CLONE
       if(clone && clone.x===x && clone.y===y){
-        d.textContent = clone.dir==="R" ? "🦆".split("").reverse().join("") : "🦆";
+        d.textContent="🦆";
+        if(clone.dir==="R"){
+          d.style.transform="scaleX(-1)";
+        }
       }
 
       game.appendChild(d);
