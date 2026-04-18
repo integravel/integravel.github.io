@@ -253,7 +253,7 @@ function update(dt){
       let cmd = clone.commands[clone.index];
 
       if(clone.timer >= cmd.delay){
-        clone.timer = 0;
+        clone.timer -= cmd.delay;
         applyMove(clone,cmd.dir);
         clone.index++;
       }
