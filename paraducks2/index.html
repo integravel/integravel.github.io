@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
 :root { --cell: min(9vw, 9vh); }
@@ -78,15 +78,10 @@ body.rewind{
 
 #center{
   grid-area:center;
+  font-size:34px;
   display:flex;
   align-items:center;
   justify-content:center;
-  font-size:30px;
-  font-weight:bold;
-}
-
-#timer{
-  font-size:34px;
 }
 </style>
 </head>
@@ -138,13 +133,17 @@ let reversing=false;
 let rewindTimer=0;
 
 let lastTimestamp=Date.now();
+let moving=false;
 
 const game=document.getElementById("game");
 const timerEl=document.getElementById("timer");
 
 // ===== MAP =====
 
-function getCell(x,y){ return map[y][x]; }
+function getCell(x,y){
+  if(!map[y] || !map[y][x]) return "#";
+  return map[y][x];
+}
 
 function isOnButton(e){
   return getCell(e.x,e.y)==="B";
@@ -181,6 +180,8 @@ function applyMove(entity,dir){
 
 function move(dir){
   if(reversing) return;
+
+  moving=true;
 
   const delta=time-lastInputTime;
   lastInputTime=time;
@@ -243,3 +244,119 @@ function reverseTime(delta){
       y:startPos.y,
       commands:[...history],
       index:0,
+      timer:0
+    };
+
+    const t=findTimeMachine();
+    player.x=t.x;
+    player.y=t.y;
+
+    time=0;
+  }
+}
+
+// ===== UTILS =====
+
+function findTimeMachine(){
+  for(let y=0;y<map.length;y++){
+    for(let x=0;x<map[y].length;x++){
+      if(map[y][x]==="T") return {x,y};
+    }
+  }
+}
+
+// ===== VITÓRIA =====
+
+function checkWin(){
+  if(getCell(player.x,player.y)==="G"){
+    alert("✔ Você venceu!");
+    location.reload();
+  }
+}
+
+// ===== RENDER =====
+
+function draw(){
+  game.innerHTML="";
+
+  map.forEach((row,y)=>{
+    row.split("").forEach((cell,x)=>{
+      const div=document.createElement("div");
+      div.classList.add("cell");
+
+      if(cell==="#") div.classList.add("wall");
+      else div.classList.add("floor");
+
+      if(cell==="D") div.textContent="🚪";
+      if(cell==="B") div.textContent="🔘";
+      if(cell==="T") div.textContent="📞";
+      if(cell==="G") div.textContent="🏁";
+
+      if(player.x===x && player.y===y){
+        div.textContent = moving ? "🚶" : "🧍";
+      }
+
+      if(clone && clone.x===x && clone.y===y){
+        div.textContent = "🧍";
+      }
+
+      game.appendChild(div);
+    });
+  });
+}
+
+// ===== LOOP =====
+
+function loop(){
+  const now=Date.now();
+  const delta=(now-lastTimestamp)/1000;
+  lastTimestamp=now;
+
+  moving=false;
+
+  if(!reversing) time+=delta;
+  else reverseTime(delta);
+
+  updateClone(delta);
+
+  timerEl.textContent=Math.floor(time);
+
+  draw();
+  checkWin();
+
+  requestAnimationFrame(loop);
+}
+
+// ===== CONTROLES =====
+
+let holdInterval=null;
+
+function bind(id,dir){
+  const el=document.getElementById(id);
+
+  el.onmousedown=()=>startMove(dir);
+  el.ontouchstart=(e)=>{e.preventDefault();startMove(dir);};
+
+  el.onmouseup=stopMove;
+  el.ontouchend=stopMove;
+}
+
+function startMove(dir){
+  move(dir);
+  holdInterval=setInterval(()=>move(dir),500);
+}
+
+function stopMove(){
+  clearInterval(holdInterval);
+}
+
+bind("up","U");
+bind("down","D");
+bind("left","L");
+bind("right","R");
+
+loop();
+
+</script>
+</body>
+</html>
