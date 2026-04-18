@@ -287,15 +287,33 @@ function draw(){
       if(cell==="#") div.classList.add("wall");
       else div.classList.add("floor");
 
-      if(cell==="D") div.textContent="🚪";
-      if(cell==="B") div.textContent="🔘";
-      if(cell==="T") div.textContent="📞";
+      // BOTÃO
+      if(cell==="B"){
+        const pressed = isOnButton(player) || (clone && isOnButton(clone));
+        div.textContent = pressed ? "🟢" : "🔘";
+      }
+
+      // PORTA
+      if(cell==="D"){
+        if(!isDoorOpen()){
+          div.textContent="🚪";
+        } else {
+          div.textContent="";
+        }
+      }
+
+      // MÁQUINA DO TEMPO
+      if(cell==="T") div.textContent="🌀";
+
+      // OBJETIVO
       if(cell==="G") div.textContent="🏁";
 
+      // PLAYER
       if(player.x===x && player.y===y){
         div.textContent = moving ? "🚶" : "🧍";
       }
 
+      // CLONE
       if(clone && clone.x===x && clone.y===y){
         div.textContent = "🧍";
       }
