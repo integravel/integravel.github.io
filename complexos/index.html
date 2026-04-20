@@ -1,3 +1,162 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Função Complexa</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.min.js"></script>
+
+<style>
+*{box-sizing:border-box}
+body{
+margin:0;
+font-family:Arial;
+background:linear-gradient(135deg,#4facfe,#00f2fe);
+}
+
+.screen{
+display:none;
+min-height:100vh;
+justify-content:center;
+align-items:center;
+padding:20px;
+}
+.active{display:flex;}
+
+.container{
+background:white;
+width:100%;
+max-width:420px;
+padding:20px;
+border-radius:18px;
+box-shadow:0 10px 30px rgba(0,0,0,0.25);
+}
+
+h2{text-align:center}
+
+.desc{
+font-size:13px;
+color:#666;
+margin-bottom:5px;
+}
+
+.grid{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:8px;
+margin-bottom:10px;
+}
+
+input{
+width:100%;
+padding:10px;
+border-radius:10px;
+border:1px solid #ccc;
+}
+
+button{
+width:100%;
+padding:12px;
+margin-top:10px;
+border-radius:12px;
+border:none;
+background:#4facfe;
+color:white;
+font-size:16px;
+}
+
+#canvas{
+width:100%;
+border-radius:12px;
+background:black;
+}
+
+.graph-buttons{
+display:flex;
+gap:10px;
+margin-top:10px;
+}
+
+#loading{
+position:fixed;
+inset:0;
+background:rgba(0,0,0,0.6);
+display:none;
+justify-content:center;
+align-items:center;
+flex-direction:column;
+color:white;
+}
+
+.bar{
+width:200px;
+height:10px;
+background:#333;
+border-radius:10px;
+overflow:hidden;
+margin-top:10px;
+}
+
+.progress{
+height:100%;
+width:0%;
+background:#4facfe;
+}
+</style>
+</head>
+
+<body>
+
+<div id="menu" class="screen active">
+<div class="container">
+
+<h2>Função Complexa</h2>
+
+<div class="desc">📐 Tamanho</div>
+<div class="grid">
+<input id="width" value="400">
+<input id="height" value="400">
+</div>
+
+<div class="desc">🔵 Real</div>
+<div class="grid">
+<input id="xmin" value="-2">
+<input id="xmax" value="2">
+</div>
+
+<div class="desc">🟣 Imaginário</div>
+<div class="grid">
+<input id="ymin" value="-2">
+<input id="ymax" value="2">
+</div>
+
+<div class="desc">🧠 Função</div>
+<input id="func" value="z^2">
+
+<button onclick="gerar()">Gerar Gráfico</button>
+
+</div>
+</div>
+
+<div id="grafico" class="screen">
+<div class="container">
+
+<canvas id="canvas"></canvas>
+
+<div class="graph-buttons">
+<button onclick="voltar()">Voltar</button>
+<button onclick="baixar()">Salvar</button>
+</div>
+
+</div>
+</div>
+
+<div id="loading">
+<div>Gerando...</div>
+<div class="bar"><div class="progress" id="progress"></div></div>
+</div>
+
 <script>
 function trocarTela(a,b){
     document.getElementById(a).classList.remove("active");
@@ -128,3 +287,6 @@ function baixar(){
     link.click();
 }
 </script>
+
+</body>
+</html>
