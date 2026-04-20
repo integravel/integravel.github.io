@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>Gráfico de Funções Complexas</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.min.js"></script>
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #4facfe, #00f2fe);
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+.container {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    width: 350px;
+}
+h2 {
+    text-align: center;
+}
+input, button {
+    width: 100%;
+    margin: 8px 0;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+}
+button {
+    background: #4facfe;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+button:hover {
+    background: #00c6ff;
+}
+canvas {
+    margin-top: 20px;
+    border: 1px solid #ccc;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+    <h2>Função Complexa</h2>
+
+    <input type="number" id="width" placeholder="Largura (px)" value="400">
+    <input type="number" id="height" placeholder="Altura (px)" value="400">
+
+    <input type="number" id="xmin" placeholder="X mínimo (real)" value="-2">
+    <input type="number" id="xmax" placeholder="X máximo (real)" value="2">
+
+    <input type="number" id="ymin" placeholder="Y mínimo (imaginário)" value="-2">
+    <input type="number" id="ymax" placeholder="Y máximo (imaginário)" value="2">
+
+    <input type="text" id="func" placeholder="Função (ex: z^2, sin(z), exp(z))" value="z^2">
+
+    <button onclick="gerar()">Gerar Gráfico</button>
+    <button onclick="baixar()">Salvar Imagem</button>
+
+    <canvas id="canvas"></canvas>
+</div>
+
+<script>
+function complexToColor(z) {
+    // Argumento (fase)
+    let arg = Math.atan2(z.im, z.re);
+
+    // Magnitude
+    let mag = Math.sqrt(z.re*z.re + z.im*z.im);
+
+    // Hue baseado no argumento
+    let hue = (arg + Math.PI) / (2 * Math.PI);
+
+    // Saturação fixa
+    let sat = 1;
+
+    // Brilho baseado na magnitude
+    let val = 1 - Math.exp(-mag);
+
+    return hsvToRgb(hue, sat, val);
+}
+
+function hsvToRgb(h, s, v) {
+    let i = Math.floor(h * 6);
+    let f = h * 6 - i;
+    let p = v * (1 - s);
+    let q = v * (1 - f * s);
+    let t = v * (1 - (1 - f) * s);
+
+    let r, g, b;
+    switch(i % 6){
+        case 0: r=v, g=t, b=p; break;
+        case 1: r=q, g=v, b=p; break;
+        case 2: r=p, g=v, b=t; break;
+        case 3: r=p, g=q, b=v; break;
+        case 4: r=t, g=p, b=v; break;
+        case 5: r=v, g=p, b=q; break;
+    }
+
+    return [
+        Math.floor(r*255),
+        Math.floor(g*255),
+        Math.floor(b*255)
+    ];
+}
+
+function gerar() {
+    let w = parseInt(document.getElementById("width").value);
+    let h = parseInt(document.getElementById("height").value);
+
+    let xmin = parseFloat(document.getElementById("xmin").value);
+    let xmax = parseFloat(document.getElementById("xmax").value);
+
+    let ymin = parseFloat(document.getElementById("ymin").value);
+    let ymax = parseFloat(document.getElementById("ymax").value);
+
+    let expr = document.getElementById("func").value;
+
+    let canvas = document.getElementById("canvas");
+    canvas.width = w;
+    canvas.height = h;
+
+    let ctx = canvas.getContext("2d");
+    let img = ctx.createImageData(w, h);
+
+    let compiled;
+    try {
+        compiled = math.compile(expr);
+    } catch(e) {
+        alert("Erro na função!");
+        return;
+    }
+
+    for(let px = 0; px < w; px++) {
+        for(let py = 0; py < h; py++) {
+
+            let a = xmin + (px / w) * (xmax - xmin);
+            let b = ymin + (py / h) * (ymax - ymin);
+
+            let z = math.complex(a, b);
+
+            let result;
+            try {
+                result = compiled.evaluate({ z: z });
+            } catch {
+                result = math.complex(0,0);
+            }
+
+            let [r,g,bcolor] = complexToColor(result);
+
+            let idx = (py * w + px) * 4;
+            img.data[idx] = r;
+            img.data[idx+1] = g;
+            img.data[idx+2] = bcolor;
+            img.data[idx+3] = 255;
+        }
+    }
+
+    ctx.putImageData(img, 0, 0);
+}
+
+function baixar() {
+    let canvas = document.getElementById("canvas");
+    let link = document.createElement("a");
+    link.download = "grafico.png";
+    link.href = canvas.toDataURL();
+    link.click();
+}
+</script>
+
+</body>
+</html>
