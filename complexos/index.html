@@ -8,158 +8,130 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.min.js"></script>
 
 <style>
-* { box-sizing: border-box; }
-
-body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background: linear-gradient(135deg, #4facfe, #00f2fe);
+*{box-sizing:border-box}
+body{
+margin:0;
+font-family:Arial;
+background:linear-gradient(135deg,#4facfe,#00f2fe);
 }
 
-/* TELAS */
-.screen {
-    display: none;
-    min-height: 100vh;
-    justify-content: center;
-    align-items: center;
-    padding: 20px;
+.screen{
+display:none;
+min-height:100vh;
+justify-content:center;
+align-items:center;
+padding:20px;
+}
+.active{display:flex;}
+
+.container{
+background:white;
+width:100%;
+max-width:420px;
+padding:20px;
+border-radius:18px;
+box-shadow:0 10px 30px rgba(0,0,0,0.25);
 }
 
-.active {
-    display: flex;
+h2{text-align:center}
+
+.desc{
+font-size:13px;
+color:#666;
+margin-bottom:5px;
 }
 
-/* CARD BONITO */
-.container {
-    background: white;
-    width: 100%;
-    max-width: 420px;
-    padding: 20px;
-    border-radius: 18px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+.grid{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:8px;
+margin-bottom:10px;
 }
 
-h2 {
-    text-align: center;
-    margin-bottom: 10px;
+input{
+width:100%;
+padding:10px;
+border-radius:10px;
+border:1px solid #ccc;
 }
 
-/* TEXTOS EXPLICATIVOS */
-.desc {
-    font-size: 13px;
-    color: #666;
-    margin-bottom: 5px;
+button{
+width:100%;
+padding:12px;
+margin-top:10px;
+border-radius:12px;
+border:none;
+background:#4facfe;
+color:white;
+font-size:16px;
 }
 
-/* GRID */
-.grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
-    margin-bottom: 10px;
+#canvas{
+width:100%;
+border-radius:12px;
+background:black;
 }
 
-@media (max-width: 400px) {
-    .grid {
-        grid-template-columns: 1fr;
-    }
+.graph-buttons{
+display:flex;
+gap:10px;
+margin-top:10px;
 }
 
-/* INPUT */
-input {
-    width: 100%;
-    padding: 10px;
-    border-radius: 10px;
-    border: 1px solid #ccc;
+#loading{
+position:fixed;
+inset:0;
+background:rgba(0,0,0,0.6);
+display:none;
+justify-content:center;
+align-items:center;
+flex-direction:column;
+color:white;
 }
 
-/* BOTÃO */
-button {
-    width: 100%;
-    padding: 12px;
-    margin-top: 10px;
-    border-radius: 12px;
-    border: none;
-    background: #4facfe;
-    color: white;
-    font-size: 16px;
-    cursor: pointer;
+.bar{
+width:200px;
+height:10px;
+background:#333;
+border-radius:10px;
+overflow:hidden;
+margin-top:10px;
 }
 
-button:hover {
-    background: #00c6ff;
-}
-
-/* CANVAS */
-#canvas {
-    width: 100%;
-    border-radius: 12px;
-    background: black;
-}
-
-/* BOTÕES */
-.graph-buttons {
-    display: flex;
-    gap: 10px;
-    margin-top: 10px;
-}
-
-/* LOADING */
-#loading {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.6);
-    display: none;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-    color: white;
-}
-
-.bar {
-    width: 200px;
-    height: 10px;
-    background: #333;
-    border-radius: 10px;
-    overflow: hidden;
-    margin-top: 10px;
-}
-
-.progress {
-    height: 100%;
-    width: 0%;
-    background: #4facfe;
+.progress{
+height:100%;
+width:0%;
+background:#4facfe;
 }
 </style>
 </head>
 
 <body>
 
-<!-- MENU -->
 <div id="menu" class="screen active">
 <div class="container">
 
 <h2>Função Complexa</h2>
 
-<div class="desc">📐 Tamanho da imagem</div>
+<div class="desc">📐 Tamanho</div>
 <div class="grid">
-    <input id="width" value="400">
-    <input id="height" value="400">
+<input id="width" value="400">
+<input id="height" value="400">
 </div>
 
-<div class="desc">🔵 Intervalo real (a)</div>
+<div class="desc">🔵 Real</div>
 <div class="grid">
-    <input id="xmin" value="-2">
-    <input id="xmax" value="2">
+<input id="xmin" value="-2">
+<input id="xmax" value="2">
 </div>
 
-<div class="desc">🟣 Intervalo imaginário (b)</div>
+<div class="desc">🟣 Imaginário</div>
 <div class="grid">
-    <input id="ymin" value="-2">
-    <input id="ymax" value="2">
+<input id="ymin" value="-2">
+<input id="ymax" value="2">
 </div>
 
-<div class="desc">🧠 Função f(z)</div>
+<div class="desc">🧠 Função</div>
 <input id="func" value="z^2">
 
 <button onclick="gerar()">Gerar Gráfico</button>
@@ -167,142 +139,170 @@ button:hover {
 </div>
 </div>
 
-<!-- GRÁFICO -->
 <div id="grafico" class="screen">
 <div class="container">
 
 <canvas id="canvas"></canvas>
 
 <div class="graph-buttons">
-    <button onclick="voltar()">Voltar</button>
-    <button onclick="baixar()">Salvar</button>
+<button onclick="voltar()">Voltar</button>
+<button onclick="baixar()">Salvar</button>
 </div>
 
 </div>
 </div>
 
-<!-- LOADING -->
 <div id="loading">
 <div>Gerando...</div>
 <div class="bar"><div class="progress" id="progress"></div></div>
 </div>
 
 <script>
+let worker;
+
 function trocarTela(a,b){
-    document.getElementById(a).classList.remove("active");
-    document.getElementById(b).classList.add("active");
+document.getElementById(a).classList.remove("active");
+document.getElementById(b).classList.add("active");
 }
 
 function showLoading(v){
-    document.getElementById("loading").style.display = v ? "flex":"none";
-}
-
-function complexToColor(z){
-    let arg = Math.atan2(z.im, z.re);
-    let mag = Math.hypot(z.re, z.im);
-
-    let hue = (arg + Math.PI)/(2*Math.PI);
-    let val = 1 - Math.exp(-mag);
-
-    return hsvToRgb(hue,1,val);
-}
-
-function hsvToRgb(h,s,v){
-    let i = Math.floor(h*6);
-    let f = h*6 - i;
-    let p = v*(1-s);
-    let q = v*(1-f*s);
-    let t = v*(1-(1-f)*s);
-
-    let r,g,b;
-    switch(i%6){
-        case 0: r=v,g=t,b=p; break;
-        case 1: r=q,g=v,b=p; break;
-        case 2: r=p,g=v,b=t; break;
-        case 3: r=p,g=q,b=v; break;
-        case 4: r=t,g=p,b=v; break;
-        case 5: r=v,g=p,b=q; break;
-    }
-    return [r*255,g*255,b*255];
+document.getElementById("loading").style.display=v?"flex":"none";
 }
 
 function gerar(){
-    trocarTela("menu","grafico");
-    showLoading(true);
+trocarTela("menu","grafico");
+showLoading(true);
 
-    setTimeout(()=>{
+let w=+width.value;
+let h=+height.value;
 
-        let w = +document.getElementById("width").value;
-        let h = +document.getElementById("height").value;
+let canvas=document.getElementById("canvas");
+canvas.width=w;
+canvas.height=h;
 
-        let xmin = +xmin.value;
-        let xmax = +xmax.value;
-        let ymin = +ymin.value;
-        let ymax = +ymax.value;
+let ctx=canvas.getContext("2d");
 
-        let expr = func.value;
+let xmin=+xmin.value;
+let xmax=+xmax.value;
+let ymin=+ymin.value;
+let ymax=+ymax.value;
+let expr=func.value;
 
-        let canvas = document.getElementById("canvas");
-        canvas.width = w;
-        canvas.height = h;
+// cria worker
+let blob = new Blob([`
+self.importScripts('https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.min.js');
 
-        let ctx = canvas.getContext("2d");
-        let img = ctx.createImageData(w,h);
+function hsvToRgb(h,s,v){
+let i=Math.floor(h*6);
+let f=h*6-i;
+let p=v*(1-s);
+let q=v*(1-f*s);
+let t=v*(1-(1-f)*s);
+let r,g,b;
+switch(i%6){
+case 0:r=v;g=t;b=p;break;
+case 1:r=q;g=v;b=p;break;
+case 2:r=p;g=v;b=t;break;
+case 3:r=p;g=q;b=v;break;
+case 4:r=t;g=p;b=v;break;
+case 5:r=v;g=p;b=q;break;
+}
+return [r*255,g*255,b*255];
+}
 
-        let compiled;
-        try{
-            compiled = math.compile(expr);
-        }catch(e){
-            alert("Erro na função");
-            voltar();
-            showLoading(false);
-            return;
-        }
+function complexToColor(z){
+let arg=Math.atan2(z.im,z.re);
+let mag=Math.hypot(z.re,z.im);
+let hue=(arg+Math.PI)/(2*Math.PI);
+let val=1-Math.exp(-mag);
+return hsvToRgb(hue,1,val);
+}
 
-        for(let y=0;y<h;y++){
+onmessage = function(e){
+let {w,h,xmin,xmax,ymin,ymax,expr}=e.data;
 
-            document.getElementById("progress").style.width =
-                (y/h*100)+"%";
+let compiled;
+try{
+compiled = math.compile(expr);
+}catch{
+postMessage({error:true});
+return;
+}
 
-            for(let x=0;x<w;x++){
+let img=new Uint8ClampedArray(w*h*4);
 
-                let a = xmin + x/w*(xmax-xmin);
-                let b = ymin + y/h*(ymax-ymin);
+for(let y=0;y<h;y++){
 
-                let z = math.complex(a,b);
+for(let x=0;x<w;x++){
 
-                let r;
-                try{
-                    r = compiled.evaluate({z:z});
-                }catch{
-                    r = math.complex(0,0);
-                }
+let a=xmin+x/w*(xmax-xmin);
+let b=ymin+y/h*(ymax-ymin);
 
-                let [R,G,B] = complexToColor(r);
+let z=math.complex(a,b);
 
-                let i = (y*w+x)*4;
-                img.data[i]=R;
-                img.data[i+1]=G;
-                img.data[i+2]=B;
-                img.data[i+3]=255;
-            }
-        }
+let r;
+try{
+r=compiled.evaluate({z:z});
+}catch{
+r=math.complex(0,0);
+}
 
-        ctx.putImageData(img,0,0);
-        showLoading(false);
+let [R,G,B]=complexToColor(r);
 
-    },50);
+let i=(y*w+x)*4;
+img[i]=R;
+img[i+1]=G;
+img[i+2]=B;
+img[i+3]=255;
+}
+
+if(y%10===0){
+postMessage({progress:y/h});
+}
+}
+
+postMessage({done:true,img});
+}
+`], {type:"application/javascript"});
+
+worker = new Worker(URL.createObjectURL(blob));
+
+worker.onmessage = function(e){
+
+if(e.data.error){
+alert("Erro na função");
+voltar();
+showLoading(false);
+return;
+}
+
+if(e.data.progress){
+document.getElementById("progress").style.width =
+(e.data.progress*100)+"%";
+}
+
+if(e.data.done){
+let imageData=new ImageData(e.data.img,w,h);
+ctx.putImageData(imageData,0,0);
+showLoading(false);
+worker.terminate();
+}
+};
+
+worker.postMessage({w,h,xmin,xmax,ymin,ymax,expr});
 }
 
 function voltar(){
-    trocarTela("grafico","menu");
+if(worker) worker.terminate();
+trocarTela("grafico","menu");
+showLoading(false);
 }
 
 function baixar(){
-    let link=document.createElement("a");
-    link.download="grafico.png";
-    link.href=canvas.toDataURL();
-    link.click();
+let link=document.createElement("a");
+link.download="grafico.png";
+link.href=canvas.toDataURL();
+link.click();
 }
 </script>
 
