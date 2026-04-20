@@ -2,13 +2,13 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Função Complexa</title>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.min.js"></script>
 
 <style>
-* {
-    box-sizing: border-box;
-}
+* { box-sizing: border-box; }
 
 body {
     margin: 0;
@@ -20,9 +20,10 @@ body {
 .screen {
     display: none;
     min-height: 100vh;
+    width: 100%;
     justify-content: center;
     align-items: center;
-    padding: 15px;
+    padding: 20px;
 }
 
 .active {
@@ -33,34 +34,38 @@ body {
 .container {
     background: white;
     width: 100%;
-    max-width: 420px;
+    max-width: 500px;
     padding: 20px;
-    border-radius: 16px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    border-radius: 18px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.25);
 }
 
 h2 {
     text-align: center;
 }
 
-/* INPUTS */
-input {
-    width: 100%;
-    padding: 12px;
-    margin: 6px 0;
-    border-radius: 10px;
-    border: 1px solid #ccc;
-    font-size: 14px;
-}
-
-/* GRID para organizar melhor no mobile */
+/* GRID */
 .grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 8px;
 }
 
-/* BOTÕES */
+@media (max-width: 400px) {
+    .grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* INPUT */
+input {
+    width: 100%;
+    padding: 12px;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+}
+
+/* BOTÃO */
 button {
     width: 100%;
     padding: 12px;
@@ -77,10 +82,9 @@ button:hover {
     background: #00c6ff;
 }
 
-/* TELA DO GRÁFICO */
+/* CANVAS */
 #canvas {
     width: 100%;
-    height: auto;
     border-radius: 12px;
     background: black;
 }
@@ -89,66 +93,98 @@ button:hover {
 .graph-buttons {
     display: flex;
     gap: 10px;
-    margin-top: 15px;
+    margin-top: 10px;
 }
 
-.graph-buttons button {
-    flex: 1;
+/* LOADING */
+#loading {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.6);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    color: white;
 }
 
-/* RESPONSIVO */
-@media (max-width: 400px) {
-    .grid {
-        grid-template-columns: 1fr;
-    }
+.bar {
+    width: 200px;
+    height: 10px;
+    background: #333;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-top: 10px;
+}
+
+.progress {
+    height: 100%;
+    width: 0%;
+    background: #4facfe;
 }
 </style>
 </head>
 
 <body>
 
-<!-- TELA MENU -->
+<!-- MENU -->
 <div id="menu" class="screen active">
     <div class="container">
         <h2>Função Complexa</h2>
 
         <div class="grid">
-            <input type="number" id="width" placeholder="Largura" value="400">
-            <input type="number" id="height" placeholder="Altura" value="400">
+            <input id="width" type="number" value="400" placeholder="Largura">
+            <input id="height" type="number" value="400" placeholder="Altura">
         </div>
 
         <div class="grid">
-            <input type="number" id="xmin" placeholder="X min" value="-2">
-            <input type="number" id="xmax" placeholder="X max" value="2">
+            <input id="xmin" type="number" value="-2">
+            <input id="xmax" type="number" value="2">
         </div>
 
         <div class="grid">
-            <input type="number" id="ymin" placeholder="Y min" value="-2">
-            <input type="number" id="ymax" placeholder="Y max" value="2">
+            <input id="ymin" type="number" value="-2">
+            <input id="ymax" type="number" value="2">
         </div>
 
-        <input type="text" id="func" placeholder="Ex: sin(z), z^2, exp(z)" value="z^2">
+        <input id="func" value="z^2">
 
         <button onclick="gerar()">Gerar Gráfico</button>
     </div>
 </div>
 
-<!-- TELA GRÁFICO -->
+<!-- GRÁFICO -->
 <div id="grafico" class="screen">
     <div class="container">
         <canvas id="canvas"></canvas>
 
         <div class="graph-buttons">
             <button onclick="voltar()">Voltar</button>
+            <button onclick="resetView()">Reset</button>
             <button onclick="baixar()">Salvar</button>
         </div>
     </div>
 </div>
 
+<!-- LOADING -->
+<div id="loading">
+    <div>Gerando imagem...</div>
+    <div class="bar">
+        <div class="progress" id="progress"></div>
+    </div>
+</div>
+
 <script>
-function trocarTela(de, para) {
-    document.getElementById(de).classList.remove("active");
-    document.getElementById(para).classList.add("active");
+function trocarTela(a, b) {
+    document.getElementById(a).classList.remove("active");
+    document.getElementById(b).classList.add("active");
+}
+
+function showLoading(show) {
+    document.getElementById("loading").style.display = show ? "flex" : "none";
 }
 
 function complexToColor(z) {
@@ -170,12 +206,12 @@ function hsvToRgb(h, s, v) {
 
     let r, g, b;
     switch(i % 6){
-        case 0: r=v, g=t, b=p; break;
-        case 1: r=q, g=v, b=p; break;
-        case 2: r=p, g=v, b=t; break;
-        case 3: r=p, g=q, b=v; break;
-        case 4: r=t, g=p, b=v; break;
-        case 5: r=v, g=p, b=q; break;
+        case 0: r=v; g=t; b=p; break;
+        case 1: r=q; g=v; b=p; break;
+        case 2: r=p; g=v; b=t; break;
+        case 3: r=p; g=q; b=v; break;
+        case 4: r=t; g=p; b=v; break;
+        case 5: r=v; g=p; b=q; break;
     }
 
     return [r*255, g*255, b*255];
@@ -183,60 +219,70 @@ function hsvToRgb(h, s, v) {
 
 function gerar() {
     trocarTela("menu", "grafico");
+    showLoading(true);
 
-    let w = parseInt(document.getElementById("width").value);
-    let h = parseInt(document.getElementById("height").value);
+    setTimeout(() => {
 
-    let xmin = parseFloat(document.getElementById("xmin").value);
-    let xmax = parseFloat(document.getElementById("xmax").value);
+        let w = +width.value;
+        let h = +height.value;
 
-    let ymin = parseFloat(document.getElementById("ymin").value);
-    let ymax = parseFloat(document.getElementById("ymax").value);
+        let xmin = +document.getElementById("xmin").value;
+        let xmax = +document.getElementById("xmax").value;
+        let ymin = +document.getElementById("ymin").value;
+        let ymax = +document.getElementById("ymax").value;
 
-    let expr = document.getElementById("func").value;
+        let expr = func.value;
 
-    let canvas = document.getElementById("canvas");
-    canvas.width = w;
-    canvas.height = h;
+        let canvas = document.getElementById("canvas");
+        canvas.width = w;
+        canvas.height = h;
 
-    let ctx = canvas.getContext("2d");
-    let img = ctx.createImageData(w, h);
+        let ctx = canvas.getContext("2d");
+        let img = ctx.createImageData(w, h);
 
-    let compiled;
-    try {
-        compiled = math.compile(expr);
-    } catch {
-        alert("Erro na função!");
-        voltar();
-        return;
-    }
+        let compiled;
+        try {
+            compiled = math.compile(expr);
+        } catch {
+            alert("Erro na função!");
+            voltar();
+            showLoading(false);
+            return;
+        }
 
-    for(let px = 0; px < w; px++) {
         for(let py = 0; py < h; py++) {
 
-            let a = xmin + (px / w) * (xmax - xmin);
-            let b = ymin + (py / h) * (ymax - ymin);
+            let progress = Math.floor((py / h) * 100);
+            document.getElementById("progress").style.width = progress + "%";
 
-            let z = math.complex(a, b);
+            for(let px = 0; px < w; px++) {
 
-            let result;
-            try {
-                result = compiled.evaluate({ z: z });
-            } catch {
-                result = math.complex(0,0);
+                let a = xmin + (px / w) * (xmax - xmin);
+                let b = ymin + (py / h) * (ymax - ymin);
+
+                let z = math.complex(a, b);
+
+                let result;
+                try {
+                    result = compiled.evaluate({ z: z });
+                } catch {
+                    result = math.complex(0,0);
+                }
+
+                let [r,g,bc] = complexToColor(result);
+
+                let i = (py*w + px)*4;
+                img.data[i] = r;
+                img.data[i+1] = g;
+                img.data[i+2] = bc;
+                img.data[i+3] = 255;
             }
-
-            let [r,g,bcolor] = complexToColor(result);
-
-            let idx = (py * w + px) * 4;
-            img.data[idx] = r;
-            img.data[idx+1] = g;
-            img.data[idx+2] = bcolor;
-            img.data[idx+3] = 255;
         }
-    }
 
-    ctx.putImageData(img, 0, 0);
+        ctx.putImageData(img, 0, 0);
+        showLoading(false);
+
+    }, 50);
 }
 
 function voltar() {
@@ -244,11 +290,18 @@ function voltar() {
 }
 
 function baixar() {
-    let canvas = document.getElementById("canvas");
     let link = document.createElement("a");
     link.download = "grafico.png";
     link.href = canvas.toDataURL();
     link.click();
+}
+
+function resetView() {
+    document.getElementById("xmin").value = -2;
+    document.getElementById("xmax").value = 2;
+    document.getElementById("ymin").value = -2;
+    document.getElementById("ymax").value = 2;
+    voltar();
 }
 </script>
 
