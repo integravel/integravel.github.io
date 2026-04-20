@@ -2,92 +2,163 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<title>Gráfico de Funções Complexas</title>
+<title>Função Complexa</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.min.js"></script>
 
 <style>
+* {
+    box-sizing: border-box;
+}
+
 body {
+    margin: 0;
     font-family: Arial, sans-serif;
     background: linear-gradient(135deg, #4facfe, #00f2fe);
-    margin: 0;
-    display: flex;
+}
+
+/* TELAS */
+.screen {
+    display: none;
+    min-height: 100vh;
     justify-content: center;
     align-items: center;
-    height: 100vh;
+    padding: 15px;
 }
+
+.active {
+    display: flex;
+}
+
+/* CONTAINER */
 .container {
     background: white;
+    width: 100%;
+    max-width: 420px;
     padding: 20px;
-    border-radius: 12px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-    width: 350px;
+    border-radius: 16px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
 }
+
 h2 {
     text-align: center;
 }
-input, button {
+
+/* INPUTS */
+input {
     width: 100%;
-    margin: 8px 0;
-    padding: 10px;
-    border-radius: 8px;
+    padding: 12px;
+    margin: 6px 0;
+    border-radius: 10px;
     border: 1px solid #ccc;
+    font-size: 14px;
 }
+
+/* GRID para organizar melhor no mobile */
+.grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+
+/* BOTÕES */
 button {
+    width: 100%;
+    padding: 12px;
+    margin-top: 10px;
+    border-radius: 12px;
+    border: none;
     background: #4facfe;
     color: white;
-    border: none;
+    font-size: 16px;
     cursor: pointer;
 }
+
 button:hover {
     background: #00c6ff;
 }
-canvas {
-    margin-top: 20px;
-    border: 1px solid #ccc;
+
+/* TELA DO GRÁFICO */
+#canvas {
+    width: 100%;
+    height: auto;
+    border-radius: 12px;
+    background: black;
+}
+
+/* BOTÕES DO GRÁFICO */
+.graph-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.graph-buttons button {
+    flex: 1;
+}
+
+/* RESPONSIVO */
+@media (max-width: 400px) {
+    .grid {
+        grid-template-columns: 1fr;
+    }
 }
 </style>
 </head>
 
 <body>
 
-<div class="container">
-    <h2>Função Complexa</h2>
+<!-- TELA MENU -->
+<div id="menu" class="screen active">
+    <div class="container">
+        <h2>Função Complexa</h2>
 
-    <input type="number" id="width" placeholder="Largura (px)" value="400">
-    <input type="number" id="height" placeholder="Altura (px)" value="400">
+        <div class="grid">
+            <input type="number" id="width" placeholder="Largura" value="400">
+            <input type="number" id="height" placeholder="Altura" value="400">
+        </div>
 
-    <input type="number" id="xmin" placeholder="X mínimo (real)" value="-2">
-    <input type="number" id="xmax" placeholder="X máximo (real)" value="2">
+        <div class="grid">
+            <input type="number" id="xmin" placeholder="X min" value="-2">
+            <input type="number" id="xmax" placeholder="X max" value="2">
+        </div>
 
-    <input type="number" id="ymin" placeholder="Y mínimo (imaginário)" value="-2">
-    <input type="number" id="ymax" placeholder="Y máximo (imaginário)" value="2">
+        <div class="grid">
+            <input type="number" id="ymin" placeholder="Y min" value="-2">
+            <input type="number" id="ymax" placeholder="Y max" value="2">
+        </div>
 
-    <input type="text" id="func" placeholder="Função (ex: z^2, sin(z), exp(z))" value="z^2">
+        <input type="text" id="func" placeholder="Ex: sin(z), z^2, exp(z)" value="z^2">
 
-    <button onclick="gerar()">Gerar Gráfico</button>
-    <button onclick="baixar()">Salvar Imagem</button>
+        <button onclick="gerar()">Gerar Gráfico</button>
+    </div>
+</div>
 
-    <canvas id="canvas"></canvas>
+<!-- TELA GRÁFICO -->
+<div id="grafico" class="screen">
+    <div class="container">
+        <canvas id="canvas"></canvas>
+
+        <div class="graph-buttons">
+            <button onclick="voltar()">Voltar</button>
+            <button onclick="baixar()">Salvar</button>
+        </div>
+    </div>
 </div>
 
 <script>
-function complexToColor(z) {
-    // Argumento (fase)
-    let arg = Math.atan2(z.im, z.re);
+function trocarTela(de, para) {
+    document.getElementById(de).classList.remove("active");
+    document.getElementById(para).classList.add("active");
+}
 
-    // Magnitude
+function complexToColor(z) {
+    let arg = Math.atan2(z.im, z.re);
     let mag = Math.sqrt(z.re*z.re + z.im*z.im);
 
-    // Hue baseado no argumento
     let hue = (arg + Math.PI) / (2 * Math.PI);
-
-    // Saturação fixa
-    let sat = 1;
-
-    // Brilho baseado na magnitude
     let val = 1 - Math.exp(-mag);
 
-    return hsvToRgb(hue, sat, val);
+    return hsvToRgb(hue, 1, val);
 }
 
 function hsvToRgb(h, s, v) {
@@ -107,14 +178,12 @@ function hsvToRgb(h, s, v) {
         case 5: r=v, g=p, b=q; break;
     }
 
-    return [
-        Math.floor(r*255),
-        Math.floor(g*255),
-        Math.floor(b*255)
-    ];
+    return [r*255, g*255, b*255];
 }
 
 function gerar() {
+    trocarTela("menu", "grafico");
+
     let w = parseInt(document.getElementById("width").value);
     let h = parseInt(document.getElementById("height").value);
 
@@ -136,8 +205,9 @@ function gerar() {
     let compiled;
     try {
         compiled = math.compile(expr);
-    } catch(e) {
+    } catch {
         alert("Erro na função!");
+        voltar();
         return;
     }
 
@@ -167,6 +237,10 @@ function gerar() {
     }
 
     ctx.putImageData(img, 0, 0);
+}
+
+function voltar() {
+    trocarTela("grafico", "menu");
 }
 
 function baixar() {
