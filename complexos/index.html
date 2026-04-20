@@ -3,7 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Função Complexa</title>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.min.js"></script>
 
@@ -12,19 +11,17 @@
 
 body {
     margin: 0;
-    font-family: Arial, sans-serif;
+    font-family: Arial;
     background: linear-gradient(135deg, #4facfe, #00f2fe);
 }
 
 .screen {
     display: none;
     min-height: 100vh;
-    width: 100%;
     justify-content: center;
     align-items: center;
     padding: 20px;
 }
-
 .active { display: flex; }
 
 .container {
@@ -36,7 +33,11 @@ body {
     box-shadow: 0 10px 30px rgba(0,0,0,0.25);
 }
 
-h2 { text-align: center; }
+.label {
+    font-size: 13px;
+    color: #666;
+    margin: 6px 0 4px;
+}
 
 .grid {
     display: grid;
@@ -64,11 +65,6 @@ button {
     background: #4facfe;
     color: white;
     font-size: 16px;
-    cursor: pointer;
-}
-
-button:hover {
-    background: #00c6ff;
 }
 
 #canvas {
@@ -83,6 +79,34 @@ button:hover {
     margin-top: 10px;
 }
 
+/* HISTÓRICO */
+.history {
+    margin-top: 15px;
+    max-height: 150px;
+    overflow-y: auto;
+    border-top: 1px solid #ddd;
+    padding-top: 10px;
+}
+
+.item {
+    background: #f5f5f5;
+    padding: 8px;
+    border-radius: 8px;
+    margin-bottom: 6px;
+    font-size: 13px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.item button {
+    width: auto;
+    padding: 5px 8px;
+    font-size: 12px;
+    margin: 0;
+}
+
+/* LOADING */
 #loading {
     position: fixed;
     inset: 0;
@@ -113,167 +137,233 @@ button:hover {
 
 <body>
 
+<!-- MENU -->
 <div id="menu" class="screen active">
-    <div class="container">
-        <h2>Função Complexa</h2>
+<div class="container">
 
-        <div class="grid">
-            <input id="width" type="number" value="400">
-            <input id="height" type="number" value="400">
-        </div>
-
-        <div class="grid">
-            <input id="xmin" type="number" value="-2">
-            <input id="xmax" type="number" value="2">
-        </div>
-
-        <div class="grid">
-            <input id="ymin" type="number" value="-2">
-            <input id="ymax" type="number" value="2">
-        </div>
-
-        <input id="func" value="z^2">
-
-        <button onclick="gerar()">Gerar Gráfico</button>
-    </div>
+<div class="label">📐 Tamanho da imagem (pixels)</div>
+<div class="grid">
+<input id="width" type="number" value="400">
+<input id="height" type="number" value="400">
 </div>
 
+<div class="label">🔵 Intervalo real (eixo horizontal)</div>
+<div class="grid">
+<input id="xmin" type="number" value="-2">
+<input id="xmax" type="number" value="2">
+</div>
+
+<div class="label">🟣 Intervalo imaginário (eixo vertical)</div>
+<div class="grid">
+<input id="ymin" type="number" value="-2">
+<input id="ymax" type="number" value="2">
+</div>
+
+<div class="label">🧠 Função f(z)</div>
+<input id="func" value="z^2">
+
+<button onclick="gerar()">Gerar Gráfico</button>
+
+<!-- HISTÓRICO -->
+<div class="history" id="history"></div>
+<button onclick="limparHistorico()">Limpar histórico</button>
+
+</div>
+</div>
+
+<!-- GRÁFICO -->
 <div id="grafico" class="screen">
-    <div class="container">
-        <canvas id="canvas"></canvas>
+<div class="container">
 
-        <div class="graph-buttons">
-            <button onclick="voltar()">Voltar</button>
-            <button onclick="baixar()">Salvar</button>
-        </div>
-    </div>
+<canvas id="canvas"></canvas>
+
+<div class="graph-buttons">
+<button onclick="voltar()">Voltar</button>
+<button onclick="baixar()">Salvar</button>
 </div>
 
+</div>
+</div>
+
+<!-- LOADING -->
 <div id="loading">
-    <div>Gerando imagem...</div>
-    <div class="bar">
-        <div class="progress" id="progress"></div>
-    </div>
+<div>Gerando imagem...</div>
+<div class="bar">
+<div class="progress" id="progress"></div>
+</div>
 </div>
 
 <script>
-function trocarTela(a, b) {
+function trocarTela(a,b){
     document.getElementById(a).classList.remove("active");
     document.getElementById(b).classList.add("active");
 }
 
-function showLoading(show) {
-    document.getElementById("loading").style.display = show ? "flex" : "none";
+function showLoading(v){
+    loading.style.display = v ? "flex":"none";
 }
 
-function complexToColor(z) {
+/* ===== HISTÓRICO ===== */
+function salvarHistorico(dado){
+    let lista = JSON.parse(localStorage.getItem("hist")||"[]");
+    lista.unshift(dado);
+    localStorage.setItem("hist", JSON.stringify(lista));
+    renderHistorico();
+}
+
+function renderHistorico(){
+    let lista = JSON.parse(localStorage.getItem("hist")||"[]");
+    history.innerHTML = "";
+
+    lista.forEach((item,i)=>{
+        let div = document.createElement("div");
+        div.className="item";
+
+        div.innerHTML = `
+        <span>${item.func}</span>
+        <div>
+            <button onclick="carregar(${i})">↺</button>
+            <button onclick="remover(${i})">✕</button>
+        </div>
+        `;
+        history.appendChild(div);
+    });
+}
+
+function carregar(i){
+    let lista = JSON.parse(localStorage.getItem("hist"));
+    let d = lista[i];
+
+    width.value=d.w;
+    height.value=d.h;
+    xmin.value=d.xmin;
+    xmax.value=d.xmax;
+    ymin.value=d.ymin;
+    ymax.value=d.ymax;
+    func.value=d.func;
+}
+
+function remover(i){
+    let lista = JSON.parse(localStorage.getItem("hist"));
+    lista.splice(i,1);
+    localStorage.setItem("hist", JSON.stringify(lista));
+    renderHistorico();
+}
+
+function limparHistorico(){
+    localStorage.removeItem("hist");
+    renderHistorico();
+}
+
+/* ===== COR ===== */
+function complexToColor(z){
     let arg = Math.atan2(z.im, z.re);
-    let mag = Math.sqrt(z.re*z.re + z.im*z.im);
-
-    let hue = (arg + Math.PI) / (2 * Math.PI);
+    let mag = Math.hypot(z.re, z.im);
+    let hue = (arg + Math.PI)/(2*Math.PI);
     let val = 1 - Math.exp(-mag);
-
-    return hsvToRgb(hue, 1, val);
+    return hsvToRgb(hue,1,val);
 }
 
-function hsvToRgb(h, s, v) {
-    let i = Math.floor(h * 6);
-    let f = h * 6 - i;
-    let p = v * (1 - s);
-    let q = v * (1 - f * s);
-    let t = v * (1 - (1 - f) * s);
-
-    let r, g, b;
-    switch(i % 6){
-        case 0: r=v; g=t; b=p; break;
-        case 1: r=q; g=v; b=p; break;
-        case 2: r=p; g=v; b=t; break;
-        case 3: r=p; g=q; b=v; break;
-        case 4: r=t; g=p; b=v; break;
-        case 5: r=v; g=p; b=q; break;
+function hsvToRgb(h,s,v){
+    let i=Math.floor(h*6);
+    let f=h*6-i;
+    let p=v*(1-s);
+    let q=v*(1-f*s);
+    let t=v*(1-(1-f)*s);
+    let r,g,b;
+    switch(i%6){
+        case 0:r=v,g=t,b=p;break;
+        case 1:r=q,g=v,b=p;break;
+        case 2:r=p,g=v,b=t;break;
+        case 3:r=p,g=q,b=v;break;
+        case 4:r=t,g=p,b=v;break;
+        case 5:r=v,g=p,b=q;break;
     }
-
-    return [r*255, g*255, b*255];
+    return [r*255,g*255,b*255];
 }
 
-function gerar() {
-    trocarTela("menu", "grafico");
+/* ===== GERAR ===== */
+function gerar(){
+    trocarTela("menu","grafico");
     showLoading(true);
 
-    setTimeout(() => {
+    setTimeout(()=>{
 
-        let w = +document.getElementById("width").value;
-        let h = +document.getElementById("height").value;
+        let w = +width.value;
+        let h = +height.value;
 
-        let xmin = +document.getElementById("xmin").value;
-        let xmax = +document.getElementById("xmax").value;
-        let ymin = +document.getElementById("ymin").value;
-        let ymax = +document.getElementById("ymax").value;
+        let xmi = +xmin.value;
+        let xma = +xmax.value;
+        let ymi = +ymin.value;
+        let yma = +ymax.value;
 
-        let expr = document.getElementById("func").value;
+        let expr = func.value;
+
+        salvarHistorico({w,h,xmin:xmi,xmax:xma,ymin:ymi,ymax:yma,func:expr});
 
         let canvas = document.getElementById("canvas");
-        canvas.width = w;
-        canvas.height = h;
+        canvas.width=w;
+        canvas.height=h;
 
         let ctx = canvas.getContext("2d");
-        let img = ctx.createImageData(w, h);
+        let img = ctx.createImageData(w,h);
 
         let compiled;
-        try {
+        try{
             compiled = math.compile(expr);
-        } catch {
-            alert("Erro na função!");
+        }catch{
+            alert("Erro na função");
             voltar();
             showLoading(false);
             return;
         }
 
-        for(let py = 0; py < h; py++) {
+        for(let y=0;y<h;y++){
 
-            document.getElementById("progress").style.width =
-                (py / h * 100) + "%";
+            progress.style.width=(y/h*100)+"%";
 
-            for(let px = 0; px < w; px++) {
+            for(let x=0;x<w;x++){
 
-                let a = xmin + (px / w) * (xmax - xmin);
-                let b = ymin + (py / h) * (ymax - ymin);
+                let a = xmi + x/w*(xma-xmi);
+                let b = ymi + y/h*(yma-ymi);
 
-                let z = math.complex(a, b);
+                let z = math.complex(a,b);
 
-                let result;
-                try {
-                    result = compiled.evaluate({ z: z });
-                } catch {
-                    result = math.complex(0,0);
+                let r;
+                try{
+                    r = compiled.evaluate({z:z});
+                }catch{
+                    r = math.complex(0,0);
                 }
 
-                let [r,g,bc] = complexToColor(result);
+                let [R,G,B] = complexToColor(r);
 
-                let i = (py*w + px)*4;
-                img.data[i] = r;
-                img.data[i+1] = g;
-                img.data[i+2] = bc;
-                img.data[i+3] = 255;
+                let i=(y*w+x)*4;
+                img.data[i]=R;
+                img.data[i+1]=G;
+                img.data[i+2]=B;
+                img.data[i+3]=255;
             }
         }
 
-        ctx.putImageData(img, 0, 0);
+        ctx.putImageData(img,0,0);
         showLoading(false);
 
-    }, 50);
+    },50);
 }
 
-function voltar() {
-    trocarTela("grafico", "menu");
+function voltar(){
+    trocarTela("grafico","menu");
 }
 
-function baixar() {
-    let link = document.createElement("a");
-    link.download = "grafico.png";
-    link.href = canvas.toDataURL();
+function baixar(){
+    let link=document.createElement("a");
+    link.download="grafico.png";
+    link.href=canvas.toDataURL();
     link.click();
 }
+
+renderHistorico();
 </script>
 
 </body>
