@@ -1,310 +1,130 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Função Complexa</title>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.min.js"></script>
-
-<style>
-*{box-sizing:border-box}
-body{
-margin:0;
-font-family:Arial;
-background:linear-gradient(135deg,#4facfe,#00f2fe);
-}
-
-.screen{
-display:none;
-min-height:100vh;
-justify-content:center;
-align-items:center;
-padding:20px;
-}
-.active{display:flex;}
-
-.container{
-background:white;
-width:100%;
-max-width:420px;
-padding:20px;
-border-radius:18px;
-box-shadow:0 10px 30px rgba(0,0,0,0.25);
-}
-
-h2{text-align:center}
-
-.desc{
-font-size:13px;
-color:#666;
-margin-bottom:5px;
-}
-
-.grid{
-display:grid;
-grid-template-columns:1fr 1fr;
-gap:8px;
-margin-bottom:10px;
-}
-
-input{
-width:100%;
-padding:10px;
-border-radius:10px;
-border:1px solid #ccc;
-}
-
-button{
-width:100%;
-padding:12px;
-margin-top:10px;
-border-radius:12px;
-border:none;
-background:#4facfe;
-color:white;
-font-size:16px;
-}
-
-#canvas{
-width:100%;
-border-radius:12px;
-background:black;
-}
-
-.graph-buttons{
-display:flex;
-gap:10px;
-margin-top:10px;
-}
-
-#loading{
-position:fixed;
-inset:0;
-background:rgba(0,0,0,0.6);
-display:none;
-justify-content:center;
-align-items:center;
-flex-direction:column;
-color:white;
-}
-
-.bar{
-width:200px;
-height:10px;
-background:#333;
-border-radius:10px;
-overflow:hidden;
-margin-top:10px;
-}
-
-.progress{
-height:100%;
-width:0%;
-background:#4facfe;
-}
-</style>
-</head>
-
-<body>
-
-<div id="menu" class="screen active">
-<div class="container">
-
-<h2>Função Complexa</h2>
-
-<div class="desc">📐 Tamanho</div>
-<div class="grid">
-<input id="width" value="400">
-<input id="height" value="400">
-</div>
-
-<div class="desc">🔵 Real</div>
-<div class="grid">
-<input id="xmin" value="-2">
-<input id="xmax" value="2">
-</div>
-
-<div class="desc">🟣 Imaginário</div>
-<div class="grid">
-<input id="ymin" value="-2">
-<input id="ymax" value="2">
-</div>
-
-<div class="desc">🧠 Função</div>
-<input id="func" value="z^2">
-
-<button onclick="gerar()">Gerar Gráfico</button>
-
-</div>
-</div>
-
-<div id="grafico" class="screen">
-<div class="container">
-
-<canvas id="canvas"></canvas>
-
-<div class="graph-buttons">
-<button onclick="voltar()">Voltar</button>
-<button onclick="baixar()">Salvar</button>
-</div>
-
-</div>
-</div>
-
-<div id="loading">
-<div>Gerando...</div>
-<div class="bar"><div class="progress" id="progress"></div></div>
-</div>
-
 <script>
-let worker;
-
 function trocarTela(a,b){
-document.getElementById(a).classList.remove("active");
-document.getElementById(b).classList.add("active");
+    document.getElementById(a).classList.remove("active");
+    document.getElementById(b).classList.add("active");
 }
 
 function showLoading(v){
-document.getElementById("loading").style.display=v?"flex":"none";
-}
-
-function gerar(){
-trocarTela("menu","grafico");
-showLoading(true);
-
-let w=+width.value;
-let h=+height.value;
-
-let canvas=document.getElementById("canvas");
-canvas.width=w;
-canvas.height=h;
-
-let ctx=canvas.getContext("2d");
-
-let xmin=+xmin.value;
-let xmax=+xmax.value;
-let ymin=+ymin.value;
-let ymax=+ymax.value;
-let expr=func.value;
-
-// cria worker
-let blob = new Blob([`
-self.importScripts('https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.min.js');
-
-function hsvToRgb(h,s,v){
-let i=Math.floor(h*6);
-let f=h*6-i;
-let p=v*(1-s);
-let q=v*(1-f*s);
-let t=v*(1-(1-f)*s);
-let r,g,b;
-switch(i%6){
-case 0:r=v;g=t;b=p;break;
-case 1:r=q;g=v;b=p;break;
-case 2:r=p;g=v;b=t;break;
-case 3:r=p;g=q;b=v;break;
-case 4:r=t;g=p;b=v;break;
-case 5:r=v;g=p;b=q;break;
-}
-return [r*255,g*255,b*255];
+    document.getElementById("loading").style.display = v ? "flex":"none";
 }
 
 function complexToColor(z){
-let arg=Math.atan2(z.im,z.re);
-let mag=Math.hypot(z.re,z.im);
-let hue=(arg+Math.PI)/(2*Math.PI);
-let val=1-Math.exp(-mag);
-return hsvToRgb(hue,1,val);
+    let arg = Math.atan2(z.im, z.re);
+    let mag = Math.hypot(z.re, z.im);
+    let hue = (arg + Math.PI)/(2*Math.PI);
+    let val = 1 - Math.exp(-mag);
+    return hsvToRgb(hue,1,val);
 }
 
-onmessage = function(e){
-let {w,h,xmin,xmax,ymin,ymax,expr}=e.data;
-
-let compiled;
-try{
-compiled = math.compile(expr);
-}catch{
-postMessage({error:true});
-return;
+function hsvToRgb(h,s,v){
+    let i=Math.floor(h*6);
+    let f=h*6-i;
+    let p=v*(1-s);
+    let q=v*(1-f*s);
+    let t=v*(1-(1-f)*s);
+    let r,g,b;
+    switch(i%6){
+        case 0:r=v,g=t,b=p;break;
+        case 1:r=q,g=v,b=p;break;
+        case 2:r=p,g=v,b=t;break;
+        case 3:r=p,g=q,b=v;break;
+        case 4:r=t,g=p,b=v;break;
+        case 5:r=v,g=p,b=q;break;
+    }
+    return [r*255,g*255,b*255];
 }
 
-let img=new Uint8ClampedArray(w*h*4);
+function gerar(){
+    trocarTela("menu","grafico");
+    showLoading(true);
 
-for(let y=0;y<h;y++){
+    setTimeout(() => {
 
-for(let x=0;x<w;x++){
+        let w = +width.value;
+        let h = +height.value;
 
-let a=xmin+x/w*(xmax-xmin);
-let b=ymin+y/h*(ymax-ymin);
+        let xmin = +xmin.value;
+        let xmax = +xmax.value;
+        let ymin = +ymin.value;
+        let ymax = +ymax.value;
 
-let z=math.complex(a,b);
+        let expr = func.value;
 
-let r;
-try{
-r=compiled.evaluate({z:z});
-}catch{
-r=math.complex(0,0);
-}
+        let canvas = document.getElementById("canvas");
+        canvas.width = w;
+        canvas.height = h;
 
-let [R,G,B]=complexToColor(r);
+        let ctx = canvas.getContext("2d");
+        let img = ctx.createImageData(w,h);
 
-let i=(y*w+x)*4;
-img[i]=R;
-img[i+1]=G;
-img[i+2]=B;
-img[i+3]=255;
-}
+        let compiled;
+        try{
+            compiled = math.compile(expr);
+        }catch{
+            alert("Erro na função");
+            voltar();
+            showLoading(false);
+            return;
+        }
 
-if(y%10===0){
-postMessage({progress:y/h});
-}
-}
+        let y = 0;
 
-postMessage({done:true,img});
-}
-`], {type:"application/javascript"});
+        function render(){
 
-worker = new Worker(URL.createObjectURL(blob));
+            // 🔥 velocidade máxima segura
+            let linhasPorFrame = 20;
 
-worker.onmessage = function(e){
+            for(let k=0;k<linhasPorFrame && y<h;k++,y++){
 
-if(e.data.error){
-alert("Erro na função");
-voltar();
-showLoading(false);
-return;
-}
+                for(let x=0;x<w;x++){
 
-if(e.data.progress){
-document.getElementById("progress").style.width =
-(e.data.progress*100)+"%";
-}
+                    let a = xmin + x/w*(xmax-xmin);
+                    let b = ymin + y/h*(ymax-ymin);
 
-if(e.data.done){
-let imageData=new ImageData(e.data.img,w,h);
-ctx.putImageData(imageData,0,0);
-showLoading(false);
-worker.terminate();
-}
-};
+                    let z = math.complex(a,b);
 
-worker.postMessage({w,h,xmin,xmax,ymin,ymax,expr});
+                    let r;
+                    try{
+                        r = compiled.evaluate({z:z});
+                    }catch{
+                        r = math.complex(0,0);
+                    }
+
+                    let [R,G,B] = complexToColor(r);
+
+                    let i = (y*w+x)*4;
+                    img.data[i]=R;
+                    img.data[i+1]=G;
+                    img.data[i+2]=B;
+                    img.data[i+3]=255;
+                }
+            }
+
+            document.getElementById("progress").style.width =
+                (y/h*100)+"%";
+
+            if(y < h){
+                requestAnimationFrame(render);
+            }else{
+                ctx.putImageData(img,0,0);
+                showLoading(false);
+            }
+        }
+
+        render();
+
+    }, 30);
 }
 
 function voltar(){
-if(worker) worker.terminate();
-trocarTela("grafico","menu");
-showLoading(false);
+    trocarTela("grafico","menu");
+    showLoading(false);
 }
 
 function baixar(){
-let link=document.createElement("a");
-link.download="grafico.png";
-link.href=canvas.toDataURL();
-link.click();
+    let link=document.createElement("a");
+    link.download="grafico.png";
+    link.href=canvas.toDataURL();
+    link.click();
 }
 </script>
-
-</body>
-</html>
