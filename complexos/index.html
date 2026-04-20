@@ -64,6 +64,11 @@ button {
     background: #4facfe;
     color: white;
     font-size: 16px;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #00c6ff;
 }
 
 #canvas {
@@ -152,131 +157,121 @@ button {
 </div>
 
 <script>
-function trocarTela(a,b){
+function trocarTela(a, b) {
     document.getElementById(a).classList.remove("active");
     document.getElementById(b).classList.add("active");
 }
 
-function showLoading(v){
-    document.getElementById("loading").style.display = v ? "flex":"none";
+function showLoading(show) {
+    document.getElementById("loading").style.display = show ? "flex" : "none";
 }
 
-function complexToColor(z){
+function complexToColor(z) {
     let arg = Math.atan2(z.im, z.re);
-    let mag = Math.hypot(z.re, z.im);
-    let hue = (arg + Math.PI)/(2*Math.PI);
+    let mag = Math.sqrt(z.re*z.re + z.im*z.im);
+
+    let hue = (arg + Math.PI) / (2 * Math.PI);
     let val = 1 - Math.exp(-mag);
-    return hsvToRgb(hue,1,val);
+
+    return hsvToRgb(hue, 1, val);
 }
 
-function hsvToRgb(h,s,v){
-    let i=Math.floor(h*6);
-    let f=h*6-i;
-    let p=v*(1-s);
-    let q=v*(1-f*s);
-    let t=v*(1-(1-f)*s);
-    let r,g,b;
-    switch(i%6){
-        case 0:r=v,g=t,b=p;break;
-        case 1:r=q,g=v,b=p;break;
-        case 2:r=p,g=v,b=t;break;
-        case 3:r=p,g=q,b=v;break;
-        case 4:r=t,g=p,b=v;break;
-        case 5:r=v,g=p,b=q;break;
+function hsvToRgb(h, s, v) {
+    let i = Math.floor(h * 6);
+    let f = h * 6 - i;
+    let p = v * (1 - s);
+    let q = v * (1 - f * s);
+    let t = v * (1 - (1 - f) * s);
+
+    let r, g, b;
+    switch(i % 6){
+        case 0: r=v; g=t; b=p; break;
+        case 1: r=q; g=v; b=p; break;
+        case 2: r=p; g=v; b=t; break;
+        case 3: r=p; g=q; b=v; break;
+        case 4: r=t; g=p; b=v; break;
+        case 5: r=v; g=p; b=q; break;
     }
-    return [r*255,g*255,b*255];
+
+    return [r*255, g*255, b*255];
 }
 
-function gerar(){
-    trocarTela("menu","grafico");
+function gerar() {
+    trocarTela("menu", "grafico");
     showLoading(true);
 
-    setTimeout(()=>{
+    setTimeout(() => {
 
-        let w = +width.value;
-        let h = +height.value;
+        let w = +document.getElementById("width").value;
+        let h = +document.getElementById("height").value;
 
-        let xmin = +xmin.value;
-        let xmax = +xmax.value;
-        let ymin = +ymin.value;
-        let ymax = +ymax.value;
+        let xmin = +document.getElementById("xmin").value;
+        let xmax = +document.getElementById("xmax").value;
+        let ymin = +document.getElementById("ymin").value;
+        let ymax = +document.getElementById("ymax").value;
 
-        let expr = func.value;
+        let expr = document.getElementById("func").value;
 
         let canvas = document.getElementById("canvas");
         canvas.width = w;
         canvas.height = h;
 
         let ctx = canvas.getContext("2d");
-        let img = ctx.createImageData(w,h);
+        let img = ctx.createImageData(w, h);
 
         let compiled;
-        try{
+        try {
             compiled = math.compile(expr);
-        }catch{
+        } catch {
             alert("Erro na função!");
             voltar();
             showLoading(false);
             return;
         }
 
-        let y = 0;
-
-        function render(){
-
-            let linhasPorFrame = 16; // 🔥 ajuste fino de velocidade
-
-            for(let k=0;k<linhasPorFrame && y<h;k++,y++){
-
-                for(let x=0;x<w;x++){
-
-                    let a = xmin + x/w*(xmax-xmin);
-                    let b = ymin + y/h*(ymax-ymin);
-
-                    let z = math.complex(a,b);
-
-                    let r;
-                    try{
-                        r = compiled.evaluate({z:z});
-                    }catch{
-                        r = math.complex(0,0);
-                    }
-
-                    let [R,G,B] = complexToColor(r);
-
-                    let i = (y*w+x)*4;
-                    img.data[i]=R;
-                    img.data[i+1]=G;
-                    img.data[i+2]=B;
-                    img.data[i+3]=255;
-                }
-            }
+        for(let py = 0; py < h; py++) {
 
             document.getElementById("progress").style.width =
-                (y/h*100)+"%";
+                (py / h * 100) + "%";
 
-            if(y < h){
-                requestAnimationFrame(render);
-            }else{
-                ctx.putImageData(img,0,0);
-                showLoading(false);
+            for(let px = 0; px < w; px++) {
+
+                let a = xmin + (px / w) * (xmax - xmin);
+                let b = ymin + (py / h) * (ymax - ymin);
+
+                let z = math.complex(a, b);
+
+                let result;
+                try {
+                    result = compiled.evaluate({ z: z });
+                } catch {
+                    result = math.complex(0,0);
+                }
+
+                let [r,g,bc] = complexToColor(result);
+
+                let i = (py*w + px)*4;
+                img.data[i] = r;
+                img.data[i+1] = g;
+                img.data[i+2] = bc;
+                img.data[i+3] = 255;
             }
         }
 
-        render();
+        ctx.putImageData(img, 0, 0);
+        showLoading(false);
 
-    },30);
+    }, 50);
 }
 
-function voltar(){
-    trocarTela("grafico","menu");
-    showLoading(false);
+function voltar() {
+    trocarTela("grafico", "menu");
 }
 
-function baixar(){
-    let link=document.createElement("a");
-    link.download="grafico.png";
-    link.href=canvas.toDataURL();
+function baixar() {
+    let link = document.createElement("a");
+    link.download = "grafico.png";
+    link.href = canvas.toDataURL();
     link.click();
 }
 </script>
