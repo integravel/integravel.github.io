@@ -62,6 +62,41 @@ button {
     color: white;
 }
 
+/* HISTÓRICO */
+.history {
+    margin-top: 15px;
+    max-height: 160px;
+    overflow-y: auto;
+    border-top: 1px solid #ddd;
+    padding-top: 10px;
+}
+
+.item {
+    background: #f5f5f5;
+    padding: 8px;
+    border-radius: 8px;
+    margin-bottom: 6px;
+    font-size: 13px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.item span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 60%;
+}
+
+.item button {
+    width: auto;
+    padding: 4px 6px;
+    margin-left: 5px;
+    font-size: 12px;
+}
+
+/* CANVAS */
 #canvas {
     width: 100%;
     border-radius: 12px;
@@ -74,6 +109,7 @@ button {
     margin-top: 10px;
 }
 
+/* LOADING */
 #loading {
     position: fixed;
     inset: 0;
@@ -88,6 +124,7 @@ button {
 
 <body>
 
+<!-- MENU -->
 <div id="menu" class="screen active">
 <div class="container">
 
@@ -114,9 +151,14 @@ button {
 
 <button onclick="gerar()">Gerar Gráfico</button>
 
+<!-- HISTÓRICO -->
+<div class="history" id="history"></div>
+<button onclick="limparHistorico()">Limpar histórico</button>
+
 </div>
 </div>
 
+<!-- GRÁFICO -->
 <div id="grafico" class="screen">
 <div class="container">
 
@@ -142,6 +184,59 @@ function showLoading(v){
     document.getElementById("loading").style.display = v ? "flex":"none";
 }
 
+/* ===== HISTÓRICO ===== */
+function salvarHistorico(d){
+    let lista = JSON.parse(localStorage.getItem("hist")||"[]");
+    lista.unshift(d);
+    localStorage.setItem("hist", JSON.stringify(lista));
+    renderHistorico();
+}
+
+function renderHistorico(){
+    let lista = JSON.parse(localStorage.getItem("hist")||"[]");
+    history.innerHTML = "";
+
+    lista.forEach((item,i)=>{
+        let div = document.createElement("div");
+        div.className = "item";
+
+        div.innerHTML = `
+        <span>${item.func}</span>
+        <div>
+            <button onclick="carregar(${i})">↺</button>
+            <button onclick="remover(${i})">✕</button>
+        </div>
+        `;
+        history.appendChild(div);
+    });
+}
+
+function carregar(i){
+    let lista = JSON.parse(localStorage.getItem("hist"));
+    let d = lista[i];
+
+    width.value = d.w;
+    height.value = d.h;
+    xmin.value = d.xmin;
+    xmax.value = d.xmax;
+    ymin.value = d.ymin;
+    ymax.value = d.ymax;
+    func.value = d.func;
+}
+
+function remover(i){
+    let lista = JSON.parse(localStorage.getItem("hist"));
+    lista.splice(i,1);
+    localStorage.setItem("hist", JSON.stringify(lista));
+    renderHistorico();
+}
+
+function limparHistorico(){
+    localStorage.removeItem("hist");
+    renderHistorico();
+}
+
+/* ===== COR ===== */
 function complexToColor(z){
     let arg=Math.atan2(z.im,z.re);
     let mag=Math.hypot(z.re,z.im);
@@ -168,70 +263,72 @@ function hsvToRgb(h,s,v){
     return [r*255,g*255,b*255];
 }
 
+/* ===== GERAR ===== */
 function gerar(){
     trocarTela("menu","grafico");
     showLoading(true);
 
-    // 🔥 GARANTE QUE O LOADING APAREÇA
     requestAnimationFrame(()=>{
-        requestAnimationFrame(()=>{
+    requestAnimationFrame(()=>{
 
-            let w=+document.getElementById("width").value;
-            let h=+document.getElementById("height").value;
+        let w=+width.value;
+        let h=+height.value;
 
-            let xmin=+document.getElementById("xmin").value;
-            let xmax=+document.getElementById("xmax").value;
-            let ymin=+document.getElementById("ymin").value;
-            let ymax=+document.getElementById("ymax").value;
+        let xmin=+xmin.value;
+        let xmax=+xmax.value;
+        let ymin=+ymin.value;
+        let ymax=+ymax.value;
 
-            let expr=document.getElementById("func").value;
+        let expr=func.value;
 
-            let canvas=document.getElementById("canvas");
-            canvas.width=w;
-            canvas.height=h;
+        salvarHistorico({w,h,xmin,xmax,ymin,ymax,func:expr});
 
-            let ctx=canvas.getContext("2d");
-            let img=ctx.createImageData(w,h);
+        let canvas=document.getElementById("canvas");
+        canvas.width=w;
+        canvas.height=h;
 
-            let compiled;
-            try{
-                compiled=math.compile(expr);
-            }catch{
-                alert("Erro na função");
-                voltar();
-                showLoading(false);
-                return;
-            }
+        let ctx=canvas.getContext("2d");
+        let img=ctx.createImageData(w,h);
 
-            for(let y=0;y<h;y++){
-                for(let x=0;x<w;x++){
-
-                    let a=xmin+x/w*(xmax-xmin);
-                    let b=ymin+y/h*(ymax-ymin);
-
-                    let z=math.complex(a,b);
-
-                    let r;
-                    try{
-                        r=compiled.evaluate({z:z});
-                    }catch{
-                        r=math.complex(0,0);
-                    }
-
-                    let [R,G,B]=complexToColor(r);
-
-                    let i=(y*w+x)*4;
-                    img.data[i]=R;
-                    img.data[i+1]=G;
-                    img.data[i+2]=B;
-                    img.data[i+3]=255;
-                }
-            }
-
-            ctx.putImageData(img,0,0);
+        let compiled;
+        try{
+            compiled=math.compile(expr);
+        }catch{
+            alert("Erro na função");
+            voltar();
             showLoading(false);
+            return;
+        }
 
-        });
+        for(let y=0;y<h;y++){
+            for(let x=0;x<w;x++){
+
+                let a=xmin+x/w*(xmax-xmin);
+                let b=ymin+y/h*(ymax-ymin);
+
+                let z=math.complex(a,b);
+
+                let r;
+                try{
+                    r=compiled.evaluate({z:z});
+                }catch{
+                    r=math.complex(0,0);
+                }
+
+                let [R,G,B]=complexToColor(r);
+
+                let i=(y*w+x)*4;
+                img.data[i]=R;
+                img.data[i+1]=G;
+                img.data[i+2]=B;
+                img.data[i+3]=255;
+            }
+        }
+
+        ctx.putImageData(img,0,0);
+        showLoading(false);
+
+    });
     });
 }
 
@@ -245,6 +342,8 @@ function baixar(){
     link.href=canvas.toDataURL();
     link.click();
 }
+
+renderHistorico();
 </script>
 
 </body>
