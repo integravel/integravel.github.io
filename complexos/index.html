@@ -109,12 +109,14 @@ button {
     justify-content: center;
     align-items: center;
     color: white;
+    z-index: 10;
 }
 </style>
 </head>
 
 <body>
 
+<!-- MENU -->
 <div id="menu" class="screen active">
 <div class="container">
 
@@ -141,13 +143,13 @@ button {
 
 <button onclick="gerar()">Gerar Gráfico</button>
 
-<!-- HISTÓRICO -->
 <div class="history" id="history"></div>
 <button onclick="limparHistorico()">Limpar histórico</button>
 
 </div>
 </div>
 
+<!-- GRÁFICO -->
 <div id="grafico" class="screen">
 <div class="container">
 
@@ -161,6 +163,7 @@ button {
 </div>
 </div>
 
+<!-- LOADING -->
 <div id="loading">Gerando imagem...</div>
 
 <script>
@@ -248,25 +251,24 @@ function hsvToRgb(h,s,v){
     return [r*255,g*255,b*255];
 }
 
-/* GERAR (SEU MOTOR ORIGINAL INTACTO) */
+/* GERAR */
 function gerar(){
-    trocarTela("menu","grafico");
+
     showLoading(true);
 
     requestAnimationFrame(()=>{
     requestAnimationFrame(()=>{
 
-        let w=+document.getElementById("width").value;
-        let h=+document.getElementById("height").value;
+        let w=+width.value;
+        let h=+height.value;
 
-        let xmin=+document.getElementById("xmin").value;
-        let xmax=+document.getElementById("xmax").value;
-        let ymin=+document.getElementById("ymin").value;
-        let ymax=+document.getElementById("ymax").value;
+        let xmin=+xmin.value;
+        let xmax=+xmax.value;
+        let ymin=+ymin.value;
+        let ymax=+ymax.value;
 
-        let expr=document.getElementById("func").value;
+        let expr=func.value;
 
-        // 🔥 histórico fora do cálculo (seguro)
         salvarHistorico({w,h,xmin,xmax,ymin,ymax,func:expr});
 
         let canvas=document.getElementById("canvas");
@@ -281,7 +283,6 @@ function gerar(){
             compiled=math.compile(expr);
         }catch{
             alert("Erro na função");
-            voltar();
             showLoading(false);
             return;
         }
@@ -312,7 +313,9 @@ function gerar(){
         }
 
         ctx.putImageData(img,0,0);
+
         showLoading(false);
+        trocarTela("menu","grafico"); // 🔥 só troca aqui
 
     });
     });
