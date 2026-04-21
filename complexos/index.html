@@ -99,38 +99,12 @@ button {
     gap: 10px;
     margin-top: 10px;
 }
-
-/* LOADING */
-#loading {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.6);
-    display: none;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-    color: white;
-}
-
-.bar {
-    width: 200px;
-    height: 10px;
-    background: #333;
-    border-radius: 10px;
-    overflow: hidden;
-    margin-top: 10px;
-}
-
-.progress {
-    height: 100%;
-    width: 0%;
-    background: #4facfe;
-}
 </style>
 </head>
 
 <body>
 
+<!-- MENU -->
 <div id="menu" class="screen active">
 <div class="container">
 
@@ -163,6 +137,7 @@ button {
 </div>
 </div>
 
+<!-- GRÁFICO -->
 <div id="grafico" class="screen">
 <div class="container">
 
@@ -176,19 +151,10 @@ button {
 </div>
 </div>
 
-<div id="loading">
-<div>Gerando imagem...</div>
-<div class="bar"><div class="progress" id="progress"></div></div>
-</div>
-
 <script>
 function trocarTela(a,b){
     document.getElementById(a).classList.remove("active");
     document.getElementById(b).classList.add("active");
-}
-
-function showLoading(v){
-    document.getElementById("loading").style.display = v ? "flex":"none";
 }
 
 /* HISTÓRICO */
@@ -266,10 +232,9 @@ function hsvToRgb(h,s,v){
     return [r*255,g*255,b*255];
 }
 
-/* GERAR (ASSÍNCRONO) */
+/* GERAR */
 function gerar(){
     trocarTela("menu","grafico");
-    showLoading(true);
 
     let w = +width.value;
     let h = +height.value;
@@ -296,18 +261,15 @@ function gerar(){
     }catch{
         alert("Erro na função");
         voltar();
-        showLoading(false);
         return;
     }
 
     let y = 0;
 
     function render(){
-
-        let linhas = 10; // 🔥 estabilidade máxima
+        let linhas = 10;
 
         for(let k=0;k<linhas && y<h;k++,y++){
-
             for(let x=0;x<w;x++){
 
                 let a = xmin + x/w*(xmax-xmin);
@@ -332,13 +294,10 @@ function gerar(){
             }
         }
 
-        progress.style.width = (y/h*100)+"%";
-
         if(y < h){
             requestAnimationFrame(render);
         }else{
             ctx.putImageData(img,0,0);
-            showLoading(false);
         }
     }
 
@@ -347,7 +306,6 @@ function gerar(){
 
 function voltar(){
     trocarTela("grafico","menu");
-    showLoading(false);
 }
 
 function baixar(){
