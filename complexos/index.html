@@ -15,11 +15,12 @@ body {
     background: linear-gradient(135deg, #4facfe, #00f2fe);
 }
 
+/* MENU NO TOPO */
 .screen {
     display: none;
     min-height: 100vh;
-    justify-content: center;
-    align-items: center;
+    justify-content: flex-start; /* 🔥 mudou aqui */
+    align-items: flex-start;     /* 🔥 mudou aqui */
     padding: 20px;
 }
 .active { display: flex; }
@@ -60,7 +61,39 @@ button {
     border: none;
     background: #4facfe;
     color: white;
+    cursor: pointer;
 }
+
+/* 🔥 HISTÓRICO */
+#history {
+    margin-top: 15px;
+    max-height: 200px;
+    overflow-y: auto;
+    border-top: 1px solid #ddd;
+    padding-top: 10px;
+}
+
+.history-item {
+    background: #f5f5f5;
+    border-radius: 10px;
+    padding: 8px;
+    margin-bottom: 8px;
+    font-size: 12px;
+}
+
+.history-buttons {
+    display: flex;
+    gap: 5px;
+    margin-top: 5px;
+}
+
+.small-btn {
+    flex: 1;
+    padding: 6px;
+    font-size: 11px;
+}
+
+.delete { background: #ff5c5c; }
 
 #canvas {
     width: 100%;
@@ -114,6 +147,10 @@ button {
 
 <button onclick="gerar()">Gerar Gráfico</button>
 
+<!-- 🔥 HISTÓRICO -->
+<div id="history"></div>
+<button onclick="limparHistorico()">Limpar histórico</button>
+
 </div>
 </div>
 
@@ -140,6 +177,62 @@ function trocarTela(a,b){
 
 function showLoading(v){
     document.getElementById("loading").style.display = v ? "flex":"none";
+}
+
+/* 🔥 HISTÓRICO */
+function salvarHistorico(dados){
+    let hist = JSON.parse(localStorage.getItem("historico") || "[]");
+    hist.unshift(dados);
+    localStorage.setItem("historico", JSON.stringify(hist));
+    renderHistorico();
+}
+
+function renderHistorico(){
+    let hist = JSON.parse(localStorage.getItem("historico") || "[]");
+    let div = document.getElementById("history");
+    div.innerHTML = "";
+
+    hist.forEach((item, i)=>{
+        let el = document.createElement("div");
+        el.className = "history-item";
+
+        el.innerHTML = `
+            <b>${item.func}</b><br>
+            ${item.xmin} → ${item.xmax} | ${item.ymin} → ${item.ymax}
+
+            <div class="history-buttons">
+                <button class="small-btn" onclick="carregar(${i})">Carregar</button>
+                <button class="small-btn delete" onclick="apagar(${i})">Apagar</button>
+            </div>
+        `;
+
+        div.appendChild(el);
+    });
+}
+
+function carregar(i){
+    let hist = JSON.parse(localStorage.getItem("historico"));
+    let d = hist[i];
+
+    width.value=d.w;
+    height.value=d.h;
+    xmin.value=d.xmin;
+    xmax.value=d.xmax;
+    ymin.value=d.ymin;
+    ymax.value=d.ymax;
+    func.value=d.func;
+}
+
+function apagar(i){
+    let hist = JSON.parse(localStorage.getItem("historico"));
+    hist.splice(i,1);
+    localStorage.setItem("historico", JSON.stringify(hist));
+    renderHistorico();
+}
+
+function limparHistorico(){
+    localStorage.removeItem("historico");
+    renderHistorico();
 }
 
 function complexToColor(z){
@@ -172,19 +265,21 @@ function gerar(){
     trocarTela("menu","grafico");
     showLoading(true);
 
-    // 🔥 GARANTE QUE O LOADING APAREÇA
     requestAnimationFrame(()=>{
         requestAnimationFrame(()=>{
 
-            let w=+document.getElementById("width").value;
-            let h=+document.getElementById("height").value;
+            let w=+width.value;
+            let h=+height.value;
+            let xminv=+xmin.value;
+            let xmaxv=+xmax.value;
+            let yminv=+ymin.value;
+            let ymaxv=+ymax.value;
+            let expr=func.value;
 
-            let xmin=+document.getElementById("xmin").value;
-            let xmax=+document.getElementById("xmax").value;
-            let ymin=+document.getElementById("ymin").value;
-            let ymax=+document.getElementById("ymax").value;
-
-            let expr=document.getElementById("func").value;
+            /* 🔥 SALVA */
+            salvarHistorico({
+                w,h,xmin:xminv,xmax:xmaxv,ymin:yminv,ymax:ymaxv,func:expr
+            });
 
             let canvas=document.getElementById("canvas");
             canvas.width=w;
@@ -206,8 +301,8 @@ function gerar(){
             for(let y=0;y<h;y++){
                 for(let x=0;x<w;x++){
 
-                    let a=xmin+x/w*(xmax-xmin);
-                    let b=ymin+y/h*(ymax-ymin);
+                    let a=xminv+x/w*(xmaxv-xminv);
+                    let b=yminv+y/h*(ymaxv-yminv);
 
                     let z=math.complex(a,b);
 
@@ -245,6 +340,9 @@ function baixar(){
     link.href=canvas.toDataURL();
     link.click();
 }
+
+/* 🔥 INICIALIZA */
+renderHistorico();
 </script>
 
 </body>
