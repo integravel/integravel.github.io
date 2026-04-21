@@ -96,14 +96,13 @@ button {
     font-size: 13px;
     display: flex;
     justify-content: space-between;
-    align-items: center;
 }
 
 .item button {
     width: auto;
-    padding: 5px 8px;
-    font-size: 12px;
+    padding: 4px 6px;
     margin: 0;
+    font-size: 12px;
 }
 
 /* LOADING */
@@ -117,61 +116,43 @@ button {
     flex-direction: column;
     color: white;
 }
-
-.bar {
-    width: 200px;
-    height: 10px;
-    background: #333;
-    border-radius: 10px;
-    overflow: hidden;
-    margin-top: 10px;
-}
-
-.progress {
-    height: 100%;
-    width: 0%;
-    background: #4facfe;
-}
 </style>
 </head>
 
 <body>
 
-<!-- MENU -->
 <div id="menu" class="screen active">
 <div class="container">
 
-<div class="label">📐 Tamanho da imagem (pixels)</div>
+<div class="label">📐 Tamanho (px)</div>
 <div class="grid">
-<input id="width" type="number" value="400">
-<input id="height" type="number" value="400">
+<input id="width" value="400">
+<input id="height" value="400">
 </div>
 
-<div class="label">🔵 Intervalo real (eixo horizontal)</div>
+<div class="label">🔵 Real</div>
 <div class="grid">
-<input id="xmin" type="number" value="-2">
-<input id="xmax" type="number" value="2">
+<input id="xmin" value="-2">
+<input id="xmax" value="2">
 </div>
 
-<div class="label">🟣 Intervalo imaginário (eixo vertical)</div>
+<div class="label">🟣 Imaginário</div>
 <div class="grid">
-<input id="ymin" type="number" value="-2">
-<input id="ymax" type="number" value="2">
+<input id="ymin" value="-2">
+<input id="ymax" value="2">
 </div>
 
-<div class="label">🧠 Função f(z)</div>
+<div class="label">🧠 Função</div>
 <input id="func" value="z^2">
 
 <button onclick="gerar()">Gerar Gráfico</button>
 
-<!-- HISTÓRICO -->
 <div class="history" id="history"></div>
 <button onclick="limparHistorico()">Limpar histórico</button>
 
 </div>
 </div>
 
-<!-- GRÁFICO -->
 <div id="grafico" class="screen">
 <div class="container">
 
@@ -185,13 +166,7 @@ button {
 </div>
 </div>
 
-<!-- LOADING -->
-<div id="loading">
-<div>Gerando imagem...</div>
-<div class="bar">
-<div class="progress" id="progress"></div>
-</div>
-</div>
+<div id="loading">Gerando imagem...</div>
 
 <script>
 function trocarTela(a,b){
@@ -200,40 +175,36 @@ function trocarTela(a,b){
 }
 
 function showLoading(v){
-    loading.style.display = v ? "flex":"none";
+    document.getElementById("loading").style.display = v ? "flex":"none";
 }
 
-/* ===== HISTÓRICO ===== */
-function salvarHistorico(dado){
-    let lista = JSON.parse(localStorage.getItem("hist")||"[]");
-    lista.unshift(dado);
-    localStorage.setItem("hist", JSON.stringify(lista));
+/* HISTÓRICO */
+function salvarHistorico(d){
+    let h = JSON.parse(localStorage.getItem("hist")||"[]");
+    h.unshift(d);
+    localStorage.setItem("hist",JSON.stringify(h));
     renderHistorico();
 }
 
 function renderHistorico(){
-    let lista = JSON.parse(localStorage.getItem("hist")||"[]");
-    history.innerHTML = "";
-
-    lista.forEach((item,i)=>{
-        let div = document.createElement("div");
+    let h = JSON.parse(localStorage.getItem("hist")||"[]");
+    history.innerHTML="";
+    h.forEach((e,i)=>{
+        let div=document.createElement("div");
         div.className="item";
-
-        div.innerHTML = `
-        <span>${item.func}</span>
+        div.innerHTML=`
+        <span>${e.func}</span>
         <div>
-            <button onclick="carregar(${i})">↺</button>
-            <button onclick="remover(${i})">✕</button>
-        </div>
-        `;
+        <button onclick="carregar(${i})">↺</button>
+        <button onclick="remover(${i})">✕</button>
+        </div>`;
         history.appendChild(div);
     });
 }
 
 function carregar(i){
-    let lista = JSON.parse(localStorage.getItem("hist"));
-    let d = lista[i];
-
+    let h = JSON.parse(localStorage.getItem("hist"));
+    let d = h[i];
     width.value=d.w;
     height.value=d.h;
     xmin.value=d.xmin;
@@ -244,9 +215,9 @@ function carregar(i){
 }
 
 function remover(i){
-    let lista = JSON.parse(localStorage.getItem("hist"));
-    lista.splice(i,1);
-    localStorage.setItem("hist", JSON.stringify(lista));
+    let h = JSON.parse(localStorage.getItem("hist"));
+    h.splice(i,1);
+    localStorage.setItem("hist",JSON.stringify(h));
     renderHistorico();
 }
 
@@ -255,12 +226,12 @@ function limparHistorico(){
     renderHistorico();
 }
 
-/* ===== COR ===== */
+/* COR */
 function complexToColor(z){
-    let arg = Math.atan2(z.im, z.re);
-    let mag = Math.hypot(z.re, z.im);
-    let hue = (arg + Math.PI)/(2*Math.PI);
-    let val = 1 - Math.exp(-mag);
+    let arg=Math.atan2(z.im,z.re);
+    let mag=Math.hypot(z.re,z.im);
+    let hue=(arg+Math.PI)/(2*Math.PI);
+    let val=1-Math.exp(-mag);
     return hsvToRgb(hue,1,val);
 }
 
@@ -282,35 +253,35 @@ function hsvToRgb(h,s,v){
     return [r*255,g*255,b*255];
 }
 
-/* ===== GERAR ===== */
+/* GERAR */
 function gerar(){
     trocarTela("menu","grafico");
     showLoading(true);
 
     setTimeout(()=>{
 
-        let w = +width.value;
-        let h = +height.value;
+        let w=+document.getElementById("width").value;
+        let h=+document.getElementById("height").value;
 
-        let xmi = +xmin.value;
-        let xma = +xmax.value;
-        let ymi = +ymin.value;
-        let yma = +ymax.value;
+        let xmin=+document.getElementById("xmin").value;
+        let xmax=+document.getElementById("xmax").value;
+        let ymin=+document.getElementById("ymin").value;
+        let ymax=+document.getElementById("ymax").value;
 
-        let expr = func.value;
+        let expr=document.getElementById("func").value;
 
-        salvarHistorico({w,h,xmin:xmi,xmax:xma,ymin:ymi,ymax:yma,func:expr});
+        salvarHistorico({w,h,xmin,xmax,ymin,ymax,func:expr});
 
-        let canvas = document.getElementById("canvas");
+        let canvas=document.getElementById("canvas");
         canvas.width=w;
         canvas.height=h;
 
-        let ctx = canvas.getContext("2d");
-        let img = ctx.createImageData(w,h);
+        let ctx=canvas.getContext("2d");
+        let img=ctx.createImageData(w,h);
 
         let compiled;
         try{
-            compiled = math.compile(expr);
+            compiled=math.compile(expr);
         }catch{
             alert("Erro na função");
             voltar();
@@ -319,24 +290,21 @@ function gerar(){
         }
 
         for(let y=0;y<h;y++){
-
-            progress.style.width=(y/h*100)+"%";
-
             for(let x=0;x<w;x++){
 
-                let a = xmi + x/w*(xma-xmi);
-                let b = ymi + y/h*(yma-ymi);
+                let a=xmin+x/w*(xmax-xmin);
+                let b=ymin+y/h*(ymax-ymin);
 
-                let z = math.complex(a,b);
+                let z=math.complex(a,b);
 
                 let r;
                 try{
-                    r = compiled.evaluate({z:z});
+                    r=compiled.evaluate({z:z});
                 }catch{
-                    r = math.complex(0,0);
+                    r=math.complex(0,0);
                 }
 
-                let [R,G,B] = complexToColor(r);
+                let [R,G,B]=complexToColor(r);
 
                 let i=(y*w+x)*4;
                 img.data[i]=R;
@@ -349,7 +317,7 @@ function gerar(){
         ctx.putImageData(img,0,0);
         showLoading(false);
 
-    },50);
+    },30);
 }
 
 function voltar(){
