@@ -99,16 +99,26 @@ button {
     gap: 10px;
     margin-top: 10px;
 }
+
+/* LOADING */
+#loading {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    color: white;
+}
 </style>
 </head>
 
 <body>
 
-<!-- MENU -->
 <div id="menu" class="screen active">
 <div class="container">
 
-<div class="label">📐 Tamanho</div>
+<div class="label">📐 Tamanho (px)</div>
 <div class="grid">
 <input id="width" value="400">
 <input id="height" value="400">
@@ -131,13 +141,13 @@ button {
 
 <button onclick="gerar()">Gerar Gráfico</button>
 
+<!-- HISTÓRICO -->
 <div class="history" id="history"></div>
 <button onclick="limparHistorico()">Limpar histórico</button>
 
 </div>
 </div>
 
-<!-- GRÁFICO -->
 <div id="grafico" class="screen">
 <div class="container">
 
@@ -151,10 +161,16 @@ button {
 </div>
 </div>
 
+<div id="loading">Gerando imagem...</div>
+
 <script>
 function trocarTela(a,b){
     document.getElementById(a).classList.remove("active");
     document.getElementById(b).classList.add("active");
+}
+
+function showLoading(v){
+    document.getElementById("loading").style.display = v ? "flex":"none";
 }
 
 /* HISTÓRICO */
@@ -232,59 +248,60 @@ function hsvToRgb(h,s,v){
     return [r*255,g*255,b*255];
 }
 
-/* GERAR */
+/* GERAR (SEU MOTOR ORIGINAL INTACTO) */
 function gerar(){
     trocarTela("menu","grafico");
+    showLoading(true);
 
-    let w = +width.value;
-    let h = +height.value;
+    requestAnimationFrame(()=>{
+    requestAnimationFrame(()=>{
 
-    let xmin = +xmin.value;
-    let xmax = +xmax.value;
-    let ymin = +ymin.value;
-    let ymax = +ymax.value;
+        let w=+document.getElementById("width").value;
+        let h=+document.getElementById("height").value;
 
-    let expr = func.value;
+        let xmin=+document.getElementById("xmin").value;
+        let xmax=+document.getElementById("xmax").value;
+        let ymin=+document.getElementById("ymin").value;
+        let ymax=+document.getElementById("ymax").value;
 
-    salvarHistorico({w,h,xmin,xmax,ymin,ymax,func:expr});
+        let expr=document.getElementById("func").value;
 
-    let canvas = document.getElementById("canvas");
-    canvas.width=w;
-    canvas.height=h;
+        // 🔥 histórico fora do cálculo (seguro)
+        salvarHistorico({w,h,xmin,xmax,ymin,ymax,func:expr});
 
-    let ctx = canvas.getContext("2d");
-    let img = ctx.createImageData(w,h);
+        let canvas=document.getElementById("canvas");
+        canvas.width=w;
+        canvas.height=h;
 
-    let compiled;
-    try{
-        compiled = math.compile(expr);
-    }catch{
-        alert("Erro na função");
-        voltar();
-        return;
-    }
+        let ctx=canvas.getContext("2d");
+        let img=ctx.createImageData(w,h);
 
-    let y = 0;
+        let compiled;
+        try{
+            compiled=math.compile(expr);
+        }catch{
+            alert("Erro na função");
+            voltar();
+            showLoading(false);
+            return;
+        }
 
-    function render(){
-        let linhas = 10;
-
-        for(let k=0;k<linhas && y<h;k++,y++){
+        for(let y=0;y<h;y++){
             for(let x=0;x<w;x++){
 
-                let a = xmin + x/w*(xmax-xmin);
-                let b = ymin + y/h*(ymax-ymin);
+                let a=xmin+x/w*(xmax-xmin);
+                let b=ymin+y/h*(ymax-ymin);
 
-                let z = math.complex(a,b);
+                let z=math.complex(a,b);
 
                 let r;
                 try{
-                    r = compiled.evaluate({z:z});
+                    r=compiled.evaluate({z:z});
                 }catch{
-                    r = math.complex(0,0);
+                    r=math.complex(0,0);
                 }
 
-                let [R,G,B] = complexToColor(r);
+                let [R,G,B]=complexToColor(r);
 
                 let i=(y*w+x)*4;
                 img.data[i]=R;
@@ -294,14 +311,11 @@ function gerar(){
             }
         }
 
-        if(y < h){
-            requestAnimationFrame(render);
-        }else{
-            ctx.putImageData(img,0,0);
-        }
-    }
+        ctx.putImageData(img,0,0);
+        showLoading(false);
 
-    requestAnimationFrame(render);
+    });
+    });
 }
 
 function voltar(){
