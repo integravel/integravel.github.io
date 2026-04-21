@@ -65,7 +65,7 @@ button {
 /* HISTÓRICO */
 .history {
     margin-top: 15px;
-    max-height: 160px;
+    max-height: 150px;
     overflow-y: auto;
     border-top: 1px solid #ddd;
     padding-top: 10px;
@@ -108,7 +108,23 @@ button {
     display: none;
     justify-content: center;
     align-items: center;
+    flex-direction: column;
     color: white;
+}
+
+.bar {
+    width: 200px;
+    height: 10px;
+    background: #333;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-top: 10px;
+}
+
+.progress {
+    height: 100%;
+    width: 0%;
+    background: #4facfe;
 }
 </style>
 </head>
@@ -118,7 +134,7 @@ button {
 <div id="menu" class="screen active">
 <div class="container">
 
-<div class="label">📐 Tamanho (px)</div>
+<div class="label">📐 Tamanho</div>
 <div class="grid">
 <input id="width" value="400">
 <input id="height" value="400">
@@ -160,7 +176,10 @@ button {
 </div>
 </div>
 
-<div id="loading">Gerando imagem...</div>
+<div id="loading">
+<div>Gerando imagem...</div>
+<div class="bar"><div class="progress" id="progress"></div></div>
+</div>
 
 <script>
 function trocarTela(a,b){
@@ -182,11 +201,11 @@ function salvarHistorico(d){
 
 function renderHistorico(){
     let h = JSON.parse(localStorage.getItem("hist")||"[]");
-    history.innerHTML = "";
+    history.innerHTML="";
     h.forEach((e,i)=>{
-        let div = document.createElement("div");
+        let div=document.createElement("div");
         div.className="item";
-        div.innerHTML = `
+        div.innerHTML=`
         <span>${e.func}</span>
         <div>
         <button onclick="carregar(${i})">↺</button>
@@ -199,14 +218,13 @@ function renderHistorico(){
 function carregar(i){
     let h = JSON.parse(localStorage.getItem("hist"));
     let d = h[i];
-
-    document.getElementById("width").value = d.w;
-    document.getElementById("height").value = d.h;
-    document.getElementById("xmin").value = d.xmin;
-    document.getElementById("xmax").value = d.xmax;
-    document.getElementById("ymin").value = d.ymin;
-    document.getElementById("ymax").value = d.ymax;
-    document.getElementById("func").value = d.func;
+    width.value=d.w;
+    height.value=d.h;
+    xmin.value=d.xmin;
+    xmax.value=d.xmax;
+    ymin.value=d.ymin;
+    ymax.value=d.ymax;
+    func.value=d.func;
 }
 
 function remover(i){
@@ -248,44 +266,48 @@ function hsvToRgb(h,s,v){
     return [r*255,g*255,b*255];
 }
 
-/* GERAR */
+/* GERAR (ASSÍNCRONO) */
 function gerar(){
     trocarTela("menu","grafico");
     showLoading(true);
 
-    requestAnimationFrame(()=>{
-    requestAnimationFrame(()=>{
+    let w = +width.value;
+    let h = +height.value;
 
-        let w = +document.getElementById("width").value;
-        let h = +document.getElementById("height").value;
+    let xmin = +xmin.value;
+    let xmax = +xmax.value;
+    let ymin = +ymin.value;
+    let ymax = +ymax.value;
 
-        let xmin = +document.getElementById("xmin").value;
-        let xmax = +document.getElementById("xmax").value;
-        let ymin = +document.getElementById("ymin").value;
-        let ymax = +document.getElementById("ymax").value;
+    let expr = func.value;
 
-        let expr = document.getElementById("func").value;
+    salvarHistorico({w,h,xmin,xmax,ymin,ymax,func:expr});
 
-        salvarHistorico({w,h,xmin,xmax,ymin,ymax,func:expr});
+    let canvas = document.getElementById("canvas");
+    canvas.width=w;
+    canvas.height=h;
 
-        let canvas = document.getElementById("canvas");
-        canvas.width = w;
-        canvas.height = h;
+    let ctx = canvas.getContext("2d");
+    let img = ctx.createImageData(w,h);
 
-        let ctx = canvas.getContext("2d");
-        let img = ctx.createImageData(w,h);
+    let compiled;
+    try{
+        compiled = math.compile(expr);
+    }catch{
+        alert("Erro na função");
+        voltar();
+        showLoading(false);
+        return;
+    }
 
-        let compiled;
-        try{
-            compiled = math.compile(expr);
-        }catch{
-            alert("Erro na função");
-            voltar();
-            showLoading(false);
-            return;
-        }
+    let y = 0;
 
-        for(let y=0;y<h;y++){
+    function render(){
+
+        let linhas = 10; // 🔥 estabilidade máxima
+
+        for(let k=0;k<linhas && y<h;k++,y++){
+
             for(let x=0;x<w;x++){
 
                 let a = xmin + x/w*(xmax-xmin);
@@ -310,15 +332,22 @@ function gerar(){
             }
         }
 
-        ctx.putImageData(img,0,0);
-        showLoading(false);
+        progress.style.width = (y/h*100)+"%";
 
-    });
-    });
+        if(y < h){
+            requestAnimationFrame(render);
+        }else{
+            ctx.putImageData(img,0,0);
+            showLoading(false);
+        }
+    }
+
+    requestAnimationFrame(render);
 }
 
 function voltar(){
     trocarTela("grafico","menu");
+    showLoading(false);
 }
 
 function baixar(){
