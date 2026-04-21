@@ -45,10 +45,6 @@ body {
     gap: 8px;
 }
 
-@media (max-width: 400px) {
-    .grid { grid-template-columns: 1fr; }
-}
-
 input {
     width: 100%;
     padding: 12px;
@@ -64,7 +60,6 @@ button {
     border: none;
     background: #4facfe;
     color: white;
-    font-size: 16px;
 }
 
 #canvas {
@@ -79,33 +74,6 @@ button {
     margin-top: 10px;
 }
 
-/* HISTÓRICO */
-.history {
-    margin-top: 15px;
-    max-height: 150px;
-    overflow-y: auto;
-    border-top: 1px solid #ddd;
-    padding-top: 10px;
-}
-
-.item {
-    background: #f5f5f5;
-    padding: 8px;
-    border-radius: 8px;
-    margin-bottom: 6px;
-    font-size: 13px;
-    display: flex;
-    justify-content: space-between;
-}
-
-.item button {
-    width: auto;
-    padding: 4px 6px;
-    margin: 0;
-    font-size: 12px;
-}
-
-/* LOADING */
 #loading {
     position: fixed;
     inset: 0;
@@ -113,7 +81,6 @@ button {
     display: none;
     justify-content: center;
     align-items: center;
-    flex-direction: column;
     color: white;
 }
 </style>
@@ -147,9 +114,6 @@ button {
 
 <button onclick="gerar()">Gerar Gráfico</button>
 
-<div class="history" id="history"></div>
-<button onclick="limparHistorico()">Limpar histórico</button>
-
 </div>
 </div>
 
@@ -178,55 +142,6 @@ function showLoading(v){
     document.getElementById("loading").style.display = v ? "flex":"none";
 }
 
-/* HISTÓRICO */
-function salvarHistorico(d){
-    let h = JSON.parse(localStorage.getItem("hist")||"[]");
-    h.unshift(d);
-    localStorage.setItem("hist",JSON.stringify(h));
-    renderHistorico();
-}
-
-function renderHistorico(){
-    let h = JSON.parse(localStorage.getItem("hist")||"[]");
-    history.innerHTML="";
-    h.forEach((e,i)=>{
-        let div=document.createElement("div");
-        div.className="item";
-        div.innerHTML=`
-        <span>${e.func}</span>
-        <div>
-        <button onclick="carregar(${i})">↺</button>
-        <button onclick="remover(${i})">✕</button>
-        </div>`;
-        history.appendChild(div);
-    });
-}
-
-function carregar(i){
-    let h = JSON.parse(localStorage.getItem("hist"));
-    let d = h[i];
-    width.value=d.w;
-    height.value=d.h;
-    xmin.value=d.xmin;
-    xmax.value=d.xmax;
-    ymin.value=d.ymin;
-    ymax.value=d.ymax;
-    func.value=d.func;
-}
-
-function remover(i){
-    let h = JSON.parse(localStorage.getItem("hist"));
-    h.splice(i,1);
-    localStorage.setItem("hist",JSON.stringify(h));
-    renderHistorico();
-}
-
-function limparHistorico(){
-    localStorage.removeItem("hist");
-    renderHistorico();
-}
-
-/* COR */
 function complexToColor(z){
     let arg=Math.atan2(z.im,z.re);
     let mag=Math.hypot(z.re,z.im);
@@ -253,71 +168,71 @@ function hsvToRgb(h,s,v){
     return [r*255,g*255,b*255];
 }
 
-/* GERAR */
 function gerar(){
     trocarTela("menu","grafico");
     showLoading(true);
 
-    setTimeout(()=>{
+    // 🔥 GARANTE QUE O LOADING APAREÇA
+    requestAnimationFrame(()=>{
+        requestAnimationFrame(()=>{
 
-        let w=+document.getElementById("width").value;
-        let h=+document.getElementById("height").value;
+            let w=+document.getElementById("width").value;
+            let h=+document.getElementById("height").value;
 
-        let xmin=+document.getElementById("xmin").value;
-        let xmax=+document.getElementById("xmax").value;
-        let ymin=+document.getElementById("ymin").value;
-        let ymax=+document.getElementById("ymax").value;
+            let xmin=+document.getElementById("xmin").value;
+            let xmax=+document.getElementById("xmax").value;
+            let ymin=+document.getElementById("ymin").value;
+            let ymax=+document.getElementById("ymax").value;
 
-        let expr=document.getElementById("func").value;
+            let expr=document.getElementById("func").value;
 
-        salvarHistorico({w,h,xmin,xmax,ymin,ymax,func:expr});
+            let canvas=document.getElementById("canvas");
+            canvas.width=w;
+            canvas.height=h;
 
-        let canvas=document.getElementById("canvas");
-        canvas.width=w;
-        canvas.height=h;
+            let ctx=canvas.getContext("2d");
+            let img=ctx.createImageData(w,h);
 
-        let ctx=canvas.getContext("2d");
-        let img=ctx.createImageData(w,h);
-
-        let compiled;
-        try{
-            compiled=math.compile(expr);
-        }catch{
-            alert("Erro na função");
-            voltar();
-            showLoading(false);
-            return;
-        }
-
-        for(let y=0;y<h;y++){
-            for(let x=0;x<w;x++){
-
-                let a=xmin+x/w*(xmax-xmin);
-                let b=ymin+y/h*(ymax-ymin);
-
-                let z=math.complex(a,b);
-
-                let r;
-                try{
-                    r=compiled.evaluate({z:z});
-                }catch{
-                    r=math.complex(0,0);
-                }
-
-                let [R,G,B]=complexToColor(r);
-
-                let i=(y*w+x)*4;
-                img.data[i]=R;
-                img.data[i+1]=G;
-                img.data[i+2]=B;
-                img.data[i+3]=255;
+            let compiled;
+            try{
+                compiled=math.compile(expr);
+            }catch{
+                alert("Erro na função");
+                voltar();
+                showLoading(false);
+                return;
             }
-        }
 
-        ctx.putImageData(img,0,0);
-        showLoading(false);
+            for(let y=0;y<h;y++){
+                for(let x=0;x<w;x++){
 
-    },30);
+                    let a=xmin+x/w*(xmax-xmin);
+                    let b=ymin+y/h*(ymax-ymin);
+
+                    let z=math.complex(a,b);
+
+                    let r;
+                    try{
+                        r=compiled.evaluate({z:z});
+                    }catch{
+                        r=math.complex(0,0);
+                    }
+
+                    let [R,G,B]=complexToColor(r);
+
+                    let i=(y*w+x)*4;
+                    img.data[i]=R;
+                    img.data[i+1]=G;
+                    img.data[i+2]=B;
+                    img.data[i+3]=255;
+                }
+            }
+
+            ctx.putImageData(img,0,0);
+            showLoading(false);
+
+        });
+    });
 }
 
 function voltar(){
@@ -330,8 +245,6 @@ function baixar(){
     link.href=canvas.toDataURL();
     link.click();
 }
-
-renderHistorico();
 </script>
 
 </body>
