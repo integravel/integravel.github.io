@@ -33,18 +33,48 @@ body {
   padding:10px;
   border-radius:50%;
   background:#8fe3ff;
+  border:none;
 }
 
+/* MENU MELHORADO */
 #inputPanel {
-  position:absolute;
-  bottom:-200px;
-  width:100%;
-  background:#111827;
-  padding:20px;
-  transition:0.4s;
+  position: fixed;
+  bottom: -220px;
+  left: 0;
+  width: 100%;
+  height: 140px;
+  background: linear-gradient(to top, #111827, #1f2937);
+  padding: 20px;
+  box-sizing: border-box;
+  transition: bottom 0.4s;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
 }
 
-#inputPanel.active { bottom:0; }
+#inputPanel.active {
+  bottom: 0;
+}
+
+#answer {
+  flex: 1;
+  padding: 15px;
+  font-size: 24px;
+  border-radius: 10px;
+  border: none;
+  outline: none;
+  text-transform: uppercase;
+}
+
+button.submit {
+  padding: 15px 20px;
+  font-size: 20px;
+  border-radius: 10px;
+  border: none;
+  background: #8fe3ff;
+  cursor: pointer;
+}
 
 #message {
   position:absolute;
@@ -53,6 +83,7 @@ body {
   text-align:center;
   opacity:0;
   transition:0.5s;
+  font-size:22px;
 }
 
 #message.show { opacity:1; }
@@ -65,8 +96,8 @@ body {
 <div id="message"></div>
 
 <div id="inputPanel">
-  <input id="answer">
-  <button onclick="checkAnswer()">OK</button>
+  <input id="answer" placeholder="Digite a palavra...">
+  <button class="submit">OK</button>
 </div>
 
 <script>
@@ -75,13 +106,13 @@ body {
 // BANCO DE PALAVRAS
 // =========================
 const WORDS = {
-3:["SOL","MAR","LUZ","PAZ","FLU","RUA","RIO","DIA","NOI","ARU"],
-4:["CASA","GATO","BOLA","VIDA","FOTO","MESA","LUAR","VENT","CAMA","FACA"],
-5:["NORTE","SULAS","PEDRA","TEMPO","MUNDO","VERDE","FALAR","COMER","ANDAR","PULAR"],
-6:["AMIGOS","FLORES","LIVROS","NOITES","TEMPOS","CASAIS","SONHOS","PLANOS","CANTOS","DANÇAR"],
-7:["AMOROSA","FLOREAR","CAMINHO","AMIGOSO","BRILHAR","SONHAR","ESTUDAR","CANTAR","DORMIR","VIVERES"],
+3:["SOL","MAR","LUZ","PAZ","RIO","DIA","ARU","NOI","FLU","RUA"],
+4:["CASA","GATO","BOLA","VIDA","FOTO","MESA","LUAR","CAMA","FACA","VENT"],
+5:["PEDRA","TEMPO","MUNDO","VERDE","FALAR","COMER","ANDAR","PULAR","NORTE","SULAS"],
+6:["AMIGOS","FLORES","LIVROS","NOITES","TEMPOS","CASAIS","SONHOS","PLANOS","CANTOS","DANCAR"],
+7:["CAMINHO","AMIGOSO","BRILHAR","SONHAR","ESTUDAR","CANTAR","DORMIR","VIVERES","AMOROSA","FLOREAR"],
 8:["FLORESTA","AMIZADES","CAMINHAR","BRILHANTE","SONHADOR","ESTUDIOSO","CANTORIA","DORMINDO","VIVENDO","TRABALHO"],
-9:["MARAVILHA","CAMINHADA","BRILHANTE","SONHADORA","ESTUDANTE","CANTADOR","DORMINDOS","VIVENCIA","TRABALHAR","FELICIDADE"],
+9:["MARAVILHA","CAMINHADA","BRILHANTE","SONHADORA","ESTUDANTE","CANTADOR","VIVENCIA","TRABALHAR","FELICIDADE","DORMINDOS"],
 10:["FELICIDADE","CAMINHANDO","BRILHANTES","SONHADORES","ESTUDANTES","TRABALHOS","LIBERDADE","CRIATIVOS","DIVERTIDOS","IMAGINAR"],
 11:["COMPLICADO","DESAFIADOR","INTERESSAR","CAMINHANTES","BRILHANTEAR","SONHADORAS","ESTUDANTADO","TRABALHADOR","LIBERDARES","CRIATIVIDADE"],
 12:["MARAVILHOSO","DESENVOLVER","INTERESSANTE","CAMINHANTES","BRILHANTISMO","SONHADORISMO","ESTUDANTISMO","TRABALHADORES","LIBERDADES","CRIATIVIDADE"],
@@ -199,7 +230,7 @@ function update(time=0){
 }
 
 // =========================
-// INPUT / RESPOSTA
+// RESPOSTA
 // =========================
 function checkAnswer(){
   const val=document.getElementById("answer").value.toUpperCase();
@@ -224,7 +255,6 @@ function checkAnswer(){
       document.getElementById("message").classList.remove("show");
       startGame();
     },1500);
-
   }
 }
 
@@ -233,14 +263,23 @@ function checkAnswer(){
 // =========================
 document.getElementById("freezeBtn").onclick=()=>{
   frozen=true;
+
   document.body.style.overflow="auto";
   document.getElementById("inputPanel").classList.add("active");
+
+  const input = document.getElementById("answer");
+  input.value = "";
+  input.focus();
+
   letters.forEach(l=>l.el.classList.add("frozen"));
 };
 
-// =========================
+// ENTER
+document.getElementById("answer").addEventListener("keydown", e=>{
+  if(e.key==="Enter") checkAnswer();
+});
+
 // CONTROLES
-// =========================
 window.addEventListener("mousemove",e=>{
   mouse.x=e.clientX;
   mouse.y=e.clientY;
