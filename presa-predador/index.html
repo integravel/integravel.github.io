@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Jogo Presa vs Predador</title>
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    background: #0f172a;
+    color: white;
+}
+
+h1 {
+    margin-top: 10px;
+}
+
+#game {
+    width: 90%;
+    height: 400px;
+    margin: 20px auto;
+    border: 2px solid #38bdf8;
+    position: relative;
+    overflow: hidden;
+    background: #020617;
+}
+
+.animal {
+    position: absolute;
+    font-size: 20px;
+    transition: transform 0.5s linear;
+}
+
+#info {
+    margin-top: 10px;
+}
+
+button {
+    padding: 10px;
+    margin: 5px;
+    background: #38bdf8;
+    border: none;
+    cursor: pointer;
+}
+</style>
+</head>
+
+<body>
+
+<h1>🐇 Presa vs 🐺 Predador</h1>
+
+<div id="game"></div>
+
+<div id="info">
+    <p id="stats"></p>
+    <p id="status"></p>
+</div>
+
+<button onclick="startGame()">Iniciar / Reiniciar</button>
+
+<script>
+let prey = 20;
+let predators = 5;
+
+let preyGrowth;
+let predatorDeath;
+let predatorEfficiency;
+
+let stableCounter = 0;
+let running = false;
+
+const gameArea = document.getElementById("game");
+
+function randomizeParameters() {
+    preyGrowth = Math.random() * 0.3 + 0.1;
+    predatorDeath = Math.random() * 0.2 + 0.05;
+    predatorEfficiency = Math.random() * 0.02 + 0.005;
+}
+
+function createAnimal(symbol) {
+    const el = document.createElement("div");
+    el.classList.add("animal");
+    el.innerText = symbol;
+
+    el.style.left = Math.random() * 95 + "%";
+    el.style.top = Math.random() * 90 + "%";
+
+    gameArea.appendChild(el);
+}
+
+function renderAnimals() {
+    gameArea.innerHTML = "";
+
+    for (let i = 0; i < Math.min(prey, 80); i++) {
+        createAnimal("🐇");
+    }
+
+    for (let i = 0; i < Math.min(predators, 40); i++) {
+        createAnimal("🐺");
+    }
+}
+
+function updateSystem() {
+    // Modelo simplificado tipo Lotka-Volterra
+    let newPrey = prey + (preyGrowth * prey) - (predatorEfficiency * prey * predators);
+    let newPredators = predators + (predatorEfficiency * prey * predators) - (predatorDeath * predators);
+
+    prey = Math.max(0, Math.floor(newPrey));
+    predators = Math.max(0, Math.floor(newPredators));
+
+    document.getElementById("stats").innerText =
+        `🐇 Presas: ${prey} | 🐺 Predadores: ${predators}`;
+
+    checkGameState();
+    renderAnimals();
+}
+
+function checkGameState() {
+    const status = document.getElementById("status");
+
+    if (prey === 0 || predators === 0 || prey > 500) {
+        status.innerText = "💥 Sistema colapsou!";
+        running = false;
+        setTimeout(startGame, 2000);
+        return;
+    }
+
+    // estabilidade (valores próximos por tempo)
+    if (prey > 10 && prey < 200 && predators > 3 && predators < 50) {
+        stableCounter++;
+    } else {
+        stableCounter = 0;
+    }
+
+    if (stableCounter > 20) {
+        status.innerText = "🏆 Ecossistema equilibrado! Você venceu!";
+        running = false;
+        return;
+    }
+
+    status.innerText = "⏳ Sistema em evolução...";
+}
+
+function loop() {
+    if (!running) return;
+
+    updateSystem();
+    setTimeout(loop, 800);
+}
+
+function startGame() {
+    prey = Math.floor(Math.random() * 30 + 10);
+    predators = Math.floor(Math.random() * 10 + 3);
+
+    stableCounter = 0;
+    running = true;
+
+    randomizeParameters();
+
+    document.getElementById("status").innerText = "🔄 Novo ecossistema iniciado";
+
+    loop();
+}
+</script>
+
+</body>
+</html>
