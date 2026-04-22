@@ -7,14 +7,14 @@
 <style>
 body {
     background: #0f0f1a;
-    color: #fff;
+    color: white;
     font-family: Arial;
     text-align: center;
 }
 
 #game {
     width: 90%;
-    height: 400px;
+    height: 420px;
     border: 2px solid #ff79c6;
     margin: 20px auto;
     position: relative;
@@ -24,17 +24,19 @@ body {
 
 .entity {
     position: absolute;
-    font-size: 20px;
+    font-size: 22px;
+    transition: transform 0.8s linear, opacity 0.5s;
+}
+
+.fade {
+    opacity: 0;
 }
 
 button, input {
-    padding: 10px;
+    padding: 8px;
     margin: 5px;
 }
 
-#status {
-    margin-top: 10px;
-}
 </style>
 </head>
 
@@ -54,83 +56,136 @@ button, input {
 <p id="status"></p>
 
 <script>
-let magicalGirls = 10;
-let witches = 5;
+let magicalGirls = [];
+let witches = [];
 
-let hungerTimer = [];
 let running = false;
 let stableTime = 0;
 
 const game = document.getElementById("game");
 
-const EAT_INTERVAL = 3;
-const WITCH_GROWTH = 2;
+const WITCH_GROWTH_RATE = 0.3;
 const RECRUIT_RATE = 1;
 
-function spawnEntity(symbol) {
+function randomPos() {
+    return {
+        x: Math.random() * (game.clientWidth - 30),
+        y: Math.random() * (game.clientHeight - 30)
+    };
+}
+
+function createEntity(symbol, list) {
     const el = document.createElement("div");
     el.classList.add("entity");
     el.innerText = symbol;
 
-    el.style.left = Math.random() * 95 + "%";
-    el.style.top = Math.random() * 90 + "%";
+    let pos = randomPos();
+    el.style.transform = `translate(${pos.x}px, ${pos.y}px)`;
 
     game.appendChild(el);
+
+    list.push({ el, x: pos.x, y: pos.y });
 }
 
-function render() {
-    game.innerHTML = "";
+function moveTo(entity, x, y) {
+    entity.x = x;
+    entity.y = y;
+    entity.el.style.transform = `translate(${x}px, ${y}px)`;
+}
 
-    for (let i = 0; i < Math.min(magicalGirls, 60); i++) {
-        spawnEntity("✨");
-    }
+function removeEntity(entity, list) {
+    entity.el.classList.add("fade");
+    setTimeout(() => {
+        entity.el.remove();
+    }, 400);
 
-    for (let i = 0; i < Math.min(witches, 60); i++) {
-        spawnEntity("🕸️");
-    }
+    let index = list.indexOf(entity);
+    if (index > -1) list.splice(index, 1);
 }
 
 function updateSystem() {
 
-    // Garotas tentam comer
-    let fedGirls = 0;
+    // Garotas caçam bruxas
+    let survivors = [];
 
-    for (let i = 0; i < magicalGirls; i++) {
-        if (witches > 0) {
-            witches--;
-            fedGirls++;
+    magicalGirls.forEach(girl => {
+        if (witches.length > 0) {
+
+            let target = witches[Math.floor(Math.random() * witches.length)];
+
+            // movimento até a bruxa
+            moveTo(girl, target.x, target.y);
+
+            // remove bruxa após movimento
+            setTimeout(() => {
+                removeEntity(target, witches);
+            }, 700);
+
+            survivors.push(girl);
+
         } else {
             // vira bruxa
-            witches++;
+            createEntity("🕸️", witches);
+            removeEntity(girl, magicalGirls);
         }
+    });
+
+    magicalGirls = survivors;
+
+    // reprodução de bruxas (com deslizamento)
+    let newWitches = Math.floor(witches.length * WITCH_GROWTH_RATE);
+
+    for (let i = 0; i < newWitches; i++) {
+        if (witches.length === 0) break;
+
+        let parent = witches[Math.floor(Math.random() * witches.length)];
+        let pos = randomPos();
+
+        let el = document.createElement("div");
+        el.classList.add("entity");
+        el.innerText = "🕸️";
+
+        el.style.transform = `translate(${parent.x}px, ${parent.y}px)`;
+
+        game.appendChild(el);
+
+        let newWitch = { el, x: parent.x, y: parent.y };
+        witches.push(newWitch);
+
+        // desliza para nova posição
+        setTimeout(() => {
+            moveTo(newWitch, pos.x, pos.y);
+        }, 50);
     }
 
-    magicalGirls = fedGirls;
+    // recrutamento
+    for (let i = 0; i < RECRUIT_RATE; i++) {
+        createEntity("✨", magicalGirls);
+    }
 
-    // Bruxas se multiplicam
-    witches += Math.floor(witches * 0.2);
-
-    // Organização recruta
-    magicalGirls += RECRUIT_RATE;
-
-    document.getElementById("stats").innerText =
-        `✨ Garotas: ${magicalGirls} | 🕸️ Bruxas: ${witches}`;
-
+    updateStats();
     checkState();
-    render();
+}
+
+function updateStats() {
+    document.getElementById("stats").innerText =
+        `✨ Garotas: ${magicalGirls.length} | 🕸️ Bruxas: ${witches.length}`;
 }
 
 function checkState() {
     const status = document.getElementById("status");
 
-    if (magicalGirls === 0 || witches > 300) {
-        status.innerText = "💀 Colapso: mundo dominado por bruxas!";
+    if (magicalGirls.length === 0 || witches.length > 200) {
+        status.innerText = "💀 Colapso!";
         running = false;
         setTimeout(startGame, 2500);
         return;
     }
 
-    if (magicalGirls > 5 && magicalGirls < 50 && witches > 5 && witches < 80) {
+    if (
+        magicalGirls.length > 5 && magicalGirls.length < 40 &&
+        witches.length > 5 && witches.length < 80
+    ) {
         stableTime++;
     } else {
         stableTime = 0;
@@ -149,12 +204,27 @@ function loop() {
     if (!running) return;
 
     updateSystem();
-    setTimeout(loop, 1000);
+    setTimeout(loop, 1200);
 }
 
 function startGame() {
-    magicalGirls = parseInt(document.getElementById("initialMagical").value);
-    witches = Math.floor(Math.random() * 10 + 5);
+
+    game.innerHTML = "";
+
+    magicalGirls = [];
+    witches = [];
+
+    let initial = parseInt(document.getElementById("initialMagical").value);
+
+    for (let i = 0; i < initial; i++) {
+        createEntity("✨", magicalGirls);
+    }
+
+    let initialWitches = Math.floor(Math.random() * 10 + 5);
+
+    for (let i = 0; i < initialWitches; i++) {
+        createEntity("🕸️", witches);
+    }
 
     stableTime = 0;
     running = true;
