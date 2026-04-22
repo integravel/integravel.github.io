@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jogo das Letras Congeladas</title>
+
+<style>
+  body {
+    margin: 0;
+    overflow: hidden;
+    font-family: Arial, sans-serif;
+    background: #0b0f1a;
+    color: white;
+  }
+
+  #game {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+  }
+
+  .letter {
+    position: absolute;
+    font-size: 32px;
+    font-weight: bold;
+    pointer-events: none;
+    transition: filter 0.3s;
+  }
+
+  .frozen {
+    color: #dff6ff;
+    text-shadow: 0 0 10px #aeeaff;
+    filter: brightness(1.5);
+  }
+
+  #freezeBtn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    font-size: 26px;
+    padding: 10px;
+    border-radius: 50%;
+    border: none;
+    background: #8fe3ff;
+    cursor: pointer;
+    z-index: 10;
+  }
+
+  #freezeEffect {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(173, 216, 230, 0.3);
+    transform: scale(0);
+    pointer-events: none;
+  }
+
+  #inputPanel {
+    position: absolute;
+    bottom: -200px;
+    left: 0;
+    width: 100%;
+    background: #111827;
+    padding: 20px;
+    box-sizing: border-box;
+    transition: bottom 0.4s;
+  }
+
+  #inputPanel.active {
+    bottom: 0;
+  }
+
+  input {
+    width: 70%;
+    padding: 10px;
+    font-size: 18px;
+  }
+
+  button.submit {
+    padding: 10px;
+    font-size: 18px;
+    margin-left: 10px;
+  }
+
+  #message {
+    position: absolute;
+    bottom: 80px;
+    width: 100%;
+    text-align: center;
+    opacity: 0;
+    transition: opacity 0.5s;
+  }
+
+  #message.show {
+    opacity: 1;
+  }
+</style>
+</head>
+
+<body>
+
+<div id="game">
+  <button id="freezeBtn">❄️</button>
+  <div id="freezeEffect"></div>
+
+  <div id="message">🎉 Parabéns!</div>
+
+  <div id="inputPanel">
+    <input id="answer" placeholder="Digite a palavra..." />
+    <button class="submit">OK</button>
+  </div>
+</div>
+
+<script>
+const words = ["GATO", "CASA", "FLORESTA", "JANELA", "GELO"];
+let currentWord = "";
+let letters = [];
+let mouse = { x: window.innerWidth/2, y: window.innerHeight/2 };
+let frozen = false;
+
+const game = document.getElementById("game");
+const freezeBtn = document.getElementById("freezeBtn");
+const freezeEffect = document.getElementById("freezeEffect");
+const inputPanel = document.getElementById("inputPanel");
+const answerInput = document.getElementById("answer");
+const message = document.getElementById("message");
+
+function startGame() {
+  frozen = false;
+  inputPanel.classList.remove("active");
+  message.classList.remove("show");
+  answerInput.value = "";
+
+  letters.forEach(l => l.el.remove());
+  letters = [];
+
+  currentWord = words[Math.floor(Math.random()*words.length)];
+
+  for (let i = 0; i < currentWord.length; i++) {
+    const el = document.createElement("div");
+    el.className = "letter";
+    el.innerText = currentWord[i];
+
+    game.appendChild(el);
+
+    letters.push({
+      el,
+      x: Math.random() * window.innerWidth,
+      y: Math.random() * window.innerHeight,
+      speed: 0.02 + Math.random() * 0.05
+    });
+  }
+}
+
+function update() {
+  if (!frozen) {
+    letters.forEach(l => {
+      l.x += (mouse.x - l.x) * l.speed;
+      l.y += (mouse.y - l.y) * l.speed;
+
+      l.el.style.transform = `translate(${l.x}px, ${l.y}px)`;
+    });
+  }
+  requestAnimationFrame(update);
+}
+
+window.addEventListener("mousemove", e => {
+  mouse.x = e.clientX;
+  mouse.y = e.clientY;
+});
+
+window.addEventListener("touchmove", e => {
+  mouse.x = e.touches[0].clientX;
+  mouse.y = e.touches[0].clientY;
+});
+
+freezeBtn.onclick = () => {
+  frozen = true;
+
+  // efeito explosão
+  freezeEffect.style.left = mouse.x + "px";
+  freezeEffect.style.top = mouse.y + "px";
+  freezeEffect.style.width = "20px";
+  freezeEffect.style.height = "20px";
+
+  freezeEffect.animate([
+    { transform: "scale(0)", opacity: 0.8 },
+    { transform: "scale(50)", opacity: 0 }
+  ], {
+    duration: 500,
+    easing: "ease-out"
+  });
+
+  // congelar letras
+  letters.forEach(l => l.el.classList.add("frozen"));
+
+  // liberar scroll
+  document.body.style.overflow = "auto";
+
+  setTimeout(() => {
+    inputPanel.classList.add("active");
+  }, 300);
+};
+
+document.querySelector(".submit").onclick = checkAnswer;
+
+function checkAnswer() {
+  if (answerInput.value.toUpperCase() === currentWord) {
+    message.classList.add("show");
+
+    setTimeout(() => {
+      document.body.style.overflow = "hidden";
+      startGame();
+    }, 1500);
+  }
+}
+
+// iniciar
+startGame();
+update();
+</script>
+
+</body>
+</html>
