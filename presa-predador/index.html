@@ -2,163 +2,164 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Jogo Presa vs Predador</title>
+<title>✨ Garotas Mágicas vs Bruxas 🕸️</title>
 
 <style>
 body {
-    font-family: Arial, sans-serif;
+    background: #0f0f1a;
+    color: #fff;
+    font-family: Arial;
     text-align: center;
-    background: #0f172a;
-    color: white;
-}
-
-h1 {
-    margin-top: 10px;
 }
 
 #game {
     width: 90%;
     height: 400px;
+    border: 2px solid #ff79c6;
     margin: 20px auto;
-    border: 2px solid #38bdf8;
     position: relative;
     overflow: hidden;
-    background: #020617;
+    background: #050510;
 }
 
-.animal {
+.entity {
     position: absolute;
     font-size: 20px;
-    transition: transform 0.5s linear;
 }
 
-#info {
-    margin-top: 10px;
-}
-
-button {
+button, input {
     padding: 10px;
     margin: 5px;
-    background: #38bdf8;
-    border: none;
-    cursor: pointer;
+}
+
+#status {
+    margin-top: 10px;
 }
 </style>
 </head>
 
 <body>
 
-<h1>🐇 Presa vs 🐺 Predador</h1>
+<h1>✨ Garotas Mágicas vs Bruxas 🕸️</h1>
+
+<label>Quantidade inicial de garotas mágicas:</label>
+<input type="number" id="initialMagical" value="10" min="1" max="50">
+
+<br>
+<button onclick="startGame()">Iniciar</button>
 
 <div id="game"></div>
 
-<div id="info">
-    <p id="stats"></p>
-    <p id="status"></p>
-</div>
-
-<button onclick="startGame()">Iniciar / Reiniciar</button>
+<p id="stats"></p>
+<p id="status"></p>
 
 <script>
-let prey = 20;
-let predators = 5;
+let magicalGirls = 10;
+let witches = 5;
 
-let preyGrowth;
-let predatorDeath;
-let predatorEfficiency;
-
-let stableCounter = 0;
+let hungerTimer = [];
 let running = false;
+let stableTime = 0;
 
-const gameArea = document.getElementById("game");
+const game = document.getElementById("game");
 
-function randomizeParameters() {
-    preyGrowth = Math.random() * 0.3 + 0.1;
-    predatorDeath = Math.random() * 0.2 + 0.05;
-    predatorEfficiency = Math.random() * 0.02 + 0.005;
-}
+const EAT_INTERVAL = 3;
+const WITCH_GROWTH = 2;
+const RECRUIT_RATE = 1;
 
-function createAnimal(symbol) {
+function spawnEntity(symbol) {
     const el = document.createElement("div");
-    el.classList.add("animal");
+    el.classList.add("entity");
     el.innerText = symbol;
 
     el.style.left = Math.random() * 95 + "%";
     el.style.top = Math.random() * 90 + "%";
 
-    gameArea.appendChild(el);
+    game.appendChild(el);
 }
 
-function renderAnimals() {
-    gameArea.innerHTML = "";
+function render() {
+    game.innerHTML = "";
 
-    for (let i = 0; i < Math.min(prey, 80); i++) {
-        createAnimal("🐇");
+    for (let i = 0; i < Math.min(magicalGirls, 60); i++) {
+        spawnEntity("✨");
     }
 
-    for (let i = 0; i < Math.min(predators, 40); i++) {
-        createAnimal("🐺");
+    for (let i = 0; i < Math.min(witches, 60); i++) {
+        spawnEntity("🕸️");
     }
 }
 
 function updateSystem() {
-    // Modelo simplificado tipo Lotka-Volterra
-    let newPrey = prey + (preyGrowth * prey) - (predatorEfficiency * prey * predators);
-    let newPredators = predators + (predatorEfficiency * prey * predators) - (predatorDeath * predators);
 
-    prey = Math.max(0, Math.floor(newPrey));
-    predators = Math.max(0, Math.floor(newPredators));
+    // Garotas tentam comer
+    let fedGirls = 0;
+
+    for (let i = 0; i < magicalGirls; i++) {
+        if (witches > 0) {
+            witches--;
+            fedGirls++;
+        } else {
+            // vira bruxa
+            witches++;
+        }
+    }
+
+    magicalGirls = fedGirls;
+
+    // Bruxas se multiplicam
+    witches += Math.floor(witches * 0.2);
+
+    // Organização recruta
+    magicalGirls += RECRUIT_RATE;
 
     document.getElementById("stats").innerText =
-        `🐇 Presas: ${prey} | 🐺 Predadores: ${predators}`;
+        `✨ Garotas: ${magicalGirls} | 🕸️ Bruxas: ${witches}`;
 
-    checkGameState();
-    renderAnimals();
+    checkState();
+    render();
 }
 
-function checkGameState() {
+function checkState() {
     const status = document.getElementById("status");
 
-    if (prey === 0 || predators === 0 || prey > 500) {
-        status.innerText = "💥 Sistema colapsou!";
+    if (magicalGirls === 0 || witches > 300) {
+        status.innerText = "💀 Colapso: mundo dominado por bruxas!";
         running = false;
-        setTimeout(startGame, 2000);
+        setTimeout(startGame, 2500);
         return;
     }
 
-    // estabilidade (valores próximos por tempo)
-    if (prey > 10 && prey < 200 && predators > 3 && predators < 50) {
-        stableCounter++;
+    if (magicalGirls > 5 && magicalGirls < 50 && witches > 5 && witches < 80) {
+        stableTime++;
     } else {
-        stableCounter = 0;
+        stableTime = 0;
     }
 
-    if (stableCounter > 20) {
-        status.innerText = "🏆 Ecossistema equilibrado! Você venceu!";
+    if (stableTime > 20) {
+        status.innerText = "🏆 Equilíbrio alcançado!";
         running = false;
         return;
     }
 
-    status.innerText = "⏳ Sistema em evolução...";
+    status.innerText = "⚖️ Sistema em evolução...";
 }
 
 function loop() {
     if (!running) return;
 
     updateSystem();
-    setTimeout(loop, 800);
+    setTimeout(loop, 1000);
 }
 
 function startGame() {
-    prey = Math.floor(Math.random() * 30 + 10);
-    predators = Math.floor(Math.random() * 10 + 3);
+    magicalGirls = parseInt(document.getElementById("initialMagical").value);
+    witches = Math.floor(Math.random() * 10 + 5);
 
-    stableCounter = 0;
+    stableTime = 0;
     running = true;
 
-    randomizeParameters();
-
-    document.getElementById("status").innerText = "🔄 Novo ecossistema iniciado";
+    document.getElementById("status").innerText = "🔮 Novo ciclo iniciado";
 
     loop();
 }
