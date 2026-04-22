@@ -64,7 +64,7 @@ body {
   transition: bottom 0.4s;
 
   display: flex;
-  gap: 10px;
+  gap: 12px;
   align-items: center;
   justify-content: center;
 
@@ -75,25 +75,30 @@ body {
   bottom: 10px;
 }
 
+/* INPUT E BOTÃO ALINHADOS */
 #answer {
   flex: 1;
-  padding: 15px;
-  font-size: 26px;
+  height: 55px;
+  padding: 0 15px;
+  font-size: 22px;
   border-radius: 10px;
   border: none;
   outline: none;
   text-transform: uppercase;
+  box-sizing: border-box;
 }
 
 button.submit {
-  padding: 15px 20px;
-  font-size: 22px;
+  height: 55px;
+  padding: 0 20px;
+  font-size: 20px;
   border-radius: 10px;
   border: none;
   background: #7dd3fc;
   color:#001018;
   font-weight:bold;
   cursor: pointer;
+  flex-shrink: 0;
 }
 
 #message {
