@@ -22,21 +22,29 @@ body {
 
 .frozen {
   color:#dff6ff;
-  text-shadow:0 0 10px #aeeaff;
+  text-shadow:0 0 12px #aeeaff, 0 0 20px #7dd3fc;
 }
 
+/* ❄️ BOTÃO MELHORADO */
 #freezeBtn {
   position:absolute;
   top:20px;
   right:20px;
-  font-size:24px;
-  padding:10px;
+  width:60px;
+  height:60px;
+  font-size:28px;
   border-radius:50%;
-  background:#8fe3ff;
-  border:none;
+  border:2px solid #aeeaff;
+  background: radial-gradient(circle, #1e3a5f, #0b1220);
+  color:#e0f7ff;
+  cursor:pointer;
+  box-shadow: 0 0 15px rgba(125,211,252,0.6);
+  display:flex;
+  align-items:center;
+  justify-content:center;
 }
 
-/* MENU MELHORADO */
+/* MENU */
 #inputPanel {
   position: fixed;
   bottom: -220px;
@@ -60,19 +68,22 @@ body {
 #answer {
   flex: 1;
   padding: 15px;
-  font-size: 24px;
+  font-size: 26px;
   border-radius: 10px;
   border: none;
   outline: none;
   text-transform: uppercase;
 }
 
+/* BOTÃO OK */
 button.submit {
   padding: 15px 20px;
-  font-size: 20px;
+  font-size: 22px;
   border-radius: 10px;
   border: none;
-  background: #8fe3ff;
+  background: #7dd3fc;
+  color:#001018;
+  font-weight:bold;
   cursor: pointer;
 }
 
@@ -92,7 +103,7 @@ button.submit {
 
 <body>
 
-<button id="freezeBtn">❄️</button>
+<button id="freezeBtn">❄</button>
 <div id="message"></div>
 
 <div id="inputPanel">
@@ -103,10 +114,10 @@ button.submit {
 <script>
 
 // =========================
-// BANCO DE PALAVRAS
+// PALAVRAS
 // =========================
 const WORDS = {
-3:["SOL","MAR","LUZ","PAZ","RIO","DIA","ARU","NOI","FLU","RUA"],
+3:["SOL","MAR","LUZ","PAZ","RIO","DIA","FLU","RUA","NOI","ARU"],
 4:["CASA","GATO","BOLA","VIDA","FOTO","MESA","LUAR","CAMA","FACA","VENT"],
 5:["PEDRA","TEMPO","MUNDO","VERDE","FALAR","COMER","ANDAR","PULAR","NORTE","SULAS"],
 6:["AMIGOS","FLORES","LIVROS","NOITES","TEMPOS","CASAIS","SONHOS","PLANOS","CANTOS","DANCAR"],
@@ -120,8 +131,6 @@ const WORDS = {
 };
 
 // =========================
-// ESTADO
-// =========================
 let level = 3;
 let currentWord = "";
 let attempts = 0;
@@ -131,8 +140,6 @@ let frozen=false;
 
 const usedWords = JSON.parse(localStorage.getItem("usedWords")||"{}");
 
-// =========================
-// ESCOLHER PALAVRA
 // =========================
 function getWord(size){
   if(!usedWords[size]) usedWords[size]=[];
@@ -151,8 +158,6 @@ function getWord(size){
   return word;
 }
 
-// =========================
-// START
 // =========================
 function startGame(){
   frozen=false;
@@ -176,7 +181,6 @@ function startGame(){
       el,
       x:Math.random()*innerWidth,
       y:Math.random()*innerHeight,
-      order:i,
       baseSpeed:0.015 + ((currentWord.length-i)*0.005),
       variance:0.02,
       offset:Math.random()*1000,
@@ -186,8 +190,6 @@ function startGame(){
   }
 }
 
-// =========================
-// UPDATE
 // =========================
 function update(time=0){
   if(!frozen){
@@ -210,18 +212,6 @@ function update(time=0){
       l.x+=(tx-l.x)*speed;
       l.y+=(ty-l.y)*speed;
 
-      letters.forEach((o,j)=>{
-        if(i!==j){
-          const dx=l.x-o.x;
-          const dy=l.y-o.y;
-          const d=Math.sqrt(dx*dx+dy*dy);
-          if(d<45){
-            l.x+=dx*0.03;
-            l.y+=dy*0.03;
-          }
-        }
-      });
-
       l.el.style.transform=`translate(${l.x}px,${l.y}px)`;
     });
   }
@@ -230,36 +220,43 @@ function update(time=0){
 }
 
 // =========================
-// RESPOSTA
-// =========================
 function checkAnswer(){
-  const val=document.getElementById("answer").value.toUpperCase();
+  const input = document.getElementById("answer");
+  const val = input.value.toUpperCase();
+
   attempts++;
 
-  if(val===currentWord){
+  if(val === currentWord){
 
     if(level===13 && attempts===1){
-      document.getElementById("message").innerText="🏆 Você concluiu o jogo!";
-      document.getElementById("message").classList.add("show");
+      showMessage("🏆 Você concluiu o jogo!");
       return;
     }
 
     if(attempts===1) level++;
-    else if(attempts===2) level=level;
-    else level=Math.max(3,level-1);
+    else if(attempts>2) level=Math.max(3,level-1);
 
-    document.getElementById("message").innerText="🎉 Acertou!";
-    document.getElementById("message").classList.add("show");
+    showMessage("🎉 Acertou!");
 
     setTimeout(()=>{
-      document.getElementById("message").classList.remove("show");
       startGame();
     },1500);
+  } else {
+    showMessage("❌ Tente novamente");
   }
 }
 
 // =========================
-// FREEZE
+function showMessage(text){
+  const msg = document.getElementById("message");
+  msg.innerText = text;
+  msg.classList.add("show");
+
+  setTimeout(()=>{
+    msg.classList.remove("show");
+  },1200);
+}
+
 // =========================
 document.getElementById("freezeBtn").onclick=()=>{
   frozen=true;
@@ -268,11 +265,14 @@ document.getElementById("freezeBtn").onclick=()=>{
   document.getElementById("inputPanel").classList.add("active");
 
   const input = document.getElementById("answer");
-  input.value = "";
+  input.value="";
   input.focus();
 
   letters.forEach(l=>l.el.classList.add("frozen"));
 };
+
+// BOTÃO OK FUNCIONANDO
+document.querySelector(".submit").addEventListener("click", checkAnswer);
 
 // ENTER
 document.getElementById("answer").addEventListener("keydown", e=>{
