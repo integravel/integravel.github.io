@@ -147,11 +147,17 @@ function startGame() {
   el,
   x: Math.random() * window.innerWidth,
   y: Math.random() * window.innerHeight,
-  speedBase: 0.01 + Math.random() * 0.03,
-  speedVar: Math.random() * 0.03,
-  speedOffset: Math.random() * 1000,
+
+  // ordem da letra (0 = mais rápida)
+  order: i,
+
+  baseSpeed: 0.015 + ( (currentWord.length - i) * 0.005 ),
+
+  variance: 0.01 + Math.random() * 0.02,
+  offset: Math.random() * 1000,
+
   floatOffset: Math.random() * 1000,
-  jitter: Math.random()
+  jitter: Math.random() * 0.8
 });
   }
 }
@@ -160,18 +166,21 @@ function update(time = 0) {
   if (!frozen) {
     letters.forEach((l, i) => {
 
-      // velocidade muda o tempo todo (onda)
-      const dynamicSpeed =
-        l.speedBase +
-        Math.sin(time * 0.002 + l.speedOffset) * l.speedVar;
+      // velocidade dinâmica respeitando ordem
+      let dynamicSpeed =
+        l.baseSpeed +
+        Math.sin(time * 0.002 + l.offset) * l.variance;
 
-      // micro "trancos" aleatórios
-      const jitterX = (Math.random() - 0.5) * 10 * l.jitter;
-      const jitterY = (Math.random() - 0.5) * 10 * l.jitter;
+      // limite mínimo pra não travar
+      dynamicSpeed = Math.max(0.005, dynamicSpeed);
 
-      // flutuação suave
+      // flutuação
       const floatX = Math.sin(time * 0.001 + l.floatOffset) * 20;
       const floatY = Math.cos(time * 0.0015 + l.floatOffset) * 20;
+
+      // jitter
+      const jitterX = (Math.random() - 0.5) * 8 * l.jitter;
+      const jitterY = (Math.random() - 0.5) * 8 * l.jitter;
 
       const targetX = mouse.x + floatX + jitterX;
       const targetY = mouse.y + floatY + jitterY;
@@ -179,16 +188,16 @@ function update(time = 0) {
       l.x += (targetX - l.x) * dynamicSpeed;
       l.y += (targetY - l.y) * dynamicSpeed;
 
-      // repelência
+      // repelência leve
       letters.forEach((other, j) => {
         if (i !== j) {
           const dx = l.x - other.x;
           const dy = l.y - other.y;
           const dist = Math.sqrt(dx * dx + dy * dy);
 
-          if (dist < 40) {
-            l.x += dx * 0.05;
-            l.y += dy * 0.05;
+          if (dist < 45) {
+            l.x += dx * 0.03;
+            l.y += dy * 0.03;
           }
         }
       });
