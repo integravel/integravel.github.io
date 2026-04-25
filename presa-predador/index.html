@@ -2,54 +2,78 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>EcoSim - Presa vs Predador</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EcoSim</title>
 
 <style>
-body {
+html, body {
   margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden;
   font-family: Arial, sans-serif;
-  background: linear-gradient(to right, #0a0a23, #1a1a40);
-  color: white;
-  text-align: center;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  transition: background 2s linear;
 }
 
 #game {
-  padding: 20px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 10px;
+  box-sizing: border-box;
 }
 
-h1 {
-  margin-bottom: 10px;
+.top {
+  text-align: center;
 }
 
 .stats {
-  margin: 10px;
   font-size: 18px;
+  margin: 4px;
+}
+
+.controls {
+  display: flex;
+  justify-content: space-around;
+  margin: 10px 0;
 }
 
 button {
-  padding: 10px;
-  margin: 5px;
+  padding: 12px;
   border: none;
-  border-radius: 8px;
-  cursor: pointer;
+  border-radius: 10px;
   font-size: 14px;
+  flex: 1;
+  margin: 5px;
 }
 
 button:disabled {
   opacity: 0.4;
-  cursor: not-allowed;
 }
 
 #log {
-  margin-top: 15px;
-  height: 80px;
+  font-size: 12px;
+  height: 60px;
   overflow: auto;
-  font-size: 14px;
   background: rgba(0,0,0,0.3);
-  padding: 10px;
   border-radius: 8px;
+  padding: 5px;
 }
 
+canvas {
+  width: 100%;
+  height: 150px;
+  background: rgba(0,0,0,0.2);
+  border-radius: 10px;
+}
+
+/* Dia / noite */
 .day {
   background: linear-gradient(to right, #87ceeb, #f0e68c);
   color: black;
@@ -57,27 +81,31 @@ button:disabled {
 
 .night {
   background: linear-gradient(to right, #0a0a23, #000);
+  color: white;
 }
-
 </style>
 </head>
 
 <body>
 
 <div id="game">
-  <h1>🌿 EcoSim</h1>
 
-  <div class="stats">🐇 Presas: <span id="presas">0</span></div>
-  <div class="stats">🐺 Predadores: <span id="predadores">0</span></div>
-  <div class="stats">📅 Dia: <span id="dia">0</span></div>
-
-  <div>
-    <button id="addPrey">+ Presas</button>
-    <button id="addPred">+ Predadores</button>
-    <button id="huntPrey">Caçar Presas</button>
+  <div class="top">
+    <h2>🌿 EcoSim</h2>
+    <div class="stats">🐇 <span id="presas"></span> | 🐺 <span id="predadores"></span></div>
+    <div class="stats">Dia: <span id="dia"></span></div>
   </div>
 
+  <div class="controls">
+    <button id="addPrey">+🐇</button>
+    <button id="addPred">+🐺</button>
+    <button id="huntPrey">🏹</button>
+  </div>
+
+  <canvas id="chart"></canvas>
+
   <div id="log"></div>
+
 </div>
 
 <script>
@@ -91,12 +119,23 @@ const beta = 0.002;
 const delta = 0.0008;
 const gamma = 0.05;
 
+// histórico
+let historyPrey = [];
+let historyPred = [];
+const maxHistory = 60;
+
 // cooldowns
-let cooldowns = {
-  prey: 0,
-  pred: 0,
-  hunt: 0
-};
+let cooldowns = { prey:0, pred:0, hunt:0 };
+
+const canvas = document.getElementById("chart");
+const ctx = canvas.getContext("2d");
+
+function resizeCanvas() {
+  canvas.width = canvas.offsetWidth;
+  canvas.height = canvas.offsetHeight;
+}
+window.addEventListener("resize", resizeCanvas);
+resizeCanvas();
 
 function log(msg) {
   const logDiv = document.getElementById("log");
@@ -113,57 +152,81 @@ function updateUI() {
   document.getElementById("huntPrey").disabled = cooldowns.hunt > 0;
 }
 
+function drawChart() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  let maxVal = Math.max(...historyPrey, ...historyPred, 50);
+
+  function drawLine(data, color) {
+    ctx.beginPath();
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 2;
+
+    data.forEach((val, i) => {
+      let x = (i / maxHistory) * canvas.width;
+      let y = canvas.height - (val / maxVal) * canvas.height;
+
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    });
+
+    ctx.stroke();
+  }
+
+  drawLine(historyPrey, "#00ff88");
+  drawLine(historyPred, "#ff4444");
+}
+
 function nextTurn() {
-  // simulação (dia)
   let newPresas = presas + (alpha * presas) - (beta * presas * predadores);
   let newPred = predadores + (delta * presas * predadores) - (gamma * predadores);
 
-  // ruído aleatório leve
   newPresas *= (0.95 + Math.random() * 0.1);
   newPred *= (0.95 + Math.random() * 0.1);
 
   presas = Math.max(0, newPresas);
   predadores = Math.max(0, newPred);
 
-  // cooldown reduz
+  historyPrey.push(presas);
+  historyPred.push(predadores);
+
+  if (historyPrey.length > maxHistory) {
+    historyPrey.shift();
+    historyPred.shift();
+  }
+
   for (let key in cooldowns) {
     if (cooldowns[key] > 0) cooldowns[key]--;
   }
 
-  // eventos
   if (presas <= 0) {
-    log("❌ Presas extintas!");
-    alert("Game Over!");
+    alert("Presas extintas!");
     location.reload();
-  }
-
-  if (predadores <= 0) {
-    log("⚠️ Predadores extintos!");
   }
 
   dia++;
   updateUI();
+  drawChart();
 }
 
 document.getElementById("addPrey").onclick = () => {
   presas += 10;
   cooldowns.prey = 2;
-  log("🌿 Presas introduzidas");
+  log("🌿 + presas");
 };
 
 document.getElementById("addPred").onclick = () => {
   predadores += 2;
   cooldowns.pred = 2;
-  log("🐺 Predadores introduzidos");
+  log("🐺 + predadores");
 };
 
 document.getElementById("huntPrey").onclick = () => {
   presas = Math.max(0, presas - 8);
   cooldowns.hunt = 2;
-  log("🏹 Caça realizada");
+  log("🏹 caça");
 };
 
-// loop automático (dia/noite)
 setInterval(() => {
   document.body.className = "day";
 
@@ -174,9 +237,8 @@ setInterval(() => {
 
 }, 4000);
 
-// inicializa
 updateUI();
-
+drawChart();
 </script>
 
 </body>
