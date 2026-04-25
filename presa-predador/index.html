@@ -3,98 +3,76 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>EcoSim</title>
 
 <style>
 html, body {
-  margin: 0;
-  padding: 0;
-  height: 100%;
-  font-family: Arial, sans-serif;
-  background: #0f172a;
-  color: white;
+  margin:0;
+  padding:0;
+  height:100%;
+  font-family:Arial;
+  background:#0f172a;
+  color:white;
 }
 
 #game {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  padding: 10px;
-  box-sizing: border-box;
-}
-
-.stats, .rates {
-  text-align: center;
-  font-size: 14px;
-  margin: 4px;
+  height:100%;
+  display:flex;
+  flex-direction:column;
+  padding:10px;
+  box-sizing:border-box;
 }
 
 .controls {
-  display: flex;
-  justify-content: space-around;
+  display:flex;
 }
 
 button {
-  flex: 1;
-  margin: 5px;
-  padding: 12px;
-  border-radius: 10px;
-  border: none;
-  font-size: 12px;
+  flex:1;
+  margin:5px;
+  padding:10px;
+  border:none;
+  border-radius:10px;
 }
 
-button:disabled {
-  opacity: 0.4;
+button:disabled { opacity:0.4; }
+
+#chartContainer {
+  overflow-x: auto;
+  flex:1;
 }
 
 canvas {
-  width: 100%;
-  height: 150px;
-  background: rgba(255,255,255,0.05);
-  border-radius: 10px;
+  height:200px;
 }
 
 #log {
-  height: 60px;
-  overflow: auto;
-  font-size: 12px;
-  background: rgba(255,255,255,0.05);
-  border-radius: 8px;
-  padding: 5px;
+  height:60px;
+  overflow:auto;
+  font-size:12px;
+  background:rgba(255,255,255,0.05);
+  border-radius:8px;
 }
 </style>
 </head>
 
 <body>
-
 <div id="game">
 
-  <div>
-    <h3>🌿 EcoSim</h3>
-    <div class="stats">🐇 <span id="presas"></span> | 🐺 <span id="predadores"></span></div>
-    <div class="stats">Dia: <span id="dia"></span></div>
-  </div>
+<h3>🌿 EcoSim</h3>
+<div>🐇 <span id="presas"></span> | 🐺 <span id="predadores"></span></div>
+<div>Dia: <span id="dia"></span></div>
 
-  <div class="rates">
-    🌱 Presas nascendo: <span id="birthPrey"></span> |
-    ☠️ Presas morrendo: <span id="deathPrey"></span><br>
+<div class="controls">
+<button id="addPrey">+10 🐇</button>
+<button id="addPred">+2 🐺</button>
+<button id="huntPrey">-8 🐇</button>
+</div>
 
-    🐺 Predadores nascendo: <span id="birthPred"></span> |
-    ☠️ Predadores morrendo: <span id="deathPred"></span><br>
+<div id="chartContainer">
+<canvas id="chart"></canvas>
+</div>
 
-    🎲 Determinismo: <span id="determinismo"></span>
-  </div>
-
-  <div class="controls">
-    <button id="addPrey">+10 🐇</button>
-    <button id="addPred">+2 🐺</button>
-    <button id="huntPrey">-8 🐇</button>
-  </div>
-
-  <canvas id="chart"></canvas>
-
-  <div id="log"></div>
+<div id="log"></div>
 
 </div>
 
@@ -103,82 +81,91 @@ let presas = 40;
 let predadores = 9;
 let dia = 1;
 
-// parâmetros
-const alpha = 0.08;
-const beta = 0.002;
-const delta = 0.0008;
-const gamma = 0.05;
+// parâmetros (instável por padrão)
+const alpha = 0.06;
+const beta = 0.0035;
+const delta = 0.0012;
+const gamma = 0.06;
 
-// ruído
 const noiseLevel = 0.05;
 
-// histórico
 let historyPrey = [];
 let historyPred = [];
-const maxHistory = 60;
 
-// cooldowns
-let cooldowns = { prey:0, pred:0, hunt:0 };
+let cooldowns = {prey:0,pred:0,hunt:0};
 
 const canvas = document.getElementById("chart");
 const ctx = canvas.getContext("2d");
 
-function resizeCanvas() {
-  canvas.width = canvas.offsetWidth;
-  canvas.height = canvas.offsetHeight;
+let widthPerPoint = 6;
+
+function resizeCanvas(){
+  canvas.height = 200;
 }
 resizeCanvas();
-window.addEventListener("resize", resizeCanvas);
 
-function log(msg) {
-  const logDiv = document.getElementById("log");
-  logDiv.innerHTML = msg + "<br>" + logDiv.innerHTML;
+function log(msg){
+  let l=document.getElementById("log");
+  l.innerHTML = msg+"<br>"+l.innerHTML;
 }
 
-function updateUI(stats) {
+function updateUI(){
   document.getElementById("presas").textContent = Math.round(presas);
   document.getElementById("predadores").textContent = Math.round(predadores);
   document.getElementById("dia").textContent = dia;
 
-  document.getElementById("birthPrey").textContent = stats.birthPrey.toFixed(1);
-  document.getElementById("deathPrey").textContent = stats.deathPrey.toFixed(1);
-  document.getElementById("birthPred").textContent = stats.birthPred.toFixed(2);
-  document.getElementById("deathPred").textContent = stats.deathPred.toFixed(2);
-
-  let determinismo = (1 - noiseLevel) * 100;
-  document.getElementById("determinismo").textContent = determinismo.toFixed(0) + "%";
-
-  document.getElementById("addPrey").disabled = cooldowns.prey > 0;
-  document.getElementById("addPred").disabled = cooldowns.pred > 0;
-  document.getElementById("huntPrey").disabled = cooldowns.hunt > 0;
+  document.getElementById("addPrey").disabled = cooldowns.prey>0;
+  document.getElementById("addPred").disabled = cooldowns.pred>0;
+  document.getElementById("huntPrey").disabled = cooldowns.hunt>0;
 }
 
-function drawChart() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+function drawChart(){
+
+  canvas.width = historyPrey.length * widthPerPoint + 50;
+
+  ctx.clearRect(0,0,canvas.width,canvas.height);
 
   let maxVal = Math.max(...historyPrey, ...historyPred, 50);
 
-  function drawLine(data, color) {
+  function yScale(v){
+    return canvas.height - (v/maxVal)*(canvas.height*0.8) - 20;
+  }
+
+  // linha crítica (extinção)
+  ctx.strokeStyle="white";
+  ctx.beginPath();
+  ctx.moveTo(0, yScale(5));
+  ctx.lineTo(canvas.width, yScale(5));
+  ctx.stroke();
+
+  // zona risco
+  ctx.strokeStyle="yellow";
+  ctx.beginPath();
+  ctx.moveTo(0, yScale(15));
+  ctx.lineTo(canvas.width, yScale(15));
+  ctx.stroke();
+
+  function drawLine(data,color){
     ctx.beginPath();
-    ctx.strokeStyle = color;
-    ctx.lineWidth = 2;
+    ctx.strokeStyle=color;
+    ctx.lineWidth=2;
 
-    data.forEach((val, i) => {
-      let x = (i / maxHistory) * canvas.width;
-      let y = canvas.height - (val / maxVal) * canvas.height;
+    data.forEach((v,i)=>{
+      let x = i*widthPerPoint;
+      let y = yScale(v);
 
-      if (i === 0) ctx.moveTo(x, y);
-      else ctx.lineTo(x, y);
+      if(i===0) ctx.moveTo(x,y);
+      else ctx.lineTo(x,y);
     });
 
     ctx.stroke();
   }
 
-  drawLine(historyPrey, "#22c55e");
-  drawLine(historyPred, "#ef4444");
+  drawLine(historyPrey,"#22c55e");
+  drawLine(historyPred,"#ef4444");
 }
 
-function nextTurn() {
+function nextTurn(){
 
   let birthPrey = alpha * presas;
   let deathPrey = beta * presas * predadores;
@@ -189,65 +176,54 @@ function nextTurn() {
   let newPresas = presas + birthPrey - deathPrey;
   let newPred = predadores + birthPred - deathPred;
 
-  // ruído
-  let noiseFactorPrey = (1 - noiseLevel) + Math.random() * (2 * noiseLevel);
-  let noiseFactorPred = (1 - noiseLevel) + Math.random() * (2 * noiseLevel);
+  newPresas *= (1-noiseLevel) + Math.random()*noiseLevel*2;
+  newPred *= (1-noiseLevel) + Math.random()*noiseLevel*2;
 
-  newPresas *= noiseFactorPrey;
-  newPred *= noiseFactorPred;
-
-  presas = Math.max(0, newPresas);
-  predadores = Math.max(0, newPred);
+  presas = Math.max(0,newPresas);
+  predadores = Math.max(0,newPred);
 
   historyPrey.push(presas);
   historyPred.push(predadores);
 
-  if (historyPrey.length > maxHistory) {
-    historyPrey.shift();
-    historyPred.shift();
+  for(let k in cooldowns){
+    if(cooldowns[k]>0) cooldowns[k]--;
   }
 
-  for (let key in cooldowns) {
-    if (cooldowns[key] > 0) cooldowns[key]--;
+  // feedback discreto
+  if(presas < 10 && predadores > 5){
+    log("⚠️ Sistema em colapso");
   }
 
-  if (presas <= 0) {
-    alert("Presas extintas!");
-    location.reload();
+  if(presas > 30 && predadores > 5 && predadores < 20){
+    log("✅ Sistema estabilizado");
   }
 
   dia++;
-
-  updateUI({ birthPrey, deathPrey, birthPred, deathPred });
+  updateUI();
   drawChart();
 }
 
-// botões
-document.getElementById("addPrey").onclick = () => {
-  presas += 10;
-  cooldowns.prey = 2;
-  log("+10 presas");
+// ações
+document.getElementById("addPrey").onclick=()=>{
+  presas+=10;
+  cooldowns.prey=2;
 };
 
-document.getElementById("addPred").onclick = () => {
-  predadores += 2;
-  cooldowns.pred = 2;
-  log("+2 predadores");
+document.getElementById("addPred").onclick=()=>{
+  predadores+=2;
+  cooldowns.pred=2;
 };
 
-document.getElementById("huntPrey").onclick = () => {
-  presas = Math.max(0, presas - 8);
-  cooldowns.hunt = 2;
-  log("-8 presas");
+document.getElementById("huntPrey").onclick=()=>{
+  presas=Math.max(0,presas-8);
+  cooldowns.hunt=2;
 };
 
-// loop fixo 1s
-setInterval(nextTurn, 1000);
+// loop mais rápido
+setInterval(nextTurn, 400);
 
-// init
-updateUI({ birthPrey:0, deathPrey:0, birthPred:0, deathPred:0 });
+updateUI();
 drawChart();
-
 </script>
 
 </body>
