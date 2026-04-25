@@ -1,197 +1,76 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<style>
-html,body{
-margin:0;height:100%;background:#0f172a;color:white;font-family:Arial;
-}
-#game{
-display:flex;flex-direction:column;height:100%;padding:10px;box-sizing:border-box;
-}
-.controls{display:flex;}
-button{flex:1;margin:4px;padding:10px;border-radius:10px;border:none;}
-button:disabled{opacity:0.4;}
-
-#chartContainer{
-flex:1;overflow-x:auto;
-}
-
-canvas{height:200px;}
-
-#log{
-height:60px;overflow:auto;font-size:12px;background:rgba(255,255,255,0.05);
-border-radius:8px;padding:5px;
-}
-.bar{
-height:10px;background:#333;border-radius:5px;margin:4px 0;
-}
-.fill{
-height:100%;background:#22c55e;border-radius:5px;
-}
-</style>
-</head>
-
-<body>
-<div id="game">
-
-<h3>🌿 EcoSim</h3>
-<div>🐇 <span id="presas"></span> | 🐺 <span id="predadores"></span></div>
-<div>Dia: <span id="dia"></span> | ⚡ Energia: <span id="energia"></span></div>
-
-<div>Estabilidade</div>
-<div class="bar"><div id="stabilityFill" class="fill"></div></div>
-
-<div class="controls">
-<button id="addPrey">+10 🐇</button>
-<button id="addPred">+2 🐺</button>
-<button id="huntPrey">-8 🐇</button>
-<button id="boostEnv">🌿</button>
-</div>
-
-<div id="chartContainer">
-<canvas id="chart"></canvas>
-</div>
-
-<div id="log"></div>
-
-</div>
-
-<script>
-let presas=40, predadores=9, dia=1;
-let energia=100;
-let estabilidade=100;
-
-let K=120; // capacidade suporte
-
-// parâmetros
-let alpha=0.06, beta=0.0035, delta=0.0012, gamma=0.06;
-let noise=0.08;
-
-let historyPrey=[], historyPred=[];
-let cooldowns={prey:0,pred:0,hunt:0,env:0};
-
-let running=true;
-
-const canvas=document.getElementById("chart");
-const ctx=canvas.getContext("2d");
-
-let widthPerPoint=6;
-
-function log(msg){
-document.getElementById("log").innerHTML=msg+"<br>"+document.getElementById("log").innerHTML;
-}
-
-function updateUI(){
-document.getElementById("presas").textContent=Math.round(presas);
-document.getElementById("predadores").textContent=Math.round(predadores);
-document.getElementById("dia").textContent=dia;
-document.getElementById("energia").textContent=Math.round(energia);
-
-document.getElementById("stabilityFill").style.width=estabilidade+"%";
-
-for(let k in cooldowns){
-document.getElementById({
-prey:"addPrey",pred:"addPred",hunt:"huntPrey",env:"boostEnv"
-}[k]).disabled=cooldowns[k]>0 || energia<=0 || !running;
-}
-}
-
-function drawChart(){
-
-canvas.width = historyPrey.length*widthPerPoint + 200;
-
-ctx.clearRect(0,0,canvas.width,canvas.height);
-
-let maxVal=Math.max(...historyPrey,...historyPred,K,50);
-
-function y(v){
-return canvas.height - (v/maxVal)*(canvas.height*0.8) - 20;
-}
-
-// linha K
-ctx.strokeStyle="yellow";
-ctx.beginPath();
-ctx.moveTo(0,y(K));
-ctx.lineTo(canvas.width,y(K));
-ctx.stroke();
-
-// linhas
-function draw(data,color){
-ctx.beginPath();
-ctx.strokeStyle=color;
-data.forEach((v,i)=>{
-let x=i*widthPerPoint;
-let yy=y(v);
-i?ctx.lineTo(x,yy):ctx.moveTo(x,yy);
-});
-ctx.stroke();
-}
-
-draw(historyPrey,"#22c55e");
-draw(historyPred,"#ef4444");
-
-// auto scroll direita
-let container=document.getElementById("chartContainer");
-container.scrollLeft = container.scrollWidth;
-}
-
-function randomEvent(){
-
-let r=Math.random();
-
-if(r<0.05){
-K*=0.8;
-log("🌵 Seca reduziu recursos");
-}
-else if(r<0.1){
-presas*=0.85;
-predadores*=0.9;
-log("🦠 Doença afetou populações");
-}
-else if(r<0.15){
-K*=1.2;
-log("🌱 Período fértil aumentou recursos");
-}
-}
+let predReproductionBuffer = 0;
+let prevPresas = presas;
+let prevPred = predadores;
 
 function nextTurn(){
 
 if(!running)return;
 
+// crescimento logístico das presas
+let birthPrey = preyGrowth * presas * (1 - presas/K);
+
+// predação com eficiência variável
+let predation = predationRate * presas * predadores * (0.7 + Math.random()*0.6);
+
+// acumula reprodução dos predadores
+predReproductionBuffer += predatorEfficiency * predation;
+
+// só gera novos predadores quando acumula suficiente
+let newPredators = 0;
+if(predReproductionBuffer >= reproductionDelay){
+  newPredators = Math.floor(predReproductionBuffer / reproductionDelay);
+  predReproductionBuffer -= newPredators * reproductionDelay;
+}
+
+// mortalidade por tempo de vida
+let naturalDeathPred = predadores / predatorLifespan;
+
+// atualização
+presas += birthPrey - predation;
+predadores += newPredators - naturalDeathPred;
+
+// ruído leve
+presas *= (0.97 + Math.random()*0.06);
+predadores *= (0.97 + Math.random()*0.06);
+
+presas = Math.max(0, presas);
+predadores = Math.max(0, predadores);
+
+// 🔥 ESTABILIDADE REAL
+let ratio = predadores / (presas + 1);
+let ratioIdeal = 0.2;
+
+// erro de proporção
+let ratioScore = Math.max(0, 1 - Math.abs(ratio - ratioIdeal));
+
+// pressão ambiental
+let capacityScore = Math.max(0, 1 - (presas / K));
+
+// oscilação (variação brusca)
+let deltaPrey = Math.abs(presas - prevPresas) / (prevPresas + 1);
+let deltaPred = Math.abs(predadores - prevPred) / (prevPred + 1);
+
+let oscillationPenalty = Math.min(1, (deltaPrey + deltaPred));
+
+// cálculo final
+estabilidade = (
+  ratioScore * 0.5 +
+  capacityScore * 0.3 +
+  (1 - oscillationPenalty) * 0.2
+) * 100;
+
+prevPresas = presas;
+prevPred = predadores;
+
+// eventos
 randomEvent();
 
-// crescimento logístico
-let birthPrey = alpha * presas * (1 - presas/K);
-let deathPrey = beta * presas * predadores * (0.7 + Math.random()*0.6);
+// energia
+energia = Math.min(100, energia + 1);
 
-let birthPred = delta * presas * predadores;
-let deathPred = gamma * predadores;
-
-presas += birthPrey - deathPrey;
-predadores += birthPred - deathPred;
-
-// ruído
-presas *= (1-noise)+Math.random()*noise*2;
-predadores *= (1-noise)+Math.random()*noise*2;
-
-presas=Math.max(0,presas);
-predadores=Math.max(0,predadores);
-
-// estabilidade
-let ratio = predadores/(presas+1);
-estabilidade -= Math.abs(ratio-0.2)*2;
-
-estabilidade = Math.max(0, Math.min(100, estabilidade));
-
-// energia regen
-energia = Math.min(100, energia+1);
-
-// cooldowns
+// cooldown
 for(let k in cooldowns){
-if(cooldowns[k]>0) cooldowns[k]--;
+  if(cooldowns[k]>0) cooldowns[k]--;
 }
 
 // histórico
@@ -199,57 +78,17 @@ historyPrey.push(presas);
 historyPred.push(predadores);
 
 // colapso
-if(presas<=1 || estabilidade<=0){
-running=false;
-log("💀 Ecossistema colapsou");
+if(presas <= 1 || predadores <= 0){
+  running = false;
+  log("💀 Colapso ecológico");
 }
 
-// estabilidade ok
-if(estabilidade>70 && dia%20===0){
-log("✅ Sistema estável");
+// estabilidade alta
+if(estabilidade > 75 && dia % 20 === 0){
+  log("✅ Sistema equilibrado");
 }
 
 dia++;
 updateUI();
 drawChart();
 }
-
-// ações
-function useEnergy(cost){
-if(energia<cost)return false;
-energia-=cost;
-return true;
-}
-
-document.getElementById("addPrey").onclick=()=>{
-if(!useEnergy(10))return;
-presas+=10;
-cooldowns.prey=2;
-};
-
-document.getElementById("addPred").onclick=()=>{
-if(!useEnergy(12))return;
-predadores+=2;
-cooldowns.pred=2;
-};
-
-document.getElementById("huntPrey").onclick=()=>{
-if(!useEnergy(8))return;
-presas=Math.max(0,presas-8);
-cooldowns.hunt=2;
-};
-
-document.getElementById("boostEnv").onclick=()=>{
-if(!useEnergy(15))return;
-K+=20;
-cooldowns.env=4;
-log("🌿 Ambiente melhorado");
-};
-
-setInterval(nextTurn, 400);
-
-updateUI();
-drawChart();
-</script>
-</body>
-</html>
