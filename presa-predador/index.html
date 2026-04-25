@@ -10,18 +10,13 @@ html, body {
   margin: 0;
   padding: 0;
   height: 100%;
-  overflow: hidden;
   font-family: Arial, sans-serif;
-}
-
-body {
-  display: flex;
-  flex-direction: column;
-  transition: background 2s linear;
+  background: #0f172a;
+  color: white;
 }
 
 #game {
-  flex: 1;
+  height: 100%;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -29,59 +24,44 @@ body {
   box-sizing: border-box;
 }
 
-.top {
+.stats, .rates {
   text-align: center;
-}
-
-.stats {
-  font-size: 18px;
+  font-size: 14px;
   margin: 4px;
 }
 
 .controls {
   display: flex;
   justify-content: space-around;
-  margin: 10px 0;
 }
 
 button {
-  padding: 12px;
-  border: none;
-  border-radius: 10px;
-  font-size: 14px;
   flex: 1;
   margin: 5px;
+  padding: 12px;
+  border-radius: 10px;
+  border: none;
+  font-size: 12px;
 }
 
 button:disabled {
   opacity: 0.4;
 }
 
-#log {
-  font-size: 12px;
-  height: 60px;
-  overflow: auto;
-  background: rgba(0,0,0,0.3);
-  border-radius: 8px;
-  padding: 5px;
-}
-
 canvas {
   width: 100%;
   height: 150px;
-  background: rgba(0,0,0,0.2);
+  background: rgba(255,255,255,0.05);
   border-radius: 10px;
 }
 
-/* Dia / noite */
-.day {
-  background: linear-gradient(to right, #87ceeb, #f0e68c);
-  color: black;
-}
-
-.night {
-  background: linear-gradient(to right, #0a0a23, #000);
-  color: white;
+#log {
+  height: 60px;
+  overflow: auto;
+  font-size: 12px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 8px;
+  padding: 5px;
 }
 </style>
 </head>
@@ -90,16 +70,26 @@ canvas {
 
 <div id="game">
 
-  <div class="top">
-    <h2>🌿 EcoSim</h2>
+  <div>
+    <h3>🌿 EcoSim</h3>
     <div class="stats">🐇 <span id="presas"></span> | 🐺 <span id="predadores"></span></div>
     <div class="stats">Dia: <span id="dia"></span></div>
   </div>
 
+  <div class="rates">
+    🌱 Presas nascendo: <span id="birthPrey"></span> |
+    ☠️ Presas morrendo: <span id="deathPrey"></span><br>
+
+    🐺 Predadores nascendo: <span id="birthPred"></span> |
+    ☠️ Predadores morrendo: <span id="deathPred"></span><br>
+
+    🎲 Determinismo: <span id="determinismo"></span>
+  </div>
+
   <div class="controls">
-    <button id="addPrey">+🐇</button>
-    <button id="addPred">+🐺</button>
-    <button id="huntPrey">🏹</button>
+    <button id="addPrey">+10 🐇</button>
+    <button id="addPred">+2 🐺</button>
+    <button id="huntPrey">-8 🐇</button>
   </div>
 
   <canvas id="chart"></canvas>
@@ -119,6 +109,9 @@ const beta = 0.002;
 const delta = 0.0008;
 const gamma = 0.05;
 
+// ruído
+const noiseLevel = 0.05;
+
 // histórico
 let historyPrey = [];
 let historyPred = [];
@@ -134,18 +127,26 @@ function resizeCanvas() {
   canvas.width = canvas.offsetWidth;
   canvas.height = canvas.offsetHeight;
 }
-window.addEventListener("resize", resizeCanvas);
 resizeCanvas();
+window.addEventListener("resize", resizeCanvas);
 
 function log(msg) {
   const logDiv = document.getElementById("log");
   logDiv.innerHTML = msg + "<br>" + logDiv.innerHTML;
 }
 
-function updateUI() {
+function updateUI(stats) {
   document.getElementById("presas").textContent = Math.round(presas);
   document.getElementById("predadores").textContent = Math.round(predadores);
   document.getElementById("dia").textContent = dia;
+
+  document.getElementById("birthPrey").textContent = stats.birthPrey.toFixed(1);
+  document.getElementById("deathPrey").textContent = stats.deathPrey.toFixed(1);
+  document.getElementById("birthPred").textContent = stats.birthPred.toFixed(2);
+  document.getElementById("deathPred").textContent = stats.deathPred.toFixed(2);
+
+  let determinismo = (1 - noiseLevel) * 100;
+  document.getElementById("determinismo").textContent = determinismo.toFixed(0) + "%";
 
   document.getElementById("addPrey").disabled = cooldowns.prey > 0;
   document.getElementById("addPred").disabled = cooldowns.pred > 0;
@@ -173,16 +174,27 @@ function drawChart() {
     ctx.stroke();
   }
 
-  drawLine(historyPrey, "#00ff88");
-  drawLine(historyPred, "#ff4444");
+  drawLine(historyPrey, "#22c55e");
+  drawLine(historyPred, "#ef4444");
 }
 
 function nextTurn() {
-  let newPresas = presas + (alpha * presas) - (beta * presas * predadores);
-  let newPred = predadores + (delta * presas * predadores) - (gamma * predadores);
 
-  newPresas *= (0.95 + Math.random() * 0.1);
-  newPred *= (0.95 + Math.random() * 0.1);
+  let birthPrey = alpha * presas;
+  let deathPrey = beta * presas * predadores;
+
+  let birthPred = delta * presas * predadores;
+  let deathPred = gamma * predadores;
+
+  let newPresas = presas + birthPrey - deathPrey;
+  let newPred = predadores + birthPred - deathPred;
+
+  // ruído
+  let noiseFactorPrey = (1 - noiseLevel) + Math.random() * (2 * noiseLevel);
+  let noiseFactorPred = (1 - noiseLevel) + Math.random() * (2 * noiseLevel);
+
+  newPresas *= noiseFactorPrey;
+  newPred *= noiseFactorPred;
 
   presas = Math.max(0, newPresas);
   predadores = Math.max(0, newPred);
@@ -205,40 +217,37 @@ function nextTurn() {
   }
 
   dia++;
-  updateUI();
+
+  updateUI({ birthPrey, deathPrey, birthPred, deathPred });
   drawChart();
 }
 
+// botões
 document.getElementById("addPrey").onclick = () => {
   presas += 10;
   cooldowns.prey = 2;
-  log("🌿 + presas");
+  log("+10 presas");
 };
 
 document.getElementById("addPred").onclick = () => {
   predadores += 2;
   cooldowns.pred = 2;
-  log("🐺 + predadores");
+  log("+2 predadores");
 };
 
 document.getElementById("huntPrey").onclick = () => {
   presas = Math.max(0, presas - 8);
   cooldowns.hunt = 2;
-  log("🏹 caça");
+  log("-8 presas");
 };
 
-setInterval(() => {
-  document.body.className = "day";
+// loop fixo 1s
+setInterval(nextTurn, 1000);
 
-  setTimeout(() => {
-    nextTurn();
-    document.body.className = "night";
-  }, 2000);
-
-}, 4000);
-
-updateUI();
+// init
+updateUI({ birthPrey:0, deathPrey:0, birthPred:0, deathPred:0 });
 drawChart();
+
 </script>
 
 </body>
