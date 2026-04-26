@@ -3,14 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Riemann Game</title>
+<title>Riemann Drop</title>
 
 <style>
 body{
   margin:0;
   background:#0f1115;
   overflow:hidden;
-  font-family:sans-serif;
 }
 
 canvas{
@@ -47,7 +46,6 @@ button{
 
 <div id="controls">
   <button onclick="move(-1)">◀</button>
-  <button onclick="drop()">▼</button>
   <button onclick="move(1)">▶</button>
 </div>
 
@@ -60,11 +58,10 @@ let rows;
 let blockSize;
 let grid;
 
-let cursor = 5;
-let currentSize = 1;
+let piece;
 
 function f(x){
-  return 0.02*(x-5)*(x-5)+5;
+  return 0.15*(x-5)*(x-5)+3;
 }
 
 function resize(){
@@ -83,43 +80,58 @@ function resize(){
 resize();
 window.addEventListener("resize", resize);
 
+function newPiece(){
+  piece = {
+    x: Math.floor(cols/2),
+    y: 0,
+    size: Math.floor(Math.random()*5)+1,
+    color:"#c58cff"
+  };
+}
+
 function move(dir){
-  cursor += dir;
-  if(cursor < 0) cursor = 0;
-  if(cursor >= cols) cursor = cols-1;
+  piece.x += dir;
+  if(piece.x < 0) piece.x = 0;
+  if(piece.x >= cols) piece.x = cols-1;
 }
 
-function columnHeight(x){
-  for(let y=0;y<rows;y++){
-    if(grid[y][x]) return y;
+function collide(){
+  for(let i=0;i<piece.size;i++){
+    let py = piece.y + i;
+    if(py >= rows) return true;
+    if(grid[py][piece.x]) return true;
+
+    // colisão com curva
+    let limit = Math.floor(f(piece.x));
+    if(py >= limit) return true;
   }
-  return rows;
+  return false;
 }
 
-function drop(){
-  let x = cursor;
-  let top = Math.floor(f(x));
-
-  let currentTop = columnHeight(x);
-
-  let available = currentTop - top;
-
-  if(available <= 0) return;
-
-  let size = Math.min(currentSize, available);
-
-  for(let i=0;i<size;i++){
-    grid[currentTop-1-i][x] = "#7c8cff";
+function merge(){
+  for(let i=0;i<piece.size;i++){
+    let py = piece.y + i;
+    if(py < rows){
+      grid[py][piece.x] = piece.color;
+    }
   }
+}
 
-  currentSize = Math.floor(Math.random()*5)+1;
+function update(){
+  piece.y++;
+
+  if(collide()){
+    piece.y--;
+    merge();
+    newPiece();
+  }
 }
 
 function draw(){
   ctx.clearRect(0,0,canvas.width,canvas.height);
 
   // grid
-  ctx.strokeStyle = "rgba(255,255,255,0.05)";
+  ctx.strokeStyle="rgba(255,255,255,0.05)";
   for(let x=0;x<cols;x++){
     ctx.beginPath();
     ctx.moveTo(x*blockSize,0);
@@ -138,31 +150,40 @@ function draw(){
   for(let y=0;y<rows;y++){
     for(let x=0;x<cols;x++){
       if(grid[y][x]){
-        ctx.fillStyle = grid[y][x];
+        ctx.fillStyle=grid[y][x];
         ctx.fillRect(x*blockSize,y*blockSize,blockSize-1,blockSize-1);
       }
     }
   }
 
-  // cursor
-  ctx.fillStyle = "#ffd166";
-  ctx.fillRect(cursor*blockSize,0,blockSize,blockSize);
+  // peça
+  ctx.fillStyle=piece.color;
+  for(let i=0;i<piece.size;i++){
+    ctx.fillRect(
+      piece.x*blockSize,
+      (piece.y+i)*blockSize,
+      blockSize-1,
+      blockSize-1
+    );
+  }
 
-  // gráfico
-  ctx.strokeStyle = "#ffd166";
+  // curva
+  ctx.strokeStyle="#ffd166";
   ctx.beginPath();
   for(let x=0;x<cols;x++){
-    let y = f(x);
+    let y=f(x);
     ctx.lineTo(x*blockSize,y*blockSize);
   }
   ctx.stroke();
 }
 
 function loop(){
+  update();
   draw();
   requestAnimationFrame(loop);
 }
 
+newPiece();
 loop();
 </script>
 
