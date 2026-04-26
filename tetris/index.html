@@ -44,8 +44,12 @@ let piece;
 let discarded = 0;
 
 function resize() {
+  const controls = document.getElementById('controls');
+  const controlsHeight = controls.offsetHeight;
+
   canvas.width = window.innerWidth;
-  canvas.height = canvas.clientHeight;
+  canvas.height = window.innerHeight - controlsHeight;
+
   blockSize = canvas.width / cols;
 }
 window.addEventListener('resize', resize);
