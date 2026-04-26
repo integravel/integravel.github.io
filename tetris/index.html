@@ -4,21 +4,23 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <title>Tetris Integral</title>
 <style>
-  html, body {
-    margin: 0;
-    padding: 0;
-    height: 100%;
-    background: #111;
-    color: white;
-    font-family: sans-serif;
-    overflow: hidden;
-  }#app { display: flex; flex-direction: column; height: 100vh; height: 100dvh; }
+  :root{
+    --bg:#0f1115;
+    --panel:#151922;
+    --btn:#222836;
+    --btn-active:#2c3447;
+    --grid-line:rgba(255,255,255,0.04);
+  }html, body { margin: 0; padding: 0; height: 100%; background: var(--bg); color: #e6e9ef; font-family: system-ui, -apple-system, sans-serif; overflow: hidden; }
 
-canvas { flex: 1; background: #000; }
+#app { display: flex; flex-direction: column; height: 100dvh; }
 
-#controls { display: flex; justify-content: space-around; padding: 10px; padding-bottom: env(safe-area-inset-bottom); background: #222; }
+canvas { flex: 1; display: block; }
 
-button { flex: 1; margin: 0 5px; padding: 15px; font-size: 18px; background: #444; color: white; border: none; border-radius: 10px; } </style>
+#controls { display: flex; gap: 8px; padding: 10px; padding-bottom: calc(env(safe-area-inset-bottom) + 10px); background: var(--panel); }
+
+button { flex: 1; padding: 14px; font-size: 18px; background: var(--btn); color: #e6e9ef; border: none; border-radius: 14px; }
+
+button:active { background: var(--btn-active); } </style>
 
 </head>
 <body>
@@ -59,9 +61,10 @@ function randomPiece() {
     [[1,1,1]],
     [[1,1,0],[0,1,1]]
   ];
-  let shape = shapes[Math.floor(Math.random()*shapes.length)];
+  let colors = ['#7c8cff','#6dd3a0','#f2b880','#c58cff'];
   return {
-    shape,
+    shape: shapes[Math.floor(Math.random()*shapes.length)],
+    color: colors[Math.floor(Math.random()*colors.length)],
     x: Math.floor(cols/2) - 1,
     y: 0
   };
@@ -98,7 +101,7 @@ function collide() {
 function merge() {
   piece.shape.forEach((row, y) => {
     row.forEach((val, x) => {
-      if (val) grid[piece.y + y][piece.x + x] = 1;
+      if (val) grid[piece.y + y][piece.x + x] = piece.color;
     });
   });
 }
@@ -107,37 +110,67 @@ function newPiece() {
   piece = randomPiece();
 }
 
+function drawRoundedRect(x,y,size,color){
+  let r = size*0.25;
+  ctx.fillStyle = color;
+  ctx.beginPath();
+  ctx.moveTo(x+r,y);
+  ctx.lineTo(x+size-r,y);
+  ctx.quadraticCurveTo(x+size,y,x+size,y+r);
+  ctx.lineTo(x+size,y+size-r);
+  ctx.quadraticCurveTo(x+size,y+size,x+size-r,y+size);
+  ctx.lineTo(x+r,y+size);
+  ctx.quadraticCurveTo(x,y+size,x,y+size-r);
+  ctx.lineTo(x,y+r);
+  ctx.quadraticCurveTo(x,y,x+r,y);
+  ctx.fill();
+}
+
+function drawBackgroundGrid(){
+  ctx.strokeStyle = 'rgba(255,255,255,0.03)';
+  for(let x=0;x<canvas.width;x+=blockSize){
+    ctx.beginPath();
+    ctx.moveTo(x,0);
+    ctx.lineTo(x,canvas.height);
+    ctx.stroke();
+  }
+  for(let y=0;y<canvas.height;y+=blockSize){
+    ctx.beginPath();
+    ctx.moveTo(0,y);
+    ctx.lineTo(canvas.width,y);
+    ctx.stroke();
+  }
+}
+
 function drawGrid() {
   ctx.clearRect(0,0,canvas.width,canvas.height);
+  drawBackgroundGrid();
 
   for (let y=0;y<rows;y++) {
     for (let x=0;x<cols;x++) {
       if (grid[y][x]) {
-        ctx.fillStyle = '#0f0';
-        ctx.fillRect(x*blockSize, y*blockSize, blockSize, blockSize);
+        drawRoundedRect(x*blockSize,y*blockSize,blockSize*0.9,grid[y][x]);
       }
     }
   }
 }
 
 function drawPiece() {
-  ctx.fillStyle = '#f00';
   piece.shape.forEach((row,y)=>{
     row.forEach((val,x)=>{
       if(val){
-        ctx.fillRect((piece.x+x)*blockSize,(piece.y+y)*blockSize,blockSize,blockSize);
+        drawRoundedRect((piece.x+x)*blockSize,(piece.y+y)*blockSize,blockSize*0.9,piece.color);
       }
     })
   })
 }
 
-// Função polinomial (quadrática simples)
 function f(x) {
   return 0.02*(x-5)*(x-5)+5;
 }
 
 function drawGraph() {
-  ctx.strokeStyle = 'yellow';
+  ctx.strokeStyle = '#ffd166';
   ctx.beginPath();
   for (let x=0; x<cols; x++) {
     let y = f(x);
