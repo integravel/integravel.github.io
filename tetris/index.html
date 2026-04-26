@@ -1,42 +1,86 @@
-<!DOCTYPE html><html lang="pt-BR">
+<!DOCTYPE html>
+<html lang="pt-BR">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <title>Tetris Integral</title>
+
 <style>
-  :root{
-    --bg:#0f1115;
-    --panel:#151922;
-    --btn:#222836;
-    --btn-active:#2c3447;
-    --grid-line:rgba(255,255,255,0.04);
-  }html, body { margin: 0; padding: 0; height: 100%; background: var(--bg); color: #e6e9ef; font-family: system-ui, -apple-system, sans-serif; overflow: hidden; }
+:root{
+  --bg:#0f1115;
+  --panel:#151922;
+  --btn:#222836;
+  --btn-active:#2c3447;
+}
 
-#app { display: flex; flex-direction: column; height: 100dvh; }
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background: var(--bg);
+  color: #e6e9ef;
+  font-family: system-ui, -apple-system, sans-serif;
+  overflow: hidden;
+}
 
-canvas { flex: 1; display: block; height: calc(100dvh - 120px - env(safe-area-inset-bottom)); }
+#app {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+}
 
-#controls { position: fixed; left: 0; right: 0; bottom: 0; display: flex; gap: 8px; padding: 10px; padding-bottom: calc(env(safe-area-inset-bottom) + 16px); background: var(--panel); }
+canvas {
+  flex: 1;
+  display: block;
+  z-index: 1;
+}
 
-button { flex: 1; padding: 14px; font-size: 18px; background: var(--btn); color: #e6e9ef; border: none; border-radius: 14px; }
+#controls {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  gap: 8px;
+  padding: 10px;
+  padding-bottom: calc(env(safe-area-inset-bottom) + 16px);
+  background: var(--panel);
+  z-index: 10;
+}
 
-button:active { background: var(--btn-active); } </style>
+button {
+  flex: 1;
+  padding: 14px;
+  font-size: 18px;
+  background: var(--btn);
+  color: #e6e9ef;
+  border: none;
+  border-radius: 14px;
+}
 
+button:active {
+  background: var(--btn-active);
+}
+</style>
 </head>
+
 <body>
 <div id="app">
   <canvas id="game"></canvas>
+
   <div id="controls">
     <button onclick="move(-1)">◀</button>
     <button onclick="rotatePiece()">⟳</button>
     <button onclick="move(1)">▶</button>
   </div>
-</div><script>
+</div>
+
+<script>
 const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
 
 let cols = 10;
-let rows = 20; // será recalculado dinamicamente
+let rows = 20;
 let grid;
 let blockSize;
 
@@ -52,11 +96,12 @@ function resize() {
 
   blockSize = canvas.width / cols;
 
-  // recalcula número de linhas baseado na altura visível
+  // Ajuste REAL da área jogável
   rows = Math.floor(canvas.height / blockSize);
 
   createGrid();
 }
+
 window.addEventListener('resize', resize);
 resize();
 
@@ -71,6 +116,7 @@ function randomPiece() {
     [[1,1,0],[0,1,1]]
   ];
   let colors = ['#7c8cff','#6dd3a0','#f2b880','#c58cff'];
+
   return {
     shape: shapes[Math.floor(Math.random()*shapes.length)],
     color: colors[Math.floor(Math.random()*colors.length)],
@@ -80,7 +126,9 @@ function randomPiece() {
 }
 
 function rotatePiece() {
-  let newShape = piece.shape[0].map((_, i) => piece.shape.map(r => r[i]).reverse());
+  let newShape = piece.shape[0].map((_, i) =>
+    piece.shape.map(r => r[i]).reverse()
+  );
   piece.shape = newShape;
 }
 
@@ -158,7 +206,12 @@ function drawGrid() {
   for (let y=0;y<rows;y++) {
     for (let x=0;x<cols;x++) {
       if (grid[y][x]) {
-        drawRoundedRect(x*blockSize,y*blockSize,blockSize*0.9,grid[y][x]);
+        drawRoundedRect(
+          x*blockSize,
+          y*blockSize,
+          blockSize*0.9,
+          grid[y][x]
+        );
       }
     }
   }
@@ -168,7 +221,12 @@ function drawPiece() {
   piece.shape.forEach((row,y)=>{
     row.forEach((val,x)=>{
       if(val){
-        drawRoundedRect((piece.x+x)*blockSize,(piece.y+y)*blockSize,blockSize*0.9,piece.color);
+        drawRoundedRect(
+          (piece.x+x)*blockSize,
+          (piece.y+y)*blockSize,
+          blockSize*0.9,
+          piece.color
+        );
       }
     })
   })
@@ -209,6 +267,7 @@ function estimateArea() {
 
 function update() {
   piece.y++;
+
   if (collide()) {
     piece.y--;
     merge();
@@ -228,5 +287,6 @@ function update() {
 createGrid();
 newPiece();
 setInterval(update, 500);
-</script></body>
+</script>
+</body>
 </html>
