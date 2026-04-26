@@ -1,1 +1,190 @@
-y
+<!DOCTYPE html><html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Tetris Integral</title>
+<style>
+  html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    background: #111;
+    color: white;
+    font-family: sans-serif;
+    overflow: hidden;
+  }#app { display: flex; flex-direction: column; height: 100vh; height: 100dvh; }
+
+canvas { flex: 1; background: #000; }
+
+#controls { display: flex; justify-content: space-around; padding: 10px; padding-bottom: env(safe-area-inset-bottom); background: #222; }
+
+button { flex: 1; margin: 0 5px; padding: 15px; font-size: 18px; background: #444; color: white; border: none; border-radius: 10px; } </style>
+
+</head>
+<body>
+<div id="app">
+  <canvas id="game"></canvas>
+  <div id="controls">
+    <button onclick="move(-1)">⬅</button>
+    <button onclick="rotatePiece()">⟳</button>
+    <button onclick="move(1)">➡</button>
+  </div>
+</div><script>
+const canvas = document.getElementById('game');
+const ctx = canvas.getContext('2d');
+
+let cols = 10;
+let rows = 20;
+let grid;
+let blockSize;
+
+let piece;
+let discarded = 0;
+
+function resize() {
+  canvas.width = window.innerWidth;
+  canvas.height = canvas.clientHeight;
+  blockSize = canvas.width / cols;
+}
+window.addEventListener('resize', resize);
+resize();
+
+function createGrid() {
+  grid = Array.from({length: rows}, () => Array(cols).fill(0));
+}
+
+function randomPiece() {
+  const shapes = [
+    [[1,1],[1,1]],
+    [[1,1,1]],
+    [[1,1,0],[0,1,1]]
+  ];
+  let shape = shapes[Math.floor(Math.random()*shapes.length)];
+  return {
+    shape,
+    x: Math.floor(cols/2) - 1,
+    y: 0
+  };
+}
+
+function rotatePiece() {
+  let newShape = piece.shape[0].map((_, i) => piece.shape.map(r => r[i]).reverse());
+  piece.shape = newShape;
+}
+
+function move(dir) {
+  piece.x += dir;
+  if (outOfBounds()) {
+    discarded++;
+    newPiece();
+  }
+}
+
+function outOfBounds() {
+  return piece.x < 0 || piece.x + piece.shape[0].length > cols;
+}
+
+function collide() {
+  return piece.shape.some((row, y) =>
+    row.some((val, x) => {
+      if (!val) return false;
+      let px = piece.x + x;
+      let py = piece.y + y;
+      return py >= rows || grid[py][px];
+    })
+  );
+}
+
+function merge() {
+  piece.shape.forEach((row, y) => {
+    row.forEach((val, x) => {
+      if (val) grid[piece.y + y][piece.x + x] = 1;
+    });
+  });
+}
+
+function newPiece() {
+  piece = randomPiece();
+}
+
+function drawGrid() {
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+
+  for (let y=0;y<rows;y++) {
+    for (let x=0;x<cols;x++) {
+      if (grid[y][x]) {
+        ctx.fillStyle = '#0f0';
+        ctx.fillRect(x*blockSize, y*blockSize, blockSize, blockSize);
+      }
+    }
+  }
+}
+
+function drawPiece() {
+  ctx.fillStyle = '#f00';
+  piece.shape.forEach((row,y)=>{
+    row.forEach((val,x)=>{
+      if(val){
+        ctx.fillRect((piece.x+x)*blockSize,(piece.y+y)*blockSize,blockSize,blockSize);
+      }
+    })
+  })
+}
+
+// Função polinomial (quadrática simples)
+function f(x) {
+  return 0.02*(x-5)*(x-5)+5;
+}
+
+function drawGraph() {
+  ctx.strokeStyle = 'yellow';
+  ctx.beginPath();
+  for (let x=0; x<cols; x++) {
+    let y = f(x);
+    ctx.lineTo(x*blockSize, y*blockSize);
+  }
+  ctx.stroke();
+}
+
+function checkFillUnderCurve() {
+  for (let x=0;x<cols;x++) {
+    let limit = Math.floor(f(x));
+    for (let y=limit;y<rows;y++) {
+      if (!grid[y][x]) return false;
+    }
+  }
+  return true;
+}
+
+function estimateArea() {
+  let area = 0;
+  for (let x=0;x<cols;x++) {
+    let limit = Math.floor(f(x));
+    area += (rows - limit);
+  }
+  return area;
+}
+
+function update() {
+  piece.y++;
+  if (collide()) {
+    piece.y--;
+    merge();
+    newPiece();
+  }
+
+  drawGrid();
+  drawPiece();
+  drawGraph();
+
+  if (checkFillUnderCurve()) {
+    alert(`Fim do jogo! Área estimada: ${estimateArea()} blocos.\nDescartadas: ${discarded}`);
+    createGrid();
+  }
+}
+
+createGrid();
+newPiece();
+setInterval(update, 500);
+</script></body>
+</html>
