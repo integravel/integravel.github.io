@@ -18,34 +18,31 @@ html, body {
   padding: 0;
   height: 100%;
   background: var(--bg);
-  color: #e6e9ef;
-  font-family: system-ui, -apple-system, sans-serif;
   overflow: hidden;
+  font-family: system-ui;
 }
 
 #app {
+  height: 100dvh;
   display: flex;
   flex-direction: column;
-  height: 100dvh;
 }
 
 canvas {
-  flex: 1;
   display: block;
-  z-index: 1;
+  margin: 0 auto;
 }
 
 #controls {
   position: fixed;
+  bottom: 0;
   left: 0;
   right: 0;
-  bottom: 0;
   display: flex;
   gap: 8px;
   padding: 10px;
   padding-bottom: calc(env(safe-area-inset-bottom) + 16px);
   background: var(--panel);
-  z-index: 10;
 }
 
 button {
@@ -53,13 +50,9 @@ button {
   padding: 14px;
   font-size: 18px;
   background: var(--btn);
-  color: #e6e9ef;
+  color: white;
   border: none;
   border-radius: 14px;
-}
-
-button:active {
-  background: var(--btn-active);
 }
 </style>
 </head>
@@ -81,8 +74,8 @@ const ctx = canvas.getContext('2d');
 
 let cols = 10;
 let rows = 20;
-let grid;
 let blockSize;
+let grid;
 
 let piece;
 let discarded = 0;
@@ -91,13 +84,18 @@ function resize() {
   const controls = document.getElementById('controls');
   const controlsHeight = controls.offsetHeight;
 
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight - controlsHeight;
+  const availableWidth = window.innerWidth;
+  const availableHeight = window.innerHeight - controlsHeight;
 
-  blockSize = canvas.width / cols;
+  // 🔥 pixel-perfect: escolhe o maior bloco inteiro possível
+  blockSize = Math.floor(availableWidth / cols);
 
-  // Ajuste REAL da área jogável
-  rows = Math.floor(canvas.height / blockSize);
+  // calcula quantas linhas cabem EXATAMENTE
+  rows = Math.floor(availableHeight / blockSize);
+
+  // agora o canvas fica PERFEITO (sem sobra)
+  canvas.width = cols * blockSize;
+  canvas.height = rows * blockSize;
 
   createGrid();
 }
@@ -115,6 +113,7 @@ function randomPiece() {
     [[1,1,1]],
     [[1,1,0],[0,1,1]]
   ];
+
   let colors = ['#7c8cff','#6dd3a0','#f2b880','#c58cff'];
 
   return {
@@ -167,51 +166,18 @@ function newPiece() {
   piece = randomPiece();
 }
 
-function drawRoundedRect(x,y,size,color){
-  let r = size*0.25;
+function drawBlock(x,y,color){
   ctx.fillStyle = color;
-  ctx.beginPath();
-  ctx.moveTo(x+r,y);
-  ctx.lineTo(x+size-r,y);
-  ctx.quadraticCurveTo(x+size,y,x+size,y+r);
-  ctx.lineTo(x+size,y+size-r);
-  ctx.quadraticCurveTo(x+size,y+size,x+size-r,y+size);
-  ctx.lineTo(x+r,y+size);
-  ctx.quadraticCurveTo(x,y+size,x,y+size-r);
-  ctx.lineTo(x,y+r);
-  ctx.quadraticCurveTo(x,y,x+r,y);
-  ctx.fill();
-}
-
-function drawBackgroundGrid(){
-  ctx.strokeStyle = 'rgba(255,255,255,0.03)';
-  for(let x=0;x<canvas.width;x+=blockSize){
-    ctx.beginPath();
-    ctx.moveTo(x,0);
-    ctx.lineTo(x,canvas.height);
-    ctx.stroke();
-  }
-  for(let y=0;y<canvas.height;y+=blockSize){
-    ctx.beginPath();
-    ctx.moveTo(0,y);
-    ctx.lineTo(canvas.width,y);
-    ctx.stroke();
-  }
+  ctx.fillRect(x, y, blockSize-1, blockSize-1);
 }
 
 function drawGrid() {
   ctx.clearRect(0,0,canvas.width,canvas.height);
-  drawBackgroundGrid();
 
   for (let y=0;y<rows;y++) {
     for (let x=0;x<cols;x++) {
       if (grid[y][x]) {
-        drawRoundedRect(
-          x*blockSize,
-          y*blockSize,
-          blockSize*0.9,
-          grid[y][x]
-        );
+        drawBlock(x*blockSize, y*blockSize, grid[y][x]);
       }
     }
   }
@@ -221,10 +187,9 @@ function drawPiece() {
   piece.shape.forEach((row,y)=>{
     row.forEach((val,x)=>{
       if(val){
-        drawRoundedRect(
+        drawBlock(
           (piece.x+x)*blockSize,
           (piece.y+y)*blockSize,
-          blockSize*0.9,
           piece.color
         );
       }
@@ -239,10 +204,12 @@ function f(x) {
 function drawGraph() {
   ctx.strokeStyle = '#ffd166';
   ctx.beginPath();
+
   for (let x=0; x<cols; x++) {
     let y = f(x);
     ctx.lineTo(x*blockSize, y*blockSize);
   }
+
   ctx.stroke();
 }
 
