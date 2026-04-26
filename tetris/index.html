@@ -14,7 +14,7 @@
 
 #app { display: flex; flex-direction: column; height: 100dvh; }
 
-canvas { flex: 1; display: block; height: calc(100dvh - 80px - env(safe-area-inset-bottom)); }
+canvas { flex: 1; display: block; height: calc(100dvh - 120px - env(safe-area-inset-bottom)); }
 
 #controls { position: fixed; left: 0; right: 0; bottom: 0; display: flex; gap: 8px; padding: 10px; padding-bottom: calc(env(safe-area-inset-bottom) + 16px); background: var(--panel); }
 
@@ -27,9 +27,9 @@ button:active { background: var(--btn-active); } </style>
 <div id="app">
   <canvas id="game"></canvas>
   <div id="controls">
-    <button onclick="move(-1)">⬅</button>
+    <button onclick="move(-1)">◀</button>
     <button onclick="rotatePiece()">⟳</button>
-    <button onclick="move(1)">➡</button>
+    <button onclick="move(1)">▶</button>
   </div>
 </div><script>
 const canvas = document.getElementById('game');
