@@ -14,9 +14,9 @@
 
 #app { display: flex; flex-direction: column; height: 100dvh; }
 
-canvas { flex: 1; display: block; }
+canvas { flex: 1; display: block; height: calc(100dvh - 80px - env(safe-area-inset-bottom)); }
 
-#controls { display: flex; gap: 8px; padding: 10px; padding-bottom: calc(env(safe-area-inset-bottom) + 10px); background: var(--panel); }
+#controls { position: fixed; left: 0; right: 0; bottom: 0; display: flex; gap: 8px; padding: 10px; padding-bottom: calc(env(safe-area-inset-bottom) + 16px); background: var(--panel); }
 
 button { flex: 1; padding: 14px; font-size: 18px; background: var(--btn); color: #e6e9ef; border: none; border-radius: 14px; }
 
