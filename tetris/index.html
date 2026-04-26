@@ -1,259 +1,170 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-<title>Tetris Integral</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Riemann Game</title>
 
 <style>
-:root{
-  --bg:#0f1115;
-  --panel:#151922;
-  --btn:#222836;
-  --btn-active:#2c3447;
+body{
+  margin:0;
+  background:#0f1115;
+  overflow:hidden;
+  font-family:sans-serif;
 }
 
-html, body {
-  margin: 0;
-  padding: 0;
-  height: 100%;
-  background: var(--bg);
-  overflow: hidden;
-  font-family: system-ui;
+canvas{
+  display:block;
+  margin:auto;
 }
 
-#app {
-  height: 100dvh;
-  display: flex;
-  flex-direction: column;
+#controls{
+  position:fixed;
+  bottom:0;
+  left:0;
+  right:0;
+  display:flex;
+  gap:8px;
+  padding:10px;
+  background:#151922;
 }
 
-canvas {
-  display: block;
-  margin: 0 auto;
-}
-
-#controls {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  display: flex;
-  gap: 8px;
-  padding: 10px;
-  padding-bottom: calc(env(safe-area-inset-bottom) + 16px);
-  background: var(--panel);
-}
-
-button {
-  flex: 1;
-  padding: 14px;
-  font-size: 18px;
-  background: var(--btn);
-  color: white;
-  border: none;
-  border-radius: 14px;
+button{
+  flex:1;
+  padding:14px;
+  font-size:18px;
+  border:none;
+  border-radius:10px;
+  background:#222836;
+  color:white;
 }
 </style>
 </head>
 
 <body>
-<div id="app">
-  <canvas id="game"></canvas>
 
-  <div id="controls">
-    <button onclick="move(-1)">◀</button>
-    <button onclick="rotatePiece()">⟳</button>
-    <button onclick="move(1)">▶</button>
-  </div>
+<canvas id="game"></canvas>
+
+<div id="controls">
+  <button onclick="move(-1)">◀</button>
+  <button onclick="drop()">▼</button>
+  <button onclick="move(1)">▶</button>
 </div>
 
 <script>
-const canvas = document.getElementById('game');
-const ctx = canvas.getContext('2d');
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
 
 let cols = 10;
-let rows = 20;
+let rows;
 let blockSize;
 let grid;
 
-let piece;
-let discarded = 0;
+let cursor = 5;
+let currentSize = 1;
 
-function resize() {
-  const controls = document.getElementById('controls');
-  const controlsHeight = controls.offsetHeight;
-
-  const availableWidth = window.innerWidth;
-  const availableHeight = window.innerHeight - controlsHeight;
-
-  // 🔥 pixel-perfect: escolhe o maior bloco inteiro possível
-  blockSize = Math.floor(availableWidth / cols);
-
-  // calcula quantas linhas cabem EXATAMENTE
-  rows = Math.floor(availableHeight / blockSize);
-
-  // agora o canvas fica PERFEITO (sem sobra)
-  canvas.width = cols * blockSize;
-  canvas.height = rows * blockSize;
-
-  createGrid();
-}
-
-window.addEventListener('resize', resize);
-resize();
-
-function createGrid() {
-  grid = Array.from({length: rows}, () => Array(cols).fill(0));
-}
-
-function randomPiece() {
-  const shapes = [
-    [[1,1],[1,1]],
-    [[1,1,1]],
-    [[1,1,0],[0,1,1]]
-  ];
-
-  let colors = ['#7c8cff','#6dd3a0','#f2b880','#c58cff'];
-
-  return {
-    shape: shapes[Math.floor(Math.random()*shapes.length)],
-    color: colors[Math.floor(Math.random()*colors.length)],
-    x: Math.floor(cols/2) - 1,
-    y: 0
-  };
-}
-
-function rotatePiece() {
-  let newShape = piece.shape[0].map((_, i) =>
-    piece.shape.map(r => r[i]).reverse()
-  );
-  piece.shape = newShape;
-}
-
-function move(dir) {
-  piece.x += dir;
-  if (outOfBounds()) {
-    discarded++;
-    newPiece();
-  }
-}
-
-function outOfBounds() {
-  return piece.x < 0 || piece.x + piece.shape[0].length > cols;
-}
-
-function collide() {
-  return piece.shape.some((row, y) =>
-    row.some((val, x) => {
-      if (!val) return false;
-      let px = piece.x + x;
-      let py = piece.y + y;
-      return py >= rows || grid[py][px];
-    })
-  );
-}
-
-function merge() {
-  piece.shape.forEach((row, y) => {
-    row.forEach((val, x) => {
-      if (val) grid[piece.y + y][piece.x + x] = piece.color;
-    });
-  });
-}
-
-function newPiece() {
-  piece = randomPiece();
-}
-
-function drawBlock(x,y,color){
-  ctx.fillStyle = color;
-  ctx.fillRect(x, y, blockSize-1, blockSize-1);
-}
-
-function drawGrid() {
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-
-  for (let y=0;y<rows;y++) {
-    for (let x=0;x<cols;x++) {
-      if (grid[y][x]) {
-        drawBlock(x*blockSize, y*blockSize, grid[y][x]);
-      }
-    }
-  }
-}
-
-function drawPiece() {
-  piece.shape.forEach((row,y)=>{
-    row.forEach((val,x)=>{
-      if(val){
-        drawBlock(
-          (piece.x+x)*blockSize,
-          (piece.y+y)*blockSize,
-          piece.color
-        );
-      }
-    })
-  })
-}
-
-function f(x) {
+function f(x){
   return 0.02*(x-5)*(x-5)+5;
 }
 
-function drawGraph() {
-  ctx.strokeStyle = '#ffd166';
-  ctx.beginPath();
+function resize(){
+  const controls = document.getElementById('controls');
+  const h = window.innerHeight - controls.offsetHeight;
 
-  for (let x=0; x<cols; x++) {
-    let y = f(x);
-    ctx.lineTo(x*blockSize, y*blockSize);
+  blockSize = Math.floor(window.innerWidth / cols);
+  rows = Math.floor(h / blockSize);
+
+  canvas.width = cols * blockSize;
+  canvas.height = rows * blockSize;
+
+  grid = Array.from({length: rows}, () => Array(cols).fill(0));
+}
+
+resize();
+window.addEventListener("resize", resize);
+
+function move(dir){
+  cursor += dir;
+  if(cursor < 0) cursor = 0;
+  if(cursor >= cols) cursor = cols-1;
+}
+
+function columnHeight(x){
+  for(let y=0;y<rows;y++){
+    if(grid[y][x]) return y;
+  }
+  return rows;
+}
+
+function drop(){
+  let x = cursor;
+  let top = Math.floor(f(x));
+
+  let currentTop = columnHeight(x);
+
+  let available = currentTop - top;
+
+  if(available <= 0) return;
+
+  let size = Math.min(currentSize, available);
+
+  for(let i=0;i<size;i++){
+    grid[currentTop-1-i][x] = "#7c8cff";
   }
 
+  currentSize = Math.floor(Math.random()*5)+1;
+}
+
+function draw(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+
+  // grid
+  ctx.strokeStyle = "rgba(255,255,255,0.05)";
+  for(let x=0;x<cols;x++){
+    ctx.beginPath();
+    ctx.moveTo(x*blockSize,0);
+    ctx.lineTo(x*blockSize,canvas.height);
+    ctx.stroke();
+  }
+
+  for(let y=0;y<rows;y++){
+    ctx.beginPath();
+    ctx.moveTo(0,y*blockSize);
+    ctx.lineTo(canvas.width,y*blockSize);
+    ctx.stroke();
+  }
+
+  // blocos
+  for(let y=0;y<rows;y++){
+    for(let x=0;x<cols;x++){
+      if(grid[y][x]){
+        ctx.fillStyle = grid[y][x];
+        ctx.fillRect(x*blockSize,y*blockSize,blockSize-1,blockSize-1);
+      }
+    }
+  }
+
+  // cursor
+  ctx.fillStyle = "#ffd166";
+  ctx.fillRect(cursor*blockSize,0,blockSize,blockSize);
+
+  // gráfico
+  ctx.strokeStyle = "#ffd166";
+  ctx.beginPath();
+  for(let x=0;x<cols;x++){
+    let y = f(x);
+    ctx.lineTo(x*blockSize,y*blockSize);
+  }
   ctx.stroke();
 }
 
-function checkFillUnderCurve() {
-  for (let x=0;x<cols;x++) {
-    let limit = Math.floor(f(x));
-    for (let y=limit;y<rows;y++) {
-      if (!grid[y][x]) return false;
-    }
-  }
-  return true;
+function loop(){
+  draw();
+  requestAnimationFrame(loop);
 }
 
-function estimateArea() {
-  let area = 0;
-  for (let x=0;x<cols;x++) {
-    let limit = Math.floor(f(x));
-    area += (rows - limit);
-  }
-  return area;
-}
-
-function update() {
-  piece.y++;
-
-  if (collide()) {
-    piece.y--;
-    merge();
-    newPiece();
-  }
-
-  drawGrid();
-  drawPiece();
-  drawGraph();
-
-  if (checkFillUnderCurve()) {
-    alert(`Fim do jogo! Área estimada: ${estimateArea()} blocos.\nDescartadas: ${discarded}`);
-    createGrid();
-  }
-}
-
-createGrid();
-newPiece();
-setInterval(update, 500);
+loop();
 </script>
+
 </body>
 </html>
