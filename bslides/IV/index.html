@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Laboratório Integrável</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      max-width: 100vw;
+      overflow-x: hidden;
+    }
+
+    /* ===== HEADER ===== */
+    .site-header {
+      background-color: #000;
+      color: #fff;
+      padding: 10px 20px;
+    }
+
+    .site-header a {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .site-header img {
+      height: 40px;
+    }
+
+    .site-header p {
+      margin: 0;
+    }
+
+    /* ===== CONTAINER ===== */
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      line-height: 1.6;
+      text-align: justify;
+    }
+
+    h2 {
+      color: #333;
+      margin-top: 30px;
+    }
+
+    a {
+      color: #007BFF;
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    .lista-demonstracoes a {
+      display: block;
+      margin: 6px 0;
+    }
+
+    /* ===== FOOTER ===== */
+    .site-footer {
+      background-color: #f4f4f4;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 30px;
+      padding: 20px;
+      border-top: 1px solid #ddd;
+    }
+
+    .site-footer div {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .site-footer img {
+      height: 40px;
+    }
+
+    .site-footer img.large {
+      height: 50px;
+    }
+
+    .site-footer button {
+      background-color: #007BFF;
+      color: #fff;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .site-footer button:hover {
+      background-color: #0056b3;
+    }
+
+    /* ===== RESPONSIVO ===== */
+    @media (max-width: 600px) {
+      .site-header a {
+        flex-direction: column;
+        text-align: center;
+      }
+
+      .site-footer {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ===== HEADER ===== -->
+<header class="site-header">
+  <a href="https://integravel.github.io/">
+    <img src="/imagens/logo.png" alt="Logo do Laboratório Integrável" />
+    <p>
+      Laboratório Integrável é um hub para recursos virtuais, abertos,
+      de Ciências e Matemática, de autoria neurodivergente.
+    </p>
+  </a>
+</header>
+
+<!-- ===== CONTEÚDO ===== -->
+<main class="container">
+
+  <h2>Geração I</h2>
+
+  <p>
+    Na época (2018) havia atingido resultados tão bons com a linguagem Scratch, que comecei a oferecer para meus amigos da Educação, se alguém tinha um projeto que gostaria de implementar computacionalmente. Daí cheguei numa professora de Educação Especial que queria trabalhar o conceito de reconhecimento simbólico de números e de seus significados concretos (quantidades), com crianças autistas. Assim, com suas orientações a respeito do que seriam estímulos positivos e negativos aceitáveis para este público, construí um jogo bastante simples, que propunha dois quadros, com quantidades diferentes de besouros, e no centro da tela um número. O jogador precisava escolher o quadro com a quantidade correspondente àquele número.
+  </p>
+
+  <h2><a href="https://scratch.mit.edu/projects/210523544/">Geração I</a></h2>
+
+</main>
+
+<!-- ===== FOOTER ===== -->
+<footer class="site-footer">
+  <div>
+    <img src="/imagens/logo-sobre.png" alt="Logo sobre" class="large" />
+    <button data-link="https://integravel.github.io/sobre">
+      Mais Informações
+    </button>
+  </div>
+
+  <div>
+    <img src="/imagens/logo-contato.png" alt="Logo contato" />
+    <button data-link="mailto:integravel@gmail.com">
+      integravel@gmail.com
+    </button>
+  </div>
+</footer>
+
+<script>
+  document.querySelectorAll("button[data-link]").forEach(button => {
+    button.addEventListener("click", () => {
+      window.location.href = button.dataset.link;
+    });
+  });
+</script>
+
+</body>
+</html>
