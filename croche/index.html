@@ -1,1 +1,169 @@
-y
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculadora de Crochê</title>
+
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background: #f7f7f7;
+        margin: 0;
+        padding: 16px;
+        display: flex;
+        justify-content: center;
+    }
+
+    .container {
+        width: 100%;
+        max-width: 420px;
+    }
+
+    h2 {
+        text-align: center;
+        color: #333;
+    }
+
+    .card {
+        background: #fff;
+        padding: 16px;
+        margin-bottom: 16px;
+        border-radius: 12px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+    }
+
+    label {
+        font-size: 14px;
+        color: #555;
+    }
+
+    input {
+        width: 100%;
+        padding: 10px;
+        margin: 6px 0 12px;
+        border-radius: 8px;
+        border: 1px solid #ccc;
+        font-size: 16px;
+    }
+
+    button {
+        width: 100%;
+        padding: 12px;
+        border: none;
+        border-radius: 10px;
+        background: #6c63ff;
+        color: white;
+        font-size: 16px;
+        cursor: pointer;
+    }
+
+    button:hover {
+        background: #574fd6;
+    }
+
+    .result {
+        margin-top: 10px;
+        font-weight: bold;
+        color: #333;
+        text-align: center;
+    }
+</style>
+</head>
+
+<body>
+
+<div class="container">
+    <h2>Calculadora de Crochê</h2>
+
+    <!-- Função 1 -->
+    <div class="card">
+        <h3>Consumo por ponto</h3>
+        <label>Quantidade de pontos</label>
+        <input type="number" id="pontos">
+
+        <label>Comprimento usado (mm)</label>
+        <input type="number" id="comprimento">
+
+        <button onclick="calcConsumo()">Calcular</button>
+        <div class="result" id="resultado1"></div>
+    </div>
+
+    <!-- Função 2 -->
+    <div class="card">
+        <h3>Consumo total do disco</h3>
+        <label>Pontos no primeiro anel</label>
+        <input type="number" id="inicio">
+
+        <label>Aumento por anel</label>
+        <input type="number" id="razao">
+
+        <label>Número de anéis</label>
+        <input type="number" id="aneis">
+
+        <label>Consumo por ponto (mm)</label>
+        <input type="number" id="consumoPonto">
+
+        <button onclick="calcDisco()">Calcular</button>
+        <div class="result" id="resultado2"></div>
+    </div>
+
+    <!-- Função 3 -->
+    <div class="card">
+        <h3>Estimativa de anéis por raio</h3>
+        <label>Raio desejado (mm)</label>
+        <input type="number" id="raio">
+
+        <label>Espessura da linha (mm)</label>
+        <input type="number" id="espessura">
+
+        <button onclick="calcAneis()">Calcular</button>
+        <div class="result" id="resultado3"></div>
+    </div>
+
+</div>
+
+<script>
+function calcConsumo() {
+    let pontos = parseFloat(document.getElementById("pontos").value);
+    let comprimento = parseFloat(document.getElementById("comprimento").value);
+
+    if (pontos > 0) {
+        let consumo = comprimento / pontos;
+        document.getElementById("resultado1").innerText =
+            "Cada ponto consome " + consumo.toFixed(2) + " mm";
+    }
+}
+
+function calcDisco() {
+    let inicio = parseFloat(document.getElementById("inicio").value);
+    let razao = parseFloat(document.getElementById("razao").value);
+    let aneis = parseFloat(document.getElementById("aneis").value);
+    let consumo = parseFloat(document.getElementById("consumoPonto").value);
+
+    let totalPontos = 0;
+
+    for (let i = 0; i < aneis; i++) {
+        totalPontos += inicio + (i * razao);
+    }
+
+    let totalLinha = totalPontos * consumo;
+
+    document.getElementById("resultado2").innerText =
+        "Total de linha: " + totalLinha.toFixed(2) + " mm";
+}
+
+function calcAneis() {
+    let raio = parseFloat(document.getElementById("raio").value);
+    let espessura = parseFloat(document.getElementById("espessura").value);
+
+    if (espessura > 0) {
+        let aneis = raio / espessura;
+        document.getElementById("resultado3").innerText =
+            "Você precisará de aproximadamente " + Math.ceil(aneis) + " anéis";
+    }
+}
+</script>
+
+</body>
+</html>
