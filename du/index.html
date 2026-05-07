@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Espectrum Dress-up</title>
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <div class="app">
+
+    <div id="avatar">
+      <img id="baseLayer" />
+      <img id="bodyLayer" />
+      <img id="skin2Layer" />
+      <img id="skirtLayer" />
+      <img id="shoesLayer" />
+      <img id="hairLayer" />
+      <img id="skin3Layer" />
+    </div>
+
+    <div class="controls">
+
+      <button onclick="prevHair()">← Cabelo</button>
+      <button onclick="nextHair()">Cabelo →</button>
+
+      <button onclick="prevSkirt()">← Saia</button>
+      <button onclick="nextSkirt()">Saia →</button>
+
+      <button onclick="prevShoes()">← Sapato</button>
+      <button onclick="nextShoes()">Sapato →</button>
+
+    </div>
+
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
