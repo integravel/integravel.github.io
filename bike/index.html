@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Which Way the Bicycle Go?</title>
+
+<style>
+    *{
+        box-sizing:border-box;
+        margin:0;
+        padding:0;
+    }
+
+    body{
+        background:#111;
+        color:white;
+        font-family:Arial, Helvetica, sans-serif;
+        overflow:hidden;
+    }
+
+    #ui{
+        position:fixed;
+        top:10px;
+        left:10px;
+        z-index:10;
+        background:rgba(0,0,0,0.6);
+        padding:12px;
+        border-radius:12px;
+        border:1px solid #444;
+        width:260px;
+    }
+
+    #ui h1{
+        font-size:18px;
+        margin-bottom:8px;
+    }
+
+    #stats{
+        line-height:1.6;
+        margin-bottom:10px;
+        font-size:14px;
+    }
+
+    #message{
+        margin-top:8px;
+        min-height:40px;
+        font-size:14px;
+    }
+
+    canvas{
+        display:block;
+        background:#181818;
+    }
+
+    button{
+        margin-top:6px;
+        width:100%;
+        padding:10px;
+        border:none;
+        border-radius:8px;
+        background:#333;
+        color:white;
+        cursor:pointer;
+        font-weight:bold;
+    }
+
+    button:hover{
+        background:#444;
+    }
+
+    .legend{
+        margin-top:8px;
+        font-size:12px;
+        opacity:0.85;
+        line-height:1.4;
+    }
+
+    .color-box{
+        display:inline-block;
+        width:10px;
+        height:10px;
+        margin-right:5px;
+        border-radius:50%;
+    }
+</style>
+</head>
+
+<body>
+
+<div id="ui">
+    <h1>Which Way the Bicycle Go?</h1>
+
+    <div id="stats">
+        Trajetos: <span id="rounds">0</span><br>
+        Acertos: <span id="hits">0</span><br>
+        Erros: <span id="misses">0</span><br>
+        Precisão: <span id="accuracy">0%</span>
+    </div>
+
+    <button id="nextBtn" style="display:none;">Próximo trajeto</button>
+
+    <div class="legend">
+        <div><span class="color-box" style="background:red"></span>Uma roda</div>
+        <div><span class="color-box" style="background:#3fa9ff"></span>Outra roda</div>
+    </div>
+
+    <div id="message"></div>
+</div>
+
+<canvas id="canvas"></canvas>
+
+<script>
+
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+
+let W, H;
+
+function resize(){
+    W = canvas.width = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+}
+resize();
+window.addEventListener("resize", resize);
+
+const roundsEl = document.getElementById("rounds");
+const hitsEl = document.getElementById("hits");
+const missesEl = document.getElementById("misses");
+const accuracyEl = document.getElementById("accuracy");
+const messageEl = document.getElementById("message");
+const nextBtn = document.getElementById("nextBtn");
+
+let rounds = 0;
+let hits = 0;
+let misses = 0;
+
+let state = "demo";
+
+let currentPath = [];
+let frontColorIndex = 0;
+let directionCorrect = null;
+
+let selectedLine = null;
+let selectedDirection = null;
+
+let hoveredDirection = null;
+
+const bikeDistance = 34;
+
+function updateStats(){
+    roundsEl.textContent = rounds;
+    hitsEl.textContent = hits;
+    missesEl.textContent = misses;
+
+    let acc = rounds === 0 ? 0 : Math.round((hits/rounds)*100);
+    accuracyEl.textContent = acc + "%";
+}
+
+function rand(min,max){
+    return Math.random()*(max-min)+min;
+}
+
+function generatePath(){
+
+    const pts = [];
+
+    let x = rand(120, W-120);
+    let y = rand(120, H-120);
+
+    let angle = rand(0, Math.PI*2);
+
+    pts.push({x,y});
+
+    for(let i=0;i<260;i++){
+
+        angle += rand(-0.25,0.25);
+
+        let speed = rand(2.2,4);
+
+        x += Math.cos(angle)*speed;
+        y += Math.sin(angle)*speed;
+
+        if(x<70){ x=70; angle=Math.PI-angle; }
+        if(x>W-70){ x=W-70; angle=Math.PI-angle; }
+        if(y<70){ y=70; angle=-angle; }
+        if(y>H-70){ y=H-70; angle=-angle; }
+
+        pts.push({x,y});
+    }
+
+    return pts;
+}
+
+function offsetPoint(p1,p2,d){
+
+    const dx = p2.x-p1.x;
+    const dy = p2.y-p1.y;
+
+    const len = Math.hypot(dx,dy);
+
+    const nx = -dy/len;
+    const ny = dx/len;
+
+    return {
+        x:p1.x + nx*d,
+        y:p1.y + ny*d
+    };
+}
+
+function buildTracks(path){
+
+    const left = [];
+    const right = [];
+
+    for(let i=0;i<path.length-1;i++){
+
+        const p1 = path[i];
+        const p2 = path[i+1];
+
+        left.push(offsetPoint(p1,p2,bikeDistance/2));
+        right.push(offsetPoint(p1,p2,-bikeDistance/2));
+    }
+
+    return {left,right};
+}
+
+function drawTrack(points,color,lineWidth=5){
+
+    ctx.beginPath();
+
+    for(let i=0;i<points.length;i++){
+
+        const p = points[i];
+
+        if(i===0){
+            ctx.moveTo(p.x,p.y);
+        }else{
+            ctx.lineTo(p.x,p.y);
+        }
+    }
+
+    ctx.strokeStyle = color;
+    ctx.lineWidth = lineWidth;
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+    ctx.stroke();
+}
+
+function drawBike(x,y,angle){
+
+    ctx.save();
+
+    ctx.translate(x,y);
+    ctx.rotate(angle);
+
+    ctx.strokeStyle="white";
+    ctx.lineWidth=3;
+
+    // rodas
+    ctx.beginPath();
+    ctx.arc(-18,0,10,0,Math.PI*2);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.arc(18,0,10,0,Math.PI*2);
+    ctx.stroke();
+
+    // quadro
+    ctx.beginPath();
+    ctx.moveTo(-18,0);
+    ctx.lineTo(0,-12);
+    ctx.lineTo(18,0);
+    ctx.lineTo(0,0);
+    ctx.lineTo(-18,0);
+    ctx.stroke();
+
+    ctx.restore();
+}
+
+async function playDemo(){
+
+    state = "demo";
+
+    ctx.clearRect(0,0,W,H);
+
+    currentPath = generatePath();
+
+    const tracks = buildTracks(currentPath);
+
+    frontColorIndex = Math.random()<0.5 ? 0 : 1;
+
+    const frontTrack = frontColorIndex===0 ? tracks.left : tracks.right;
+    const backTrack  = frontColorIndex===0 ? tracks.right : tracks.left;
+
+    for(let i=1;i<currentPath.length;i++){
+
+        ctx.clearRect(0,0,W,H);
+
+        drawTrack(frontTrack.slice(0,i),"red");
+        drawTrack(backTrack.slice(0,i),"#3fa9ff");
+
+        const p1 = currentPath[i-1];
+        const p2 = currentPath[i];
+
+        const angle = Math.atan2(p2.y-p1.y,p2.x-p1.x);
+
+        drawBike(p2.x,p2.y,angle);
+
+        await new Promise(r=>setTimeout(r,10));
+    }
+
+    setTimeout(startGameRound,600);
+}
+
+function startGameRound(){
+
+    state = "guessFront";
+
+    ctx.clearRect(0,0,W,H);
+
+    currentPath = generatePath();
+
+    directionCorrect = Math.random()<0.5 ? "forward":"backward";
+
+    if(directionCorrect==="backward"){
+        currentPath.reverse();
+    }
+
+    const tracks = buildTracks(currentPath);
+
+    frontColorIndex = Math.random()<0.5 ? 0 : 1;
+
+    const frontTrack = frontColorIndex===0 ? tracks.left : tracks.right;
+    const backTrack  = frontColorIndex===0 ? tracks.right : tracks.left;
+
+    drawTrack(frontTrack,"red");
+    drawTrack(backTrack,"#3fa9ff");
+
+    messageEl.innerHTML =
+        "1) Clique na trilha que você acha que é a roda da frente.";
+
+    selectedLine = null;
+    selectedDirection = null;
+
+    nextBtn.style.display="none";
+}
+
+canvas.addEventListener("click",(e)=>{
+
+    if(state==="demo") return;
+
+    const rect = canvas.getBoundingClientRect();
+
+    const mx = e.clientX - rect.left;
+    const my = e.clientY - rect.top;
+
+    if(state==="guessFront"){
+
+        const clicked = detectClosestTrack(mx,my);
+
+        if(clicked!==null){
+
+            selectedLine = clicked;
+
+            state = "guessDirection";
+
+            drawSelection();
+
+            messageEl.innerHTML =
+                "2) Agora clique na METADE da tela indicando a direção da bicicleta.<br><br>⬅ esquerda = começou aqui<br>➡ direita = terminou aqui";
+        }
+    }
+    else if(state==="guessDirection"){
+
+        selectedDirection = mx < W/2 ? "backward":"forward";
+
+        evaluateRound();
+    }
+
+});
+
+function detectClosestTrack(mx,my){
+
+    const tracks = buildTracks(currentPath);
+
+    const arrs = [tracks.left, tracks.right];
+
+    let best = null;
+    let bestDist = Infinity;
+
+    for(let a=0;a<2;a++){
+
+        for(const p of arrs[a]){
+
+            const d = Math.hypot(mx-p.x,my-p.y);
+
+            if(d<bestDist){
+                bestDist = d;
+                best = a;
+            }
+        }
+    }
+
+    if(bestDist<25){
+        return best;
+    }
+
+    return null;
+}
+
+function drawSelection(){
+
+    ctx.clearRect(0,0,W,H);
+
+    const tracks = buildTracks(currentPath);
+
+    drawTrack(tracks.left,"red");
+    drawTrack(tracks.right,"#3fa9ff");
+
+    const chosenColor =
+        selectedLine===0 ? "red" : "#3fa9ff";
+
+    ctx.strokeStyle="white";
+    ctx.lineWidth=10;
+
+    const selectedTrack =
+        selectedLine===0 ? tracks.left : tracks.right;
+
+    ctx.beginPath();
+
+    for(let i=0;i<selectedTrack.length;i++){
+
+        const p = selectedTrack[i];
+
+        if(i===0){
+            ctx.moveTo(p.x,p.y);
+        }else{
+            ctx.lineTo(p.x,p.y);
+        }
+    }
+
+    ctx.stroke();
+
+    drawTrack(selectedTrack,chosenColor,5);
+
+}
+
+function evaluateRound(){
+
+    rounds++;
+
+    const correctFront = selectedLine === frontColorIndex;
+    const correctDir = selectedDirection === directionCorrect;
+
+    const success = correctFront && correctDir;
+
+    if(success){
+        hits++;
+        messageEl.innerHTML =
+            "✅ Acertou a roda da frente E a direção!";
+    }else{
+
+        misses++;
+
+        let txt = "❌ ";
+
+        if(!correctFront && !correctDir){
+            txt += "Errou ambos.";
+        }else if(!correctFront){
+            txt += "Errou a roda da frente.";
+        }else{
+            txt += "Errou a direção.";
+        }
+
+        txt += "<br><br>";
+
+        txt += "Resposta correta: ";
+
+        txt += frontColorIndex===0
+            ? "VERMELHA"
+            : "AZUL";
+
+        txt += " era a roda da frente.";
+
+        txt += "<br>";
+
+        txt += directionCorrect==="forward"
+            ? "A bicicleta foi da esquerda para a direita."
+            : "A bicicleta foi da direita para a esquerda.";
+
+        messageEl.innerHTML = txt;
+    }
+
+    updateStats();
+
+    state = "result";
+
+    nextBtn.style.display="block";
+}
+
+nextBtn.addEventListener("click",()=>{
+    playDemo();
+});
+
+updateStats();
+playDemo();
+
+</script>
+
+</body>
+</html>
