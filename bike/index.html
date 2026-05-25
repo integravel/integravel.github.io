@@ -1,31 +1,114 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Which Way The Bicycle Go?</title>
+
+<style>
+
+html,body{
+    margin:0;
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    background:#111;
+    touch-action:none;
+}
+
+canvas{
+    display:block;
+    background:#151515;
+}
+
+</style>
+</head>
+<body>
+
+<canvas id="canvas"></canvas>
+
+<script>
+
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+
+let W,H;
+
+function resize(){
+
+    W = canvas.width = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+}
+
+resize();
+window.addEventListener("resize",resize);
+
 /* =========================================================
-   SUBSTITUA A FUNÇÃO generateFrontWheelPath()
-   POR ESTA VERSÃO
+   CONFIGURAÇÕES
+========================================================= */
+
+const BIKE_LENGTH = 52;
+
+const TRACK_COLOR = "#f5f5f5";
+
+const TRACK_WIDTH = 4;
+
+const HIGHLIGHT_COLOR = "#00ffff";
+
+/* =========================================================
+   ESTADO
+========================================================= */
+
+let currentData = null;
+
+let phase = "chooseTrack";
+
+let selectedTrack = null;
+
+let selectedDirection = null;
+
+let rounds = 0;
+let hits = 0;
+
+/* =========================================================
+   UTIL
+========================================================= */
+
+function random(min,max){
+
+    return Math.random()*(max-min)+min;
+}
+
+function clamp(v,min,max){
+
+    return Math.max(min,Math.min(max,v));
+}
+
+function lerp(a,b,t){
+
+    return a + (b-a)*t;
+}
+
+function catmullRom(p0,p1,p2,p3,t){
+
+    return 0.5 * (
+        (2*p1) +
+        (-p0+p2)*t +
+        (2*p0-5*p1+4*p2-p3)*t*t +
+        (-p0+3*p1-3*p2+p3)*t*t*t
+    );
+}
+
+/* =========================================================
+   TRAJETÓRIA PARAMÉTRICA
 ========================================================= */
 
 function generateFrontWheelPath(){
 
-    const points = [];
-
-    /*
-        Margem invisível externa.
-        A trajetória começa e termina fora da tela.
-    */
-
     const outside = Math.max(W,H) * 0.18;
 
-    /*
-        Área segura interna:
-        garante que o miolo do trajeto fique visível
-        mesmo em celulares estreitos.
-    */
-
-    const safeX = W * 0.18;
-    const safeY = H * 0.18;
-
-    /*
-        Escolhe um lado inicial aleatório
-    */
+    const safeX = W * 0.16;
+    const safeY = H * 0.16;
 
     const side = Math.floor(random(0,4));
 
@@ -73,77 +156,70 @@ function generateFrontWheelPath(){
         endY = -outside;
     }
 
-    /*
-        Pontos intermediários suaves.
-        Todos ficam DENTRO da tela.
-    */
+    const controls = [];
 
-    const controlPoints = [];
-
-    controlPoints.push({
+    controls.push({
         x:startX,
         y:startY
     });
 
-    const segments = 6;
+    const segments = 7;
 
     for(let i=1;i<=segments;i++){
 
         const t = i/(segments+1);
 
-        /*
-            Interpolação principal
-        */
-
         let x = lerp(startX,endX,t);
         let y = lerp(startY,endY,t);
 
         /*
-            Perturbações trigonométricas suaves
+            Perturbações suaves:
+            polinomiais + trigonométricas
         */
 
-        const ampX = W * 0.12;
-        const ampY = H * 0.12;
+        const poly = (t-0.5)*(t-0.5);
 
         x +=
             Math.sin(t*Math.PI*2 + random(-1,1))
-            * ampX;
+            * W * 0.12
+            * (1-poly);
 
         y +=
             Math.cos(t*Math.PI*2 + random(-1,1))
-            * ampY;
+            * H * 0.12
+            * (1-poly);
 
-        /*
-            Mantém interior visível
-        */
+        x +=
+            (t-0.5)*(t-0.5)*(t-0.5)
+            * W * 0.08;
 
         x = clamp(x,safeX,W-safeX);
         y = clamp(y,safeY,H-safeY);
 
-        controlPoints.push({x,y});
+        controls.push({x,y});
     }
 
-    controlPoints.push({
+    controls.push({
         x:endX,
         y:endY
     });
 
     /*
-        Catmull-Rom spline
+        SPLINE SUAVE
     */
 
-    const smoothPoints = [];
+    const path = [];
 
-    for(let i=0;i<controlPoints.length-1;i++){
+    for(let i=0;i<controls.length-1;i++){
 
-        const p0 = controlPoints[Math.max(0,i-1)];
-        const p1 = controlPoints[i];
-        const p2 = controlPoints[i+1];
-        const p3 = controlPoints[
-            Math.min(controlPoints.length-1,i+2)
+        const p0 = controls[Math.max(0,i-1)];
+        const p1 = controls[i];
+        const p2 = controls[i+1];
+        const p3 = controls[
+            Math.min(controls.length-1,i+2)
         ];
 
-        for(let t=0;t<1;t+=0.015){
+        for(let t=0;t<1;t+=0.012){
 
             const x = catmullRom(
                 p0.x,p1.x,p2.x,p3.x,t
@@ -153,31 +229,301 @@ function generateFrontWheelPath(){
                 p0.y,p1.y,p2.y,p3.y,t
             );
 
-            smoothPoints.push({x,y});
+            path.push({x,y});
         }
     }
 
-    return smoothPoints;
+    return path;
 }
 
 /* =========================================================
-   ADICIONE TAMBÉM ESTAS FUNÇÕES
+   RODA TRASEIRA DEPENDENTE
 ========================================================= */
 
-function clamp(v,min,max){
-    return Math.max(min,Math.min(max,v));
+function generateBikeTracks(frontPath){
+
+    const rear = [];
+
+    rear.push({
+
+        x: frontPath[0].x - BIKE_LENGTH,
+
+        y: frontPath[0].y
+    });
+
+    for(let i=1;i<frontPath.length;i++){
+
+        const front = frontPath[i];
+
+        const prevRear = rear[i-1];
+
+        const dx = front.x - prevRear.x;
+        const dy = front.y - prevRear.y;
+
+        const dist = Math.hypot(dx,dy);
+
+        const nx = dx / dist;
+        const ny = dy / dist;
+
+        /*
+            Mantém quadro rígido
+        */
+
+        rear.push({
+
+            x: front.x - nx*BIKE_LENGTH,
+
+            y: front.y - ny*BIKE_LENGTH
+        });
+    }
+
+    return {
+
+        front: frontPath,
+
+        rear
+    };
 }
 
-function lerp(a,b,t){
-    return a + (b-a)*t;
+/* =========================================================
+   DESENHO
+========================================================= */
+
+function drawPath(points,color,width){
+
+    ctx.beginPath();
+
+    for(let i=0;i<points.length;i++){
+
+        const p = points[i];
+
+        if(i===0){
+
+            ctx.moveTo(p.x,p.y);
+        }
+        else{
+
+            ctx.lineTo(p.x,p.y);
+        }
+    }
+
+    ctx.strokeStyle = color;
+
+    ctx.lineWidth = width;
+
+    ctx.lineCap = "round";
+
+    ctx.lineJoin = "round";
+
+    ctx.stroke();
 }
 
-function catmullRom(p0,p1,p2,p3,t){
+function redraw(){
 
-    return 0.5 * (
-        (2 * p1) +
-        (-p0 + p2) * t +
-        (2*p0 - 5*p1 + 4*p2 - p3) * t*t +
-        (-p0 + 3*p1 - 3*p2 + p3) * t*t*t
+    ctx.clearRect(0,0,W,H);
+
+    drawPath(
+        currentData.trackA,
+        TRACK_COLOR,
+        TRACK_WIDTH
     );
+
+    drawPath(
+        currentData.trackB,
+        TRACK_COLOR,
+        TRACK_WIDTH
+    );
+
+    if(selectedTrack){
+
+        const path =
+            selectedTrack === "A"
+            ? currentData.trackA
+            : currentData.trackB;
+
+        drawPath(
+            path,
+            HIGHLIGHT_COLOR,
+            10
+        );
+
+        drawPath(
+            path,
+            TRACK_COLOR,
+            TRACK_WIDTH
+        );
+    }
 }
+
+/* =========================================================
+   NOVA RODADA
+========================================================= */
+
+function nextRound(){
+
+    selectedTrack = null;
+
+    selectedDirection = null;
+
+    phase = "chooseTrack";
+
+    let frontPath = generateFrontWheelPath();
+
+    const direction =
+        Math.random() < 0.5
+        ? "forward"
+        : "backward";
+
+    if(direction === "backward"){
+
+        frontPath.reverse();
+    }
+
+    const bike = generateBikeTracks(frontPath);
+
+    const swap = Math.random() < 0.5;
+
+    currentData = {
+
+        direction,
+
+        trackA:
+            swap
+            ? bike.front
+            : bike.rear,
+
+        trackB:
+            swap
+            ? bike.rear
+            : bike.front,
+
+        correctTrack:
+            swap
+            ? "A"
+            : "B"
+    };
+
+    redraw();
+}
+
+/* =========================================================
+   DETECÇÃO
+========================================================= */
+
+function nearestTrack(mx,my){
+
+    const tracks = [
+
+        {
+            name:"A",
+            points:currentData.trackA
+        },
+
+        {
+            name:"B",
+            points:currentData.trackB
+        }
+    ];
+
+    let best = null;
+
+    let bestDist = Infinity;
+
+    for(const track of tracks){
+
+        for(const p of track.points){
+
+            const d = Math.hypot(
+                mx-p.x,
+                my-p.y
+            );
+
+            if(d < bestDist){
+
+                bestDist = d;
+
+                best = track.name;
+            }
+        }
+    }
+
+    if(bestDist < 24){
+
+        return best;
+    }
+
+    return null;
+}
+
+/* =========================================================
+   INPUT
+========================================================= */
+
+canvas.addEventListener("click",(e)=>{
+
+    const rect = canvas.getBoundingClientRect();
+
+    const mx = e.clientX - rect.left;
+
+    const my = e.clientY - rect.top;
+
+    if(phase === "chooseTrack"){
+
+        const track = nearestTrack(mx,my);
+
+        if(track){
+
+            selectedTrack = track;
+
+            redraw();
+
+            phase = "chooseDirection";
+        }
+    }
+    else if(phase === "chooseDirection"){
+
+        selectedDirection =
+            mx < W/2
+            ? "backward"
+            : "forward";
+
+        evaluate();
+    }
+});
+
+/* =========================================================
+   RESULTADO
+========================================================= */
+
+function evaluate(){
+
+    rounds++;
+
+    const correctTrack =
+        selectedTrack === currentData.correctTrack;
+
+    const correctDirection =
+        selectedDirection === currentData.direction;
+
+    if(correctTrack && correctDirection){
+
+        hits++;
+    }
+
+    /*
+        Pequena pausa antes do próximo
+    */
+
+    setTimeout(nextRound,700);
+}
+
+/* =========================================================
+   START
+========================================================= */
+
+nextRound();
+
+</script>
+
+</body>
+</html>
