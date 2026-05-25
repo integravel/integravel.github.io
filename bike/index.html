@@ -14,6 +14,7 @@ html,body{
     overflow:hidden;
     background:#111;
     touch-action:none;
+    font-family:Arial, Helvetica, sans-serif;
 }
 
 canvas{
@@ -21,9 +22,86 @@ canvas{
     background:#151515;
 }
 
+#hud{
+
+    position:fixed;
+
+    top:12px;
+    left:12px;
+
+    background:rgba(0,0,0,0.55);
+
+    border:1px solid rgba(255,255,255,0.08);
+
+    padding:10px 14px;
+
+    border-radius:12px;
+
+    color:white;
+
+    font-size:14px;
+
+    line-height:1.6;
+
+    backdrop-filter: blur(5px);
+
+    z-index:10;
+}
+
+#result{
+
+    position:fixed;
+
+    bottom:20px;
+    left:50%;
+
+    transform:translateX(-50%);
+
+    background:rgba(0,0,0,0.65);
+
+    color:white;
+
+    padding:10px 18px;
+
+    border-radius:12px;
+
+    font-size:15px;
+
+    opacity:0;
+
+    transition:0.25s;
+
+    pointer-events:none;
+}
+
+#result.show{
+    opacity:1;
+}
+
 </style>
 </head>
 <body>
+
+<div id="hud">
+
+    Rodadas:
+    <span id="rounds">0</span>
+    <br>
+
+    Acertos de roda:
+    <span id="wheelHits">0</span>
+    <br>
+
+    Acertos de trajeto:
+    <span id="directionHits">0</span>
+    <br>
+
+    Acertos completos:
+    <span id="perfectHits">0</span>
+
+</div>
+
+<div id="result"></div>
 
 <canvas id="canvas"></canvas>
 
@@ -44,12 +122,23 @@ resize();
 window.addEventListener("resize",resize);
 
 /* =========================================================
-   CONFIGURAÇÕES
+   HUD
+========================================================= */
+
+const roundsEl = document.getElementById("rounds");
+const wheelHitsEl = document.getElementById("wheelHits");
+const directionHitsEl = document.getElementById("directionHits");
+const perfectHitsEl = document.getElementById("perfectHits");
+
+const resultEl = document.getElementById("result");
+
+/* =========================================================
+   CONFIG
 ========================================================= */
 
 const BIKE_LENGTH = 52;
 
-const TRACK_COLOR = "#f5f5f5";
+const TRACK_COLOR = "#f2f2f2";
 
 const TRACK_WIDTH = 4;
 
@@ -68,7 +157,12 @@ let selectedTrack = null;
 let selectedDirection = null;
 
 let rounds = 0;
-let hits = 0;
+
+let wheelHits = 0;
+
+let directionHits = 0;
+
+let perfectHits = 0;
 
 /* =========================================================
    UTIL
@@ -99,6 +193,17 @@ function catmullRom(p0,p1,p2,p3,t){
     );
 }
 
+function updateHUD(){
+
+    roundsEl.textContent = rounds;
+
+    wheelHitsEl.textContent = wheelHits;
+
+    directionHitsEl.textContent = directionHits;
+
+    perfectHitsEl.textContent = perfectHits;
+}
+
 /* =========================================================
    TRAJETÓRIA PARAMÉTRICA
 ========================================================= */
@@ -108,6 +213,7 @@ function generateFrontWheelPath(){
     const outside = Math.max(W,H) * 0.18;
 
     const safeX = W * 0.16;
+
     const safeY = H * 0.16;
 
     const side = Math.floor(random(0,4));
@@ -117,8 +223,6 @@ function generateFrontWheelPath(){
 
     if(side === 0){
 
-        // esquerda -> direita
-
         startX = -outside;
         startY = random(safeY,H-safeY);
 
@@ -126,8 +230,6 @@ function generateFrontWheelPath(){
         endY = random(safeY,H-safeY);
     }
     else if(side === 1){
-
-        // direita -> esquerda
 
         startX = W + outside;
         startY = random(safeY,H-safeY);
@@ -137,8 +239,6 @@ function generateFrontWheelPath(){
     }
     else if(side === 2){
 
-        // topo -> baixo
-
         startX = random(safeX,W-safeX);
         startY = -outside;
 
@@ -146,8 +246,6 @@ function generateFrontWheelPath(){
         endY = H + outside;
     }
     else{
-
-        // baixo -> topo
 
         startX = random(safeX,W-safeX);
         startY = H + outside;
@@ -170,12 +268,8 @@ function generateFrontWheelPath(){
         const t = i/(segments+1);
 
         let x = lerp(startX,endX,t);
-        let y = lerp(startY,endY,t);
 
-        /*
-            Perturbações suaves:
-            polinomiais + trigonométricas
-        */
+        let y = lerp(startY,endY,t);
 
         const poly = (t-0.5)*(t-0.5);
 
@@ -194,6 +288,7 @@ function generateFrontWheelPath(){
             * W * 0.08;
 
         x = clamp(x,safeX,W-safeX);
+
         y = clamp(y,safeY,H-safeY);
 
         controls.push({x,y});
@@ -204,17 +299,16 @@ function generateFrontWheelPath(){
         y:endY
     });
 
-    /*
-        SPLINE SUAVE
-    */
-
     const path = [];
 
     for(let i=0;i<controls.length-1;i++){
 
         const p0 = controls[Math.max(0,i-1)];
+
         const p1 = controls[i];
+
         const p2 = controls[i+1];
+
         const p3 = controls[
             Math.min(controls.length-1,i+2)
         ];
@@ -237,7 +331,7 @@ function generateFrontWheelPath(){
 }
 
 /* =========================================================
-   RODA TRASEIRA DEPENDENTE
+   RODA TRASEIRA
 ========================================================= */
 
 function generateBikeTracks(frontPath){
@@ -258,16 +352,14 @@ function generateBikeTracks(frontPath){
         const prevRear = rear[i-1];
 
         const dx = front.x - prevRear.x;
+
         const dy = front.y - prevRear.y;
 
         const dist = Math.hypot(dx,dy);
 
         const nx = dx / dist;
-        const ny = dy / dist;
 
-        /*
-            Mantém quadro rígido
-        */
+        const ny = dy / dist;
 
         rear.push({
 
@@ -387,6 +479,10 @@ function nextRound(){
 
         direction,
 
+        /*
+            Track A e B são embaralhadas
+        */
+
         trackA:
             swap
             ? bike.front
@@ -467,6 +563,10 @@ canvas.addEventListener("click",(e)=>{
 
     const my = e.clientY - rect.top;
 
+    /*
+        ESCOLHA DA RODA
+    */
+
     if(phase === "chooseTrack"){
 
         const track = nearestTrack(mx,my);
@@ -480,12 +580,19 @@ canvas.addEventListener("click",(e)=>{
             phase = "chooseDirection";
         }
     }
+
+    /*
+        ESCOLHA DA DIREÇÃO
+        Critério:
+        clicar no lado de onde a bicicleta VEIO
+    */
+
     else if(phase === "chooseDirection"){
 
         selectedDirection =
             mx < W/2
-            ? "backward"
-            : "forward";
+            ? "left"
+            : "right";
 
         evaluate();
     }
@@ -499,27 +606,114 @@ function evaluate(){
 
     rounds++;
 
-    const correctTrack =
-        selectedTrack === currentData.correctTrack;
+    const firstPoint =
+        currentData.trackA[0];
 
-    const correctDirection =
-        selectedDirection === currentData.direction;
+    let cameFrom;
 
-    if(correctTrack && correctDirection){
+    /*
+        Detecta origem do trajeto
+    */
 
-        hits++;
+    if(firstPoint.x < 0){
+
+        cameFrom = "left";
+    }
+    else if(firstPoint.x > W){
+
+        cameFrom = "right";
+    }
+    else if(firstPoint.y < 0){
+
+        cameFrom = "top";
+    }
+    else{
+
+        cameFrom = "bottom";
     }
 
     /*
-        Pequena pausa antes do próximo
+        Para celular:
+        esquerda da tela = veio da esquerda/topo
+        direita da tela = veio da direita/baixo
     */
 
-    setTimeout(nextRound,700);
+    const correctDirection =
+        (
+            selectedDirection === "left" &&
+            (
+                cameFrom === "left" ||
+                cameFrom === "top"
+            )
+        )
+        ||
+        (
+            selectedDirection === "right" &&
+            (
+                cameFrom === "right" ||
+                cameFrom === "bottom"
+            )
+        );
+
+    const correctWheel =
+        selectedTrack === currentData.correctTrack;
+
+    if(correctWheel){
+
+        wheelHits++;
+    }
+
+    if(correctDirection){
+
+        directionHits++;
+    }
+
+    if(correctWheel && correctDirection){
+
+        perfectHits++;
+
+        showResult("✅ Acertou ambos");
+    }
+    else if(correctWheel){
+
+        showResult("✅ Roda certa");
+    }
+    else if(correctDirection){
+
+        showResult("✅ Direção certa");
+    }
+    else{
+
+        showResult("❌ Errou");
+    }
+
+    updateHUD();
+
+    setTimeout(nextRound,850);
+}
+
+/* =========================================================
+   FEEDBACK
+========================================================= */
+
+function showResult(text){
+
+    resultEl.textContent = text;
+
+    resultEl.classList.add("show");
+
+    setTimeout(()=>{
+
+        resultEl.classList.remove("show");
+
+    },600);
 }
 
 /* =========================================================
    START
 ========================================================= */
+
+updateHUD();
 
 nextRound();
 
