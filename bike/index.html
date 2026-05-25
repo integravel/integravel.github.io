@@ -1,426 +1,183 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Which Way The Bicycle Go?</title>
-
-<style>
-
-html,body{
-    margin:0;
-    overflow:hidden;
-    background:#111;
-    width:100%;
-    height:100%;
-    touch-action:none;
-}
-
-canvas{
-    display:block;
-    background:#151515;
-}
-
-</style>
-</head>
-<body>
-
-<canvas id="canvas"></canvas>
-
-<script>
-
-const canvas = document.getElementById("canvas");
-const ctx = canvas.getContext("2d");
-
-let W,H;
-
-function resize(){
-
-    W = canvas.width = window.innerWidth;
-    H = canvas.height = window.innerHeight;
-}
-
-resize();
-window.addEventListener("resize", resize);
-
 /* =========================================================
-   CONFIGURAÇÃO DA BICICLETA
-========================================================= */
-
-const BIKE_LENGTH = 46;
-const TRACK_COLOR = "#f5f5f5";
-const TRACK_WIDTH = 4;
-
-/* =========================================================
-   ESTADO
-========================================================= */
-
-let rounds = 0;
-let hits = 0;
-
-let currentData = null;
-
-let phase = "chooseTrack";
-
-let selectedTrack = null;
-let selectedDirection = null;
-
-/* =========================================================
-   GERA TRAJETÓRIA PARAMÉTRICA DA RODA DIANTEIRA
+   SUBSTITUA A FUNÇÃO generateFrontWheelPath()
+   POR ESTA VERSÃO
 ========================================================= */
 
 function generateFrontWheelPath(){
 
     const points = [];
 
-    const cx = W * 0.5;
-    const cy = H * 0.5;
+    /*
+        Margem invisível externa.
+        A trajetória começa e termina fora da tela.
+    */
 
-    const ax = random(140,260);
-    const ay = random(140,260);
+    const outside = Math.max(W,H) * 0.18;
 
-    const bx = random(20,90);
-    const by = random(20,90);
+    /*
+        Área segura interna:
+        garante que o miolo do trajeto fique visível
+        mesmo em celulares estreitos.
+    */
 
-    const phase1 = random(0,Math.PI*2);
-    const phase2 = random(0,Math.PI*2);
+    const safeX = W * 0.18;
+    const safeY = H * 0.18;
 
-    for(let t=0; t<Math.PI*2; t+=0.015){
+    /*
+        Escolhe um lado inicial aleatório
+    */
 
-        /*
-            Trajetória polinomial + trigonométrica
-        */
+    const side = Math.floor(random(0,4));
 
-        const poly = 0.015 * Math.pow(t-3,3);
+    let startX,startY;
+    let endX,endY;
 
-        const x =
-            cx +
-            ax*Math.cos(t + phase1) +
-            bx*Math.sin(3*t) +
-            poly*120;
+    if(side === 0){
 
-        const y =
-            cy +
-            ay*Math.sin(t + phase2) +
-            by*Math.cos(2*t);
+        // esquerda -> direita
 
-        points.push({x,y});
+        startX = -outside;
+        startY = random(safeY,H-safeY);
+
+        endX = W + outside;
+        endY = random(safeY,H-safeY);
+    }
+    else if(side === 1){
+
+        // direita -> esquerda
+
+        startX = W + outside;
+        startY = random(safeY,H-safeY);
+
+        endX = -outside;
+        endY = random(safeY,H-safeY);
+    }
+    else if(side === 2){
+
+        // topo -> baixo
+
+        startX = random(safeX,W-safeX);
+        startY = -outside;
+
+        endX = random(safeX,W-safeX);
+        endY = H + outside;
+    }
+    else{
+
+        // baixo -> topo
+
+        startX = random(safeX,W-safeX);
+        startY = H + outside;
+
+        endX = random(safeX,W-safeX);
+        endY = -outside;
     }
 
-    return smooth(points,2);
-}
+    /*
+        Pontos intermediários suaves.
+        Todos ficam DENTRO da tela.
+    */
 
-/* =========================================================
-   RODA TRASEIRA SEGUE A FRENTE
-========================================================= */
+    const controlPoints = [];
 
-function generateBikeTracks(frontPath){
-
-    const rearPath = [];
-
-    rearPath.push({
-        x: frontPath[0].x - BIKE_LENGTH,
-        y: frontPath[0].y
+    controlPoints.push({
+        x:startX,
+        y:startY
     });
 
-    for(let i=1;i<frontPath.length;i++){
+    const segments = 6;
 
-        const front = frontPath[i];
+    for(let i=1;i<=segments;i++){
 
-        const prevRear = rearPath[i-1];
-
-        const dx = front.x - prevRear.x;
-        const dy = front.y - prevRear.y;
-
-        const dist = Math.hypot(dx,dy);
-
-        const nx = dx / dist;
-        const ny = dy / dist;
+        const t = i/(segments+1);
 
         /*
-            Mantém distância fixa do quadro
+            Interpolação principal
         */
 
-        const rear = {
-            x: front.x - nx * BIKE_LENGTH,
-            y: front.y - ny * BIKE_LENGTH
-        };
-
-        rearPath.push(rear);
-    }
-
-    return {
-        front: frontPath,
-        rear: rearPath
-    };
-}
-
-/* =========================================================
-   SUAVIZAÇÃO
-========================================================= */
-
-function smooth(points,passes){
-
-    let pts = points;
-
-    for(let p=0;p<passes;p++){
-
-        const out = [];
-
-        for(let i=0;i<pts.length-1;i++){
-
-            const a = pts[i];
-            const b = pts[i+1];
-
-            out.push(a);
-
-            out.push({
-                x:(a.x+b.x)/2,
-                y:(a.y+b.y)/2
-            });
-        }
-
-        out.push(pts[pts.length-1]);
-
-        pts = out;
-    }
-
-    return pts;
-}
-
-/* =========================================================
-   DESENHO
-========================================================= */
-
-function drawTrack(points){
-
-    ctx.beginPath();
-
-    for(let i=0;i<points.length;i++){
-
-        const p = points[i];
-
-        if(i===0){
-            ctx.moveTo(p.x,p.y);
-        }
-        else{
-            ctx.lineTo(p.x,p.y);
-        }
-    }
-
-    ctx.strokeStyle = TRACK_COLOR;
-    ctx.lineWidth = TRACK_WIDTH;
-    ctx.lineCap = "round";
-    ctx.lineJoin = "round";
-    ctx.stroke();
-}
-
-function redraw(){
-
-    ctx.clearRect(0,0,W,H);
-
-    drawTrack(currentData.front);
-    drawTrack(currentData.rear);
-
-    if(selectedTrack !== null){
-
-        const path =
-            selectedTrack === "front"
-            ? currentData.front
-            : currentData.rear;
-
-        ctx.beginPath();
-
-        for(let i=0;i<path.length;i++){
-
-            const p = path[i];
-
-            if(i===0){
-                ctx.moveTo(p.x,p.y);
-            }else{
-                ctx.lineTo(p.x,p.y);
-            }
-        }
-
-        ctx.strokeStyle = "#00ffff";
-        ctx.lineWidth = 10;
-        ctx.lineCap = "round";
-        ctx.lineJoin = "round";
-        ctx.stroke();
-
-        drawTrack(path);
-    }
-}
-
-/* =========================================================
-   NOVA RODADA
-========================================================= */
-
-function nextRound(){
-
-    phase = "chooseTrack";
-
-    selectedTrack = null;
-    selectedDirection = null;
-
-    const direction =
-        Math.random() < 0.5
-        ? "forward"
-        : "backward";
-
-    let front = generateFrontWheelPath();
-
-    if(direction === "backward"){
-        front.reverse();
-    }
-
-    const bike = generateBikeTracks(front);
-
-    const frontIsFirst =
-        Math.random() < 0.5;
-
-    currentData = {
-
-        direction,
+        let x = lerp(startX,endX,t);
+        let y = lerp(startY,endY,t);
 
         /*
-            Embaralha qual trilha pertence à frente
+            Perturbações trigonométricas suaves
         */
 
-        front:
-            frontIsFirst
-            ? bike.front
-            : bike.rear,
+        const ampX = W * 0.12;
+        const ampY = H * 0.12;
 
-        rear:
-            frontIsFirst
-            ? bike.rear
-            : bike.front,
+        x +=
+            Math.sin(t*Math.PI*2 + random(-1,1))
+            * ampX;
 
-        frontTrack:
-            frontIsFirst
-            ? "front"
-            : "rear"
-    };
+        y +=
+            Math.cos(t*Math.PI*2 + random(-1,1))
+            * ampY;
 
-    redraw();
-}
+        /*
+            Mantém interior visível
+        */
 
-/* =========================================================
-   DETECÇÃO
-========================================================= */
+        x = clamp(x,safeX,W-safeX);
+        y = clamp(y,safeY,H-safeY);
 
-function nearestTrack(mx,my){
+        controlPoints.push({x,y});
+    }
 
-    const tracks = [
-        {
-            name:"front",
-            points:currentData.front
-        },
-        {
-            name:"rear",
-            points:currentData.rear
-        }
-    ];
+    controlPoints.push({
+        x:endX,
+        y:endY
+    });
 
-    let best = null;
-    let bestDist = Infinity;
+    /*
+        Catmull-Rom spline
+    */
 
-    for(const track of tracks){
+    const smoothPoints = [];
 
-        for(const p of track.points){
+    for(let i=0;i<controlPoints.length-1;i++){
 
-            const d = Math.hypot(
-                mx-p.x,
-                my-p.y
+        const p0 = controlPoints[Math.max(0,i-1)];
+        const p1 = controlPoints[i];
+        const p2 = controlPoints[i+1];
+        const p3 = controlPoints[
+            Math.min(controlPoints.length-1,i+2)
+        ];
+
+        for(let t=0;t<1;t+=0.015){
+
+            const x = catmullRom(
+                p0.x,p1.x,p2.x,p3.x,t
             );
 
-            if(d < bestDist){
+            const y = catmullRom(
+                p0.y,p1.y,p2.y,p3.y,t
+            );
 
-                bestDist = d;
-                best = track.name;
-            }
+            smoothPoints.push({x,y});
         }
     }
 
-    if(bestDist < 20){
-        return best;
-    }
-
-    return null;
+    return smoothPoints;
 }
 
 /* =========================================================
-   CLIQUES
+   ADICIONE TAMBÉM ESTAS FUNÇÕES
 ========================================================= */
 
-canvas.addEventListener("click",(e)=>{
-
-    const rect = canvas.getBoundingClientRect();
-
-    const mx = e.clientX - rect.left;
-    const my = e.clientY - rect.top;
-
-    if(phase === "chooseTrack"){
-
-        const track = nearestTrack(mx,my);
-
-        if(track){
-
-            selectedTrack = track;
-
-            redraw();
-
-            phase = "chooseDirection";
-        }
-    }
-    else if(phase === "chooseDirection"){
-
-        selectedDirection =
-            mx < W/2
-            ? "backward"
-            : "forward";
-
-        evaluate();
-    }
-});
-
-/* =========================================================
-   RESULTADO
-========================================================= */
-
-function evaluate(){
-
-    rounds++;
-
-    const correctTrack =
-        selectedTrack === currentData.frontTrack;
-
-    const correctDirection =
-        selectedDirection === currentData.direction;
-
-    if(correctTrack && correctDirection){
-        hits++;
-    }
-
-    setTimeout(nextRound,700);
+function clamp(v,min,max){
+    return Math.max(min,Math.min(max,v));
 }
 
-/* =========================================================
-   UTIL
-========================================================= */
-
-function random(min,max){
-    return Math.random()*(max-min)+min;
+function lerp(a,b,t){
+    return a + (b-a)*t;
 }
 
-/* =========================================================
-   START
-========================================================= */
+function catmullRom(p0,p1,p2,p3,t){
 
-nextRound();
-
-</script>
-
-</body>
-</html>
+    return 0.5 * (
+        (2 * p1) +
+        (-p0 + p2) * t +
+        (2*p0 - 5*p1 + 4*p2 - p3) * t*t +
+        (-p0 + 3*p1 - 3*p2 + p3) * t*t*t
+    );
+}
