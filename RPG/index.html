@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>Gerador de Personagem RPG</title>
+
+<style>
+body {
+  font-family: Arial;
+  background: #111;
+  color: #eee;
+  padding: 20px;
+}
+
+h1 { color: #9cf; }
+
+.container {
+  display: flex;
+  gap: 20px;
+}
+
+.panel {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid #333;
+  border-radius: 8px;
+}
+
+.node {
+  padding: 8px;
+  margin: 6px 0;
+  border: 1px solid #444;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.node:hover {
+  background: #222;
+}
+
+.disabled {
+  opacity: 0.3;
+  pointer-events: none;
+}
+
+.stat {
+  margin: 4px 0;
+}
+</style>
+</head>
+
+<body>
+
+<h1>Gerador de Personagem</h1>
+
+<div class="container">
+
+  <div class="panel">
+    <h2>Escolhas</h2>
+    <div id="choices"></div>
+  </div>
+
+  <div class="panel">
+    <h2>Ficha do Personagem</h2>
+    <div id="sheet"></div>
+  </div>
+
+</div>
+
+<script>
+// =========================
+// 🧠 JSON DO SISTEMA
+// =========================
+
+const nodes = [
+{
+  id: "birth",
+  title: "Londres - Classe trabalhadora",
+  requirements: [],
+  age: 0,
+  effects: { body: 1, technique: 1, resources: 1 }
+},
+{
+  id: "alley",
+  title: "Albergue com o pai",
+  requirements: ["birth"],
+  age: 2,
+  effects: { vontade: 1, carisma: 1 }
+},
+{
+  id: "care_work",
+  title: "Trabalho no albergue",
+  requirements: ["alley"],
+  age: 3,
+  effects: { technique: 2, memoria: 1, resources: -1 }
+},
+{
+  id: "teaching",
+  title: "Magistério informal",
+  requirements: ["care_work"],
+  age: 2,
+  effects: { carisma: 2, technique: 2, analise: 1 }
+},
+{
+  id: "magic",
+  title: "Contato com magia",
+  requirements: ["care_work"],
+  age: 1,
+  effects: { technique: 3, analise: 1 }
+},
+{
+  id: "mentor",
+  title: "Treinamento com bruxo",
+  requirements: ["magic"],
+  age: 1,
+  effects: { technique: 3, memoria: 1 }
+},
+{
+  id: "demon",
+  title: "Confronto com demônio",
+  requirements: ["mentor"],
+  age: 0,
+  effects: { vontade: 2, reflexo: 1, resources: -3 }
+}
+];
+
+// =========================
+// 🧍 ESTADO DO JOGADOR
+// =========================
+
+let state = {
+  selected: [],
+  age: 0,
+  stats: {
+    body: 0,
+    technique: 0,
+    resources: 0,
+    carisma: 0,
+    vontade: 0,
+    memoria: 0,
+    analise: 0,
+    reflexo: 0
+  }
+};
+
+// =========================
+// 🔧 FUNÇÕES
+// =========================
+
+function canUnlock(node) {
+  return node.requirements.every(req =>
+    state.selected.includes(req)
+  );
+}
+
+function applyNode(node) {
+  if (state.selected.includes(node.id)) return;
+
+  state.selected.push(node.id);
+  state.age += node.age;
+
+  for (let k in node.effects) {
+    state.stats[k] += node.effects[k];
+  }
+
+  render();
+}
+
+function renderChoices() {
+  const div = document.getElementById("choices");
+  div.innerHTML = "";
+
+  nodes.forEach(n => {
+    const el = document.createElement("div");
+    el.className = "node";
+
+    const unlocked = canUnlock(n);
+    const used = state.selected.includes(n.id);
+
+    if (!unlocked || used) {
+      el.classList.add("disabled");
+    }
+
+    el.innerHTML = n.title + (used ? " ✔" : "");
+
+    el.onclick = () => applyNode(n);
+
+    div.appendChild(el);
+  });
+}
+
+function renderSheet() {
+  const div = document.getElementById("sheet");
+
+  div.innerHTML = `
+    <div class="stat">Idade: ${state.age}</div>
+    <hr/>
+    ${Object.entries(state.stats).map(([k,v]) =>
+      `<div class="stat">${k}: ${v}</div>`
+    ).join("")}
+    <hr/>
+    <div><b>Experiências:</b></div>
+    ${state.selected.map(id =>
+      `<div>- ${id}</div>`
+    ).join("")}
+  `;
+}
+
+function render() {
+  renderChoices();
+  renderSheet();
+}
+
+// inicializa
+render();
+
+</script>
+
+</body>
+</html>
