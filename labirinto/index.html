@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Labirinto Dimensional</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    background:#111;
+    color:white;
+    font-family:Arial;
+    display:flex;
+    flex-direction:column;
+    height:100vh;
+}
+
+#game{
+    flex:1;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+canvas{
+    width:min(90vw,90vh);
+    height:min(90vw,90vh);
+    background:#000;
+    border:2px solid white;
+}
+
+#controls{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:15px;
+}
+
+.side{
+    display:flex;
+    align-items:center;
+}
+
+.middle{
+    display:grid;
+    grid-template-columns:70px 70px 70px;
+    grid-template-rows:70px 70px 70px;
+    gap:5px;
+}
+
+button{
+    font-size:24px;
+    border:none;
+    border-radius:10px;
+    background:#444;
+    color:white;
+}
+
+button:active{
+    background:#888;
+}
+
+.empty{
+    visibility:hidden;
+}
+</style>
+
+</head>
+<body>
+
+<div id="game">
+<canvas id="canvas"></canvas>
+</div>
+
+<div id="controls">
+
+<div class="side">
+<button onclick="changeDimension(-1)">⟸</button>
+</div>
+
+<div class="middle">
+
+<div class="empty"></div>
+<button onclick="move(0,-1)">▲</button>
+<div class="empty"></div>
+
+<button onclick="move(-1,0)">◀</button>
+<div class="empty"></div>
+<button onclick="move(1,0)">▶</button>
+
+<div class="empty"></div>
+<button onclick="move(0,1)">▼</button>
+<div class="empty"></div>
+
+</div>
+
+<div class="side">
+<button onclick="changeDimension(1)">⟹</button>
+</div>
+
+</div>
+
+<script>
+
+const maps=[
+
+// dimensão esquerda
+[
+"##########",
+"#S#......#",
+"#.#.####.#",
+"#.#....#.#",
+"#.####.#.#",
+"#......#.#",
+"######.#.#",
+"#......#.#",
+"#.######.#",
+"########E#"
+],
+
+// dimensão central
+[
+"##########",
+"#S.......#",
+"#######..#",
+"#......#.#",
+"#.####.#.#",
+"#.#....#.#",
+"#.#.####.#",
+"#.#......#",
+"#.######.#",
+"########E#"
+],
+
+// dimensão direita
+[
+"##########",
+"#S.......#",
+"#.######.#",
+"#.#....#.#",
+"#.#.##.#.#",
+"#...##.#.#",
+"###.##.#.#",
+"#......#.#",
+"#.######.#",
+"########E#"
+]
+
+];
+
+let dimension=1;
+
+let player={x:1,y:1};
+
+const canvas=document.getElementById("canvas");
+const ctx=canvas.getContext("2d");
+
+function resize(){
+
+canvas.width=canvas.clientWidth;
+canvas.height=canvas.clientHeight;
+
+draw();
+
+}
+
+window.onresize=resize;
+
+function draw(){
+
+ctx.clearRect(0,0,canvas.width,canvas.height);
+
+const map=maps[dimension];
+
+const cell=Math.min(canvas.width/map[0].length,
+canvas.height/map.length);
+
+for(let y=0;y<map.length;y++){
+
+for(let x=0;x<map[y].length;x++){
+
+let c=map[y][x];
+
+if(c=="#"){
+ctx.fillStyle="#555";
+ctx.fillRect(x*cell,y*cell,cell,cell);
+}
+
+if(c=="E"){
+ctx.fillStyle="lime";
+ctx.fillRect(x*cell,y*cell,cell,cell);
+}
+
+}
+
+}
+
+ctx.fillStyle="red";
+ctx.beginPath();
+ctx.arc(
+player.x*cell+cell/2,
+player.y*cell+cell/2,
+cell*0.3,
+0,
+Math.PI*2
+);
+ctx.fill();
+
+ctx.fillStyle="white";
+ctx.font=(cell*0.4)+"px Arial";
+ctx.fillText(
+"Dimensão "+dimension,
+10,
+20
+);
+
+}
+
+function move(dx,dy){
+
+let nx=player.x+dx;
+let ny=player.y+dy;
+
+let map=maps[dimension];
+
+if(map[ny][nx]!="#"){
+
+player.x=nx;
+player.y=ny;
+
+if(map[ny][nx]=="E"){
+alert("Você venceu!");
+}
+
+}
+
+draw();
+
+}
+
+function changeDimension(dir){
+
+dimension=(dimension+dir+3)%3;
+
+draw();
+
+}
+
+resize();
+
+</script>
+
+</body>
+</html>
