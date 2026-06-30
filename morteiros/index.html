@@ -2,57 +2,70 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
 <title>Canhão e Buraco Negro</title>
 
 <style>
-body{
+html, body{
     margin:0;
+    padding:0;
+    width:100%;
+    height:100%;
+    overflow:hidden;
     background:#111;
     color:white;
-    font-family:Arial,sans-serif;
-    text-align:center;
+    font-family:Arial, sans-serif;
 }
 
-h2{
-    margin:10px;
+body{
+    display:flex;
+    flex-direction:column;
 }
 
 #painel{
-    padding:10px;
+    flex:0 0 auto;
     background:#222;
+    padding:6px;
+    font-size:14px;
+    text-align:center;
 }
 
 canvas{
-    background:#000;
-    border:2px solid #555;
-    margin:10px auto;
+    flex:1;
     display:block;
+    width:100%;
+    height:100%;
+    background:black;
 }
 
 label{
-    margin:0 10px;
+    margin:0 6px;
 }
 
-input{
-    width:120px;
+input[type=range]{
+    width:100px;
+}
+
+button{
+    padding:4px 10px;
+    margin-left:8px;
 }
 </style>
 </head>
-<body>
 
-<h2>Canhão e Buraco Negro</h2>
+<body>
 
 <div id="painel">
 
 <label>
-Ângulo:
+Ângulo
 <input id="angulo" type="range" min="5" max="85" value="45">
 <span id="anguloValor">45</span>°
 </label>
 
 <label>
-Força:
+Força
 <input id="forca" type="range" min="50" max="300" value="180">
 <span id="forcaValor">180</span>
 </label>
@@ -61,12 +74,20 @@ Força:
 
 </div>
 
-<canvas id="canvas" width="900" height="500"></canvas>
+<canvas id="canvas"></canvas>
 
 <script>
 
+document.addEventListener(
+    "touchmove",
+    e => e.preventDefault(),
+    { passive:false }
+);
+
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
+
+const painel = document.getElementById("painel");
 
 const anguloInput = document.getElementById("angulo");
 const forcaInput = document.getElementById("forca");
@@ -74,108 +95,221 @@ const forcaInput = document.getElementById("forca");
 const anguloValor = document.getElementById("anguloValor");
 const forcaValor = document.getElementById("forcaValor");
 
-anguloInput.oninput = () => anguloValor.textContent = anguloInput.value;
-forcaInput.oninput = () => forcaValor.textContent = forcaInput.value;
+anguloInput.oninput = () =>
+    anguloValor.textContent = anguloInput.value;
 
-const canhao = {
-    x:60,
-    y:440
-};
-
-const alvo = {
-    x:820,
-    y:430,
-    r:20
-};
-
-const buracoNegro = {
-    x:450,
-    y:220,
-    r:30,
-    intensidade: 30000
-};
+forcaInput.oninput = () =>
+    forcaValor.textContent = forcaInput.value;
 
 const gravidade = 80;
 
 let projetil = null;
 
+const canhao = {
+    x:60,
+    y:0
+};
+
+const alvo = {
+    x:0,
+    y:0,
+    r:20
+};
+
+const buracoNegro = {
+    x:0,
+    y:0,
+    r:30,
+    intensidade:30000
+};
+
+function redimensionar(){
+
+    canvas.width = window.innerWidth;
+
+    canvas.height =
+        window.innerHeight -
+        painel.offsetHeight;
+
+    canhao.y = canvas.height - 40;
+
+    alvo.x = canvas.width - 70;
+    alvo.y = canvas.height - 50;
+
+    buracoNegro.x = canvas.width/2;
+    buracoNegro.y = canvas.height/2;
+}
+
+window.addEventListener(
+    "resize",
+    redimensionar
+);
+
+redimensionar();
+
+function desenharSeta(x,y,vx,vy){
+
+    const ang = Math.atan2(vy,vx);
+
+    ctx.beginPath();
+
+    ctx.moveTo(x,y);
+
+    ctx.lineTo(
+        x + vx,
+        y + vy
+    );
+
+    ctx.stroke();
+
+    const h = 4;
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+        x + vx,
+        y + vy
+    );
+
+    ctx.lineTo(
+        x + vx -
+        h*Math.cos(ang-0.5),
+
+        y + vy -
+        h*Math.sin(ang-0.5)
+    );
+
+    ctx.lineTo(
+        x + vx -
+        h*Math.cos(ang+0.5),
+
+        y + vy -
+        h*Math.sin(ang+0.5)
+    );
+
+    ctx.closePath();
+    ctx.fill();
+}
+
 function desenharCampoVetorial(){
 
-    ctx.strokeStyle="rgba(0,180,255,0.25)";
-    ctx.lineWidth=1;
+    const passo = 35;
 
-    const passo = 40;
+    for(
+        let x=15;
+        x<canvas.width;
+        x+=passo
+    ){
 
-    for(let x=20;x<canvas.width;x+=passo){
-        for(let y=20;y<canvas.height;y+=passo){
+        for(
+            let y=15;
+            y<canvas.height;
+            y+=passo
+        ){
 
-            let dx = buracoNegro.x - x;
-            let dy = buracoNegro.y - y;
+            let dx =
+                buracoNegro.x - x;
 
-            let dist = Math.sqrt(dx*dx + dy*dy);
+            let dy =
+                buracoNegro.y - y;
 
-            if(dist < 10) continue;
+            let r =
+                Math.hypot(dx,dy);
 
-            dx /= dist;
-            dy /= dist;
+            if(r < 15) continue;
 
-            const tamanho = 12;
+            let intensidade =
+                4000/(r*r+500);
 
-            ctx.beginPath();
-            ctx.moveTo(x,y);
-            ctx.lineTo(
-                x + dx*tamanho,
-                y + dy*tamanho
+            intensidade *= 1200;
+
+            let ux = dx/r;
+            let uy = dy/r;
+
+            let tamanho =
+                Math.min(
+                    18,
+                    4 + intensidade
+                );
+
+            let cor;
+
+            if(r > 250){
+                cor = "#00bfff";
+            }
+            else if(r > 120){
+                cor = "#ffd000";
+            }
+            else{
+                cor = "#ff4040";
+            }
+
+            ctx.strokeStyle = cor;
+            ctx.fillStyle = cor;
+            ctx.lineWidth = 1;
+
+            desenharSeta(
+                x,
+                y,
+                ux*tamanho,
+                uy*tamanho
             );
-            ctx.stroke();
         }
     }
 }
 
 function desenhar(){
 
-    ctx.clearRect(0,0,canvas.width,canvas.height);
+    ctx.clearRect(
+        0,
+        0,
+        canvas.width,
+        canvas.height
+    );
 
     desenharCampoVetorial();
 
-    // chão
-    ctx.fillStyle="#333";
-    ctx.fillRect(0,460,900,40);
+    ctx.fillStyle = "#333";
 
-    // alvo
-    ctx.fillStyle="lime";
-    ctx.beginPath();
-    ctx.arc(alvo.x,alvo.y,alvo.r,0,Math.PI*2);
-    ctx.fill();
-
-    // buraco negro
-    const grad = ctx.createRadialGradient(
-        buracoNegro.x,
-        buracoNegro.y,
-        5,
-        buracoNegro.x,
-        buracoNegro.y,
-        45
+    ctx.fillRect(
+        0,
+        canvas.height-20,
+        canvas.width,
+        20
     );
+
+    const grad =
+        ctx.createRadialGradient(
+            buracoNegro.x,
+            buracoNegro.y,
+            5,
+            buracoNegro.x,
+            buracoNegro.y,
+            50
+        );
 
     grad.addColorStop(0,"black");
     grad.addColorStop(0.5,"purple");
-    grad.addColorStop(1,"rgba(100,0,255,0.2)");
+    grad.addColorStop(1,"rgba(120,0,255,0.15)");
 
     ctx.fillStyle = grad;
+
     ctx.beginPath();
+
     ctx.arc(
         buracoNegro.x,
         buracoNegro.y,
-        45,
+        50,
         0,
         Math.PI*2
     );
+
     ctx.fill();
 
-    // centro
-    ctx.fillStyle="black";
+    ctx.fillStyle = "black";
+
     ctx.beginPath();
+
     ctx.arc(
         buracoNegro.x,
         buracoNegro.y,
@@ -183,28 +317,62 @@ function desenhar(){
         0,
         Math.PI*2
     );
+
     ctx.fill();
 
-    // canhão
-    ctx.fillStyle="orange";
-    ctx.fillRect(canhao.x-15, canhao.y-15, 30, 30);
+    ctx.fillStyle = "lime";
 
-    const ang = Number(anguloInput.value) * Math.PI/180;
-
-    ctx.strokeStyle="orange";
-    ctx.lineWidth=6;
     ctx.beginPath();
-    ctx.moveTo(canhao.x, canhao.y);
-    ctx.lineTo(
-        canhao.x + Math.cos(ang)*40,
-        canhao.y - Math.sin(ang)*40
+
+    ctx.arc(
+        alvo.x,
+        alvo.y,
+        alvo.r,
+        0,
+        Math.PI*2
     );
+
+    ctx.fill();
+
+    ctx.fillStyle = "orange";
+
+    ctx.fillRect(
+        canhao.x-15,
+        canhao.y-15,
+        30,
+        30
+    );
+
+    const ang =
+        Number(anguloInput.value) *
+        Math.PI/180;
+
+    ctx.strokeStyle = "orange";
+    ctx.lineWidth = 6;
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+        canhao.x,
+        canhao.y
+    );
+
+    ctx.lineTo(
+        canhao.x +
+        Math.cos(ang)*40,
+
+        canhao.y -
+        Math.sin(ang)*40
+    );
+
     ctx.stroke();
 
     if(projetil){
 
-        ctx.fillStyle="white";
+        ctx.fillStyle = "white";
+
         ctx.beginPath();
+
         ctx.arc(
             projetil.x,
             projetil.y,
@@ -212,6 +380,7 @@ function desenhar(){
             0,
             Math.PI*2
         );
+
         ctx.fill();
     }
 }
@@ -220,48 +389,74 @@ function atualizar(dt){
 
     if(!projetil) return;
 
-    let dx = buracoNegro.x - projetil.x;
-    let dy = buracoNegro.y - projetil.y;
+    let dx =
+        buracoNegro.x -
+        projetil.x;
 
-    let r2 = dx*dx + dy*dy;
+    let dy =
+        buracoNegro.y -
+        projetil.y;
 
-    let r = Math.sqrt(r2);
+    let r2 =
+        dx*dx +
+        dy*dy;
+
+    let r =
+        Math.sqrt(r2);
 
     if(r > 1){
 
-        const a = buracoNegro.intensidade / (r2 + 2000);
+        const a =
+            buracoNegro.intensidade /
+            (r2 + 2000);
 
-        projetil.vx += (dx/r) * a * dt;
-        projetil.vy += (dy/r) * a * dt;
+        projetil.vx +=
+            (dx/r) *
+            a *
+            dt;
+
+        projetil.vy +=
+            (dy/r) *
+            a *
+            dt;
     }
 
-    projetil.vy += gravidade * dt;
+    projetil.vy +=
+        gravidade * dt;
 
-    projetil.x += projetil.vx * dt;
-    projetil.y += projetil.vy * dt;
+    projetil.x +=
+        projetil.vx * dt;
 
-    const dAlvo =
+    projetil.y +=
+        projetil.vy * dt;
+
+    const distanciaAlvo =
         Math.hypot(
             projetil.x - alvo.x,
             projetil.y - alvo.y
         );
 
-    if(dAlvo < alvo.r + 5){
-        alert("Acertou o alvo!");
+    if(
+        distanciaAlvo <
+        alvo.r + 5
+    ){
+        alert("🎯 Acertou o alvo!");
         projetil = null;
+        return;
     }
 
     if(
-        projetil.x < 0 ||
-        projetil.x > canvas.width ||
-        projetil.y > canvas.height ||
-        projetil.y < 0
+        projetil.x < -20 ||
+        projetil.x > canvas.width+20 ||
+        projetil.y < -20 ||
+        projetil.y > canvas.height+20
     ){
         projetil = null;
     }
 }
 
-document.getElementById("atirar")
+document
+.getElementById("atirar")
 .addEventListener("click",()=>{
 
     const ang =
@@ -276,26 +471,36 @@ document.getElementById("atirar")
         x: canhao.x,
         y: canhao.y,
 
-        vx: Math.cos(ang)*forca,
+        vx:
+            Math.cos(ang) *
+            forca,
 
-        vy: -Math.sin(ang)*forca
+        vy:
+            -Math.sin(ang) *
+            forca
     };
+
 });
 
-let ultimo = performance.now();
+let ultimo =
+    performance.now();
 
 function loop(tempo){
 
-    const dt = (tempo - ultimo)/1000;
+    const dt =
+        (tempo - ultimo)/1000;
+
     ultimo = tempo;
 
     atualizar(dt);
+
     desenhar();
 
     requestAnimationFrame(loop);
 }
 
 desenhar();
+
 requestAnimationFrame(loop);
 
 </script>
