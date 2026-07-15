@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oculista Simulator</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+    <h1>👓 Oculista Simulator</h1>
+    <p>Descubra a melhor lente para cada paciente.</p>
+</header>
+
+<main>
+
+    <!-- Tela inicial -->
+    <section id="menu" class="screen">
+
+        <h2>Bem-vindo!</h2>
+
+        <p>
+            Você é um oculista e deve encontrar a melhor configuração
+            de lentes para cada paciente.
+        </p>
+
+        <button id="btnStart">
+            Iniciar Atendimento
+        </button>
+
+    </section>
+
+    <!-- Tela do paciente -->
+    <section id="game" class="screen hidden">
+
+        <div class="patient-card">
+
+            <h2 id="patientName">
+                Paciente
+            </h2>
+
+            <p id="patientSpeech">
+                ...
+            </p>
+
+        </div>
+
+        <div class="exam-area">
+
+            <h2 id="examTitle">
+                Teste
+            </h2>
+
+            <div id="examDisplay">
+
+            </div>
+
+        </div>
+
+        <div class="controls">
+
+            <h3>Configuração da Lente</h3>
+
+            <div class="control">
+
+                <label>Esférico</label>
+
+                <button id="sphereMinus">-</button>
+
+                <span id="sphereValue">
+                    0.00
+                </span>
+
+                <button id="spherePlus">+</button>
+
+            </div>
+
+            <div class="control">
+
+                <label>Cilindro</label>
+
+                <button id="cylMinus">-</button>
+
+                <span id="cylValue">
+                    0.00
+                </span>
+
+                <button id="cylPlus">+</button>
+
+            </div>
+
+            <div class="control">
+
+                <label>Eixo</label>
+
+                <button id="axisMinus">-</button>
+
+                <span id="axisValue">
+                    0°
+                </span>
+
+                <button id="axisPlus">+</button>
+
+            </div>
+
+            <button id="confirmExam" class="confirm">
+                Confirmar Configuração
+            </button>
+
+        </div>
+
+    </section>
+
+    <!-- Resultado -->
+    <section id="result" class="screen hidden">
+
+        <h2>Resultado</h2>
+
+        <p id="resultText">
+
+        </p>
+
+        <button id="nextPatient">
+            Próximo Paciente
+        </button>
+
+    </section>
+
+</main>
+
+<footer>
+
+    Oculista Simulator • Protótipo
+
+</footer>
+
+<!-- JavaScript -->
+
+<script src="js/data.js"></script>
+<script src="js/patient.js"></script>
+<script src="js/vision.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/game.js"></script>
+<script src="script.js"></script>
+
+</body>
+</html>
