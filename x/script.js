@@ -13,7 +13,14 @@ init();
 async function init() {
   const res = await fetch("demos.json");
   DEMOS = await res.json();
+
   renderList();
+
+  // Abre automaticamente uma demonstração se houver um #id na URL
+  const id = location.hash.slice(1);
+  if (id && DEMOS.some(d => d.id === id)) {
+    openDemo(id);
+  }
 }
 
 /* STORAGE */
@@ -40,7 +47,7 @@ function renderList() {
 
     const el = document.createElement("div");
     el.className = "demo-item" + (prog.done ? " done" : "");
-el.innerHTML = `<strong>${d.title}</strong><br>Erros: ${prog.errors}`;
+    el.innerHTML = `<strong>${d.title}</strong><br>Erros: ${prog.errors}`;
     el.onclick = () => openDemo(d.id);
 
     app.appendChild(el);
@@ -50,6 +57,10 @@ el.innerHTML = `<strong>${d.title}</strong><br>Erros: ${prog.errors}`;
 /* DEMO */
 
 function openDemo(id) {
+
+  // Atualiza a URL para permitir compartilhamento
+  history.replaceState(null, "", "#" + id);
+
   currentDemo = DEMOS.find(d => d.id === id);
   const prog = getProgress(id);
 
@@ -58,14 +69,16 @@ function openDemo(id) {
   const back = document.createElement("div");
   back.className = "back-btn";
   back.textContent = "← Voltar";
-  back.onclick = renderList;
+  back.onclick = () => {
+    history.replaceState(null, "", location.pathname);
+    renderList();
+  };
   app.appendChild(back);
 
   currentDemo.initial.forEach(addLine);
 
   const dropzones = [];
 
-  // ✅ AGORA TOTALMENTE DINÂMICO
   const total = currentDemo.blocks.length;
 
   for (let i = 0; i < total; i++) {
@@ -124,7 +137,6 @@ function setupDrag(el) {
     dragged = el;
     originZone = el.parentElement;
 
-    // limpa visual imediatamente
     if (originZone && originZone.classList.contains("dropzone")) {
       originZone.classList.remove("correct", "wrong");
     }
@@ -170,15 +182,13 @@ function setupGlobalDrag(dropzones, options, prog, demoId) {
       }
     });
 
-// ✅ devolve para a área de opções se NÃO foi colocado em nenhuma dropzone
-if (!placed) {
-  if (!dragged.classList.contains("locked")) {
-    options.appendChild(dragged);
-    delete prog.positions[dragged.dataset.id];
-  }
-}
+    if (!placed) {
+      if (!dragged.classList.contains("locked")) {
+        options.appendChild(dragged);
+        delete prog.positions[dragged.dataset.id];
+      }
+    }
 
-    // limpa zona de origem se ficou vazia
     if (originZone && originZone.classList.contains("dropzone")) {
       if (originZone.children.length === 0) {
         originZone.classList.remove("correct", "wrong");
