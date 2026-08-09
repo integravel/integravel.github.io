@@ -219,6 +219,26 @@
   "final": [
     "Logo, \\(x_1 + x_2 = -\\frac{b}{a}\\) e \\(x_1 x_2 = \\frac{c}{a}\\)."
   ]
+},
+
+  {
+  "id": "simetria_eixo_z",
+  "title": "Teste de simetria em relação ao eixo z",
+  "initial": [
+    "<strong>Teorema.</strong> Uma superfície \\(F(x,y,z)=0\\) é simétrica em relação ao eixo \\(z\\) se, para todo ponto \\((x,y,z)\\) pertencente à superfície, o ponto \\((-x,-y,z)\\) também pertence à superfície.",
+    "<strong>Demonstração.</strong> Considere um ponto \\((x,y,z)\\) pertencente à superfície.",
+    "Então \\(F(x,y,z)=0\\)."
+  ],
+  "blocks": [
+    "Substituindo \\(x\\) por \\(-x\\) e \\(y\\) por \\(-y\\), obtemos \\(F(-x,-y,z)\\).",
+    "Se \\(F(-x,-y,z)=F(x,y,z)\\), então \\(F(-x,-y,z)=0\\).",
+    "Logo, \\((-x,-y,z)\\) também pertence à superfície.",
+    "O ponto \\((-x,-y,z)\\) é o reflexo de \\((x,y,z)\\) em relação ao eixo \\(z\\)."
+  ],
+  "final": [
+    "Portanto, a superfície é simétrica em relação ao eixo \\(z\\).",
+    "Assim, o teste consiste em verificar se a equação permanece inalterada quando fazemos \\(x\\to-x\\) e \\(y\\to-y\\)."
+  ]
 }
 
 
