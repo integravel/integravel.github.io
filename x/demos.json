@@ -239,6 +239,28 @@
   "final": [
     "Logo, a superfície é simétrica em relação ao eixo \\(z\\)."
   ]
+},
+
+  {
+  "id": "pa_funcao_primeiro_grau",
+  "title": "P.A. e função de primeiro grau",
+  "initial": [
+    "<strong>Teorema.</strong> Os pontos \\( (n,a_n) \\) de uma Progressão Aritmética pertencem ao gráfico de uma função de primeiro grau.",
+    "<strong>Demonstração.</strong> Considere uma P.A. de primeiro termo \\(a_1\\) e razão \\(r\\).",
+    "Sabemos que seu termo geral é \\(a_n=a_1+(n-1)r\\)."
+  ],
+  "blocks": [
+    "\\(a_n=a_1+nr-r\\)",
+    "\\(a_n=rn+(a_1-r)\\)",
+    "\\(f(x)=rx+(a_1-r)\\)",
+    "\\(f(n)=rn+(a_1-r)\\)",
+    "\\(f(n)=a_n\\)",
+    "\\(\\therefore (n,a_n)\\text{ pertence ao gráfico de }f\\)"
+  ],
+  "final": [
+    "Portanto, todos os pontos da P.A. pertencem ao gráfico da função \\(f(x)=rx+(a_1-r)\\).",
+    "Logo, os pontos de uma Progressão Aritmética estão alinhados em uma reta."
+  ]
 }
 
 
