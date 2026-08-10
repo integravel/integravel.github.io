@@ -261,6 +261,27 @@
     "Portanto, todos os pontos da P.A. pertencem ao gráfico da função \\(f(x)=rx+(a_1-r)\\).",
     "Logo, os pontos de uma Progressão Aritmética estão alinhados em uma reta."
   ]
+},
+
+  {
+  "id": "porcentagem_grafico_setores",
+  "title": "Porcentagem e área do gráfico de setores",
+  "initial": [
+    "<strong>Teorema.</strong> Em um gráfico de setores, uma categoria que representa \\(p\\%\\) dos dados corresponde a um setor que representa \\(p\\%\\) da área total do gráfico.",
+    "<strong>Demonstração.</strong> Considere um gráfico de setores representado por um círculo de área total \\(A\\)."
+  ],
+  "blocks": [
+    "Se uma categoria representa \\(p\\%\\) dos dados, sua frequência corresponde à fração \\(\\frac{p}{100}\\) do total.",
+    "Como os setores são proporcionais às frequências, o setor correspondente representa \\(\\frac{p}{100}\\) da circunferência.",
+    "A área de um setor circular é proporcional ao seu ângulo central.",
+    "Portanto, um setor correspondente a \\(\\frac{p}{100}\\) da circunferência possui área \\(\\frac{p}{100}A\\).",
+    "Assim, a porcentagem da área do setor em relação à área total é \\(\\frac{\\frac{p}{100}A}{A}=\\frac{p}{100}\\).",
+    "\\(\\therefore\\) a área de cada setor representa a mesma porcentagem dos dados que a categoria correspondente."
+  ],
+  "final": [
+    "Portanto, em um gráfico de setores, a porcentagem de uma categoria é igual à porcentagem da área do setor correspondente.",
+    "Logo, se uma categoria representa \\(p\\%\\) dos dados, seu setor representa \\(p\\%\\) da área total do gráfico."
+  ]
 }
 
 
