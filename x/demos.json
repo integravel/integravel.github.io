@@ -305,6 +305,28 @@
     "Portanto, \\((x,y)\\) também satisfaz qualquer combinação linear das duas equações.",
     "Logo, as equações de um sistema linear podem ser combinadas linearmente sem deixar de ser satisfeitas por suas soluções."
   ]
+},
+
+  {
+  "id": "clairaut_schwarz",
+  "title": "Teorema de Clairaut-Schwarz",
+  "initial": [
+    "<strong>Teorema.</strong> Se \\(f\\) possui derivadas parciais de segunda ordem contínuas em uma vizinhança de um ponto, então as derivadas parciais mistas são iguais.",
+    "<strong>Demonstração.</strong> Considere uma função \\(f(x,y)\\) e um ponto \\((a,b)\\). Tome incrementos \\(h\\) e \\(k\\) nas variáveis \\(x\\) e \\(y\\).",
+    "Considere a diferença entre os valores de \\(f\\) nos quatro vértices do pequeno retângulo determinado por esses incrementos."
+  ],
+  "blocks": [
+    "\\(\\Delta=f(a+h,b+k)-f(a+h,b)-f(a,b+k)+f(a,b)\\)",
+    "\\(\\Delta=[f(a+h,b+k)-f(a+h,b)]-[f(a,b+k)-f(a,b)]\\)",
+    "\\(\\Delta=h\\,[f_x(a+\\theta h,b+k)-f_x(a+\\theta h,b)]\\)",
+    "\\(\\Delta=hk\\,f_{xy}(a+\\theta h,b+\\eta k)\\)",
+    "\\(\\Delta=hk\\,f_{yx}(a+\\theta' h,b+\\eta' k)\\)",
+    "\\(\\frac{\\Delta}{hk}\\to f_{xy}(a,b)\\quad\\text{e}\\quad\\frac{\\Delta}{hk}\\to f_{yx}(a,b)\\)"
+  ],
+  "final": [
+    "Como as derivadas parciais de segunda ordem são contínuas, os limites acima existem e são iguais.",
+    "Logo, \\(\\boxed{f_{xy}(a,b)=f_{yx}(a,b)}\\)."
+  ]
 }
 
 ]
