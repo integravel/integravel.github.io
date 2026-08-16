@@ -282,7 +282,29 @@
     "Portanto, em um gráfico de setores, a porcentagem de uma categoria é igual à porcentagem da área do setor correspondente.",
     "Logo, se uma categoria representa \\(p\\%\\) dos dados, seu setor representa \\(p\\%\\) da área total do gráfico."
   ]
-}
+},
 
+  {
+  "id": "combinacao_linear_sistema",
+  "title": "Combinação linear das equações de um sistema",
+  "initial": [
+    "<strong>Teorema.</strong> Se \\((x,y)\\) é solução de um sistema linear, então toda combinação linear de suas equações também é satisfeita por \\((x,y)\\).",
+    "<strong>Demonstração.</strong> Considere o sistema:",
+    "\\(\\begin{cases} a_1x+b_1y=c_1 \\\\ a_2x+b_2y=c_2 \\end{cases}\\)",
+    "Se \\((x,y)\\) é solução, então as duas igualdades são verdadeiras."
+  ],
+  "blocks": [
+    "\\( a_1x+b_1y=c_1 \\)",
+    "\\( a_2x+b_2y=c_2 \\)",
+    "\\( \\lambda(a_1x+b_1y)=\\lambda c_1 \\)",
+    "\\( \\mu(a_2x+b_2y)=\\mu c_2 \\)",
+    "\\( \\lambda(a_1x+b_1y)+\\mu(a_2x+b_2y)=\\lambda c_1+\\mu c_2 \\)",
+    "\\( (\\lambda a_1+\\mu a_2)x+(\\lambda b_1+\\mu b_2)y=\\lambda c_1+\\mu c_2 \\)"
+  ],
+  "final": [
+    "Portanto, \\((x,y)\\) também satisfaz qualquer combinação linear das duas equações.",
+    "Logo, as equações de um sistema linear podem ser combinadas linearmente sem deixar de ser satisfeitas por suas soluções."
+  ]
+}
 
 ]
