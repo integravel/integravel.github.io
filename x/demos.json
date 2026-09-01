@@ -327,6 +327,72 @@
     "Como as derivadas parciais de segunda ordem são contínuas, os limites acima existem e são iguais.",
     "Logo, \\(\\boxed{f_{xy}(a,b)=f_{yx}(a,b)}\\)."
   ]
+},
+
+  {
+  "id": "produto_escalar_angulo",
+  "title": "Produto escalar e ângulo entre vetores",
+  "initial": [
+    "<strong>Teorema.</strong> Se \\(\\mathbf{u}\\) e \\(\\mathbf{v}\\) são vetores não nulos que formam um ângulo \\(\\theta\\), então \\(\\mathbf{u}\\cdot\\mathbf{v}=\\|\\mathbf{u}\\|\\|\\mathbf{v}\\|\\cos\\theta\\).",
+    "<strong>Demonstração.</strong> Considere os vetores \\(\\mathbf{u}\\) e \\(\\mathbf{v}\\) e o vetor diferença \\(\\mathbf{u}-\\mathbf{v}\\).",
+    "Calcularemos \\(\\|\\mathbf{u}-\\mathbf{v}\\|^2\\) de duas maneiras diferentes."
+  ],
+  "blocks": [
+    "\\(\\|\\mathbf{u}-\\mathbf{v}\\|^2=(\\mathbf{u}-\\mathbf{v})\\cdot(\\mathbf{u}-\\mathbf{v})\\)",
+    "\\(\\|\\mathbf{u}-\\mathbf{v}\\|^2=\\|\\mathbf{u}\\|^2-2\\mathbf{u}\\cdot\\mathbf{v}+\\|\\mathbf{v}\\|^2\\)",
+    "\\(\\|\\mathbf{u}-\\mathbf{v}\\|^2=\\|\\mathbf{u}\\|^2+\\|\\mathbf{v}\\|^2-2\\|\\mathbf{u}\\|\\|\\mathbf{v}\\|\\cos\\theta\\)",
+    "\\(\\|\\mathbf{u}\\|^2-2\\mathbf{u}\\cdot\\mathbf{v}+\\|\\mathbf{v}\\|^2=\\|\\mathbf{u}\\|^2+\\|\\mathbf{v}\\|^2-2\\|\\mathbf{u}\\|\\|\\mathbf{v}\\|\\cos\\theta\\)",
+    "\\(\\mathbf{u}\\cdot\\mathbf{v}=\\|\\mathbf{u}\\|\\|\\mathbf{v}\\|\\cos\\theta\\)",
+    "\\(\\cos\\theta=\\frac{\\mathbf{u}\\cdot\\mathbf{v}}{\\|\\mathbf{u}\\|\\|\\mathbf{v}\\|}\\)"
+  ],
+  "final": [
+    "Portanto, o produto escalar entre dois vetores não nulos está relacionado ao cosseno do ângulo formado por eles.",
+    "Logo, o ângulo entre dois vetores pode ser determinado por \\(\\displaystyle \\theta=\\arccos\\left(\\frac{\\mathbf{u}\\cdot\\mathbf{v}}{\\|\\mathbf{u}\\|\\|\\mathbf{v}\\|}\\right)\\)."
+  ]
+},
+
+  {
+  "id": "lei_dos_cossenos",
+  "title": "Lei dos Cossenos",
+  "initial": [
+    "<strong>Teorema.</strong> Em um triângulo com lados \\(a\\), \\(b\\) e \\(c\\), sendo \\(\\theta\\) o ângulo entre os lados \\(a\\) e \\(b\\), vale \\(c^2=a^2+b^2-2ab\\cos\\theta\\).",
+    "<strong>Demonstração.</strong> Considere um triângulo e posicione um de seus vértices na origem de um sistema de coordenadas.",
+    "Seus lados adjacentes ao ângulo \\(\\theta\\) podem ser representados pelos vetores \\(\\mathbf{u}=(a,0)\\) e \\(\\mathbf{v}=(b\\cos\\theta,b\\sin\\theta)\\)."
+  ],
+  "blocks": [
+    "\\(\\mathbf{u}-\\mathbf{v}=(a-b\\cos\\theta,-b\\sin\\theta)\\)",
+    "\\(\\|\\mathbf{u}-\\mathbf{v}\\|^2=(a-b\\cos\\theta)^2+(-b\\sin\\theta)^2\\)",
+    "\\(\\|\\mathbf{u}-\\mathbf{v}\\|^2=a^2-2ab\\cos\\theta+b^2\\cos^2\\theta+b^2\\sin^2\\theta\\)",
+    "\\(\\|\\mathbf{u}-\\mathbf{v}\\|^2=a^2-2ab\\cos\\theta+b^2(\\cos^2\\theta+\\sin^2\\theta)\\)",
+    "\\(\\|\\mathbf{u}-\\mathbf{v}\\|^2=a^2+b^2-2ab\\cos\\theta\\)",
+    "\\(c^2=a^2+b^2-2ab\\cos\\theta\\)"
+  ],
+  "final": [
+    "Como \\(c=\\|\\mathbf{u}-\\mathbf{v}\\|\\), a expressão obtida para \\(\\|\\mathbf{u}-\\mathbf{v}\\|^2\\) fornece o quadrado do terceiro lado do triângulo.",
+    "Logo, \\(\\boxed{c^2=a^2+b^2-2ab\\cos\\theta}\\), que é a Lei dos Cossenos."
+  ]
+},
+
+  {
+  "id": "lei_dos_senos",
+  "title": "Lei dos Senos",
+  "initial": [
+    "<strong>Teorema.</strong> Em um triângulo, os lados são proporcionais aos senos dos ângulos opostos. Assim, \\(\\frac{a}{\\sin A}=\\frac{b}{\\sin B}=\\frac{c}{\\sin C}\\).",
+    "<strong>Demonstração.</strong> Considere um triângulo de lados \\(a\\), \\(b\\) e \\(c\\), com ângulos opostos \\(A\\), \\(B\\) e \\(C\\). Seja \\(h\\) a altura relativa ao lado \\(a\\).",
+    "Aplicaremos a definição de seno aos dois triângulos retângulos formados por essa altura."
+  ],
+  "blocks": [
+    "\\(\\sin B=\\frac{h}{c}\\)",
+    "\\(h=c\\sin B\\)",
+    "\\(\\sin C=\\frac{h}{b}\\)",
+    "\\(h=b\\sin C\\)",
+    "\\(c\\sin B=b\\sin C\\)",
+    "\\(\\frac{b}{\\sin B}=\\frac{c}{\\sin C}\\)"
+  ],
+  "final": [
+    "De modo análogo, considerando as alturas relativas aos outros lados, obtemos \\(\\frac{a}{\\sin A}=\\frac{c}{\\sin C}\\).",
+    "Logo, \\(\\boxed{\\frac{a}{\\sin A}=\\frac{b}{\\sin B}=\\frac{c}{\\sin C}}\\), que é a Lei dos Senos."
+  ]
 }
 
 ]
