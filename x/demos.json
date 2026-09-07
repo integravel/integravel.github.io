@@ -393,6 +393,27 @@
     "De modo análogo, considerando as alturas relativas aos outros lados, obtemos \\(\\frac{a}{\\sin A}=\\frac{c}{\\sin C}\\).",
     "Logo, \\(\\boxed{\\frac{a}{\\sin A}=\\frac{b}{\\sin B}=\\frac{c}{\\sin C}}\\), que é a Lei dos Senos."
   ]
+},
+
+  {
+  "id": "multiplicadores_lagrange",
+  "title": "Multiplicadores de Lagrange",
+  "initial": [
+    "<strong>Teorema.</strong> Seja \\(f(x,y)\\) uma função diferenciável e seja \\(g(x,y)=c\\) uma curva de restrição. Se \\(P=(x_0,y_0)\\) é um ponto de máximo ou mínimo de \\(f\\) sobre essa curva e \\(\\nabla g(P)\\neq\\vec{0}\\), então existe um número real \\(\\lambda\\) tal que \\(\\nabla f(P)=\\lambda\\nabla g(P)\\).",
+    "<strong>Demonstração.</strong> Considere uma parametrização da curva de restrição dada por \\(\\mathbf{r}(t)=(x(t),y(t))\\), de modo que \\(g(x(t),y(t))=c\\)."
+  ],
+  "blocks": [
+    "Como \\(P\\) é um ponto de máximo ou mínimo de \\(f\\) sobre a curva, a função \\(F(t)=f(x(t),y(t))\\) possui um extremo em \\(t=t_0\\). Portanto, \\(F'(t_0)=0\\), ou seja, \\(\\nabla f(P)\\cdot\\mathbf{r}'(t_0)=0\\).",
+    "Assim, \\(\\nabla f(P)\\) é perpendicular ao vetor tangente \\(\\mathbf{r}'(t_0)\\) da curva de restrição.",
+    "Por outro lado, como \\(g(x(t),y(t))=c\\), temos \\(\\frac{d}{dt}g(x(t),y(t))=0\\). Pela regra da cadeia, \\(\\nabla g(P)\\cdot\\mathbf{r}'(t_0)=0\\).",
+    "Logo, \\(\\nabla g(P)\\) também é perpendicular ao vetor tangente \\(\\mathbf{r}'(t_0)\\) da curva de restrição.",
+    "Portanto, \\(\\nabla f(P)\\) e \\(\\nabla g(P)\\) são vetores normais à mesma curva. Como \\(\\nabla g(P)\\neq\\vec{0}\\), esses vetores são paralelos e, portanto, existe \\(\\lambda\\in\\mathbb{R}\\) tal que \\(\\nabla f(P)=\\lambda\\nabla g(P)\\).",
+    "\\(\\therefore\\ \\nabla f(P)=\\lambda\\nabla g(P)\\)"
+  ],
+  "final": [
+    "Portanto, em um ponto de máximo ou mínimo de \\(f\\) sujeito à restrição \\(g(x,y)=c\\), os gradientes de \\(f\\) e \\(g\\) são paralelos.",
+    "Logo, os possíveis extremos restritos podem ser encontrados resolvendo o sistema \\(\\nabla f=\\lambda\\nabla g\\), juntamente com a restrição \\(g(x,y)=c\\)."
+  ]
 }
 
 ]
