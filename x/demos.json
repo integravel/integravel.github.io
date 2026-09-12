@@ -477,6 +477,27 @@
     "Portanto, a fórmula de Pearson estabelece, de forma aproximada, uma relação entre média, mediana e moda para distribuições unimodais e moderadamente assimétricas.",
     "Logo, também podemos escrevê-la como \\(\\boxed{3\\text{Mediana}\\approx\\text{Moda}+2\\text{Média}}\\) ou \\(\\boxed{\\text{Mediana}\\approx\\frac{\\text{Moda}+2\\text{Média}}{3}}\\)."
   ]
+},
+
+{
+  "id": "periodicidade_potencias_i",
+  "title": "Periodicidade das Potências de \\(i\\)",
+  "initial": [
+    "<strong>Proposição.</strong> As potências de \\(i\\), onde \\(i^2=-1\\), são periódicas de período \\(4\\). Em particular, para todo \\(n\\in\\mathbb{N}\\), \\(i^{n+4}=i^n\\).",
+    "<strong>Demonstração.</strong> A periodicidade decorre diretamente da propriedade fundamental \\(i^2=-1\\)."
+  ],
+  "blocks": [
+    "Como \\(i^2=-1\\), elevando ambos os lados ao quadrado obtemos \\(i^4=(-1)^2=1\\).",
+    "Considere agora uma potência arbitrária \\(i^n\\). Podemos escrever \\(n=4q+r\\), pelo algoritmo da divisão, onde \\(q\\in\\mathbb{N}\\) e \\(r\\in\\{0,1,2,3\\}\\).",
+    "Assim, \\(i^n=i^{4q+r}=i^{4q}i^r=(i^4)^q i^r\\).",
+    "Como \\(i^4=1\\), segue que \\((i^4)^q=1^q=1\\). Portanto, \\(i^n=i^r\\), onde \\(r\\) é o resto da divisão de \\(n\\) por \\(4\\).",
+    "Consequentemente, só precisamos conhecer quatro casos: \\(i^0=1\\), \\(i^1=i\\), \\(i^2=-1\\) e \\(i^3=-i\\). Depois disso, a sequência se repete, pois \\(i^4=1\\).",
+    "\\(\\therefore\\ \\boxed{i^n=i^{\\,n\\bmod 4}}\\)"
+  ],
+  "final": [
+    "Portanto, as potências de \\(i\\) se repetem a cada quatro expoentes: \\(1,i,-1,-i,1,i,-1,-i,\\ldots\\).",
+    "Logo, para calcular uma potência enorme de \\(i\\), basta dividir o expoente por \\(4\\) e observar o resto. Por exemplo, como \\(2026=4\\cdot506+2\\), temos \\(i^{2026}=i^2=\\boxed{-1}\\)."
+  ]
 }
 
 ]
