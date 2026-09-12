@@ -456,6 +456,27 @@
     "Portanto, pelo princípio da indução matemática, o Teorema Binomial de Newton é válido para quaisquer números complexos \\(z,w\\in\\mathbb{C}\\) e todo \\(n\\in\\mathbb{N}\\).",
     "Logo, a expansão de um binômio complexo segue exatamente a mesma regra da expansão de um binômio real, pois as operações de soma e multiplicação em \\(\\mathbb{C}\\) satisfazem as propriedades necessárias para a demonstração."
   ]
+},
+
+{
+  "id": "formula_pearson_media_mediana_moda",
+  "title": "Fórmula de Pearson: Média, Mediana e Moda",
+  "initial": [
+    "<strong>Fórmula de Pearson.</strong> Para uma distribuição unimodal e moderadamente assimétrica, vale aproximadamente \\(\\text{Média}-\\text{Moda}\\approx3(\\text{Média}-\\text{Mediana})\\). Equivalentemente, \\(\\text{Moda}\\approx3\\text{Mediana}-2\\text{Média}\\).",
+    "<strong>Demonstração.</strong> A relação pode ser motivada comparando os dois coeficientes de assimetria de Pearson."
+  ],
+  "blocks": [
+    "O primeiro coeficiente de assimetria de Pearson é definido por \\(Sk_1=\\frac{\\text{Média}-\\text{Moda}}{\\sigma}\\), onde \\(\\sigma\\) representa o desvio-padrão da distribuição.",
+    "O segundo coeficiente de assimetria de Pearson é definido por \\(Sk_2=\\frac{3(\\text{Média}-\\text{Mediana})}{\\sigma}\\). Esse coeficiente utiliza a mediana quando a moda não é suficientemente bem determinada.",
+    "Para distribuições unimodais e moderadamente assimétricas, considera-se que os dois coeficientes fornecem aproximadamente a mesma medida de assimetria. Assim, \\(Sk_1\\approx Sk_2\\).",
+    "Substituindo as definições dos coeficientes, temos \\(\\frac{\\text{Média}-\\text{Moda}}{\\sigma}\\approx\\frac{3(\\text{Média}-\\text{Mediana})}{\\sigma}\\). Como \\(\\sigma\\neq0\\), podemos multiplicar ambos os lados por \\(\\sigma\\).",
+    "Obtemos então \\(\\text{Média}-\\text{Moda}\\approx3(\\text{Média}-\\text{Mediana})\\). Desenvolvendo o lado direito, \\(\\text{Média}-\\text{Moda}\\approx3\\text{Média}-3\\text{Mediana}\\), e, portanto, \\(\\text{Moda}\\approx3\\text{Mediana}-2\\text{Média}\\).",
+    "\\(\\therefore\\ \\boxed{\\text{Moda}\\approx3\\text{Mediana}-2\\text{Média}}\\)"
+  ],
+  "final": [
+    "Portanto, a fórmula de Pearson estabelece, de forma aproximada, uma relação entre média, mediana e moda para distribuições unimodais e moderadamente assimétricas.",
+    "Logo, também podemos escrevê-la como \\(\\boxed{3\\text{Mediana}\\approx\\text{Moda}+2\\text{Média}}\\) ou \\(\\boxed{\\text{Mediana}\\approx\\frac{\\text{Moda}+2\\text{Média}}{3}}\\)."
+  ]
 }
 
 ]
