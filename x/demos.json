@@ -435,6 +435,27 @@
     "Portanto, quando as duas populações são normais e as amostras são independentes, sob a hipótese de igualdade das variâncias, a razão entre as variâncias amostrais segue uma distribuição F.",
     "Logo, o teste de igualdade de duas variâncias pode ser realizado comparando \\(F=\\frac{S_1^2}{S_2^2}\\) com os valores críticos da distribuição \\(F_{n_1-1,n_2-1}\\)."
   ]
+},
+
+{
+  "id": "teorema_binomial_complexos",
+  "title": "Teorema Binomial de Newton para Números Complexos",
+  "initial": [
+    "<strong>Teorema.</strong> Sejam \\(z,w\\in\\mathbb{C}\\) e \\(n\\in\\mathbb{N}\\). Então, \\((z+w)^n=\\sum_{k=0}^{n}\\binom{n}{k}z^{n-k}w^k\\).",
+    "<strong>Demonstração.</strong> A demonstração será feita por indução matemática sobre \\(n\\), utilizando as propriedades de soma e multiplicação dos números complexos."
+  ],
+  "blocks": [
+    "Para \\(n=1\\), temos \\((z+w)^1=z+w\\). Como \\(\\binom{1}{0}=\\binom{1}{1}=1\\), segue que \\((z+w)^1=\\sum_{k=0}^{1}\\binom{1}{k}z^{1-k}w^k\\). Portanto, a propriedade é verdadeira para \\(n=1\\).",
+    "Suponha, por hipótese de indução, que a propriedade seja verdadeira para algum \\(n\\in\\mathbb{N}\\). Assim, \\((z+w)^n=\\sum_{k=0}^{n}\\binom{n}{k}z^{n-k}w^k\\).",
+    "Multiplicando ambos os lados por \\(z+w\\), obtemos \\((z+w)^{n+1}=(z+w)\\sum_{k=0}^{n}\\binom{n}{k}z^{n-k}w^k\\).",
+    "Pela propriedade distributiva da multiplicação em \\(\\mathbb{C}\\), temos \\((z+w)^{n+1}=\\sum_{k=0}^{n}\\binom{n}{k}z^{n+1-k}w^k+\\sum_{k=0}^{n}\\binom{n}{k}z^{n-k}w^{k+1}\\).",
+    "Reorganizando os termos e utilizando a identidade de Pascal \\(\\binom{n}{k}+\\binom{n}{k-1}=\\binom{n+1}{k}\\), obtemos \\((z+w)^{n+1}=\\sum_{k=0}^{n+1}\\binom{n+1}{k}z^{n+1-k}w^k\\). Portanto, a propriedade é verdadeira para \\(n+1\\).",
+    "\\(\\therefore\\ (z+w)^n=\\sum_{k=0}^{n}\\binom{n}{k}z^{n-k}w^k\\quad\\text{para todo }n\\in\\mathbb{N}\\)"
+  ],
+  "final": [
+    "Portanto, pelo princípio da indução matemática, o Teorema Binomial de Newton é válido para quaisquer números complexos \\(z,w\\in\\mathbb{C}\\) e todo \\(n\\in\\mathbb{N}\\).",
+    "Logo, a expansão de um binômio complexo segue exatamente a mesma regra da expansão de um binômio real, pois as operações de soma e multiplicação em \\(\\mathbb{C}\\) satisfazem as propriedades necessárias para a demonstração."
+  ]
 }
 
 ]
