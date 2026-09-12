@@ -498,6 +498,27 @@
     "Portanto, as potências de \\(i\\) se repetem a cada quatro expoentes: \\(1,i,-1,-i,1,i,-1,-i,\\ldots\\).",
     "Logo, para calcular uma potência enorme de \\(i\\), basta dividir o expoente por \\(4\\) e observar o resto. Por exemplo, como \\(2026=4\\cdot506+2\\), temos \\(i^{2026}=i^2=\\boxed{-1}\\)."
   ]
+},
+
+{
+  "id": "media_igual_mediana_dados_simetricos",
+  "title": "Média igual à Mediana para Dados Simétricos",
+  "initial": [
+    "<strong>Proposição.</strong> Se um conjunto de dados é simétrico em torno de um valor \\(c\\), então sua média aritmética é igual à sua mediana.",
+    "<strong>Demonstração.</strong> Considere os \\(2k+1\\) valores ordenados \\(c-a_k,\\ldots,c-a_1,c,c+a_1,\\ldots,c+a_k\\), com \\(a_i>0\\)."
+  ],
+  "blocks": [
+    "Como os dados estão ordenados e possuem a mesma quantidade de valores à esquerda e à direita de \\(c\\), o valor central do conjunto é \\(c\\).",
+    "Portanto, pela definição de mediana para uma quantidade ímpar de observações, temos \\(\\text{Mediana}=c\\).",
+    "Agora, agrupamos os valores em pares simétricos em torno de \\(c\\): \\((c-a_i)+(c+a_i)\\), para \\(i=1,\\ldots,k\\).",
+    "Em cada par, os desvios em relação a \\(c\\) se cancelam, de modo que \\((c-a_i)+(c+a_i)=2c\\). Assim, a soma de todos os valores é \\(2kc+c=(2k+1)c\\).",
+    "Como existem \\(2k+1\\) observações, a média aritmética é \\(\\bar{x}=\\frac{(2k+1)c}{2k+1}=c\\). Portanto, \\(\\text{Média}=c\\) e \\(\\text{Mediana}=c\\).",
+    "\\(\\therefore\\ \\boxed{\\text{Média}=\\text{Mediana}=c}\\)"
+  ],
+  "final": [
+    "Portanto, em um conjunto de dados simétrico em torno de \\(c\\), os valores se distribuem igualmente para os dois lados de \\(c\\).",
+    "Os desvios positivos e negativos se compensam no cálculo da média, enquanto \\(c\\) ocupa a posição central dos dados. Logo, \\(\\boxed{\\text{Média}=\\text{Mediana}}\\)."
+  ]
 }
 
 ]
