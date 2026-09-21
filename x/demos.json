@@ -519,6 +519,28 @@
     "Portanto, em um conjunto de dados simétrico em torno de \\(c\\), os valores se distribuem igualmente para os dois lados de \\(c\\).",
     "Os desvios positivos e negativos se compensam no cálculo da média, enquanto \\(c\\) ocupa a posição central dos dados. Logo, \\(\\boxed{\\text{Média}=\\text{Mediana}}\\)."
   ]
+},
+
+{
+  "id": "vertice_parabola",
+  "title": "Vértice da parábola por simetria",
+  "initial": [
+    "<strong>Teorema.</strong> Para \\(f(x)=ax^2+bx+c\\), o eixo de simetria da parábola é \\(2ax+b=0\\).",
+    "<strong>Demonstração.</strong> No vértice, pontos igualmente distantes do eixo de simetria possuem a mesma altura.",
+    "Considere dois pontos simétricos: \\(x-h\\) e \\(x+h\\)."
+  ],
+  "blocks": [
+    "\\(f(x-h)=f(x+h)\\)",
+    "\\(a(x-h)^2+b(x-h)+c=a(x+h)^2+b(x+h)+c\\)",
+    "\\(ax^2-2axh+ah^2+bx-bh+c=ax^2+2axh+ah^2+bx+bh+c\\)",
+    "\\(-2axh-bh=2axh+bh\\)",
+    "\\(-4axh-2bh=0\\)",
+    "\\(2ax+b=0\\)"
+  ],
+  "final": [
+    "Logo, o eixo de simetria é \\(2ax+b=0\\).",
+    "O vértice está sobre esse eixo; portanto, sua abscissa satisfaz \\(x_V=-\\frac{b}{2a}\\)."
+  ]
 }
 
 ]
