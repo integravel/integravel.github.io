@@ -541,6 +541,28 @@
     "Logo, o eixo de simetria é \\(2ax+b=0\\).",
     "O vértice está sobre esse eixo; portanto, sua abscissa satisfaz \\(x_V=-\\frac{b}{2a}\\)."
   ]
+},
+
+{
+  "id": "integral_constante",
+  "title": "Integral dupla vezes uma constante",
+  "initial": [
+    "<strong>Teorema.</strong> \\( \\iint_D c f(x,y)\\,dA = c\\iint_D f(x,y)\\,dA \\)",
+    "<strong>Demonstração.</strong> Divida \\(D\\) em pequenos retângulos \\(R_i\\), cada um com área \\(\\Delta A_i\\), e escolha um ponto \\((x_i^*,y_i^*)\\) em cada um.",
+    "Pela definição, a soma de Riemann de \\(f\\) é \\(\\sum_{i=1}^{n} f(x_i^*,y_i^*)\\Delta A_i\\)."
+  ],
+  "blocks": [
+    "\\( \\sum_{i=1}^{n} c f(x_i^*,y_i^*)\\Delta A_i \\)",
+    "\\( = c\\sum_{i=1}^{n} f(x_i^*,y_i^*)\\Delta A_i \\)",
+    "\\( \\iint_D c f(x,y)\\,dA = \\lim_{\\|\\Delta\\|\\to0} c\\sum_{i=1}^{n} f(x_i^*,y_i^*)\\Delta A_i \\)",
+    "\\( = c\\lim_{\\|\\Delta\\|\\to0}\\sum_{i=1}^{n} f(x_i^*,y_i^*)\\Delta A_i \\)",
+    "\\( = c\\iint_D f(x,y)\\,dA \\)",
+    "\\( \\boxed{\\iint_D c f(x,y)\\,dA = c\\iint_D f(x,y)\\,dA} \\)"
+  ],
+  "final": [
+    "Portanto, multiplicar a função por uma constante \\(c\\) multiplica cada pequeno volume — e, no limite, o volume total — pela mesma constante.",
+    "<strong>Logo, a propriedade está demonstrada.</strong>"
+  ]
 }
 
 ]
