@@ -563,6 +563,50 @@
     "Portanto, multiplicar a função por uma constante \\(c\\) multiplica cada pequeno volume — e, no limite, o volume total — pela mesma constante.",
     "<strong>Logo, a propriedade está demonstrada.</strong>"
   ]
+},
+
+  {
+  "id": "pa_funcao_primeiro_grau",
+  "title": "P.A. e função de primeiro grau",
+  "initial": [
+    "<strong>Teorema.</strong> Os pontos \\( (n,a_n) \\) de uma Progressão Aritmética pertencem ao gráfico de uma função de primeiro grau.",
+    "<strong>Demonstração.</strong> Considere uma P.A. de primeiro termo \\(a_1\\) e razão \\(r\\).",
+    "Sabemos que seu termo geral é \\(a_n=a_1+(n-1)r\\)."
+  ],
+  "blocks": [
+    "\\(a_n=a_1+nr-r\\)",
+    "\\(a_n=rn+(a_1-r)\\)",
+    "\\(f(x)=rx+(a_1-r)\\)",
+    "\\(f(n)=rn+(a_1-r)\\)",
+    "\\(f(n)=a_n\\)",
+    "\\(\\therefore (n,a_n)\\text{ pertence ao gráfico de }f\\)"
+  ],
+  "final": [
+    "Portanto, todos os pontos da P.A. pertencem ao gráfico da função \\(f(x)=rx+(a_1-r)\\).",
+    "Logo, os pontos de uma Progressão Aritmética estão alinhados em uma reta."
+  ]
+},
+
+  {
+  "id": "sac_soma_pa",
+  "title": "SAC e soma de uma P.A.",
+  "initial": [
+    "<strong>Teorema.</strong> Em um financiamento de valor \\(P\\), com taxa de juros \\(i\\) por período e \\(n\\) amortizações iguais, a prestação do período \\(k\\) no Sistema de Amortização Constante é \\(R_k=\\frac{P}{n}+i\\left[P-(k-1)\\frac{P}{n}\\right]\\).",
+    "<strong>Demonstração.</strong> No SAC, o valor financiado é dividido igualmente entre as \\(n\\) amortizações. Assim, a amortização de cada período é constante.",
+    "Como os juros são calculados sobre o saldo devedor do início de cada período, e esse saldo diminui sempre pelo mesmo valor, os juros formam uma Progressão Aritmética."
+  ],
+  "blocks": [
+    "\\(A=\\frac{P}{n}\\)",
+    "\\(D_k=P-(k-1)A=P-(k-1)\\frac{P}{n}\\)",
+    "\\(J_k=iD_k=i\\left[P-(k-1)\\frac{P}{n}\\right]\\)",
+    "\\(R_k=A+J_k=\\frac{P}{n}+i\\left[P-(k-1)\\frac{P}{n}\\right]\\)",
+    "\\(R_k=P\\left[\\frac{1}{n}+i\\left(1-\\frac{k-1}{n}\\right)\\right]\\)",
+    "\\(\\therefore R_k=\\frac{P}{n}+i\\left[P-(k-1)\\frac{P}{n}\\right]\\)"
+  ],
+  "final": [
+    "Portanto, no SAC, a amortização permanece constante e as prestações diminuem ao longo do tempo porque os juros formam uma Progressão Aritmética decrescente.",
+    "A soma das prestações também pode ser obtida pela soma de uma P.A.: \\(\\sum_{k=1}^{n}R_k=\\frac{n(R_1+R_n)}{2}\\)."
+  ]
 }
 
 ]
