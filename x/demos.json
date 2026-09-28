@@ -585,6 +585,28 @@
     "Portanto, no SAC, a amortização permanece constante e as prestações diminuem ao longo do tempo porque os juros formam uma Progressão Aritmética decrescente.",
     "A soma das prestações também pode ser obtida pela soma de uma P.A.: \\(\\sum_{k=1}^{n}R_k=\\frac{n(R_1+R_n)}{2}\\)."
   ]
+},
+
+{
+  "id": "fatoracao_equacao_biquadrada",
+  "title": "Equação Biquadrada como Produto de Duas Equações de 2º Grau",
+  "initial": [
+    "<strong>Teorema.</strong> Considere a equação biquadrada \\(ax^4+bx^2+c=0\\), com \\(a\\neq0\\). Se \\(y_1\\) e \\(y_2\\) são as raízes da equação \\(ay^2+by+c=0\\), então a equação biquadrada pode ser escrita como o produto de duas expressões de 2º grau.",
+    "<strong>Demonstração.</strong> Como \\(y_1\\) e \\(y_2\\) são as raízes de \\(ay^2+by+c=0\\), podemos escrever esse polinômio na forma fatorada.",
+    "Substituindo \\(y\\) por \\(x^2\\), obtemos uma fatoração da equação biquadrada em dois fatores de 2º grau."
+  ],
+  "blocks": [
+    "\\(ay^2+by+c=a(y-y_1)(y-y_2)\\)",
+    "\\(y=x^2\\)",
+    "\\(ax^4+bx^2+c=a(x^2-y_1)(x^2-y_2)\\)",
+    "\\(ax^4+bx^2+c=0\\iff a(x^2-y_1)(x^2-y_2)=0\\)",
+    "\\(a(x^2-y_1)(x^2-y_2)=0\\iff(x^2-y_1)(x^2-y_2)=0\\)",
+    "\\(\\therefore\\ ax^4+bx^2+c=0\\iff\\boxed{(x^2-y_1)(x^2-y_2)=0}\\)"
+  ],
+  "final": [
+    "Portanto, uma equação biquadrada pode ser fatorada como o produto de duas expressões de 2º grau: \\((x^2-y_1)(x^2-y_2)=0\\).",
+    "Pelo princípio do produto nulo, sua resolução é então reduzida às duas equações \\(x^2-y_1=0\\) e \\(x^2-y_2=0\\)."
+  ]
 }
 
 ]
