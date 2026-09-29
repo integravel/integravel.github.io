@@ -607,6 +607,26 @@
     "Portanto, uma equação biquadrada pode ser fatorada como o produto de duas expressões de 2º grau: \\((x^2-y_1)(x^2-y_2)=0\\).",
     "Pelo princípio do produto nulo, sua resolução é então reduzida às duas equações \\(x^2-y_1=0\\) e \\(x^2-y_2=0\\)."
   ]
+},
+
+{
+  "id": "linearidade_integral_dupla_soma_riemann",
+  "title": "Linearidade da Integral Dupla pela Soma de Riemann",
+  "initial": [
+    "<strong>Teorema.</strong> Se \\(f\\) e \\(g\\) são integráveis em \\(D\\), então a integral dupla da soma é igual à soma das integrais duplas.",
+    "<strong>Demonstração.</strong> Pela definição da integral dupla como limite de uma soma de Riemann:"
+  ],
+  "blocks": [
+    "\\(\\iint_D(f+g)\\,dA=\\lim_{n\\to\\infty}\\sum_{i=1}^{n}(f_i+g_i)\\Delta A_i\\)",
+    "\\(=\\lim_{n\\to\\infty}\\sum_{i=1}^{n}\\left(f_i\\Delta A_i+g_i\\Delta A_i\\right)\\)",
+    "\\(=\\lim_{n\\to\\infty}\\left(\\sum_{i=1}^{n}f_i\\Delta A_i+\\sum_{i=1}^{n}g_i\\Delta A_i\\right)\\)",
+    "\\(=\\lim_{n\\to\\infty}\\sum_{i=1}^{n}f_i\\Delta A_i+\\lim_{n\\to\\infty}\\sum_{i=1}^{n}g_i\\Delta A_i\\)",
+    "\\(=\\iint_Df(x,y)\\,dA+\\iint_Dg(x,y)\\,dA\\)",
+    "\\(\\therefore\\ \\boxed{\\iint_D(f+g)\\,dA=\\iint_Df\\,dA+\\iint_Dg\\,dA}\\)"
+  ],
+  "final": [
+    "A soma de Riemann de \\(f+g\\) se separa nas somas de Riemann de \\(f\\) e \\(g\\). Pela propriedade do limite da soma, cada uma delas converge para sua respectiva integral dupla."
+  ]
 }
 
 ]
