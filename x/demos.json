@@ -627,6 +627,28 @@
   "final": [
     "A soma de Riemann de \\(f+g\\) se separa nas somas de Riemann de \\(f\\) e \\(g\\). Pela propriedade do limite da soma, cada uma delas converge para sua respectiva integral dupla."
   ]
+},
+
+{
+  "id": "jacobiano",
+  "title": "Demonstração do Jacobiano",
+  "initial": [
+    "<strong>Teorema.</strong> Considere a mudança de coordenadas \\(x=x(u,v)\\) e \\(y=y(u,v)\\). Então a área é transformada segundo \\(dA=|J|\\,du\\,dv\\), onde \\(J\\) é o Jacobiano.",
+    "<strong>Demonstração.</strong> Considere um pequeno retângulo no plano \\((u,v)\\), com lados \\(du\\) e \\(dv\\).",
+    "Pela aproximação linear, sua imagem no plano \\((x,y)\\) é aproximadamente um paralelogramo."
+  ],
+  "blocks": [
+    "\\(\\vec{u}=\\left(\\frac{\\partial x}{\\partial u},\\frac{\\partial y}{\\partial u}\\right)du\\)",
+    "\\(\\vec{v}=\\left(\\frac{\\partial x}{\\partial v},\\frac{\\partial y}{\\partial v}\\right)dv\\)",
+    "\\(dA=|\\det(\\vec{u},\\vec{v})|\\)",
+    "\\(dA=\\left|\\begin{vmatrix}\\frac{\\partial x}{\\partial u}du & \\frac{\\partial x}{\\partial v}dv\\\\\\frac{\\partial y}{\\partial u}du & \\frac{\\partial y}{\\partial v}dv\\end{vmatrix}\\right|\\)",
+    "\\(dA=\\left|\\frac{\\partial x}{\\partial u}\\frac{\\partial y}{\\partial v}-\\frac{\\partial x}{\\partial v}\\frac{\\partial y}{\\partial u}\\right|du\\,dv\\)",
+    "\\(dA=\\left|\\frac{\\partial(x,y)}{\\partial(u,v)}\\right|du\\,dv\\)"
+  ],
+  "final": [
+    "Portanto, o fator que determina quanto a mudança de coordenadas dilata ou contrai uma pequena área é o módulo do Jacobiano.",
+    "\\(\\boxed{dA=|J|\\,du\\,dv}\\)"
+  ]
 }
 
 ]
